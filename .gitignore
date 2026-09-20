@@ -8,5 +8,8 @@
 *.pt
 *.pth
 *.zip
+*.jpg
+*.jpeg
+*.png
 .ipynb_checkpoints/
 
