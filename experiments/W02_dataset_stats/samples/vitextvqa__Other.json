@@ -1,0 +1,62 @@
+{
+  "dataset": "vitextvqa",
+  "predicted_type": "Other",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "14794.jpg",
+      "image_id": "train:14794",
+      "question": "sản phẩm nào giảm 40 % ?",
+      "answer": "ssd adata legend 710 512gb",
+      "answers": [
+        "ssd adata legend 710 512gb"
+      ],
+      "predicted_type": "Other",
+      "split": "train"
+    },
+    {
+      "image_path": "10502.jpg",
+      "image_id": "test:10502",
+      "question": "tấm hình được lấy từ trang web nào ?",
+      "answer": "invaquangcaochuyennghiep . com",
+      "answers": [
+        "invaquangcaochuyennghiep . com"
+      ],
+      "predicted_type": "Other",
+      "split": "test"
+    },
+    {
+      "image_path": "8803.jpg",
+      "image_id": "train:8803",
+      "question": "cửa hàng di động bên phải tên gì ?",
+      "answer": "quang hậu luxury mobil",
+      "answers": [
+        "quang hậu luxury mobil"
+      ],
+      "predicted_type": "Other",
+      "split": "train"
+    },
+    {
+      "image_path": "9291.jpg",
+      "image_id": "train:9291",
+      "question": "cửa tiệm chính giữa bức hình là cửa tiệm sữa chữa gì ?",
+      "answer": "xe máy",
+      "answers": [
+        "xe máy"
+      ],
+      "predicted_type": "Other",
+      "split": "train"
+    },
+    {
+      "image_path": "10135.jpg",
+      "image_id": "train:10135",
+      "question": "hình ảnh là của kênh ?",
+      "answer": "liềnphong",
+      "answers": [
+        "liềnphong"
+      ],
+      "predicted_type": "Other",
+      "split": "train"
+    }
+  ]
+}

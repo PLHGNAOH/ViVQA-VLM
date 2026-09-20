@@ -1,0 +1,122 @@
+# WEEK 5 — BASELINE REPRODUCTION (HOÀN TẤT)
+
+## 1. Mục tiêu Tuần 5
+
+**Vấn đề:** W4 đã chạy được inference vài mẫu, nhưng chưa có con số baseline chính thức
+trên toàn bộ test split. Không có baseline number, mọi tuyên bố "cải thiện" sau này đều
+vô nghĩa vì không có mốc để so.
+
+Mục tiêu W5:
+
+> **Reproduce hoàn chỉnh baseline: chạy đánh giá trên full test split của ViVQA &
+> ViTextVQA, tính EM / VQA Accuracy / ANLS, và ghi lại con số baseline chính thức làm
+> mốc tham chiếu cho cả đề tài.**
+
+Nguyên tắc xuyên suốt: **Reproduce trước, cải tiến sau.** Con số baseline của W5 là "vạch
+xuất phát" — mọi cải tiến ở W8+ đo ngược lại chính nó, dưới điều kiện y hệt.
+
+---
+
+## 2. Vị trí trong lộ trình
+
+* Giữa Task Package 2 (W4–W6).
+* Đầu ra là dữ liệu cho Report 4 (Methodology) và là baseline reference cho toàn bộ experiment.
+* Dependency: môi trường + split + pipeline OCR (W4).
+
+---
+
+## 3. Nhiệm vụ 1 — Chạy baseline trên full test split (SV1 chủ trì)
+
+* Dùng đúng split cố định từ W4 (không random lại).
+* Cố định random seed (ví dụ 42) và ghi lại.
+* Chạy zero-shot (và few-shot nếu baseline hỗ trợ) trên **toàn bộ test set** của ViVQA và ViTextVQA.
+* Lưu toàn bộ prediction ra file (`predictions_baseline.json`) để tính metric và tái kiểm.
+
+```python
+# vòng lặp inference, lưu prediction từng mẫu
+results = []
+for ex in test_split:
+    pred = run_vlm(model, processor, ex["image"], ex["question"])
+    results.append({"id": ex["id"], "q": ex["question"],
+                    "gold": ex["answer"], "pred": pred})
+# dump results -> predictions_baseline.json
+```
+
+---
+
+## 4. Nhiệm vụ 2 — Tính metric chính (SV4 chủ trì)
+
+Cài đặt và tính **3 metric bắt buộc**:
+
+| Metric | Ý nghĩa | Ghi chú |
+|--------|---------|---------|
+| Exact Match (EM) | Khớp tuyệt đối sau normalize | Nhạy với chuẩn hoá tiếng Việt |
+| VQA Accuracy | Accuracy chuẩn VQA | Có thể theo consensus answer |
+| ANLS | Average Normalized Levenshtein Similarity | **Đặc biệt cho ViTextVQA/scene-text** |
+
+* Chuẩn hoá answer nhất quán (Unicode NFC, lowercase có kiểm soát dấu) trước khi so.
+* BLEU/CIDEr chỉ tính như **chỉ số phụ** cho câu trả lời sinh mở — không dùng làm metric chính.
+
+```python
+def exact_match(pred, gold):
+    return normalize_vi(pred) == normalize_vi(gold)
+
+def anls(pred, gold, tau=0.5):
+    # 1 - normalized edit distance, threshold tau
+    ...
+```
+
+---
+
+## 5. Nhiệm vụ 3 — Đối chiếu với paper (SV1 + SV4)
+
+* So sánh con số reproduce với số báo cáo trong paper gốc (nếu có).
+* Ghi lại chênh lệch và **giải thích lý do** (khác split, khác version model, thiếu few-shot,
+  khác cách normalize...). Reproduce không cần trùng khít, nhưng phải **hợp lý và giải thích được**.
+
+---
+
+## 6. Nhiệm vụ 4 — Log baseline chính thức (SV4 chủ trì)
+
+Ghi một bản `baseline_results.txt` chốt cứng, gồm:
+
+* Model id + version.
+* Dataset + split + seed.
+* Hardware, VRAM, thời gian inference tổng và trung bình/mẫu.
+* Bảng metric: EM / VQA-Acc / ANLS cho ViVQA và ViTextVQA riêng.
+* Prompt template dùng.
+
+Đây là "mốc" — khoá lại, không sửa. Cải tiến sau này so với đúng bản này.
+
+---
+
+## 7. Nhiệm vụ 5 — Quan sát định tính ban đầu (TEAM)
+
+Lướt qua ~30 prediction sai, phân loại nhanh theo 5 nhóm câu hỏi (Yes/No, Counting,
+Object, Text-reading, Reasoning) và đánh dấu case hallucination / OCR failure. Đây là
+nguyên liệu sớm cho error & hallucination analysis (W12).
+
+---
+
+## 8. Deliverables cuối Tuần 5
+
+1. `predictions_baseline.json` — prediction đầy đủ trên test set.
+2. `src/eval/` — code tính EM / VQA-Acc / ANLS.
+3. `baseline_results.txt` — bảng metric baseline chính thức + cấu hình.
+4. Ghi chú đối chiếu với paper gốc.
+5. Bảng quan sát định tính ~30 case sai.
+6. `W05_Team_Report.txt`.
+
+---
+
+## 9. Tiêu chí hoàn thành Tuần 5
+
+* [ ] Baseline chạy xong trên full test split của cả 2 dataset.
+* [ ] Có con số EM / VQA-Acc / ANLS chính thức, lưu lại.
+* [ ] Đã đối chiếu và giải thích chênh lệch với paper.
+* [ ] Mọi thứ log đầy đủ để tái lập (split/seed/hardware/time).
+* [ ] Có quan sát định tính sơ bộ về lỗi.
+
+> **Nhắc:** baseline number là bất khả xâm phạm sau khi chốt. Nếu cần đổi baseline (khó
+> reproduce), phải quyết định NGAY tuần này — càng để muộn càng đội chi phí. Vẫn PEFT-only,
+> chưa training gì ở bước reproduce zero/few-shot.

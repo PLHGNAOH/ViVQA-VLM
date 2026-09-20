@@ -1,0 +1,82 @@
+# =============================================================================
+# CONFIG TRUNG TÂM cho baseline Qwen2.5-VL + QLoRA
+# -----------------------------------------------------------------------------
+# Triết lý: MỌI siêu tham số của 1 lần chạy (run) nằm ở đây, không hard-code
+# trong code Python. Mỗi thí nghiệm (ablation) = 1 file config riêng, copy từ
+# file này rồi đổi vài dòng. Điều này thỏa yêu cầu "Reproducibility package"
+# của PDF: config files + experiment log (split, seed, settings per run).
+#
+# Cách dùng:  python -m src.train.train_lora --config configs/qwen_lora.yaml
+# =============================================================================
+
+# --- Định danh run: dùng để đặt tên thư mục log/checkpoint ---
+run:
+  name: "qwen2_5_vl_3b_lora_vivqa_baseline"   # đổi tên mỗi lần thí nghiệm
+  seed: 42                                     # CỐ ĐỊNH seed cho mọi run (PDF bắt buộc)
+  output_dir: "experiments/runs"               # nơi lưu adapter + log
+
+# --- Backbone VLM cần reproduce (chọn ĐÚNG 1 theo yêu cầu PDF) ---
+# Có thể thay bằng BLIP-2 / Florence-2, nhưng target_modules (mục lora) phải
+# đổi theo kiến trúc tương ứng — xem comment trong src/models/vlm_loader.py.
+model:
+  backbone: "qwen2_5_vl"                        # định danh nội bộ (loader dựa vào đây)
+  model_id: "Qwen/Qwen2.5-VL-3B-Instruct"       # checkpoint pretrained trên HuggingFace
+  torch_dtype: "bfloat16"                        # bf16 nếu GPU hỗ trợ (A100), else float16
+  min_pixels: 200704                             # 256*28*28 — giảm để tiết kiệm VRAM
+  max_pixels: 1003520                            # 1280*28*28 — giới hạn ảnh lớn
+
+# --- Lượng tử hóa 4-bit (QLoRA). Đây là chỗ hiện thực "PEFT-only / no full-FT" ---
+quantization:
+  enabled: true                                  # true = QLoRA (4-bit); false = LoRA thường (fp16)
+  load_in_4bit: true
+  bnb_4bit_quant_type: "nf4"                     # NormalFloat4 — chuẩn của QLoRA
+  bnb_4bit_use_double_quant: true                # nén thêm hằng số lượng tử hóa
+  bnb_4bit_compute_dtype: "bfloat16"             # kiểu tính toán khi giải lượng tử hóa
+
+# --- Cấu hình LoRA adapter (bộ tham số DUY NHẤT được huấn luyện) ---
+lora:
+  r: 16                                          # rank — càng cao càng nhiều tham số học
+  lora_alpha: 32                                 # hệ số scale (thường = 2*r)
+  lora_dropout: 0.05
+  bias: "none"
+  # Các lớp attention của phần LLM decoder sẽ được gắn adapter.
+  # LƯU Ý: tên module này ĐÚNG cho họ Qwen2.5-VL. Backbone khác -> tên khác.
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+
+# --- Dữ liệu (KHÔNG phải ViVQA-X; đây là ViVQA/ViTextVQA theo yêu cầu PDF) ---
+data:
+  dataset_name: "vivqa"                          # "vivqa" (general) | "vitextvqa" (scene-text)
+  train_path: "data/vivqa/train.json"
+  val_path: "data/vivqa/val.json"
+  test_path: "data/vivqa/test.json"
+  image_dir: "data/vivqa/images"
+  ocr_cache: "data/vivqa/ocr_cache.json"         # OCR chạy trước, cache lại (xem Bước 3)
+  max_samples: null                              # null = dùng hết; đặt số nhỏ để smoke-test
+  # --- Cấu hình OCR (dùng cho ViTextVQA / câu hỏi text-in-image) ---
+  ocr:
+    backend: "paddleocr"                         # paddleocr | paddledet_vietocr | mock
+    image_pattern: null                          # mẫu tên ảnh nếu dataset chỉ cho image_id
+    field_map: null                              # ghi đè tên trường nếu khác mặc định
+
+# --- Chế độ prompt (điều khiển ablation, KHÔNG đổi model) ---
+# zero_shot | prompt_optimized | ocr | rag | ocr_rag
+prompting:
+  mode: "zero_shot"
+  max_new_tokens: 32                             # câu trả lời ngắn -> giới hạn nhỏ, chống lan man
+
+# --- Huấn luyện PEFT ---
+training:
+  epochs: 3
+  per_device_batch_size: 2                       # nhỏ vì VLM ngốn VRAM; tăng nếu GPU khỏe
+  gradient_accumulation_steps: 8                 # batch hiệu dụng = 2 * 8 = 16
+  learning_rate: 0.0002                          # 2e-4 — mức khuyến nghị cho LoRA
+  warmup_ratio: 0.03
+  weight_decay: 0.0
+  logging_steps: 10
+  save_strategy: "epoch"
+  gradient_checkpointing: true                   # đánh đổi tốc độ lấy VRAM — cần trên Colab
+
+# --- Metric đánh giá (PRIMARY theo PDF: EM, VQA-Acc, ANLS) ---
+eval:
+  primary_metrics: ["exact_match", "vqa_accuracy", "anls"]
+  anls_threshold: 0.5                            # ngưỡng chuẩn của ANLS

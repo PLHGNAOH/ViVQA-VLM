@@ -1,0 +1,203 @@
+{
+  "dataset_key": "vitextvqa",
+  "display_name": "ViTextVQA (Nguyen et al., 2024) — Vietnamese scene-text VQA",
+  "status": "OK",
+  "seed": 42,
+  "script_version": "w02-analyze-1.0",
+  "generated_at_utc": "2026-09-14T14:55:58.073047+00:00",
+  "source_kind": "huggingface",
+  "source_detail": "streamed 'nhonhoccode/ViTextVQA' [nested_img_ann] with splits ['train', 'test']",
+  "num_images": 15086,
+  "num_qa": 45187,
+  "split_sizes": {
+    "train": 35159,
+    "test": 10028
+  },
+  "question_length_tokens": {
+    "count": 45187,
+    "min": 3,
+    "max": 31,
+    "mean": 9.599,
+    "median": 9,
+    "p25": 8,
+    "p75": 11,
+    "p90": 13
+  },
+  "answer_length_tokens": {
+    "count": 45187,
+    "min": 1,
+    "max": 52,
+    "mean": 4.194,
+    "median": 3,
+    "p25": 2,
+    "p75": 5,
+    "p90": 9
+  },
+  "answer_stats": {
+    "unique_answers": 29202,
+    "pct_answer_one_word": 15.91,
+    "pct_answer_le_3_words": 57.98
+  },
+  "top_answers": [
+    {
+      "answer": "vinmart",
+      "count": 184
+    },
+    {
+      "answer": "chợ",
+      "count": 132
+    },
+    {
+      "answer": "kenh14 . vn",
+      "count": 127
+    },
+    {
+      "answer": "hà nội",
+      "count": 119
+    },
+    {
+      "answer": "việt nam",
+      "count": 91
+    },
+    {
+      "answer": "khuyến mãi",
+      "count": 77
+    },
+    {
+      "answer": "khai trương",
+      "count": 67
+    },
+    {
+      "answer": "đồng nai",
+      "count": 59
+    },
+    {
+      "answer": "0935 248 949",
+      "count": 56
+    },
+    {
+      "answer": "vov",
+      "count": 50
+    },
+    {
+      "answer": "50 %",
+      "count": 46
+    },
+    {
+      "answer": "afamily . vn",
+      "count": 45
+    },
+    {
+      "answer": "foody . vn",
+      "count": 43
+    },
+    {
+      "answer": "2021",
+      "count": 43
+    },
+    {
+      "answer": "bia phố cổ",
+      "count": 42
+    },
+    {
+      "answer": "2",
+      "count": 40
+    },
+    {
+      "answer": "tây ninh",
+      "count": 40
+    },
+    {
+      "answer": "vineco",
+      "count": 40
+    },
+    {
+      "answer": "zing",
+      "count": 39
+    },
+    {
+      "answer": "vietnamnet . vn",
+      "count": 38
+    },
+    {
+      "answer": "hanatech",
+      "count": 36
+    },
+    {
+      "answer": "vinmart+",
+      "count": 36
+    },
+    {
+      "answer": "nhà xuất bản trẻ",
+      "count": 36
+    },
+    {
+      "answer": "tưng bừng khai trương",
+      "count": 36
+    },
+    {
+      "answer": "chợ bến thành",
+      "count": 34
+    },
+    {
+      "answer": "bảo tàng",
+      "count": 34
+    },
+    {
+      "answer": "tạp hóa",
+      "count": 34
+    },
+    {
+      "answer": "nhà hàng",
+      "count": 33
+    },
+    {
+      "answer": "điện biên phủ",
+      "count": 33
+    },
+    {
+      "answer": "vinamilk",
+      "count": 32
+    }
+  ],
+  "question_type_distribution": {
+    "Text-reading": {
+      "count": 9191,
+      "pct": 20.34
+    },
+    "Counting": {
+      "count": 2642,
+      "pct": 5.85
+    },
+    "Yes/No": {
+      "count": 48,
+      "pct": 0.11
+    },
+    "Reasoning": {
+      "count": 2260,
+      "pct": 5.0
+    },
+    "Object-recognition": {
+      "count": 12640,
+      "pct": 27.97
+    },
+    "Other": {
+      "count": 18406,
+      "pct": 40.73
+    }
+  },
+  "question_type_method": "rule_based_vi_cue_words (heuristic, exploratory only)",
+  "load_log": [
+    "load_dataset('nhonhoccode/ViTextVQA') failed: DatasetGenerationError: An error occurred while generating the dataset",
+    "stream split 'nhonhoccode/ViTextVQA:validation' skipped: ValueError: Expected object or value",
+    "OK: streamed 'nhonhoccode/ViTextVQA' [nested_img_ann] with splits ['train', 'test']"
+  ],
+  "samples_written_per_type": {
+    "Text-reading": 5,
+    "Counting": 5,
+    "Yes/No": 5,
+    "Reasoning": 5,
+    "Object-recognition": 5,
+    "Other": 5
+  }
+}

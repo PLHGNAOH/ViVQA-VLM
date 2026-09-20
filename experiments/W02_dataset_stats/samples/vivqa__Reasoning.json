@@ -1,0 +1,62 @@
+{
+  "dataset": "vivqa",
+  "predicted_type": "Reasoning",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "COCO_val2014_000000576052.jpg",
+      "image_id": "576052",
+      "question": "người đó đã làm gì với một con ngựa",
+      "answer": "núi",
+      "answers": [
+        "núi"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "test"
+    },
+    {
+      "image_path": "COCO_train2014_000000170045.jpg",
+      "image_id": "170045",
+      "question": "người phụ nữ đang làm gì đó ở đâu",
+      "answer": "phòng bếp",
+      "answers": [
+        "phòng bếp"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_val2014_000000554340.jpg",
+      "image_id": "554340",
+      "question": "tôi làm gì thậm chí còn không nhìn thấy cú đánh của bạn",
+      "answer": "bức ảnh",
+      "answers": [
+        "bức ảnh"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_val2014_000000549399.jpg",
+      "image_id": "549399",
+      "question": "công viên thể thao đã làm gì trên mặt đường gần với một tòa nhà",
+      "answer": "xe máy",
+      "answers": [
+        "xe máy"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_val2014_000000362469.jpg",
+      "image_id": "362469",
+      "question": "kích thước trung bình trong một khối nước lớn đã làm gì",
+      "answer": "con thuyền",
+      "answers": [
+        "con thuyền"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "test"
+    }
+  ]
+}

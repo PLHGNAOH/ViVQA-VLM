@@ -1,0 +1,300 @@
+====================================================================
+ViVQA-VLM — KỊCH BẢN THUYẾT TRÌNH REVIEW 1
+====================================================================
+
+Slide TIẾNG ANH, trình bày TIẾNG VIỆT (giữ thuật ngữ tiếng Anh).
+Khung 45 phút: ~22 phút nói + ~20 phút Q&A + ~3 phút GV ghi nhận.
+Deck: ViVQA-VLM_Review1_EN.pptx (15 slide).
+
+
+--------------------------------------------------------------------
+PHÂN VAI & THỜI LƯỢNG
+--------------------------------------------------------------------
+Slide 0-1  | Title + Problem & Motivation      | SV3 (Hoàng)  | 2.5'
+Slide 2    | Research Gap G1-G4                 | SV1          | 2'
+Slide 3    | Research Questions                 | SV3          | 2'
+Slide 4    | Hypotheses                         | SV3          | 2'
+Slide 5    | Dataset Analysis                   | SV2          | 2.5'
+Slide 6    | Candidate Methods & Baseline       | SV1          | 2.5'
+Slide 7    | Expected Deliverables              | SV4          | 1.5'
+Slide 8    | Practical Value & Significance     | SV2          | 1.5'
+Slide 9    | 15-Week Plan                       | SV3          | 1.5'
+Slide 10   | Risk Matrix                        | SV3          | 1'
+Slide 11   | Zero-shot sanity                   | SV4          | 1'
+Slide 12   | Team Roles                         | SV3          | 1'
+Slide 13   | Constraint: PEFT-only              | SV1          | 1'
+Slide 14   | Questions for reviewers            | SV3          | 0.5' -> Q&A
+
+Nguyên tắc: mỗi SV tự trình phần chuyên môn của mình (SV1 model/
+baseline, SV2 dataset/OCR, SV3 PEFT + điều phối, SV4 evaluation/
+deploy). Reviewer chấm cả trách nhiệm cá nhân.
+
+
+====================================================================
+KỊCH BẢN CHI TIẾT
+====================================================================
+
+--------------------------------------------------------------------
+MỞ ĐẦU — Slide 0-1 — SV3 (Hoàng) — 2.5'
+--------------------------------------------------------------------
+Kính chào hai thầy/cô Reviewer. Nhóm em gồm 4 thành viên, thực hiện
+đề tài ViVQA-VLM — Efficient Vietnamese Visual Question Answering
+using Vision-Language Models, dưới sự hướng dẫn của thầy Đặng Ngọc
+Minh Đức. Hôm nay ở Review 1, nhóm xin trình bày phạm vi bài toán —
+tương ứng Report 1.
+
+(chuyển slide 1)
+
+Bài toán của nhóm: cho một ảnh tiếng Việt và một câu hỏi tiếng Việt,
+hệ thống dùng một Vision-Language Model để sinh ra câu trả lời tiếng
+Việt. Khác với image classification hay object detection, VQA đòi hỏi
+hiểu đồng thời nội dung ảnh và ngôn ngữ, kèm suy luận.
+
+Cái khó khi làm cho tiếng Việt nằm ở 4 điểm: một là các VLM mã nguồn
+mở chủ yếu pretrain trên tiếng Anh; hai là đọc chữ trong ảnh —
+scene-text và dấu thanh; ba là code-switching Anh-Việt; và bốn là
+hallucination — model trả lời trôi chảy nhưng sai so với ảnh.
+
+Điểm quan trọng nhất về động lực: nhóm KHÔNG làm một ứng dụng demo,
+mà thích nghi VLM cho tiếng Việt dưới ngân sách tham số nghiêm ngặt —
+chỉ dùng PEFT, không full fine-tuning — để tạo ra một đóng góp kỹ
+thuật đo được. Tiếp theo, mời SV1 trình bày khoảng trống nghiên cứu.
+
+
+--------------------------------------------------------------------
+Slide 2 — Research Gap — SV1 — 2'
+--------------------------------------------------------------------
+Em trình bày 4 khoảng trống nghiên cứu, đều rút ra từ literature chứ
+không tự nghĩ. Công thức chung là: "đã làm tốt cho tiếng Anh, nhưng
+chưa làm hoặc chưa tốt cho tiếng Việt."
+
+G1 — pretraining thiên tiếng Anh, nên alignment ảnh-ngôn ngữ chưa tối
+ưu cho tiếng Việt. G2 — VQA tiếng Việt còn yếu, nhất là scene-text:
+đọc chữ trong ảnh, dấu thanh, code-switching. G3, đây là TRỌNG TÂM
+của nhóm — PEFT cho VLM tiếng Việt gần như chưa có nghiên cứu bài
+bản. G4 — hallucination chưa được đo cho tiếng Việt.
+
+Nhóm có một ma trận Gap x Paper đối chiếu từng gap với các paper đã
+đọc, nhãn L1-L10. Một vài ô nhóm còn để "chờ xác nhận" vì đang kiểm
+lại nguồn — nhóm chủ trương chỉ tick khi có evidence rõ ràng. Mời SV3
+nói tiếp về câu hỏi nghiên cứu.
+
+
+--------------------------------------------------------------------
+Slide 3 — Research Questions — SV3 — 2'
+--------------------------------------------------------------------
+Từ 4 gap, nhóm đặt 4 câu hỏi nghiên cứu. RQ1: các VLM chạy zero-shot
+trên ViVQA và ViTextVQA đạt bao nhiêu, đo bằng EM, VQA-Accuracy,
+ANLS — đây là mốc tham chiếu. RQ2, câu hỏi TRỌNG TÂM: PEFT, cụ thể
+QLoRA, cải thiện được bao nhiêu so với zero-shot và prompting, mà
+không full fine-tuning. RQ3: kết hợp OCR-prompting với PEFT ảnh hưởng
+thế nào tới scene-text, tập trung metric ANLS. RQ4: PEFT tác động ra
+sao tới hallucination.
+
+RQ2 còn tách thành các câu hỏi con RQ2a-e, phục vụ cho ablation study
+sau này. Tiếp theo là các giả thuyết tương ứng.
+
+
+--------------------------------------------------------------------
+Slide 4 — Hypotheses — SV3 — 2'
+--------------------------------------------------------------------
+Mỗi câu hỏi nhóm gắn với giả thuyết kiểm chứng được, có ngưỡng cụ
+thể. Ví dụ H1 — trọng tâm Review: QLoRA cải thiện ít nhất +5 điểm
+EM/VQA-Acc so với zero-shot. H2: bản 4-bit đạt tối thiểu 97% chất
+lượng so với 16-bit nhưng tiết kiệm >=40% VRAM. H5: PEFT không làm
+tăng hallucination. H6: OCR-prompting tăng >=3 ANLS và cộng hưởng với
+QLoRA.
+
+Em nói rõ một điều để minh bạch: các ngưỡng này kế thừa từ
+literature, nhóm CHƯA đo trên tiếng Việt — chính việc đo và kiểm
+chứng là nội dung các tuần sau. Ba giả thuyết H9-H11 nhóm xếp ngoài
+phạm vi. Mời SV2 trình bày phần dữ liệu.
+
+
+--------------------------------------------------------------------
+Slide 5 — Dataset Analysis — SV2 — 2.5'
+--------------------------------------------------------------------
+Nhóm dùng hai benchmark tiếng Việt cho hai mục đích khác nhau. ViVQA
+là general VQA: 15.000 cặp hỏi-đáp trên 10.328 ảnh, chia train/test
+11.999 và 3.001. ViTextVQA là scene-text — phải đọc chữ trong ảnh:
+45.187 cặp hỏi-đáp trên 15.086 ảnh.
+
+Đây là số nhóm TỰ CHẠY thống kê, script analyze_dataset.py, cố định
+seed 42, không phải chép từ paper. Hai quan sát dẫn tới lựa chọn
+metric: với ViVQA, 99,83% đáp án dài <= 3 từ nên dùng EM và
+VQA-Accuracy hợp lý; với ViTextVQA có tới 29.202 đáp án khác nhau,
+đáp án mở, nên dùng ANLS.
+
+Hai điểm nhóm chủ động minh bạch: bản mirror của cả hai bộ THIẾU tập
+validation — nhóm sẽ tự tách theo seed 42 sau khi xin phép thầy,
+không tự ý. Và licence dataset nhóm còn đang xác minh, để "TODO".
+Mời SV1 trình bày hướng tiếp cận và baseline.
+
+
+--------------------------------------------------------------------
+Slide 6 — Candidate Methods & Baseline — SV1 — 2.5'
+--------------------------------------------------------------------
+Về hướng tiếp cận, nhóm khảo sát 4 VLM: BLIP-2, Florence-2,
+Qwen2.5-VL và LLaVA — so trên kiến trúc, kích thước, VRAM, khả năng
+đọc scene-text và tương thích PEFT.
+
+Nhóm KHÔNG xây từ đầu mà tái sử dụng VLM mã nguồn mở, rồi cải tiến
+CHỈ bằng PEFT. Các cải tiến ưu tiên: QLoRA NF4 all-linear là trọng
+tâm, kèm format-prompt tiếng Việt, OCR-enhanced prompting, shared
+adapter; RAG để tùy chọn; soft-prompt nhóm loại.
+
+Baseline nhóm ĐỀ XUẤT Qwen2.5-VL-3B-Instruct — vì đọc scene-text
+tốt, đa ngôn ngữ, bản 3B vừa chạy QLoRA trên GPU nhỏ, phù hợp ràng
+buộc efficiency. Em nhấn mạnh đây là đề xuất, sẽ chốt lại với thầy
+hướng dẫn. Thầy đã cho phép chọn cả model ngoài danh sách nếu hợp sản
+phẩm và demo chạy trơn, nên nhóm chọn theo 4 tiêu chí: hợp sản phẩm,
+demo trơn, tương thích PEFT, chạy được GPU nhỏ. Backup là Florence-2.
+Nguyên tắc: reproduce đúng 1 baseline trước, cải tiến sau.
+
+
+--------------------------------------------------------------------
+Slide 7 — Expected Deliverables — SV4 — 1.5'
+--------------------------------------------------------------------
+Sản phẩm cuối của đề tài gồm 3 phần. Một, đóng góp nghiên cứu kiểu
+báo cáo khoa học: ít nhất một cải tiến PEFT được kiểm chứng so với
+baseline, kèm ablation, error và hallucination analysis. Hai, một web
+prototype: upload ảnh tiếng Việt, hỏi tiếng Việt, nhận câu trả lời,
+hiển thị confidence và OCR/evidence. Ba, thesis hoàn chỉnh cùng
+reproducibility package: source code, adapter weights, config,
+inference script, experiment log.
+
+
+--------------------------------------------------------------------
+Slide 8 — Practical Value & Significance — SV2 — 1.5'
+--------------------------------------------------------------------
+Về giá trị thực tế: hệ thống có thể đọc biển hiệu, nhãn, giá trong
+ảnh; hỗ trợ người khiếm thị; hiểu tài liệu, thực đơn, biểu mẫu; và
+làm công cụ giáo dục cho tiếng Việt.
+
+Về ý nghĩa khoa học và tính mới: đây là nghiên cứu PEFT có hệ thống
+đầu tiên cho VLM tiếng Việt (G3), và là lần đầu đo hallucination cho
+Vietnamese VQA (G4); điểm sáng tạo là thích nghi hiệu quả dưới ngân
+sách tham số nghiêm ngặt, hoàn toàn tái lập được.
+
+
+--------------------------------------------------------------------
+Slide 9 — 15-Week Plan — SV3 — 1.5'
+--------------------------------------------------------------------
+Đây là lộ trình 15 tuần với 4 milestone. Nhóm hiện ở W3 — Review 1.
+Sau đó W4-W5 reproduce baseline, W6 methodology, W7 Review 2 với kết
+quả sơ bộ, W8-W12 cải tiến và thí nghiệm, W13 hội đồng cấp Khoa, W15
+bảo vệ cuối. Các milestone bắt buộc nhóm không đảo thứ tự.
+
+
+--------------------------------------------------------------------
+Slide 10 — Risk Matrix — SV3 — 1'
+--------------------------------------------------------------------
+Nhóm đã lường trước >=5 rủi ro và có phương án. Ví dụ model quá lớn
+gây OOM thì dùng QLoRA 4-bit và model 3B; GPU/Colab bị ngắt thì dùng
+Kaggle P100 và checkpoint định kỳ; baseline khó reproduce thì bám
+repo gốc, cố định seed, hoặc đổi VLM; nếu training không hội tụ thì
+lùi về hướng prompting.
+
+
+--------------------------------------------------------------------
+Slide 11 — Zero-shot sanity — SV4 — 1'
+--------------------------------------------------------------------
+Nhóm xin nói rõ: Review 1 CHƯA bắt buộc có số của model, và nhóm
+KHÔNG đưa bất kỳ số EM/VQA-Acc/ANLS nào chưa chạy thật để tránh số
+liệu bịa. Thay vào đó nhóm có một sanity checklist cho protocol:
+chuẩn hoá NFC, greedy decode với seed 42, cố định split/hardware, và
+log VRAM cùng thời gian — sẽ khoá và log đầy đủ ở W5.
+
+
+--------------------------------------------------------------------
+Slide 12 — Team Roles — SV3 — 1'
+--------------------------------------------------------------------
+Nhóm phân vai rõ theo chuyên môn: SV1 phụ trách VLM và baseline, SV2
+dataset và OCR, SV3 — là em — PEFT và training kiêm điều phối tổng
+thể, SV4 evaluation và deployment. Mỗi thành viên có nhiệm vụ và
+trách nhiệm kỹ thuật riêng.
+
+
+--------------------------------------------------------------------
+Slide 13 — Constraint: PEFT-only — SV1 — 1'
+--------------------------------------------------------------------
+Ràng buộc cốt lõi xuyên suốt đề tài: không full fine-tuning, chỉ dùng
+LoRA/QLoRA. Mọi cải tiến đều so với baseline đã reproduce, dưới cùng
+split, seed, hardware. Efficiency là một ràng buộc thiết kế tường
+minh — nhóm log VRAM và thời gian để đảm bảo tái lập.
+
+
+--------------------------------------------------------------------
+Slide 14 — Questions for reviewers — SV3 — 0.5' -> mở Q&A
+--------------------------------------------------------------------
+Phần trình bày của nhóm đến đây kết thúc. Nhóm rất mong nhận góp ý
+của thầy/cô về 4 điểm: phạm vi bài toán đã phù hợp với một capstone
+chưa; hướng baseline cộng cải tiến PEFT đã hợp lý chưa; có lo ngại gì
+về tính khả thi dưới ràng buộc GPU nhỏ và PEFT-only; và thầy/cô có
+gợi ý gì về đánh giá, đặc biệt cách đo hallucination cho tiếng Việt.
+Nhóm xin lắng nghe ạ.
+
+
+====================================================================
+PHỤ LỤC — Q&A DỰ KIẾN (chuẩn bị trước)
+====================================================================
+Bám đúng rubric của trường (problem, proposed solution, scope/khả
+thi, giá trị).
+
+H: Bài toán này có gì mới, hay chỉ là VQA đã có?
+Đ: Điểm mới nằm ở ngôn ngữ và ràng buộc: thích nghi VLM cho tiếng
+   Việt (scene-text, dấu thanh) chỉ bằng PEFT, và đo hallucination
+   cho tiếng Việt — cả ba đều chưa được nghiên cứu bài bản (G2, G3,
+   G4).
+
+H: Cải tiến cụ thể của nhóm là gì, đo bằng gì?
+Đ: Ít nhất một cải tiến PEFT — trọng tâm QLoRA all-linear, kèm
+   OCR-prompting — so với baseline đã reproduce, cùng điều kiện. Đo
+   bằng EM, VQA-Accuracy, ANLS, cộng hallucination analysis; có
+   ablation để tách phần nào tạo ra cải thiện.
+
+H: Tại sao chọn Qwen2.5-VL-3B mà không phải model lớn hơn?
+Đ: Vì ràng buộc efficiency: bản 3B chạy được QLoRA trên GPU nhỏ
+   (Kaggle P100 16GB free-tier). Bản 7B cần ~24GB, mâu thuẫn chính
+   luận điểm efficiency của đề tài. Đây là đề xuất, nhóm sẽ chốt cuối
+   với thầy hướng dẫn.
+
+H: Dataset là có sẵn hay tự xây? Có thay đổi gì?
+Đ: Có sẵn: ViVQA và ViTextVQA. Nhóm thay đổi ở khâu chuẩn hoá:
+   normalize câu hỏi/đáp án, trích OCR cho scene-text, cố định split
+   theo seed 42. Bản mirror thiếu validation nên nhóm dự kiến tự tách
+   sau khi xin phép thầy.
+
+H: Số lượng khảo sát bao nhiêu?
+Đ: 4 VLM, 2 dataset, và một tập phương pháp cải tiến ứng viên (QLoRA,
+   OCR-prompting, format-prompt, shared adapter, RAG).
+
+H: Full fine-tuning có cho kết quả tốt hơn không? Sao không thử?
+Đ: Có thể tốt hơn về điểm số, nhưng đề tài CỐ Ý đặt ràng buộc
+   PEFT-only để nghiên cứu adaptation hiệu quả dưới ngân sách nhỏ —
+   đó là scope và đóng góp, không phải hạn chế kỹ thuật.
+
+H: Làm sao tránh số liệu ảo / đảm bảo tái lập?
+Đ: Mọi thí nghiệm log split, seed, hardware, hyperparameters, thời
+   gian; nộp reproducibility package. Ở Review 1 nhóm chủ động không
+   đưa số model nào chưa chạy thật.
+
+H: Rủi ro lớn nhất là gì?
+Đ: Baseline khó reproduce và giới hạn GPU. Phương án: bám repo gốc +
+   seed cố định, QLoRA 4-bit, backup Florence-2; nếu training không
+   hội tụ thì lùi về prompting.
+
+
+====================================================================
+MẸO TRÌNH BÀY
+====================================================================
+- Nói tiếng Việt, đọc thuật ngữ tiếng Anh đúng như trên slide (EM,
+  ANLS, QLoRA...).
+- Mỗi SV nắm chắc phần của mình + 1 câu chuyển sang người kế.
+- Slide mạnh nhất là Dataset (5) vì có số thật — nói chậm, tự tin.
+- Khi bị hỏi ngoài dự kiến, không bịa số: "Phần đó nhóm sẽ đo và log
+  ở W5, hiện chưa có số nên em chưa dám khẳng định."
+- Cử 1 người ghi feedback GV vào sheet Review1 ngay tại chỗ.
+- Canh giờ: nếu quá 22' phần nói, cắt bớt slide 9-13 (lướt nhanh) để
+  dành thời gian Q&A.
+====================================================================

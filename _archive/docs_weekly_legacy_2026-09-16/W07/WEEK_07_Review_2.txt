@@ -1,0 +1,107 @@
+# WEEK 7 — REVIEW 2 (MILESTONE BẮT BUỘC)
+
+## 1. Mục tiêu Tuần 7
+
+**Vấn đề:** giai đoạn baseline (W4–W6) đã xong về mặt kỹ thuật và tài liệu, nhưng hội đồng
+chưa xác nhận rằng nhóm đi đúng hướng nghiên cứu và phương pháp cải tiến là hợp lý. Nếu
+sai hướng mà không phát hiện ở W7, đến W13 sẽ không kịp sửa.
+
+Mục tiêu W7:
+
+> **Trình bày Review 2: chứng minh baseline đã reproduce (số cụ thể), trình bày proposed
+> method rõ ràng, đưa ra preliminary results và kế hoạch experiment còn lại — để hội đồng
+> xác nhận hướng đi trước khi dồn sức vào giai đoạn cải tiến/thí nghiệm.**
+
+W7 là **milestone** — cổng thứ hai. Đây là điểm kiểm tra giữa kỳ về mặt kỹ thuật.
+
+---
+
+## 2. Vị trí trong lộ trình
+
+* Mở đầu Task Package 3 (W7–W10): PEFT adaptation + cải tiến OCR/RAG/prompt.
+* Deliverable: **REVIEW 2** + Report 4 (Methodology) bản trình hội đồng.
+* Dependency: baseline number (W5) + method design (W6).
+
+---
+
+## 3. Nhiệm vụ 1 — Nội dung Review 2 (bám 5 câu hỏi bắt buộc)
+
+1. **Đã hoàn thành những gì?** (từ W1 đến W6, cô đọng)
+2. **Baseline đã reproduce chưa?** — trình bày bảng EM/VQA-Acc/ANLS thật, có đối chiếu paper.
+3. **Proposed method là gì?** — kỹ thuật cải tiến + động cơ từ Research Gap.
+4. **Có preliminary results chưa?** — ít nhất 1 run cải tiến chạy được / số sơ bộ.
+5. **Cần trình bày experiment nào tiếp?** — Experiment Plan còn lại + ablation dự kiến.
+
+---
+
+## 4. Nhiệm vụ 2 — Slide deck Review 2
+
+Cấu trúc đề xuất (~15 slide):
+
+* Title + tóm tắt tiến độ so với kế hoạch W1.
+* Recap problem/gap/RQ (1 slide, nhắc lại ngắn).
+* **Baseline reproduced**: bảng số + so với paper + cấu hình (điểm nhấn của Review 2).
+* Data & OCR pipeline (1 slide).
+* **Proposed method**: sơ đồ + cấu hình PEFT + lý do (điểm nhấn thứ hai).
+* Experimental protocol (so sánh công bằng).
+* **Preliminary results** (nếu có) + đọc hiểu sơ bộ.
+* Experiment Plan còn lại (W8–W12).
+* Rủi ro cập nhật + phân công.
+
+---
+
+## 5. Nhiệm vụ 3 — Preliminary results (SV3 + SV4)
+
+Nếu có thể, chạy 1–2 run nhỏ của phương pháp cải tiến để có số sơ bộ:
+
+* Với LoRA/QLoRA: 1 run ngắn (ít epoch / subset train) để chứng minh pipeline train chạy
+  và loss giảm.
+* Với OCR-prompting / RAG: 1 batch nhỏ cho thấy answer thay đổi so với baseline.
+
+Không cần kết quả cuối; cần **bằng chứng phương pháp chạy được và có tín hiệu**.
+
+> Ràng buộc: mọi run vẫn phải log (split/seed/hardware/time) và tuyệt đối PEFT-only.
+
+---
+
+## 6. Nhiệm vụ 4 — Report 4 bản trình hội đồng
+
+Hoàn thiện Report 4 (Methodology) từ draft W6: chèn baseline number thật, cấu hình PEFT
+chính xác, protocol so sánh, reproducibility statement.
+
+---
+
+## 7. Nhiệm vụ 5 — Rehearsal & Q&A prep
+
+Chuẩn bị trả lời các câu hỏi hội đồng thường hỏi ở giữa kỳ:
+
+* Vì sao chọn baseline này? Số reproduce có khớp paper không, vì sao lệch?
+* Cải tiến của nhóm mới ở điểm nào so với baseline?
+* Làm sao đảm bảo so sánh công bằng?
+* Ngân sách GPU có đủ chạy hết plan không? Backup là gì?
+* Ablation sẽ chứng minh phần nào tạo ra cải thiện?
+
+Mỗi SV nắm chắc phần mình; rehearsal có bấm giờ.
+
+---
+
+## 8. Deliverables cuối Tuần 7
+
+1. `Review_2_Slides`.
+2. `Report_4_Methodology.txt` (bản trình hội đồng).
+3. `preliminary_results.txt` — số sơ bộ + log.
+4. `Experiment_Plan_remaining.txt` — kế hoạch W8–W12.
+5. `W07_Team_Report.txt` — tổng hợp + biên bản phản hồi hội đồng.
+
+---
+
+## 9. Tiêu chí hoàn thành Tuần 7
+
+* [ ] Trình bày được baseline number thật + đối chiếu paper.
+* [ ] Proposed method rõ ràng, gắn với gap, đúng ràng buộc PEFT-only.
+* [ ] Có preliminary result hoặc bằng chứng pipeline cải tiến chạy được.
+* [ ] Report 4 hoàn chỉnh.
+* [ ] Ghi nhận phản hồi hội đồng và cập nhật plan.
+
+> **Nhắc:** Review 2 là chốt chặn "đúng hướng". Nếu hội đồng yêu cầu đổi hướng cải tiến,
+> điều chỉnh ngay tuần này — sau W7 là giai đoạn dồn lực thí nghiệm, ít dư địa quay đầu.

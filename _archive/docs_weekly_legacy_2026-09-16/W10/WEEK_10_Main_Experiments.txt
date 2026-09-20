@@ -1,0 +1,111 @@
+# WEEK 10 — THÍ NGHIỆM CHÍNH (MAIN RESULTS)
+
+## 1. Mục tiêu Tuần 10
+
+**Vấn đề:** phương pháp cải tiến đã đóng băng ở W9, nhưng số mới chỉ đo trên validation.
+Chưa có kết quả chính thức trên test split để so baseline vs cải tiến một cách công bằng.
+
+Mục tiêu W10:
+
+> **Chạy thí nghiệm chính: đánh giá bản cải tiến final vs baseline trên TEST split, dưới
+> điều kiện y hệt, tạo bảng main results EM/VQA-Acc/ANLS chính thức cho ViVQA & ViTextVQA.**
+
+W10 tạo ra "con số nói chuyện với hội đồng". Đây là trái tim của contribution.
+
+---
+
+## 2. Vị trí trong lộ trình
+
+* Kết thúc Task Package 3 (W7–W10).
+* Feed vào Report 6 & 7 (Results/Discussion).
+* Dependency: bản cải tiến final + adapter/config đóng băng (W9); baseline number (W5).
+
+---
+
+## 3. Nhiệm vụ 1 — Chạy main experiment trên test split (SV1 + SV3)
+
+Điều kiện phải TRÙNG với baseline W5:
+
+* Cùng test split cố định, cùng seed.
+* Cùng cách normalize answer.
+* Cùng metric EM/VQA-Acc/ANLS.
+* Ghi cùng loại log (hardware/time).
+
+```python
+# đánh giá bản cải tiến trên test, lưu prediction để tái kiểm
+model = load_base_then_adapter("adapters/final")
+results = []
+for ex in test_split:            # ĐÚNG split của baseline
+    pred = run_vlm(model, processor, ex["image"], ex["question"])
+    results.append({"id": ex["id"], "gold": ex["answer"], "pred": pred})
+# dump -> predictions_improved.json
+```
+
+Chạy riêng cho ViVQA và ViTextVQA.
+
+---
+
+## 4. Nhiệm vụ 2 — Bảng Main Results (SV4 chủ trì)
+
+Lập bảng so sánh trực tiếp:
+
+| Model / Setting | Dataset | EM | VQA-Acc | ANLS | Inference time/mẫu |
+|-----------------|---------|----|---------|------|--------------------|
+| Baseline (zero-shot) | ViVQA | | | | |
+| **Cải tiến (final)** | ViVQA | | | | |
+| Baseline (zero-shot) | ViTextVQA | | | | |
+| **Cải tiến (final)** | ViTextVQA | | | | |
+| (tham chiếu) VLM khác | | | | | |
+
+Tính **delta** (cải tiến − baseline) cho từng metric. Đây là bằng chứng "cải thiện đo được".
+
+---
+
+## 5. Nhiệm vụ 3 — Kiểm tra tính vững (SV4)
+
+* Nếu ngân sách cho phép: chạy ≥ 2 seed để xem kết quả có ổn định không (report mean ± std).
+* Nếu không đủ GPU: ghi rõ chạy 1 seed và nêu hạn chế này (trung thực về giới hạn).
+* Kiểm tra sanity: prediction có bị rỗng/lặp/hallucinate hàng loạt không?
+
+---
+
+## 6. Nhiệm vụ 4 — Lưu artefact cho ablation & error analysis (TEAM)
+
+W12 sẽ cần dữ liệu chi tiết. Ngay W10 hãy lưu:
+
+* `predictions_improved.json` + `predictions_baseline.json` (đối chiếu từng mẫu).
+* Cột đánh dấu đúng/sai theo từng metric.
+* Gắn tag loại câu hỏi (Yes/No, Counting, Object, Text-reading, Reasoning) cho mỗi mẫu —
+  dựa trên bộ phân loại từ W2. Đây là xương sống của error analysis.
+
+---
+
+## 7. Nhiệm vụ 5 — Cập nhật reproducibility log (SV4)
+
+Bổ sung vào experiment log: cấu hình main run, seed, hardware, thời gian inference tổng,
+đường dẫn adapter/config đã dùng. Đảm bảo người khác chạy lại ra đúng số.
+
+---
+
+## 8. Deliverables cuối Tuần 10
+
+1. `predictions_improved.json` (test) cho cả 2 dataset.
+2. `main_results.txt` — bảng so sánh baseline vs cải tiến + delta.
+3. Ghi chú độ vững (seeds) hoặc nêu giới hạn.
+4. File dữ liệu đã gắn tag loại câu hỏi cho error analysis.
+5. Experiment log cập nhật.
+6. `W10_Team_Report.txt`.
+
+---
+
+## 9. Tiêu chí hoàn thành Tuần 10
+
+* [ ] Bản cải tiến đo trên test split, cùng điều kiện baseline.
+* [ ] Có bảng main results EM/VQA-Acc/ANLS + delta rõ ràng.
+* [ ] Prediction lưu lại, gắn tag loại câu hỏi.
+* [ ] Log đầy đủ, tái lập được.
+* [ ] Đã kiểm tra sanity kết quả.
+
+> **Nhắc:** so sánh chỉ có giá trị khi baseline và cải tiến CÙNG điều kiện. Nếu cải tiến
+> không vượt baseline ở dataset nào đó, giữ nguyên số thật và để dành phân tích ở W12 —
+> không chọn lọc số liệu, không bịa.

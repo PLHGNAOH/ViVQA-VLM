@@ -1,0 +1,62 @@
+{
+  "dataset": "vivqa",
+  "predicted_type": "Counting",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "COCO_val2014_000000202507.jpg",
+      "image_id": "202507",
+      "question": "có bao nhiêu rổ táo vàng, xanh, đỏ",
+      "answer": "năm",
+      "answers": [
+        "năm"
+      ],
+      "predicted_type": "Counting",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000498809.jpg",
+      "image_id": "498809",
+      "question": "số lượng lớn nệm nằm ở đâu",
+      "answer": "cửa hàng",
+      "answers": [
+        "cửa hàng"
+      ],
+      "predicted_type": "Counting",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000329756.jpg",
+      "image_id": "329756",
+      "question": "có bao nhiêu người trong quân đội mệt mỏi khi cắt một chiếc bánh",
+      "answer": "năm",
+      "answers": [
+        "năm"
+      ],
+      "predicted_type": "Counting",
+      "split": "test"
+    },
+    {
+      "image_path": "COCO_train2014_000000013920.jpg",
+      "image_id": "13920",
+      "question": "có bao nhiêu người cưỡi voi trên con đường mòn",
+      "answer": "ba",
+      "answers": [
+        "ba"
+      ],
+      "predicted_type": "Counting",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000284964.jpg",
+      "image_id": "284964",
+      "question": "có bao nhiêu người đang trao cho nhau một high five trên sân tennis",
+      "answer": "hai",
+      "answers": [
+        "hai"
+      ],
+      "predicted_type": "Counting",
+      "split": "train"
+    }
+  ]
+}

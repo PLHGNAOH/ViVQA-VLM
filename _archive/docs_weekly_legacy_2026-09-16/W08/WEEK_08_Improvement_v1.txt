@@ -1,0 +1,117 @@
+# WEEK 8 — TRIỂN KHAI CẢI TIẾN (BẢN ĐẦU)
+
+## 1. Mục tiêu Tuần 8
+
+**Vấn đề:** đến hết W7 nhóm đã có thiết kế phương pháp và (có thể) vài số sơ bộ, nhưng chưa
+có một bản cải tiến chạy ổn định end-to-end. Không có bản chạy được thì không thể tinh
+chỉnh hay đo đạc nghiêm túc.
+
+Mục tiêu W8:
+
+> **Triển khai bản đầu tiên của phương pháp cải tiến (LoRA/QLoRA hoặc OCR-prompting/RAG)
+> chạy end-to-end trên dataset thật, ổn định và log đầy đủ — chấp nhận kết quả chưa tối ưu.**
+
+W8 ưu tiên "chạy đúng và chạy ổn" hơn "chạy đẹp". Tinh chỉnh là việc của W9.
+
+---
+
+## 2. Vị trí trong lộ trình
+
+* Giữa Task Package 3 (W7–W10).
+* Feed vào Report 4/5 (Methodology/Implementation).
+* Dependency: method design + protocol (W6), xác nhận hướng ở Review 2 (W7).
+
+---
+
+## 3. Nhiệm vụ 1 — Triển khai cải tiến chính (SV3 chủ trì)
+
+### Nếu là LoRA/QLoRA
+
+Dựng vòng train PEFT hoàn chỉnh trên train split cố định:
+
+```python
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+from transformers import TrainingArguments, Trainer
+
+model = prepare_model_for_kbit_training(base_model)   # cho QLoRA
+model = get_peft_model(model, lora_config)
+
+args = TrainingArguments(
+    output_dir="adapters/W08_run1",
+    per_device_train_batch_size=..., gradient_accumulation_steps=...,
+    learning_rate=2e-4, num_train_epochs=1,      # bản đầu: ít epoch
+    fp16=True, logging_steps=20, save_steps=..., seed=42,
+)
+# train, theo dõi loss giảm
+```
+
+Xác nhận: loss giảm, `print_trainable_parameters()` cho thấy % param train nhỏ, adapter
+lưu được ra `adapters/`.
+
+### Nếu là OCR-enhanced prompting
+
+Tích hợp OCR text (từ pipeline W4) vào prompt:
+
+```python
+ocr_text = run_ocr(image)                       # PaddleOCR / VietOCR
+prompt = f"Văn bản trong ảnh: {ocr_text}\nCâu hỏi: {question}\nTrả lời:"
+```
+
+### Nếu là RAG
+
+Dựng index (ảnh/OCR/caption) và bước retrieve evidence trước khi hỏi VLM.
+
+---
+
+## 4. Nhiệm vụ 2 — Chạy end-to-end trên subset rồi mở rộng (SV3 + SV1)
+
+* Chạy thử trên subset nhỏ trước để bắt lỗi (OOM, shape mismatch, tokenizer).
+* Khi ổn, chạy trên tập train/val đầy đủ theo protocol.
+* Với QLoRA: canh VRAM; nếu OOM → giảm batch, tăng gradient accumulation, hoặc hạ rank.
+
+> Ràng buộc: tuyệt đối không chuyển sang full fine-tuning để "cho nhanh". Nếu không hội tụ,
+> backup theo risk plan là chuyển hướng prompting — không phá ràng buộc PEFT.
+
+---
+
+## 5. Nhiệm vụ 3 — Log run đầy đủ (SV4 chủ trì)
+
+Mỗi run cải tiến ghi vào `experiments/W08_*/`:
+
+* config PEFT (rank, alpha, target_modules, quantization)
+* learning rate, batch, epoch, seed
+* hardware, VRAM peak
+* training time, loss curve
+* prompt template (với OCR/RAG)
+
+Không có log = run không tồn tại về mặt reproducibility.
+
+---
+
+## 6. Nhiệm vụ 4 — Đo nhanh trên val (chưa phải kết quả chính)
+
+Chạy metric EM/VQA-Acc/ANLS trên **validation split** để có tín hiệu sớm bản cải tiến có
+nhích so với baseline hay không. Đây là số để định hướng tinh chỉnh W9, chưa phải số báo cáo.
+
+---
+
+## 7. Deliverables cuối Tuần 8
+
+1. Code cải tiến chạy end-to-end trong `src/adaptation/`.
+2. Adapter weights bản đầu (nếu LoRA/QLoRA) trong `adapters/W08_run1/`.
+3. `experiments/W08_*/run_log` đầy đủ + loss curve.
+4. Số val sơ bộ của bản cải tiến vs baseline.
+5. `W08_Team_Report.txt` — gồm cả các lỗi gặp phải và cách xử lý.
+
+---
+
+## 8. Tiêu chí hoàn thành Tuần 8
+
+* [ ] Phương pháp cải tiến chạy end-to-end, ổn định.
+* [ ] (LoRA/QLoRA) loss giảm, adapter lưu được, % param train nhỏ.
+* [ ] Run được log đầy đủ để tái lập.
+* [ ] Có số val sơ bộ so với baseline.
+* [ ] Không vi phạm PEFT-only.
+
+> **Nhắc:** W8 chấp nhận kết quả xấu. Điều không chấp nhận là run không log được hoặc lén
+> đổi sang full fine-tuning. Bản đầu chạy được là tiền đề để W9 tinh chỉnh.

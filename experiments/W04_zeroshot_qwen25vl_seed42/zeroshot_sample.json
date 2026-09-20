@@ -1,0 +1,9 @@
+{
+  "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+  "seed": 42,
+  "image": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/transformers/tasks/car.jpg",
+  "question": "Trong ảnh có gì? Trả lời ngắn gọn bằng tiếng Việt.",
+  "answer": "Trong ảnh có một chiếc xe cổ màu xanh lá cây đậu trước một bức tường màu vàng. Xe có thiết kế kiểu dáng cổ điển, đặc trưng của dòng xe Volkswagen Beetle. Xe đậu trên một con đường gạch.",
+  "infer_seconds": 6.35,
+  "vram_gb": 7.6
+}

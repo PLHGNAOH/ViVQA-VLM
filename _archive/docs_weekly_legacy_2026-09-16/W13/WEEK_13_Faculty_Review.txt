@@ -1,0 +1,116 @@
+# WEEK 13 — HỘI ĐỒNG CẤP KHOA (FACULTY REVIEW — MILESTONE CHÍNH)
+
+## 1. Mục tiêu Tuần 13
+
+**Vấn đề:** đến W12 nhóm đã có gần như toàn bộ kết quả và phân tích, nhưng chúng đang nằm
+rải rác trong nhiều report. Hội đồng cấp Khoa cần thấy một công trình nghiên cứu hoàn chỉnh,
+mạch lạc, chứng minh được contribution — không phải một tập hợp thí nghiệm rời.
+
+Mục tiêu W13:
+
+> **Tổng hợp toàn bộ nghiên cứu thành một bài trình bày hoàn chỉnh cho Hội đồng cấp Khoa:
+> methodology, experiments, main results, ablation, error analysis, hallucination analysis —
+> chứng minh đề tài đã hoàn thành phần lớn nghiên cứu và contribution được kiểm chứng.**
+
+W13 là **milestone chính**, không phải tuần thường. Đây là "hội đồng lớn" trước final defense.
+
+---
+
+## 2. Vị trí trong lộ trình
+
+* Kết thúc Task Package 4 (W11–W13).
+* Deliverable: **FACULTY REVIEW** — trình bày + bộ report tổng hợp.
+* Dependency: ba phân tích bắt buộc + Report 6 & 7 (W12).
+
+---
+
+## 3. Yêu cầu bắt buộc PHẢI XONG trước W13
+
+Theo Master Instruction, trước W13 phải hoàn thành phần lớn:
+
+* [ ] Research methodology (Report 4)
+* [ ] Experiments (baseline + cải tiến, cùng điều kiện)
+* [ ] Main results (EM/VQA-Acc/ANLS, có delta)
+* [ ] Ablation study
+* [ ] Error analysis
+* [ ] Hallucination analysis
+* [ ] Reproducibility log đầy đủ
+
+Nếu mục nào chưa xong → ưu tiên tuyệt đối hoàn tất đầu tuần này.
+
+---
+
+## 4. Nhiệm vụ 1 — Bài trình bày Hội đồng Khoa (TEAM)
+
+Cấu trúc đề xuất (~20–25 slide):
+
+* Title + tóm tắt đề tài + contribution statement.
+* Problem, motivation, Vietnamese-specific challenges.
+* Research gap → RQ → hypotheses (nhắc gọn).
+* Methodology: baseline + phương pháp cải tiến (sơ đồ pipeline) + PEFT config.
+* **Main results**: bảng baseline vs cải tiến + delta (điểm nhấn số 1).
+* **Ablation**: phần nào tạo cải thiện (điểm nhấn số 2).
+* **Error analysis**: theo loại câu hỏi + failure cases tiếng Việt.
+* **Hallucination analysis**: tỉ lệ + loại + case study.
+* Efficiency: % param, VRAM, time (chứng minh "efficient").
+* Trả lời RQ/hypothesis + giới hạn.
+* Kế hoạch W14–W15 (prototype, thesis, defense).
+
+---
+
+## 5. Nhiệm vụ 2 — Bộ report tổng hợp (TEAM)
+
+Gộp và rà soát tính nhất quán số liệu giữa các report (1, 3, 4, 6, 7). Đảm bảo mọi con số
+trùng khớp với `master_results` (W11). Đây là bản gần-cuối của thesis.
+
+---
+
+## 6. Nhiệm vụ 3 — Chứng minh "4 trụ" (Definition of Done)
+
+Hội đồng đánh giá theo bốn trụ — chuẩn bị bằng chứng cho từng trụ:
+
+| Trụ | Bằng chứng |
+|-----|------------|
+| Knowledge | Hiểu VQA/VLM/Vietnamese VQA, ViVQA/ViTextVQA, hướng adaptation |
+| Research | Gap có evidence, RQ, hypothesis, baseline reproduced, ≥ 1 cải tiến kiểm chứng (PEFT-only) |
+| Rigor | Ablation + error + hallucination; mọi thí nghiệm tái lập được |
+| Delivery | (đang tiến hành) prototype + thesis + reproducibility package |
+
+---
+
+## 7. Nhiệm vụ 4 — Rehearsal & Q&A prep
+
+Câu hỏi hội đồng Khoa thường nhắm vào:
+
+* Contribution cụ thể là gì? Cải thiện đo được bao nhiêu, có ý nghĩa không?
+* Ablation chứng minh phần nào tạo cải thiện? Có bị nhiễu điều kiện không?
+* So sánh baseline vs cải tiến có thật sự cùng điều kiện?
+* Hallucination có giảm không? Đo bằng cách nào?
+* Kết quả có tái lập được không? (split/seed/hardware/time)
+* Vì sao tin đây là đóng góp cho Vietnamese VQA, không chỉ là một demo?
+
+Mỗi SV bảo vệ được phần chuyên môn của mình; rehearsal có bấm giờ ≥ 1 lần.
+
+---
+
+## 8. Deliverables cuối Tuần 13
+
+1. `Faculty_Review_Slides`.
+2. Bộ report tổng hợp (1/3/4/6/7) nhất quán số liệu.
+3. Bảng bằng chứng "4 trụ".
+4. Biên bản phản hồi hội đồng Khoa + danh sách chỉnh sửa yêu cầu.
+5. `W13_Team_Report.txt`.
+
+---
+
+## 9. Tiêu chí hoàn thành Tuần 13
+
+* [ ] Toàn bộ nghiên cứu (methodology → 3 phân tích) đã xong và trình bày mạch lạc.
+* [ ] Số liệu nhất quán across reports.
+* [ ] Contribution được chứng minh (cải thiện đo được / giảm hallucination) + ablation.
+* [ ] Mọi kết quả tái lập được.
+* [ ] Ghi nhận yêu cầu chỉnh sửa của hội đồng cho W14–W15.
+
+> **Nhắc:** W13 là điểm mà "phần lớn nghiên cứu phải xong". W14–W15 chỉ hoàn thiện prototype,
+> thesis, documentation và bảo vệ — KHÔNG phải lúc chạy lại thí nghiệm chính. Nếu hội đồng
+> yêu cầu bổ sung, xử lý gọn trong đầu W14.

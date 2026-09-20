@@ -1,0 +1,62 @@
+{
+  "dataset": "vivqa",
+  "predicted_type": "Object-recognition",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "COCO_train2014_000000088123.jpg",
+      "image_id": "88123",
+      "question": "màu của xe đạp là gì",
+      "answer": "màu đỏ",
+      "answers": [
+        "màu đỏ"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_val2014_000000578813.jpg",
+      "image_id": "578813",
+      "question": "cái gì được bao phủ bởi rất nhiều tuyết",
+      "answer": "núi",
+      "answers": [
+        "núi"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000186646.jpg",
+      "image_id": "186646",
+      "question": "màu của thùng là gì",
+      "answer": "màu xanh dương",
+      "answers": [
+        "màu xanh dương"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000249226.jpg",
+      "image_id": "249226",
+      "question": "mọi người đang chọn hành lý của họ ở đâu",
+      "answer": "sân bay",
+      "answers": [
+        "sân bay"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000350597.jpg",
+      "image_id": "350597",
+      "question": "bồn tắm, nhà vệ sinh và bồn rửa với tủ gỗ ở đâu",
+      "answer": "phòng tắm",
+      "answers": [
+        "phòng tắm"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+﻿{
+    "docs\\literature":  {
+                             "n":  10,
+                             "hashes":  [
+                                            "D:\\FPT_university\\termno9\\ViVQA-VLM\\docs\\literature\\Literature_Matrix.from_AIP491.md=E1CD2DA98F525B2C554AB7875F0A1888779125B0F799E5A11477E1AE6C67BC66",
+                                            "D:\\FPT_university\\termno9\\ViVQA-VLM\\docs\\literature\\Literature_Matrix.md=CCD999FE0AEF32B26A0EDF2E832EA3FE38595F566E6417F8925FD5951E6C2741",
+                                            "D:\\FPT_university\\termno9\\ViVQA-VLM\\docs\\literature\\SV1_Paper_Review.from_AIP491.md=984FB6874A9CFA9A5398B6E0A88BCD46233D612EFD5E8B96D83875FF9950B3BF",
+                                            "D:\\FPT_university\\termno9\\ViVQA-VLM\\docs\\literature\\SV1_Paper_Review.md=FAC125113BEDA1A0B090550EBBF75670B46F7A7A43D08C3364FCA78C45D8A6EA",
+                                            "D:\\FPT_university\\termno9\\ViVQA-VLM\\docs\\literature\\SV2_Paper_Review.from_AIP491.md=4F7727CE9F49D45A510D235FC19FEA3D07320B047DEC99ECC0041DA072012657",
+                                            "D:\\FPT_university\\termno9\\ViVQA-VLM\\docs\\literature\\SV2_Paper_Review.md=A23A0CAB38EBDDEBFF47D025139EF7B91E6E2F34F221B67E62D0BC072DE1D084",
+                                            "D:\\FPT_university\\termno9\\ViVQA-VLM\\docs\\literature\\SV3_Paper_Review.from_AIP491.md=0DE2EF41A24EBFF2584909F536CB21583487E0654F0DFD3030B41D37FBC47B4B",
+                                            "D:\\FPT_university\\termno9\\ViVQA-VLM\\docs\\literature\\SV3_Paper_Review.md=CE0A035F0EA69B97F7C40ECD8E5F00D95B370A7391CC245A4B675FB3EECBDB12",
+                                            "D:\\FPT_university\\termno9\\ViVQA-VLM\\docs\\literature\\SV4_Paper_Review.from_AIP491.md=A2DE345B1473127D729409E106F4CB34A11339C117C5D9CF5900803E8B2D70E8",
+                                            "D:\\FPT_university\\termno9\\ViVQA-VLM\\docs\\literature\\SV4_Paper_Review.md=C21753AD29B4613B85C8C1169510760811D41B54595CC7A7BDED8B088AB38FA9"
+                                        ]
+                         },
+    "src\\prompting":  {
+                           "n":  2,
+                           "hashes":  [
+                                          "D:\\FPT_university\\termno9\\ViVQA-VLM\\src\\prompting\\builder.py=0DFB78ED31533E662031E9EC8CA8B99AE704721F99FF68E37B9993EBD3BFA164",
+                                          "D:\\FPT_university\\termno9\\ViVQA-VLM\\src\\prompting\\__init__.py=E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+                                      ]
+                       },
+    "src\\models":  {
+                        "n":  2,
+                        "hashes":  [
+                                       "D:\\FPT_university\\termno9\\ViVQA-VLM\\src\\models\\vlm_loader.py=BC250C26DFB9F4413AE9458BBFD1566EDA24A218E45CBCCF0EB15E95A5282B89",
+                                       "D:\\FPT_university\\termno9\\ViVQA-VLM\\src\\models\\__init__.py=E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+                                   ]
+                    }
+}

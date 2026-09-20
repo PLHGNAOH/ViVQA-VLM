@@ -1,0 +1,201 @@
+{
+  "dataset_key": "vivqa",
+  "display_name": "ViVQA (Tran et al., PACLIC 2021) — general Vietnamese VQA",
+  "status": "OK",
+  "seed": 42,
+  "script_version": "w02-analyze-1.0",
+  "generated_at_utc": "2026-09-14T14:55:42.448630+00:00",
+  "source_kind": "huggingface",
+  "source_detail": "loaded 'minhnguyent546/ViVQA' [generic] with splits ['train', 'test']",
+  "num_images": 10328,
+  "num_qa": 15000,
+  "split_sizes": {
+    "train": 11999,
+    "test": 3001
+  },
+  "question_length_tokens": {
+    "count": 15000,
+    "min": 2,
+    "max": 26,
+    "mean": 9.514,
+    "median": 9.0,
+    "p25": 6,
+    "p75": 12,
+    "p90": 15
+  },
+  "answer_length_tokens": {
+    "count": 15000,
+    "min": 1,
+    "max": 4,
+    "mean": 1.78,
+    "median": 2.0,
+    "p25": 1,
+    "p75": 2,
+    "p90": 3
+  },
+  "answer_stats": {
+    "unique_answers": 351,
+    "pct_answer_one_word": 34.05,
+    "pct_answer_le_3_words": 99.83
+  },
+  "top_answers": [
+    {
+      "answer": "hai",
+      "count": 671
+    },
+    {
+      "answer": "ba",
+      "count": 612
+    },
+    {
+      "answer": "bốn",
+      "count": 427
+    },
+    {
+      "answer": "màu trắng",
+      "count": 395
+    },
+    {
+      "answer": "màu đỏ",
+      "count": 376
+    },
+    {
+      "answer": "màu đen",
+      "count": 363
+    },
+    {
+      "answer": "màu xanh dương",
+      "count": 361
+    },
+    {
+      "answer": "màu xanh lá",
+      "count": 353
+    },
+    {
+      "answer": "màu vàng",
+      "count": 336
+    },
+    {
+      "answer": "phòng",
+      "count": 334
+    },
+    {
+      "answer": "phòng bếp",
+      "count": 301
+    },
+    {
+      "answer": "màu nâu",
+      "count": 292
+    },
+    {
+      "answer": "phòng tắm",
+      "count": 245
+    },
+    {
+      "answer": "màu cam",
+      "count": 241
+    },
+    {
+      "answer": "giường",
+      "count": 222
+    },
+    {
+      "answer": "màu tía",
+      "count": 213
+    },
+    {
+      "answer": "con mèo",
+      "count": 208
+    },
+    {
+      "answer": "hươu cao cổ",
+      "count": 204
+    },
+    {
+      "answer": "máy bay",
+      "count": 203
+    },
+    {
+      "answer": "gương",
+      "count": 200
+    },
+    {
+      "answer": "màu xám",
+      "count": 196
+    },
+    {
+      "answer": "con chim",
+      "count": 195
+    },
+    {
+      "answer": "năm",
+      "count": 195
+    },
+    {
+      "answer": "con chó",
+      "count": 187
+    },
+    {
+      "answer": "con thuyền",
+      "count": 179
+    },
+    {
+      "answer": "gấu",
+      "count": 179
+    },
+    {
+      "answer": "xe ô tô",
+      "count": 176
+    },
+    {
+      "answer": "lọ cắm hoa",
+      "count": 171
+    },
+    {
+      "answer": "con voi",
+      "count": 165
+    },
+    {
+      "answer": "một",
+      "count": 164
+    }
+  ],
+  "question_type_distribution": {
+    "Text-reading": {
+      "count": 244,
+      "pct": 1.63
+    },
+    "Counting": {
+      "count": 2090,
+      "pct": 13.93
+    },
+    "Yes/No": {
+      "count": 58,
+      "pct": 0.39
+    },
+    "Reasoning": {
+      "count": 63,
+      "pct": 0.42
+    },
+    "Object-recognition": {
+      "count": 8092,
+      "pct": 53.95
+    },
+    "Other": {
+      "count": 4453,
+      "pct": 29.69
+    }
+  },
+  "question_type_method": "rule_based_vi_cue_words (heuristic, exploratory only)",
+  "load_log": [
+    "OK: loaded 'minhnguyent546/ViVQA' [generic] with splits ['train', 'test']"
+  ],
+  "samples_written_per_type": {
+    "Text-reading": 5,
+    "Counting": 5,
+    "Yes/No": 5,
+    "Reasoning": 5,
+    "Object-recognition": 5,
+    "Other": 5
+  }
+}

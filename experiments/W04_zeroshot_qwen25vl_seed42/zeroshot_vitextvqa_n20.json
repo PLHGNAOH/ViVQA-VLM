@@ -1,0 +1,182 @@
+[
+  {
+    "question_id": 29,
+    "question": "tiệm thuốc này bán kẹo gì ?",
+    "gold": [
+      "cool air"
+    ],
+    "pred": "Kẹo Cool Air",
+    "sec": 3.38
+  },
+  {
+    "question_id": 30,
+    "question": "tiệm thuốc này bán kẹo gì ?",
+    "gold": [
+      "doublemint"
+    ],
+    "pred": "Kẹo Cool Air",
+    "sec": 2.83
+  },
+  {
+    "question_id": 31,
+    "question": "tiệm thuốc này bán kẹo gì ?",
+    "gold": [
+      "alpenliebe"
+    ],
+    "pred": "Kẹo Cool Air",
+    "sec": 3.02
+  },
+  {
+    "question_id": 32,
+    "question": "tiệm thuốc này bán khẩu trang gì ?",
+    "gold": [
+      "medmask"
+    ],
+    "pred": "MEDMask",
+    "sec": 1.19
+  },
+  {
+    "question_id": 33,
+    "question": "nơi này là đâu ?",
+    "gold": [
+      "bảo tàng lịch sử quốc gia"
+    ],
+    "pred": "Đại sảnh Quốc hội Việt Nam",
+    "sec": 0.75
+  },
+  {
+    "question_id": 34,
+    "question": "đây là bảo tàng gì ?",
+    "gold": [
+      "lịch sử quốc gia"
+    ],
+    "pred": "Bảo tàng Lịch sử Quốc gia.",
+    "sec": 0.89
+  },
+  {
+    "question_id": 35,
+    "question": "đây là đâu ?",
+    "gold": [
+      "bảo tàng"
+    ],
+    "pred": "Đây là Bảo tàng Lịch sử Quốc gia Hà Nội.",
+    "sec": 1.07
+  },
+  {
+    "question_id": 36,
+    "question": "quầy hàng dầu ăn trong ảnh đang số sự kiện gì ?",
+    "gold": [
+      "khuyến mãi"
+    ],
+    "pred": "Khuyến mãi",
+    "sec": 1.15
+  },
+  {
+    "question_id": 37,
+    "question": "phía xa sau gian hàng dầu ăn bán gì ?",
+    "gold": [
+      "bánh biscuits"
+    ],
+    "pred": "Thực phẩm",
+    "sec": 1.21
+  },
+  {
+    "question_id": 38,
+    "question": "mức giá khuyến mãi đầu của bảng đầu tiên là bao nhiêu ?",
+    "gold": [
+      "32500"
+    ],
+    "pred": "32.000",
+    "sec": 1.32
+  },
+  {
+    "question_id": 39,
+    "question": "mức giá khuyến mãi thứ hai của bảng đầu tiên là bao nhiêu ?",
+    "gold": [
+      "44500"
+    ],
+    "pred": "44.000",
+    "sec": 1.37
+  },
+  {
+    "question_id": 55,
+    "question": "nơi này tên là gì ?",
+    "gold": [
+      "nông trại vui vẻ"
+    ],
+    "pred": "Thúy Cánh Farm",
+    "sec": 1.56
+  },
+  {
+    "question_id": 56,
+    "question": "địa chỉ nơi này là đâu ?",
+    "gold": [
+      "121c2 - kdc an bình , bh - đn"
+    ],
+    "pred": "ĐC: 121C2 - KDC An Bình, BH - ĐN",
+    "sec": 2.37
+  },
+  {
+    "question_id": 57,
+    "question": "số điện thoại nơi này là gì ?",
+    "gold": [
+      "0912992121"
+    ],
+    "pred": "0912 99 21 21",
+    "sec": 1.72
+  },
+  {
+    "question_id": 72,
+    "question": "tấm bảng màu vàng dùng làm gì ?",
+    "gold": [
+      "vách ngăn covid - 19"
+    ],
+    "pred": "Tấm bảng màu vàng được sử dụng để quảng cáo vách ngăn phòng chống COVID-19.",
+    "sec": 2.17
+  },
+  {
+    "question_id": 73,
+    "question": "ở đây bán sẵn gì ?",
+    "gold": [
+      "vách ngăn mica trong ngừa covid 19s"
+    ],
+    "pred": "BÁN SẴN VÁCH NGĂN MICA TRONG NGỪA COVID-19",
+    "sec": 2.24
+  },
+  {
+    "question_id": 78,
+    "question": "ở đây đang diễn ra gì ?",
+    "gold": [
+      "siêu thị mini 0 đồng"
+    ],
+    "pred": "Chương trình Hà Nội Trai, Tìm Hàng.",
+    "sec": 1.16
+  },
+  {
+    "question_id": 79,
+    "question": "nơi trong ảnh là khu vực gì ?",
+    "gold": [
+      "hàng hóa tài trợ"
+    ],
+    "pred": "Khu vực hàng hóa tài trợ không tính giá",
+    "sec": 1.14
+  },
+  {
+    "question_id": 80,
+    "question": "hàng hóa tài trợ trong ảnh như thế nào ?",
+    "gold": [
+      "không tính giá"
+    ],
+    "pred": "Không tính giá",
+    "sec": 0.92
+  },
+  {
+    "question_id": 81,
+    "question": "mỗi quý khách được lấy bao nhiêu hàng hóa ?",
+    "gold": [
+      "1 sản phẩm"
+    ],
+    "pred": "0 ĐỒNG",
+    "sec": 0.93
+  }
+]

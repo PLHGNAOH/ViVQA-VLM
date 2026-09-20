@@ -1,0 +1,62 @@
+{
+  "dataset": "vitextvqa",
+  "predicted_type": "Text-reading",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "3212.jpg",
+      "image_id": "train:3212",
+      "question": "địa chỉ của trung tâm này là gì ?",
+      "answer": "đc : 594 nguyễn trãi - tp . bắc ninh",
+      "answers": [
+        "đc : 594 nguyễn trãi - tp . bắc ninh"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    },
+    {
+      "image_path": "6778.jpg",
+      "image_id": "train:6778",
+      "question": "số điện thoại của cửa hàng phía sau người phụ nữ áo đỏ là gì ?",
+      "answer": "02422 119 111",
+      "answers": [
+        "02422 119 111"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    },
+    {
+      "image_path": "11288.jpg",
+      "image_id": "train:11288",
+      "question": "nội dung của bảng màu xanh lá bên phải ?",
+      "answer": "100 % tự nhiên",
+      "answers": [
+        "100 % tự nhiên"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    },
+    {
+      "image_path": "16267.jpg",
+      "image_id": "train:16267",
+      "question": "cửa hàng có biển màu vàng là nơi nào ?",
+      "answer": "đại lý xổ số miền bắc",
+      "answers": [
+        "đại lý xổ số miền bắc"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    },
+    {
+      "image_path": "7500.jpg",
+      "image_id": "train:7500",
+      "question": "khẩu hiệu của siêu thị lanchi là gì ?",
+      "answer": "niềm tin của mọi nhà",
+      "answers": [
+        "niềm tin của mọi nhà"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    }
+  ]
+}

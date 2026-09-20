@@ -1,0 +1,62 @@
+{
+  "dataset": "vivqa_x",
+  "predicted_type": "Text-reading",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "COCO_train2014_000000343898.jpg",
+      "image_id": "343898",
+      "question": "Biển báo màu đỏ và trắng có hình dạng gì?",
+      "answer": "x",
+      "answers": [
+        "x"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000391200.jpg",
+      "image_id": "391200",
+      "question": "Biển hiệu được đặt ở loại đất nào?",
+      "answer": "đất",
+      "answers": [
+        "đất"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000480240.jpg",
+      "image_id": "480240",
+      "question": "Đôi giày của cầu thủ đang mang loại thương hiệu nào?",
+      "answer": "nike",
+      "answers": [
+        "nike"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000548171.jpg",
+      "image_id": "548171",
+      "question": "Biển hiệu màu xanh quảng cáo loại thực phẩm gì?",
+      "answer": "hải sản",
+      "answers": [
+        "hải sản"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000015366.jpg",
+      "image_id": "15366",
+      "question": "Thương hiệu phần cứng chơi game này là gì?",
+      "answer": "wii",
+      "answers": [
+        "wii"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    }
+  ]
+}

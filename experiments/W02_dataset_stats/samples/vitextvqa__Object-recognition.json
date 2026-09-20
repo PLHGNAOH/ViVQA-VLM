@@ -1,0 +1,62 @@
+{
+  "dataset": "vitextvqa",
+  "predicted_type": "Object-recognition",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "5792.jpg",
+      "image_id": "train:5792",
+      "question": "cửa hàng phía sau có tên là gì ?",
+      "answer": "tuyến oanh",
+      "answers": [
+        "tuyến oanh"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    },
+    {
+      "image_path": "6117.jpg",
+      "image_id": "train:6117",
+      "question": "chợ lớn là gì đối với người sài gòn ?",
+      "answer": "ký ức",
+      "answers": [
+        "ký ức"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    },
+    {
+      "image_path": "7444.jpg",
+      "image_id": "train:7444",
+      "question": "đơn vị sở hữu tấm ảnh này là ai ?",
+      "answer": "kiến thức",
+      "answers": [
+        "kiến thức"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    },
+    {
+      "image_path": "9998.jpg",
+      "image_id": "train:9998",
+      "question": "cửa hàng nghị đồng nai chuyên mua bán gì ?",
+      "answer": "các loại dụng cụ cơ khí",
+      "answers": [
+        "các loại dụng cụ cơ khí"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    },
+    {
+      "image_path": "3913.jpg",
+      "image_id": "train:3913",
+      "question": "bảo tàng này có tên là gì ?",
+      "answer": "chứng tích chiến tranh",
+      "answers": [
+        "chứng tích chiến tranh"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+﻿__pycache__/
+*.pyc
+
+/data/
+/adapters/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.zip
+.ipynb_checkpoints/
+

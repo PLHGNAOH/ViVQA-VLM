@@ -1,0 +1,62 @@
+{
+  "dataset": "vivqa",
+  "predicted_type": "Text-reading",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "COCO_val2014_000000514607.jpg",
+      "image_id": "514607",
+      "question": "những gì trên bãi biển cát",
+      "answer": "chiếc ô",
+      "answers": [
+        "chiếc ô"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000432410.jpg",
+      "image_id": "432410",
+      "question": "có bao nhiêu người trên bãi biển đang cưỡi ngựa",
+      "answer": "sáu",
+      "answers": [
+        "sáu"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000442311.jpg",
+      "image_id": "442311",
+      "question": "những con ngựa nâu kéo một người đàn ông qua sóng biển ở đâu",
+      "answer": "xe đẩy",
+      "answers": [
+        "xe đẩy"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_val2014_000000579307.jpg",
+      "image_id": "579307",
+      "question": "người đàn ông và con trai đã đứng trên bãi biển với một sự tự lắp ráp",
+      "answer": "diều",
+      "answers": [
+        "diều"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_val2014_000000388846.jpg",
+      "image_id": "388846",
+      "question": "ô dù bãi biển đỏ và trắng đông đúc là gì",
+      "answer": "bờ biển",
+      "answers": [
+        "bờ biển"
+      ],
+      "predicted_type": "Text-reading",
+      "split": "train"
+    }
+  ]
+}

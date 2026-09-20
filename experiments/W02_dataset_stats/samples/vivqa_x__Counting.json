@@ -1,0 +1,62 @@
+{
+  "dataset": "vivqa_x",
+  "predicted_type": "Counting",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "COCO_val2014_000000255274.jpg",
+      "image_id": "255274",
+      "question": "Đây là hiệp mấy?",
+      "answer": "4",
+      "answers": [
+        "4"
+      ],
+      "predicted_type": "Counting",
+      "split": "val"
+    },
+    {
+      "image_path": "COCO_train2014_000000516012.jpg",
+      "image_id": "516012",
+      "question": "Xe buýt số mấy?",
+      "answer": "53",
+      "answers": [
+        "53"
+      ],
+      "predicted_type": "Counting",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000422737.jpg",
+      "image_id": "422737",
+      "question": "Đây là tầng mấy?",
+      "answer": "gỗ",
+      "answers": [
+        "gỗ"
+      ],
+      "predicted_type": "Counting",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000442988.jpg",
+      "image_id": "442988",
+      "question": "Đây là số mấy?",
+      "answer": "9",
+      "answers": [
+        "9"
+      ],
+      "predicted_type": "Counting",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_val2014_000000415196.jpg",
+      "image_id": "415196",
+      "question": "Giường này kích thước bao nhiêu?",
+      "answer": "king",
+      "answers": [
+        "king"
+      ],
+      "predicted_type": "Counting",
+      "split": "val"
+    }
+  ]
+}

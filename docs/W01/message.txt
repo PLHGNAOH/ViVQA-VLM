@@ -1,0 +1,696 @@
+# WEEK 1 — RESEARCH ORIENTATION & PROJECT PLANNING
+
+## 1. Mục tiêu Tuần 1
+
+Trong tuần đầu tiên, nhóm **không tập trung vào việc code hoặc xây dựng prototype**.
+
+Mục tiêu chính là:
+
+> **Hiểu bài toán → đọc và phân tích các nghiên cứu liên quan → xác định Research Gap → hình thành hướng nghiên cứu → xây dựng kế hoạch thực hiện Capstone 15 tuần.**
+
+Sau Tuần 1, nhóm phải hiểu rõ:
+
+* Đề tài đang giải quyết bài toán gì?
+* Tại sao bài toán này quan trọng?
+* Vision-Language Model (VLM) là gì?
+* Vietnamese Visual Question Answering (VQA) có những thách thức gì?
+* Các nghiên cứu trước đây đã làm gì?
+* Khoảng trống nghiên cứu (Research Gap) là gì?
+* Nhóm dự kiến nghiên cứu vấn đề nào?
+* Nhóm sẽ đánh giá kết quả bằng cách nào?
+* Toàn bộ 15 tuần sẽ được thực hiện như thế nào?
+
+---
+
+# 2. Tổng quan đề tài
+
+**English:** Efficient Vietnamese Visual Question Answering using Vision-Language Models
+
+**Vietnamese:** Nghiên cứu hệ thống hỏi đáp trực quan tiếng Việt hiệu quả sử dụng mô hình Vision-Language
+
+**Abbreviation:** ViVQA-VLM
+
+Bài toán:
+
+```text
+Vietnamese Image
+       +
+Vietnamese Question
+       ↓
+ Vision-Language Model
+       ↓
+Vietnamese Answer
+```
+
+Đề tài hướng tới việc nghiên cứu khả năng thích nghi các VLM mã nguồn mở cho Vietnamese VQA, đặc biệt trong điều kiện **không sử dụng full fine-tuning** mà sử dụng các phương pháp hiệu quả về tham số như PEFT/LoRA/QLoRA, OCR, prompting hoặc các phương pháp tương đương.
+
+Các benchmark chính được đề cập trong đề tài là:
+
+* ViVQA
+* ViTextVQA
+
+Các model có thể được khảo sát gồm:
+
+* BLIP-2
+* Florence-2
+* Qwen2.5-VL
+* LLaVA
+
+---
+
+# 3. Nhiệm vụ 1 — Tìm hiểu bài toán VQA và VLM
+
+Nhóm phải hiểu và giải thích được:
+
+### VQA
+
+* Visual Question Answering là gì?
+* VQA khác Image Classification như thế nào?
+* VQA khác Object Detection như thế nào?
+* VQA khác Image Captioning như thế nào?
+* VQA yêu cầu những khả năng nào?
+
+### VLM
+
+Tìm hiểu:
+
+* Vision Encoder
+* Language Model
+* Vision-Language Alignment
+* Multimodal Input
+* Multimodal Reasoning
+
+Nhóm phải có ít nhất một sơ đồ thể hiện pipeline:
+
+```text
+Image
+  ↓
+Vision Encoder
+  ↓
+Visual Representation
+  ↓
+Vision-Language Interface
+  ↓
+Language Model
+  ↓
+Answer
+```
+
+---
+
+# 4. Nhiệm vụ 2 — Đọc các paper liên quan
+
+Đây là **nhiệm vụ bắt buộc** của Tuần 1.
+
+Mỗi sinh viên phải đọc **ít nhất 3 paper**, trong đó phải có paper liên quan trực tiếp đến phần mình phụ trách.
+
+## SV1 — VQA & VLM
+
+Tập trung vào:
+
+* VQA
+* Vision-Language Models
+* BLIP-2
+* LLaVA
+* Florence-2
+* Qwen2.5-VL
+
+Paper nền tảng nên đọc:
+
+* BLIP-2
+* LLaVA
+* Một paper về Florence-2 hoặc Qwen2.5-VL
+
+---
+
+## SV2 — Vietnamese VQA & Dataset
+
+Tập trung vào:
+
+* Vietnamese VQA
+* ViVQA
+* ViTextVQA
+* Scene-text VQA
+* OCR
+* Vietnamese-specific challenges
+
+Paper bắt buộc nên đọc:
+
+* ViVQA: Vietnamese Visual Question Answering
+* ViTextVQA: A Large-Scale VQA Dataset for Evaluating Vietnamese Text Comprehension in Images
+* Ít nhất 1 paper khác về Vietnamese VQA
+
+---
+
+## SV3 — Efficient VLM Adaptation
+
+Tập trung vào:
+
+* Parameter-Efficient Fine-Tuning
+* LoRA
+* QLoRA
+* Prompt Engineering
+* Multimodal Prompting
+* OCR-enhanced VQA
+* Retrieval-Augmented VQA
+
+Cần đọc:
+
+* Ít nhất 1 paper về LoRA
+* Ít nhất 1 paper về QLoRA
+* Ít nhất 1 paper về PEFT/VLM adaptation
+
+---
+
+## SV4 — Evaluation, Hallucination & Deployment
+
+Tập trung vào:
+
+* VQA evaluation
+* Exact Match
+* VQA Accuracy
+* ANLS
+* VLM hallucination
+* Object hallucination
+* Text hallucination
+* Reliability
+* Efficient inference/deployment
+
+Cần đọc:
+
+* POPE — Evaluating Object Hallucination in Large Vision-Language Models
+* Ít nhất 1 paper về VQA evaluation
+* Ít nhất 1 paper về VLM hallucination/reliability
+
+---
+
+# 5. Cách đọc paper
+
+Không được chỉ viết abstract hoặc tóm tắt paper.
+
+Mỗi paper phải trả lời ít nhất 10 câu hỏi:
+
+1. What problem does the paper solve?
+2. Why is the problem important?
+3. What is the research gap?
+4. What is the proposed method?
+5. What is the key technical idea?
+6. What dataset is used?
+7. What metrics are used?
+8. What are the main results?
+9. What are the limitations?
+10. **What can we learn/use for our project?**
+
+Câu số 10 là bắt buộc.
+
+Sinh viên phải chỉ ra được:
+
+> Paper này liên quan gì đến đề tài ViVQA-VLM?
+
+---
+
+# 6. Nhiệm vụ 3 — Phân tích Research Gap
+
+Dựa trên paper đã đọc và đề cương đề tài, nhóm phải xác định các vấn đề nghiên cứu.
+
+Một số Research Gap được đề tài đặt ra:
+
+### Gap 1 — English-centric pretraining
+
+Nhiều VLM được huấn luyện chủ yếu trên dữ liệu tiếng Anh, do đó khả năng alignment giữa hình ảnh và tiếng Việt có thể chưa tối ưu.
+
+### Gap 2 — Vietnamese VQA performance
+
+Đặc biệt với:
+
+* Text-in-image
+* Vietnamese diacritics
+* Code-switching
+* OCR
+* Scene text
+
+### Gap 3 — PEFT
+
+Việc sử dụng LoRA/QLoRA để thích nghi các VLM cho Vietnamese VQA vẫn là một hướng cần được nghiên cứu thêm.
+
+### Gap 4 — Hallucination
+
+VLM có thể tạo ra câu trả lời tự nhiên nhưng không đúng với hình ảnh.
+
+Nhóm phải:
+
+* Xác nhận các gap bằng literature.
+* Tìm thêm evidence từ các paper.
+* Không chỉ sao chép Research Gap trong đề cương.
+* Xác định gap nào nhóm có khả năng nghiên cứu trong phạm vi Capstone.
+
+---
+
+# 7. Nhiệm vụ 4 — Khảo sát ViVQA và ViTextVQA
+
+Nhóm cần tìm hiểu:
+
+* Dataset được xây dựng như thế nào?
+* Có bao nhiêu loại câu hỏi?
+* Các loại answer?
+* Scene text là gì?
+* OCR có vai trò gì?
+* Những khó khăn đặc thù của tiếng Việt?
+
+Nhóm cần lấy một số sample data để quan sát thực tế.
+
+Phân loại ít nhất một số câu hỏi thành:
+
+* Yes/No
+* Counting
+* Object recognition
+* Text reading
+* Reasoning
+
+Đây sẽ là cơ sở cho error analysis ở các tuần sau.
+
+---
+
+# 8. Nhiệm vụ 5 — Mini Pilot Experiment
+
+Nếu điều kiện môi trường cho phép, nhóm nên thực hiện một pilot experiment nhỏ.
+
+**Không yêu cầu training.**
+
+Có thể sử dụng bất kỳ môi trường phù hợp:
+
+* Google Colab
+* Kaggle
+* GPU Server RTX 3090
+* PC/GPU cá nhân
+* Jetson AGX Thor
+* Cloud GPU
+* Môi trường tương đương
+
+Chọn một pretrained VLM và thử khoảng **10–20 image-question pairs**.
+
+Ghi nhận:
+
+* Correct answer
+* Incorrect answer
+* Partially correct
+* Hallucination
+* OCR failure
+* Reasoning failure
+
+Mục đích của pilot experiment không phải tạo ra kết quả chính thức.
+
+Mục đích là:
+
+> **Quan sát trực tiếp vấn đề nghiên cứu.**
+
+---
+
+# 9. Nhiệm vụ 6 — Đề xuất Research Questions
+
+Cuối Tuần 1, nhóm phải đề xuất:
+
+### Primary Research Question
+
+Ví dụ:
+
+> Can parameter-efficient adaptation improve the performance of an open-source Vision-Language Model on Vietnamese Visual Question Answering without full fine-tuning?
+
+### Secondary Research Questions
+
+Có thể xem xét:
+
+* OCR có cải thiện Vietnamese scene-text VQA không?
+* LoRA/QLoRA có cải thiện VQA performance không?
+* Những loại câu hỏi nào được cải thiện nhiều nhất?
+* Phương pháp đề xuất có làm giảm hallucination không?
+* Model có thể được triển khai hiệu quả trên edge device không?
+
+Nhóm không nhất thiết phải sử dụng các câu hỏi trên; phải tự xây dựng và giải thích lý do lựa chọn.
+
+---
+
+# 10. Nhiệm vụ 7 — Đề xuất Research Hypotheses
+
+Nhóm phải đưa ra ít nhất **2 hypotheses có thể kiểm chứng bằng experiment**.
+
+Ví dụ:
+
+### H1
+
+> PEFT adaptation improves Vietnamese VQA performance compared with the reproduced baseline.
+
+### H2
+
+> OCR-enhanced prompting improves performance on Vietnamese scene-text questions.
+
+### H3
+
+> Quantized inference enables practical deployment while maintaining acceptable VQA performance.
+
+---
+
+# 11. Nhiệm vụ 8 — Khảo sát các hướng giải pháp
+
+Nhóm phải tìm hiểu và so sánh các hướng:
+
+* Prompt optimization
+* Multimodal prompt engineering
+* LoRA
+* QLoRA
+* OCR-enhanced prompting
+* Retrieval-Augmented VQA
+* Lightweight VLM adaptation
+
+Lập bảng:
+
+| Method    | Main idea | Advantages | Limitations | Resource | Potential for project |
+| --------- | --------- | ---------- | ----------- | -------- | --------------------- |
+| Prompting |           |            |             |          |                       |
+| LoRA      |           |            |             |          |                       |
+| QLoRA     |           |            |             |          |                       |
+| OCR       |           |            |             |          |                       |
+| RAG       |           |            |             |          |                       |
+
+Chưa cần quyết định phương pháp cuối cùng trong Tuần 1.
+
+---
+
+# 12. Nhiệm vụ 9 — Xây dựng kế hoạch chi tiết cho toàn bộ 15 tuần
+
+**Đây là deliverable quan trọng nhất của nhóm trong Tuần 1.**
+
+Nhóm phải **tự xây dựng kế hoạch thực hiện Capstone trong 15 tuần**, không chỉ sử dụng lại timeline có sẵn trong đề cương.
+
+Kế hoạch phải thể hiện:
+
+* Task
+* Sub-task
+* Người phụ trách
+* Deliverable
+* Expected result
+* Dependency
+* Risk
+* Backup plan
+* Thời gian thực hiện
+
+## Các mốc bắt buộc
+
+### Week 3 — Review 1
+
+Nhóm phải xác định trong kế hoạch:
+
+* Review 1 sẽ trình bày những gì?
+* Deliverables trước Review 1?
+* Ai phụ trách?
+* Kết quả tối thiểu cần đạt?
+
+### Week 7 — Review 2
+
+Phải xác định:
+
+* Đã hoàn thành những gì?
+* Baseline đã reproduce chưa?
+* Proposed method là gì?
+* Có preliminary results chưa?
+* Cần trình bày experiment nào?
+
+### Week 13 — Hội đồng cấp Khoa
+
+Phải coi đây là **một milestone chính**, không phải một tuần làm việc bình thường.
+
+Trước W13 phải hoàn thành phần lớn:
+
+* Research methodology
+* Experiments
+* Main results
+* Ablation
+* Error analysis
+* Hallucination analysis
+
+W14–W15 dành cho hoàn thiện prototype, thesis, documentation và final defense theo kế hoạch nhóm.
+
+---
+
+# 13. Format kế hoạch 15 tuần
+
+Nhóm phải nộp một bảng tương tự:
+
+| Week    | Objective            | Tasks | SV1 | SV2 | SV3 | SV4 | Deliverable   | Milestone             |
+| ------- | -------------------- | ----- | --- | --- | --- | --- | ------------- | --------------------- |
+| W1      | Research orientation |       |     |     |     |     | W1 Report     |                       |
+| W2      | Literature & dataset |       |     |     |     |     |               |                       |
+| **W3**  | **Review 1**         |       |     |     |     |     | Review 1      | **REVIEW 1**          |
+| W4      | Baseline             |       |     |     |     |     |               |                       |
+| W5      | Baseline             |       |     |     |     |     |               |                       |
+| W6      | Baseline/Method      |       |     |     |     |     |               |                       |
+| **W7**  | **Review 2**         |       |     |     |     |     | Review 2      | **REVIEW 2**          |
+| W8      | Improvement          |       |     |     |     |     |               |                       |
+| W9      | Improvement          |       |     |     |     |     |               |                       |
+| W10     | Experiments          |       |     |     |     |     |               |                       |
+| W11     | Evaluation           |       |     |     |     |     |               |                       |
+| W12     | Analysis             |       |     |     |     |     |               |                       |
+| **W13** | **Faculty Review**   |       |     |     |     |     |               | **HỘI ĐỒNG CẤP KHOA** |
+| W14     | Prototype/Thesis     |       |     |     |     |     |               |                       |
+| W15     | Finalization         |       |     |     |     |     | Final package | **FINAL DEFENSE**     |
+
+Nhóm phải **tự điều chỉnh nội dung từng tuần**, nhưng không được thay đổi các milestone bắt buộc trên.
+
+---
+
+# 14. Yêu cầu về phân công nhóm
+
+Vì nhóm có **4 sinh viên**, phải thể hiện rõ individual responsibility.
+
+Không chấp nhận kế hoạch kiểu:
+
+> "Cả nhóm làm dataset."
+
+Phải chỉ rõ:
+
+```text
+SV1 — VLM / Baseline
+SV2 — Dataset / OCR
+SV3 — PEFT / Training
+SV4 — Evaluation / Deployment
+```
+
+Đây chỉ là phân công ban đầu; nhóm có thể tự đề xuất cách phân công khác nếu hợp lý.
+
+Mỗi sinh viên phải có:
+
+* Individual tasks
+* Individual deliverables
+* Technical responsibility
+
+Đồng thời phải có:
+
+* Team tasks
+* Team deliverables
+
+---
+
+# 15. Risk & Contingency Plan
+
+Kế hoạch 15 tuần phải có ít nhất **5 rủi ro**.
+
+Ví dụ:
+
+| Risk                   | Impact | Probability | Mitigation         | Backup |
+| ---------------------- | ------ | ----------- | ------------------ | ------ |
+| Model quá lớn          | High   |             | Smaller model      |        |
+| GPU không đủ           | High   |             | QLoRA/quantization | Colab  |
+| Dataset lỗi            | Medium |             | Preprocessing      |        |
+| Baseline khó reproduce | High   |             | Alternative VLM    |        |
+| OCR không tốt          | Medium |             | Alternative OCR    |        |
+| Training không hội tụ  | High   |             | Prompting          |        |
+| Deployment khó         | Medium |             | Cloud/Server       |        |
+
+---
+
+# 16. Môi trường thực hiện
+
+Trong giai đoạn hiện tại, **không bắt buộc một môi trường deployment cụ thể**.
+
+Sinh viên được tự lựa chọn môi trường phù hợp với từng giai đoạn.
+
+Có thể sử dụng:
+
+* RTX 3090 GPU Server
+* Jetson AGX Thor
+* Google Colab
+* Kaggle
+* PC/GPU cá nhân
+* Cloud GPU
+* Các môi trường tương đương
+
+Tuy nhiên, tất cả experiment phải ghi lại:
+
+* Hardware
+* GPU/CPU
+* RAM/VRAM
+* OS
+* CUDA
+* Python
+* PyTorch
+* Model version
+* Dataset/split
+* Random seed
+* Hyperparameters
+* Training time
+* Inference time
+
+Mục tiêu là đảm bảo **reproducibility**.
+
+---
+
+# 17. Deliverables cuối Tuần 1
+
+Nhóm phải nộp:
+
+### 1. Individual Paper Reviews
+
+Mỗi sinh viên:
+
+> **≥ 3 papers**
+
+với paper-reading template đầy đủ.
+
+### 2. Literature Matrix
+
+Tổng hợp toàn bộ paper đã đọc.
+
+### 3. Vietnamese VQA Dataset Analysis
+
+ViVQA + ViTextVQA.
+
+### 4. Research Gap Analysis
+
+Ít nhất:
+
+> **2–3 research gaps có evidence từ literature.**
+
+### 5. Research Questions
+
+* 1 Primary RQ
+* 2–3 Secondary RQs
+
+### 6. Research Hypotheses
+
+* ≥ 2 hypotheses
+
+### 7. Candidate Methods
+
+So sánh:
+
+* Prompting
+* LoRA
+* QLoRA
+* OCR
+* RAG
+* Các phương án phù hợp khác
+
+### 8. Pilot Experiment
+
+10–20 cases nếu môi trường cho phép.
+
+### 9. **15-Week Project Plan**
+
+Kế hoạch do chính nhóm xây dựng.
+
+Bắt buộc đánh dấu:
+
+* **W3 — Review 1**
+* **W7 — Review 2**
+* **W13 — Hội đồng cấp Khoa**
+
+### 10. W1 Team Report
+
+Tổng hợp toàn bộ kết quả.
+
+---
+
+# 18. Cấu trúc thư mục đề xuất
+
+```text
+ViVQA-VLM/
+│
+├── docs/
+│   └── W01/
+│       ├── SV1_Paper_Review.md
+│       ├── SV2_Paper_Review.md
+│       ├── SV3_Paper_Review.md
+│       ├── SV4_Paper_Review.md
+│       ├── Literature_Matrix.md
+│       ├── Dataset_Analysis.md
+│       ├── Research_Gap.md
+│       ├── Research_Questions.md
+│       ├── Hypotheses.md
+│       ├── Candidate_Methods.md
+│       ├── Project_Plan_15_Weeks.md
+│       └── W01_Team_Report.md
+│
+├── experiments/
+│   └── W01_Pilot/
+│
+└── README.md
+```
+
+---
+
+# 19. Tiêu chí hoàn thành Tuần 1
+
+Tuần 1 được xem là **hoàn thành** khi nhóm chứng minh được:
+
+### Knowledge
+
+* Hiểu VQA.
+* Hiểu VLM.
+* Hiểu Vietnamese VQA.
+* Hiểu ViVQA/ViTextVQA.
+* Hiểu các hướng adaptation.
+
+### Research
+
+* Đã đọc và phân tích paper.
+* Xác định được research gap.
+* Có RQ.
+* Có hypothesis.
+* Có candidate methods.
+
+### Planning
+
+* Có kế hoạch 15 tuần.
+* Có phân công 4 sinh viên.
+* Có deliverable từng tuần.
+* Có milestone W3/W7/W13.
+* Có risk & contingency plan.
+
+### Mindset
+
+Sinh viên phải chuyển từ:
+
+> **“Build an AI application”**
+
+sang:
+
+> **“Conduct a reproducible research project and validate a technical hypothesis.”**
+
+---
+
+## Câu hỏi bắt buộc khi trình bày W1
+
+Mỗi sinh viên phải sẵn sàng trả lời:
+
+1. **What is the problem?**
+2. **Why is it important?**
+3. **What have previous researchers done?**
+4. **What is still missing?**
+5. **What is our research gap?**
+6. **What is our research question?**
+7. **What is our hypothesis?**
+8. **How will we validate it?**
+9. **What is my responsibility in the team?**
+10. **What should the team achieve by Week 3, Week 7 and Week 13?**
+
+> **Lưu ý:** Tuần 1 không đánh giá nhóm bằng việc có model chạy được hay chưa. Trọng tâm là **research understanding, paper reading, research direction và project planning**.

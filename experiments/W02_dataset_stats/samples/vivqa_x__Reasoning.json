@@ -1,0 +1,62 @@
+{
+  "dataset": "vivqa_x",
+  "predicted_type": "Reasoning",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "COCO_val2014_000000284400.jpg",
+      "image_id": "284400",
+      "question": "Người đàn ông đang làm gì?",
+      "answer": "nhắn tin",
+      "answers": [
+        "nhắn tin"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "test"
+    },
+    {
+      "image_path": "COCO_train2014_000000271385.jpg",
+      "image_id": "271385",
+      "question": "Mọi người đang làm gì?",
+      "answer": "trượt tuyết",
+      "answers": [
+        "trượt tuyết"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000289561.jpg",
+      "image_id": "289561",
+      "question": "Người đàn ông đang làm gì?",
+      "answer": "trượt tuyết",
+      "answers": [
+        "trượt tuyết"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000420065.jpg",
+      "image_id": "420065",
+      "question": "Mọi người đang làm gì?",
+      "answer": "ăn",
+      "answers": [
+        "ăn"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000295670.jpg",
+      "image_id": "295670",
+      "question": "Người đàn ông này đang làm gì?",
+      "answer": "trượt tuyết",
+      "answers": [
+        "trượt tuyết"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "train"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "dataset": "vivqa",
+  "predicted_type": "Other",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "COCO_val2014_000000471226.jpg",
+      "image_id": "471226",
+      "question": "những gì phủ với rau trong nước sốt",
+      "answer": "đĩa ăn",
+      "answers": [
+        "đĩa ăn"
+      ],
+      "predicted_type": "Other",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_val2014_000000451263.jpg",
+      "image_id": "451263",
+      "question": "những gì nhìn lên trong khi nằm trên bên đó",
+      "answer": "ngựa rằn",
+      "answers": [
+        "ngựa rằn"
+      ],
+      "predicted_type": "Other",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_val2014_000000339738.jpg",
+      "image_id": "339738",
+      "question": "con mèo vàng mặc gì",
+      "answer": "nón",
+      "answers": [
+        "nón"
+      ],
+      "predicted_type": "Other",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000568660.jpg",
+      "image_id": "568660",
+      "question": "người phụ nữ đang gọt chuối đâu",
+      "answer": "nhà ở",
+      "answers": [
+        "nhà ở"
+      ],
+      "predicted_type": "Other",
+      "split": "test"
+    },
+    {
+      "image_path": "COCO_train2014_000000532342.jpg",
+      "image_id": "532342",
+      "question": "đâu là một vài chiếc xe máy đậu",
+      "answer": "cái lều",
+      "answers": [
+        "cái lều"
+      ],
+      "predicted_type": "Other",
+      "split": "test"
+    }
+  ]
+}

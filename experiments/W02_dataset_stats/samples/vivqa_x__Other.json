@@ -1,0 +1,62 @@
+{
+  "dataset": "vivqa_x",
+  "predicted_type": "Other",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "COCO_train2014_000000577759.jpg",
+      "image_id": "577759",
+      "question": "Anh ta đang cắt gì?",
+      "answer": "giấy",
+      "answers": [
+        "giấy"
+      ],
+      "predicted_type": "Other",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000094485.jpg",
+      "image_id": "94485",
+      "question": "Đây là phòng nào?",
+      "answer": "phòng tắm",
+      "answers": [
+        "phòng tắm"
+      ],
+      "predicted_type": "Other",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000273607.jpg",
+      "image_id": "273607",
+      "question": "Đây là phòng nào?",
+      "answer": "nhà bếp",
+      "answers": [
+        "nhà bếp"
+      ],
+      "predicted_type": "Other",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000579713.jpg",
+      "image_id": "579713",
+      "question": "Người phụ nữ mặc loại quần nào?",
+      "answer": "quần jeans",
+      "answers": [
+        "quần jeans"
+      ],
+      "predicted_type": "Other",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000204225.jpg",
+      "image_id": "204225",
+      "question": "Đây là phòng nào?",
+      "answer": "phòng khách",
+      "answers": [
+        "phòng khách"
+      ],
+      "predicted_type": "Other",
+      "split": "train"
+    }
+  ]
+}

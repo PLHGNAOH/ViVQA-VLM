@@ -1,0 +1,62 @@
+{
+  "dataset": "vivqa",
+  "predicted_type": "Yes/No",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "COCO_val2014_000000379453.jpg",
+      "image_id": "379453",
+      "question": "cái gì đang bay trong không khí, trên không",
+      "answer": "máy bay",
+      "answers": [
+        "máy bay"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000202168.jpg",
+      "image_id": "202168",
+      "question": "người phụ nữ trông có vẻ không quan hệ như vậy, túi bông cải xanh lớn, cô đang giữ",
+      "answer": "cửa hàng",
+      "answers": [
+        "cửa hàng"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_val2014_000000475184.jpg",
+      "image_id": "475184",
+      "question": "hai người đàn ông không có áo đang giữ những gì",
+      "answer": "ván lướt sóng",
+      "answers": [
+        "ván lướt sóng"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_val2014_000000441483.jpg",
+      "image_id": "441483",
+      "question": "nhà vệ sinh không có chỗ ngồi ở đâu",
+      "answer": "phòng tắm",
+      "answers": [
+        "phòng tắm"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_val2014_000000467157.jpg",
+      "image_id": "467157",
+      "question": "điều gì nằm trên giường với chiếc chăn kéo lại để tiết lộ không có tờ nào",
+      "answer": "con mèo",
+      "answers": [
+        "con mèo"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "test"
+    }
+  ]
+}

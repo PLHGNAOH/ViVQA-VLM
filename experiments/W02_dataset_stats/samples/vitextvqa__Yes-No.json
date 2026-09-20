@@ -1,0 +1,62 @@
+{
+  "dataset": "vitextvqa",
+  "predicted_type": "Yes/No",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "5524.jpg",
+      "image_id": "test:5524",
+      "question": "không có gì quý hơn độc lập tự do là câu do ai nói ?",
+      "answer": "hồ chí minh",
+      "answers": [
+        "hồ chí minh"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "test"
+    },
+    {
+      "image_path": "599.jpg",
+      "image_id": "train:599",
+      "question": "dạo này công ty có làm ăn phát đạt không ?",
+      "answer": "không",
+      "answers": [
+        "không"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "train"
+    },
+    {
+      "image_path": "7375.jpg",
+      "image_id": "train:7375",
+      "question": "không có gì quý hơn gì ?",
+      "answer": "độc lập tự do",
+      "answers": [
+        "độc lập tự do"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "train"
+    },
+    {
+      "image_path": "16377.jpg",
+      "image_id": "train:16377",
+      "question": "bên cạnh 0251 . 3865 . 841 còn có số nào khác nữa không ?",
+      "answer": "0396 . 855 . 841",
+      "answers": [
+        "0396 . 855 . 841"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "train"
+    },
+    {
+      "image_path": "7322.jpg",
+      "image_id": "test:7322",
+      "question": "ngoài số 082 . 39 . 78910 thì còn số nào liên lạc cho xe máy hoàn thiện không ?",
+      "answer": "0899 . 79 . 4567",
+      "answers": [
+        "0899 . 79 . 4567"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "test"
+    }
+  ]
+}

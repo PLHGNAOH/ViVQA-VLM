@@ -1,0 +1,62 @@
+{
+  "dataset": "vitextvqa",
+  "predicted_type": "Reasoning",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "16552.jpg",
+      "image_id": "train:16552",
+      "question": "trung tâm trong ảnh cam kết giá như thế nào ?",
+      "answer": "tốt",
+      "answers": [
+        "tốt"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "train"
+    },
+    {
+      "image_path": "15974.jpg",
+      "image_id": "train:15974",
+      "question": "giao hàng ở go ! & bigc diễn ra thế nào ?",
+      "answer": "miễn phí",
+      "answers": [
+        "miễn phí"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "train"
+    },
+    {
+      "image_path": "1910.jpg",
+      "image_id": "train:1910",
+      "question": "nguồn của tấm ảnh này làm bảng quảng cáo lấy giá như thế nào ?",
+      "answer": "rẻ",
+      "answers": [
+        "rẻ"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "train"
+    },
+    {
+      "image_path": "1166.jpg",
+      "image_id": "test:1166",
+      "question": "ở đây bán sữa non như thế nào ?",
+      "answer": "số 1 sữa non toàn cầu",
+      "answers": [
+        "số 1 sữa non toàn cầu"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "test"
+    },
+    {
+      "image_path": "2764.jpg",
+      "image_id": "train:2764",
+      "question": "theo ngày thứ 5 thỏa sức măm măm thì các món sẽ được như thế nào ?",
+      "answer": "đồng giá 35k",
+      "answers": [
+        "đồng giá 35k"
+      ],
+      "predicted_type": "Reasoning",
+      "split": "train"
+    }
+  ]
+}

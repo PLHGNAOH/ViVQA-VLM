@@ -1,0 +1,204 @@
+{
+  "dataset_key": "vivqa_x",
+  "display_name": "ViVQA-X (translated VQA-X w/ explanations, COCO images) — RELATED local dataset, NOT ViVQA",
+  "status": "OK",
+  "seed": 42,
+  "script_version": "w02-analyze-1.0",
+  "generated_at_utc": "2026-09-14T14:55:58.680145+00:00",
+  "source_kind": "local",
+  "source_detail": "data_root=data",
+  "num_images": 28180,
+  "num_qa": 32886,
+  "split_sizes": {
+    "train": 29459,
+    "val": 1459,
+    "test": 1968
+  },
+  "question_length_tokens": {
+    "count": 32886,
+    "min": 2,
+    "max": 27,
+    "mean": 7.072,
+    "median": 7.0,
+    "p25": 5,
+    "p75": 8,
+    "p90": 10
+  },
+  "answer_length_tokens": {
+    "count": 32886,
+    "min": 1,
+    "max": 6,
+    "mean": 1.365,
+    "median": 1.0,
+    "p25": 1,
+    "p75": 2,
+    "p90": 2
+  },
+  "answer_stats": {
+    "unique_answers": 1504,
+    "pct_answer_one_word": 67.89,
+    "pct_answer_le_3_words": 99.32
+  },
+  "top_answers": [
+    {
+      "answer": "không",
+      "count": 7645
+    },
+    {
+      "answer": "có",
+      "count": 6171
+    },
+    {
+      "answer": "đúng",
+      "count": 4297
+    },
+    {
+      "answer": "quần vợt",
+      "count": 980
+    },
+    {
+      "answer": "bóng chày",
+      "count": 965
+    },
+    {
+      "answer": "phòng tắm",
+      "count": 765
+    },
+    {
+      "answer": "trượt tuyết",
+      "count": 746
+    },
+    {
+      "answer": "trượt ván",
+      "count": 548
+    },
+    {
+      "answer": "lướt sóng",
+      "count": 442
+    },
+    {
+      "answer": "bóng đá",
+      "count": 306
+    },
+    {
+      "answer": "frisbee",
+      "count": 281
+    },
+    {
+      "answer": "pizza",
+      "count": 275
+    },
+    {
+      "answer": "phòng khách",
+      "count": 273
+    },
+    {
+      "answer": "phòng bếp",
+      "count": 267
+    },
+    {
+      "answer": "nhà bếp",
+      "count": 249
+    },
+    {
+      "answer": "hươu cao cổ",
+      "count": 205
+    },
+    {
+      "answer": "phòng ngủ",
+      "count": 190
+    },
+    {
+      "answer": "chó",
+      "count": 172
+    },
+    {
+      "answer": "mèo",
+      "count": 149
+    },
+    {
+      "answer": "gỗ",
+      "count": 147
+    },
+    {
+      "answer": "ăn",
+      "count": 147
+    },
+    {
+      "answer": "ngựa",
+      "count": 135
+    },
+    {
+      "answer": "nắng",
+      "count": 128
+    },
+    {
+      "answer": "ngựa vằn",
+      "count": 121
+    },
+    {
+      "answer": "mùa đông",
+      "count": 105
+    },
+    {
+      "answer": "voi",
+      "count": 105
+    },
+    {
+      "answer": "bếp",
+      "count": 103
+    },
+    {
+      "answer": "cừu",
+      "count": 97
+    },
+    {
+      "answer": "giáng sinh",
+      "count": 94
+    },
+    {
+      "answer": "u ám",
+      "count": 90
+    }
+  ],
+  "question_type_distribution": {
+    "Text-reading": {
+      "count": 119,
+      "pct": 0.36
+    },
+    "Counting": {
+      "count": 18,
+      "pct": 0.05
+    },
+    "Yes/No": {
+      "count": 17159,
+      "pct": 52.18
+    },
+    "Reasoning": {
+      "count": 2230,
+      "pct": 6.78
+    },
+    "Object-recognition": {
+      "count": 2966,
+      "pct": 9.02
+    },
+    "Other": {
+      "count": 10394,
+      "pct": 31.61
+    }
+  },
+  "question_type_method": "rule_based_vi_cue_words (heuristic, exploratory only)",
+  "load_log": [
+    "OK: local 'train' <- data\\ViVQA-X/data/final/ViVQA-X_train.json (29459 rows)",
+    "OK: local 'val' <- data\\ViVQA-X/data/final/ViVQA-X_val.json (1459 rows)",
+    "OK: local 'test' <- data\\ViVQA-X/data/final/ViVQA-X_test.json (1968 rows)"
+  ],
+  "samples_written_per_type": {
+    "Text-reading": 5,
+    "Counting": 5,
+    "Yes/No": 5,
+    "Reasoning": 5,
+    "Object-recognition": 5,
+    "Other": 5
+  }
+}

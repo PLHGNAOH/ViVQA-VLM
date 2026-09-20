@@ -1,0 +1,62 @@
+{
+  "dataset": "vitextvqa",
+  "predicted_type": "Counting",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "4818.jpg",
+      "image_id": "train:4818",
+      "question": "cửa hàng thứ hai bên trái là cửa hàng mang số bao nhiêu ?",
+      "answer": "56",
+      "answers": [
+        "56"
+      ],
+      "predicted_type": "Counting",
+      "split": "train"
+    },
+    {
+      "image_path": "12641.jpg",
+      "image_id": "train:12641",
+      "question": "chương trình khuyến mãi diễn ra ở phuc store chỉ áp dụng cho đơn hàng từ bao nhiêu tiền trở lên ?",
+      "answer": "699k",
+      "answers": [
+        "699k"
+      ],
+      "predicted_type": "Counting",
+      "split": "train"
+    },
+    {
+      "image_path": "7099.jpg",
+      "image_id": "train:7099",
+      "question": "2 con ngựa bên phải số mấy ?",
+      "answer": "01",
+      "answers": [
+        "01"
+      ],
+      "predicted_type": "Counting",
+      "split": "train"
+    },
+    {
+      "image_path": "8713.jpg",
+      "image_id": "test:8713",
+      "question": "kích thước 2 căn được cho thuê mặt bằng bên trái của căn nhà màu vàng là bao nhiêu ?",
+      "answer": "7 . 5m x 18m",
+      "answers": [
+        "7 . 5m x 18m"
+      ],
+      "predicted_type": "Counting",
+      "split": "test"
+    },
+    {
+      "image_path": "771.jpg",
+      "image_id": "train:771",
+      "question": "câu nào là câu xạo nhất của mấy thằng bạn thân ?",
+      "answer": "đây là lần cuối tao giúp mày",
+      "answers": [
+        "đây là lần cuối tao giúp mày"
+      ],
+      "predicted_type": "Counting",
+      "split": "train"
+    }
+  ]
+}

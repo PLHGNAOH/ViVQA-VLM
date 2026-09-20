@@ -1,0 +1,62 @@
+{
+  "dataset": "vivqa_x",
+  "predicted_type": "Object-recognition",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "COCO_train2014_000000138350.jpg",
+      "image_id": "138350",
+      "question": "Đây là con vật gì?",
+      "answer": "ngựa",
+      "answers": [
+        "ngựa"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000076005.jpg",
+      "image_id": "76005",
+      "question": "Con gấu đang ngồi trên cái gì?",
+      "answer": "bàn",
+      "answers": [
+        "bàn"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000005005.jpg",
+      "image_id": "5005",
+      "question": "Đây là loại động vật gì?",
+      "answer": "bò",
+      "answers": [
+        "bò"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000390341.jpg",
+      "image_id": "390341",
+      "question": "Đây là loại động vật gì?",
+      "answer": "voi",
+      "answers": [
+        "voi"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000259886.jpg",
+      "image_id": "259886",
+      "question": "Con vật này là loại nào?",
+      "answer": "bò",
+      "answers": [
+        "bò"
+      ],
+      "predicted_type": "Object-recognition",
+      "split": "train"
+    }
+  ]
+}

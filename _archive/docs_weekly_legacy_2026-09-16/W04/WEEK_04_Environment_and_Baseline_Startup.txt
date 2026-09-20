@@ -1,0 +1,147 @@
+# WEEK 4 — ENVIRONMENT SETUP & BASELINE STARTUP
+
+## 1. Mục tiêu Tuần 4
+
+**Vấn đề:** đến hết W3 nhóm đã hiểu bài toán và chốt baseline, nhưng chưa có môi trường
+chạy được và chưa từng load model thật. Không có nền tảng kỹ thuật vững, mọi thí nghiệm
+sau này sẽ không tái lập được.
+
+Mục tiêu W4:
+
+> **Dựng môi trường reproducible (Python/PyTorch/HF/PEFT/bitsandbytes) → xây pipeline
+> tiền xử lý dữ liệu + OCR → load baseline đã chọn và chạy zero-shot inference trên một
+> subset nhỏ → thiết lập hệ thống logging cho reproducibility.**
+
+W4 là tuần "khởi động máy": chưa cần kết quả đẹp, cần **mọi thứ chạy được và ghi log được**.
+
+---
+
+## 2. Vị trí trong lộ trình
+
+* Mở đầu Task Package 2 (W4–W6): tiền xử lý dữ liệu (kèm OCR) + reproduce baseline.
+* Feed vào: Report 4 (Methodology).
+* Dependency: baseline & split đã chốt ở W3.
+
+---
+
+## 3. Nhiệm vụ 1 — Dựng môi trường (SV1 + SV3 chủ trì)
+
+### 3.1. Stack bắt buộc
+
+Python + PyTorch + HuggingFace Transformers + PEFT + bitsandbytes (cho QLoRA 4/8-bit).
+
+```bash
+# ví dụ, ghim version để tái lập
+pip install torch --index-url https://download.pytorch.org/whl/cu121
+pip install transformers accelerate peft bitsandbytes datasets
+pip install pillow pandas numpy
+# OCR (chọn theo phân công SV2)
+pip install paddleocr        # hoặc
+pip install vietocr
+```
+
+### 3.2. Ghi lại cấu hình môi trường (BẮT BUỘC)
+
+Tạo file `env_report.txt` ghi: Hardware (GPU/CPU, VRAM/RAM), OS, CUDA, Python, PyTorch,
+Transformers, PEFT, bitsandbytes version. Đây là tiền đề reproducibility.
+
+> Ràng buộc: môi trường phải chạy được trên **Colab Pro/Premium hoặc GPU server trường**.
+> Nếu VRAM hạn chế → mặc định dùng QLoRA 4-bit ngay từ khâu load model.
+
+---
+
+## 4. Nhiệm vụ 2 — Pipeline tiền xử lý dữ liệu (SV2 chủ trì)
+
+Xây `src/data/` với các bước chuẩn hoá, áp dụng cho cả ViVQA & ViTextVQA:
+
+* Image handling: resize/normalize theo yêu cầu của baseline.
+* Question/answer normalization: lowercase có kiểm soát dấu, strip khoảng trắng, chuẩn hoá
+  Unicode tiếng Việt (NFC), xử lý câu trả lời rỗng/nhiễu.
+* **Fixed split** train/val/test: cố định và lưu file split (không random lại mỗi lần chạy).
+
+```python
+# split phải cố định — lưu index ra file, không tạo lại
+SEED = 42
+# ... tạo split một lần, dump ra data/splits/{train,val,test}.json
+```
+
+---
+
+## 5. Nhiệm vụ 3 — OCR extraction (SV2 chủ trì)
+
+Cho câu hỏi text-in-image (ViTextVQA), dựng bước trích OCR bằng **PaddleOCR** hoặc
+**VietOCR**:
+
+* Chạy OCR trên một mẫu ảnh scene-text, quan sát chất lượng với tiếng Việt có dấu.
+* Lưu OCR output kèm ảnh để dùng cho OCR-enhanced prompting sau này.
+* Ghi nhận sơ bộ lỗi OCR đặc thù tiếng Việt (mất dấu, nhầm ký tự) → tư liệu cho error
+  analysis.
+
+> Đây mới là bước dựng công cụ; chưa cần tích hợp OCR vào prompt (việc đó ở giai đoạn cải tiến).
+
+---
+
+## 6. Nhiệm vụ 4 — Load baseline + zero-shot inference (SV1 chủ trì)
+
+Load đúng baseline đã chốt và chạy thử **10–30 mẫu** (chưa phải full test set):
+
+```python
+# ví dụ khung, thay bằng model đã chọn (BLIP-2 / Florence-2 / Qwen2.5-VL)
+from transformers import AutoProcessor, AutoModelForVision2Seq
+import torch
+
+model_id = "..."  # baseline đã chốt ở W3
+processor = AutoProcessor.from_pretrained(model_id)
+model = AutoModelForVision2Seq.from_pretrained(
+    model_id,
+    load_in_4bit=True,          # QLoRA-friendly nếu thiếu VRAM
+    device_map="auto",
+    torch_dtype=torch.float16,
+)
+
+# zero-shot 1 mẫu để xác nhận pipeline thông
+inputs = processor(images=image, text=question, return_tensors="pt").to(model.device)
+out = model.generate(**inputs, max_new_tokens=32)
+print(processor.decode(out[0], skip_special_tokens=True))
+```
+
+Mục tiêu: xác nhận **pipeline ảnh → question → answer chạy thông**, không phải đo accuracy.
+
+---
+
+## 7. Nhiệm vụ 5 — Hạ tầng logging cho reproducibility (SV4 chủ trì)
+
+Chuẩn hoá cách log mọi run ngay từ đầu, tránh vá về sau. Mỗi run ghi:
+
+* dataset & split, random seed
+* hardware (GPU, VRAM)
+* model id + version
+* hyperparameters
+* thời gian inference (và train khi có)
+* prompt template dùng
+
+Lưu vào `experiments/Wxx_*/run_log.txt` (hoặc JSON). Định dạng phải nhất quán suốt 15 tuần.
+
+---
+
+## 8. Deliverables cuối Tuần 4
+
+1. `env_report.txt` — cấu hình môi trường đầy đủ.
+2. `src/data/` — pipeline tiền xử lý + file split cố định.
+3. OCR pipeline chạy được trên mẫu + ghi nhận lỗi OCR sơ bộ.
+4. Notebook/script zero-shot baseline chạy thông trên subset nhỏ.
+5. `run_log` template + 1 log mẫu.
+6. `W04_Team_Report.txt`.
+
+---
+
+## 9. Tiêu chí hoàn thành Tuần 4
+
+* [ ] Môi trường reproducible, version được ghim và ghi lại.
+* [ ] Split train/val/test cố định, lưu ra file.
+* [ ] OCR chạy được trên ảnh scene-text tiếng Việt.
+* [ ] Baseline load và inference thông trên subset.
+* [ ] Hệ thống logging sẵn sàng, đã có log mẫu.
+
+> **Nhắc ràng buộc:** không full fine-tuning. Nếu load model gặp giới hạn VRAM → dùng
+> quantization 4/8-bit ngay. Việc reproduce đầy đủ (đo metric trên full test) là của W5.

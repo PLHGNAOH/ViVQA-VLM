@@ -1,0 +1,62 @@
+{
+  "dataset": "vivqa_x",
+  "predicted_type": "Yes/No",
+  "disclaimer": "[DISCLAIMER] Question-type labels are produced by a RULE-BASED Vietnamese cue-word heuristic. They are EXPLORATORY ONLY (EDA / error-analysis bootstrapping) and are NOT a validated annotation. Human review required before any thesis-bound claim.",
+  "samples": [
+    {
+      "image_path": "COCO_train2014_000000168955.jpg",
+      "image_id": "168955",
+      "question": "Trời có u ám không?",
+      "answer": "đúng",
+      "answers": [
+        "đúng"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000212901.jpg",
+      "image_id": "212901",
+      "question": "Đồng hồ có hoạt động không?",
+      "answer": "có",
+      "answers": [
+        "có"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000309526.jpg",
+      "image_id": "309526",
+      "question": "Người đàn ông có đeo bất kỳ thiết bị an toàn nào không?",
+      "answer": "có",
+      "answers": [
+        "có"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_train2014_000000535138.jpg",
+      "image_id": "535138",
+      "question": "Đây có phải là công viên trượt băng không?",
+      "answer": "đúng",
+      "answers": [
+        "đúng"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "train"
+    },
+    {
+      "image_path": "COCO_val2014_000000528956.jpg",
+      "image_id": "528956",
+      "question": "Đây có phải là một phòng khách sạn không?",
+      "answer": "có",
+      "answers": [
+        "có"
+      ],
+      "predicted_type": "Yes/No",
+      "split": "test"
+    }
+  ]
+}

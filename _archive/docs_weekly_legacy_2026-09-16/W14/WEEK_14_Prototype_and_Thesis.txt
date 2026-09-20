@@ -1,0 +1,127 @@
+# WEEK 14 — PROTOTYPE WEB & VIẾT THESIS
+
+## 1. Mục tiêu Tuần 14
+
+**Vấn đề:** nghiên cứu đã hoàn tất và qua Hội đồng Khoa (W13), nhưng đề tài yêu cầu một
+sản phẩm demo chạy được và một thesis hoàn chỉnh. Kết quả nghiên cứu tốt vẫn "trượt
+delivery" nếu prototype không chạy hoặc thesis chưa hoàn thiện.
+
+Mục tiêu W14:
+
+> **Xây prototype web demo (upload ảnh tiếng Việt → hỏi tiếng Việt → answer + confidence +
+> OCR/evidence), hoàn thiện thesis Capstone, và xử lý các yêu cầu chỉnh sửa từ Hội đồng Khoa.**
+
+W14 là tuần "đóng gói sản phẩm". Sau tuần này chỉ còn hoàn thiện cuối và bảo vệ.
+
+---
+
+## 2. Vị trí trong lộ trình
+
+* Mở đầu Task Package 5 (W14–W15): prototype, thesis, final presentation.
+* Deliverable: prototype chạy được + thesis (bản gần cuối).
+* Dependency: adapter/config final (W9) + kết quả & phân tích (W10–W12) + phản hồi W13.
+
+---
+
+## 3. Nhiệm vụ 0 — Xử lý yêu cầu chỉnh sửa của Hội đồng Khoa (đầu tuần, ưu tiên)
+
+Rà danh sách yêu cầu từ W13. Nếu là bổ sung nhỏ (thêm 1 bảng, làm rõ 1 phân tích) → xử lý
+ngay đầu tuần. Nếu là yêu cầu lớn → cân nhắc scope, ưu tiên theo mức ảnh hưởng tới bảo vệ.
+
+---
+
+## 4. Nhiệm vụ 1 — Prototype Web (SV4 chủ trì, SV1/SV3 hỗ trợ)
+
+Yêu cầu chức năng bắt buộc:
+
+* Upload một ảnh tiếng Việt.
+* Nhập câu hỏi bằng tiếng Việt.
+* Sinh câu trả lời ngôn ngữ tự nhiên (dùng bản cải tiến final).
+* Trực quan hoá **confidence** của model.
+* Khi liên quan: hiển thị **OCR text trích được** và/hoặc **evidence được retrieve** (RAG).
+
+Kiến trúc gợi ý:
+
+```text
+[Web UI]  --upload ảnh + câu hỏi-->  [Backend]
+                                        |-- OCR (PaddleOCR/VietOCR)  (nếu scene-text)
+                                        |-- VLM + adapter (PEFT final)
+                                        |-- (RAG retrieve nếu áp dụng)
+                                        v
+                              answer + confidence + OCR/evidence
+```
+
+* Backend: Python + PyTorch + HF Transformers + PEFT, load base model + adapter final.
+* Runtime: Colab Pro/Premium hoặc GPU server trường (đúng ràng buộc môi trường).
+* Ưu tiên chạy được và ổn định hơn giao diện cầu kỳ.
+
+```python
+# khung inference cho prototype
+model = load_base_then_adapter("adapters/final")   # PEFT, không full model mới
+def answer(image, question):
+    ocr = run_ocr(image) if is_scene_text(question) else None
+    prompt = build_prompt(question, ocr)            # OCR/evidence nếu có
+    out = model.generate(...)
+    return decode(out), get_confidence(out), ocr
+```
+
+---
+
+## 5. Nhiệm vụ 2 — Viết Thesis Capstone (TEAM)
+
+Ghép các report thành một thesis hoàn chỉnh (tiếng Anh). Cấu trúc điển hình:
+
+1. Introduction (Report 1)
+2. Background / Related Work (Report 3 — Existing Systems)
+3. Methodology (Report 4)
+4. Experiments & Results (Report 6)
+5. Discussion & Analysis (Report 7 — ablation/error/hallucination)
+6. Conclusion & Future Work
+7. References + Appendix (reproducibility details)
+
+Rà: mọi số liệu khớp `master_results`; mọi tuyên bố có evidence; trả lời đủ RQ/hypothesis;
+nêu rõ giới hạn; nhấn mạnh contribution và efficiency.
+
+---
+
+## 6. Nhiệm vụ 3 — Bắt đầu gom Reproducibility Package (SV3 + SV4)
+
+Chuẩn bị dần (hoàn tất ở W15):
+
+* Source code (`src/`), configuration files (`configs/`).
+* LoRA/QLoRA adapter weights (`adapters/final/`).
+* Inference script chạy độc lập.
+* README (setup & run).
+* Experiment log (metric/seed/prompt/settings từng run).
+
+---
+
+## 7. Nhiệm vụ 4 — Kiểm thử prototype (TEAM)
+
+* Test end-to-end với ảnh general (ViVQA) và scene-text (ViTextVQA).
+* Kiểm tra hiển thị confidence + OCR/evidence đúng.
+* Ghi lại vài demo case để dùng trong bảo vệ (kể cả case model sai — trung thực về giới hạn).
+
+---
+
+## 8. Deliverables cuối Tuần 14
+
+1. Prototype web chạy được (mã nguồn + hướng dẫn chạy).
+2. Thesis bản gần cuối (đầy đủ chương).
+3. Bản xử lý yêu cầu chỉnh sửa của Hội đồng Khoa.
+4. Reproducibility package (bản nháp, đang gom).
+5. Bộ demo case cho bảo vệ.
+6. `W14_Team_Report.txt`.
+
+---
+
+## 9. Tiêu chí hoàn thành Tuần 14
+
+* [ ] Prototype đủ 5 chức năng bắt buộc, chạy ổn định.
+* [ ] Thesis đủ chương, số liệu nhất quán, trả lời RQ.
+* [ ] Đã xử lý phản hồi Hội đồng Khoa.
+* [ ] Reproducibility package đang gom, gần đủ.
+* [ ] Có demo case sẵn cho final defense.
+
+> **Nhắc:** prototype dùng đúng bản cải tiến final (PEFT adapter), không huấn luyện mới,
+> không full fine-tuning. Mục tiêu W14 là delivery, không phải nghiên cứu mới.

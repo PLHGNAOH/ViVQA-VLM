@@ -1,0 +1,24 @@
+﻿| 2026-09-17 09:33:57 | COUNT_BEFORE | docs\notes | n=5 | OK |
+| 2026-09-17 09:33:57 | COUNT_BEFORE | docs\templates | n=4 | OK |
+| 2026-09-17 09:33:57 | COUNT_BEFORE | src | n=24 | OK |
+| 2026-09-17 09:33:57 | MKDIR | (none) | _archive\literature_consolidation_2026-09-16 | OK |
+| 2026-09-17 09:33:57 | COPY | docs\literature | _archive\literature_consolidation_2026-09-16\docs_literature | OK full tree |
+| 2026-09-17 09:33:57 | COPY | docs\W02\Literature_Matrix.md | _archive\literature_consolidation_2026-09-16\W02_Literature_Matrix.md | OK |
+| 2026-09-17 09:33:57 | COMPARE | docs\W02\Literature_Matrix.md | 12156 B / 58 lines / hasGap=True | CANDIDATE |
+| 2026-09-17 09:33:57 | COMPARE | docs\literature\Literature_Matrix.md | 3713 B / 28 lines / hasGap=True | smaller |
+| 2026-09-17 09:33:57 | COMPARE | docs\02_references\Literature_Matrix.md | (missing) | n/a |
+| 2026-09-17 09:33:57 | CHOOSE | docs\W02\Literature_Matrix.md | canonical (Gap matrix + largest) | OK |
+| 2026-09-17 09:33:57 | COPY | docs\W02\Literature_Matrix.md | docs\02_references\Literature_Matrix.md | OK living canonical |
+| 2026-09-17 09:33:57 | MOVE | docs\literature\Literature_Matrix.md | _archive\literature_consolidation_2026-09-16\literature_LM.md | OK |
+| 2026-09-17 09:34:29 | WRITE | docs\W02\Literature_Matrix.md | pointer -> ../02_references/Literature_Matrix.md | OK (full copy in backup W02_Literature_Matrix.md) |
+| 2026-09-17 09:34:29 | PATCH | docs\W02\README.md | Literature_Matrix link -> ../02_references/Literature_Matrix.md | OK |
+| 2026-09-17 09:34:29 | MOVE | docs\literature\SV1_Paper_Review.md | docs\02_references\Reading_Notes\SV1_Paper_Review.md | OK (Reading_Notes lacked this name) |
+| 2026-09-17 09:34:29 | MOVE | docs\literature\SV2_Paper_Review.md | docs\02_references\Reading_Notes\SV2_Paper_Review.md | OK (Reading_Notes lacked this name) |
+| 2026-09-17 09:34:29 | MOVE | docs\literature\SV3_Paper_Review.md | docs\02_references\Reading_Notes\SV3_Paper_Review.md | OK (Reading_Notes lacked this name) |
+| 2026-09-17 09:34:29 | MOVE | docs\literature\SV4_Paper_Review.md | docs\02_references\Reading_Notes\SV4_Paper_Review.md | OK (Reading_Notes lacked this name) |
+| 2026-09-17 09:34:29 | MOVE | D:\FPT_university\termno9\ViVQA-VLM\docs\literature\Literature_Matrix.from_AIP491.md | _archive\literature_consolidation_2026-09-16\Literature_Matrix.from_AIP491.md | OK |
+| 2026-09-17 09:34:29 | MOVE | D:\FPT_university\termno9\ViVQA-VLM\docs\literature\SV1_Paper_Review.from_AIP491.md | _archive\literature_consolidation_2026-09-16\SV1_Paper_Review.from_AIP491.md | OK |
+| 2026-09-17 09:34:29 | MOVE | D:\FPT_university\termno9\ViVQA-VLM\docs\literature\SV2_Paper_Review.from_AIP491.md | _archive\literature_consolidation_2026-09-16\SV2_Paper_Review.from_AIP491.md | OK |
+| 2026-09-17 09:34:29 | MOVE | D:\FPT_university\termno9\ViVQA-VLM\docs\literature\SV3_Paper_Review.from_AIP491.md | _archive\literature_consolidation_2026-09-16\SV3_Paper_Review.from_AIP491.md | OK |
+| 2026-09-17 09:34:29 | MOVE | D:\FPT_university\termno9\ViVQA-VLM\docs\literature\SV4_Paper_Review.from_AIP491.md | _archive\literature_consolidation_2026-09-16\SV4_Paper_Review.from_AIP491.md | OK |
+| 2026-09-17 09:34:29 | RMDIR_EMPTY | docs\literature | (removed empty) | OK |
