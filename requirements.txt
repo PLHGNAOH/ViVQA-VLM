@@ -1,1 +1,6 @@
 # pin dependencies here
+
+# prepare_vivqa.py (tải + chuẩn bị dataset ViVQA)
+pandas
+requests
+tqdm
