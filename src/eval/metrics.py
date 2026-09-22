@@ -23,29 +23,97 @@ from typing import List, Dict, Callable
 
 # =============================================================================
 # 1) CHUẨN HÓA VĂN BẢN TIẾNG VIỆT
+# -----------------------------------------------------------------------------
+# Lớp này áp ĐỐI XỨNG cho pred lẫn gold. Chỉ gộp CÁCH VIẾT CÙNG NGHĨA
+# (hoa/thường, tiền tố "màu ", số đơn lẻ chữ <-> chữ số).
+# KHÔNG alias màu. KHÔNG thay số nằm lẫn trong câu nhiều từ.
+# Phần gần đúng (vd "xanh lá cây" vs "xanh lá") để ANLS lo — EM giữ chặt.
 # =============================================================================
+
+# Tiền tố từ chỉ loại — CHỈ bỏ khi nằm ở ĐẦU chuỗi (sau khi lower + gộp space).
+_TYPE_PREFIXES = ("màu ",)
+
+# Số 0..20 và chục tròn 30,40,...,100: cả chữ lẫn chữ số map về CÙNG dạng (chữ số).
+# CHỈ dùng khi TOÀN BỘ chuỗi (sau prefix+strip) khớp một khóa — kể cả cụm 2 từ
+# như "mười một". Không thay token số nằm trong câu dài.
+_NUMBER_WORD_TO_DIGIT: Dict[str, str] = {
+    "không": "0",
+    "một": "1",
+    "hai": "2",
+    "ba": "3",
+    "bốn": "4",
+    "tư": "4",
+    "năm": "5",
+    "lăm": "5",
+    "sáu": "6",
+    "bảy": "7",
+    "tám": "8",
+    "chín": "9",
+    "mười": "10",
+    "mười một": "11",
+    "mười hai": "12",
+    "mười ba": "13",
+    "mười bốn": "14",
+    "mười lăm": "15",
+    "mười sáu": "16",
+    "mười bảy": "17",
+    "mười tám": "18",
+    "mười chín": "19",
+    "hai mươi": "20",
+    "ba mươi": "30",
+    "bốn mươi": "40",
+    "năm mươi": "50",
+    "sáu mươi": "60",
+    "bảy mươi": "70",
+    "tám mươi": "80",
+    "chín mươi": "90",
+    "một trăm": "100",
+    "trăm": "100",
+}
+# Chữ số cũng là khóa hợp lệ → giữ nguyên (hai chiều cùng về digit).
+for _d in list(_NUMBER_WORD_TO_DIGIT.values()):
+    _NUMBER_WORD_TO_DIGIT.setdefault(_d, _d)
+
+
+def _strip_type_prefix(text: str) -> str:
+    """Bỏ tiền tố từ chỉ loại ở ĐẦU chuỗi (vd 'màu đỏ' → 'đỏ'); không đụng nếu nằm giữa."""
+    for prefix in _TYPE_PREFIXES:
+        if text.startswith(prefix):
+            return text[len(prefix):].strip()
+    return text
+
+
+def _canonical_number(token: str) -> str:
+    """Map 1 token/cụm số (toàn chuỗi) về chữ số; không phải số đứng một mình thì giữ nguyên."""
+    return _NUMBER_WORD_TO_DIGIT.get(token, token)
+
+
 def normalize_vi(text: str) -> str:
     """
-    Chuẩn hóa 1 chuỗi trước khi so khớp.
+    Chuẩn hóa 1 chuỗi trước khi so khớp (áp đối xứng pred và gold).
 
     Các bước:
-        - unicode NFC: gộp ký tự + dấu thành 1 code point thống nhất (tránh trường
-          hợp "ề" lưu 2 kiểu khác nhau -> so sánh bị lệch). RẤT quan trọng cho
-          tiếng Việt vì dữ liệu web hay lẫn NFC/NFD.
-        - về chữ thường.
-        - bỏ dấu câu NHƯNG GIỮ dấu thanh tiếng Việt (\\w trong regex unicode của
-          Python đã bao gồm chữ cái có dấu -> ta chỉ loại ký tự không phải chữ/số/space).
+        - unicode NFC: gộp ký tự + dấu thành 1 code point thống nhất.
+        - về chữ thường (.lower): "Đỏ" → "đỏ" TRƯỚC mọi so khớp.
+        - bỏ dấu câu NHƯNG GIỮ dấu thanh tiếng Việt.
         - gộp khoảng trắng thừa.
+        - bỏ tiền tố "màu " ở ĐẦU chuỗi ("màu đỏ" → "đỏ").
+        - nếu TOÀN BỘ chuỗi còn lại là một số duy nhất (0..20 hoặc chục tròn
+          30..100, chữ hoặc chữ số) thì map về digit. Không đụng số lẫn trong câu
+          (tránh "chụp năm nào" → "chụp 5 nào").
 
-    LƯU Ý: ta KHÔNG bỏ dấu tiếng Việt. "con mèo" != "con meo" — bỏ dấu sẽ làm sai
-    lệch, và chính "diacritics" là một trong các thách thức PDF muốn ta phân tích.
+    Không alias màu: "xanh lá cây" ≠ "xanh lá" ở EM; ANLS lo phần gần đúng.
+
+    LƯU Ý: ta KHÔNG bỏ dấu tiếng Việt. "con mèo" != "con meo".
     """
     if text is None:
         return ""
     text = unicodedata.normalize("NFC", str(text))
-    text = text.lower().strip()
+    text = text.lower().strip()  # "Đỏ" → "đỏ" trước mọi so khớp
     text = re.sub(r"[^\w\s]", " ", text, flags=re.UNICODE)  # bỏ dấu câu
     text = re.sub(r"\s+", " ", text).strip()                # gộp space
+    text = _strip_type_prefix(text)
+    text = _canonical_number(text)  # no-op trừ khi cả chuỗi là một số
     return text
 
 
@@ -193,6 +261,44 @@ def evaluate_predictions(
 
 # --- Smoke test nhanh: chạy `python -m src.eval.metrics` để kiểm tra logic ---
 if __name__ == "__main__":
+    # EM chặt: chỉ MATCH khi cùng nghĩa sau NFC/lower/prefix/số-đơn.
+    must_em_1 = [
+        ("Đỏ", "màu đỏ"),
+        ("2", "hai"),
+        ("mười một", "11"),
+    ]
+    must_em_0 = [
+        ("màu vàng", "phòng"),
+        ("xanh lá cây", "màu xanh lá"),
+        ("con ngựa nhỏ", "con ngựa"),
+        ("chụp năm nào", "chụp 5 nào"),  # không đổi số lẫn trong câu
+    ]
+    must_anls_ge_half = [
+        ("xanh lá cây", "màu xanh lá"),
+        ("con ngựa nhỏ", "con ngựa"),
+    ]
+
+    for pred, gold in must_em_1:
+        em = exact_match(pred, [gold])
+        assert em == 1.0, (
+            f"EXPECT EM=1: {pred!r} vs {gold!r} -> {em} "
+            f"(norm={normalize_vi(pred)!r}/{normalize_vi(gold)!r})"
+        )
+        print(f"EM=1  {pred!r:22s} ~ {gold!r:22s}  norm={normalize_vi(pred)!r}")
+
+    for pred, gold in must_em_0:
+        em = exact_match(pred, [gold])
+        assert em == 0.0, f"EXPECT EM=0: {pred!r} vs {gold!r} -> {em}"
+        print(f"EM=0  {pred!r:22s} / {gold!r:22s}")
+
+    for pred, gold in must_anls_ge_half:
+        em = exact_match(pred, [gold])
+        nl = anls(pred, [gold])
+        assert em == 0.0 and nl >= 0.5, (
+            f"EXPECT EM=0 ANLS>=0.5: {pred!r} vs {gold!r} -> EM={em} ANLS={nl}"
+        )
+        print(f"ANLS  {pred!r:22s} / {gold!r:22s}  EM={em:.0f} ANLS={nl:.3f}")
+
     preds = ["con mèo", "hai người", "biển báo dừng lại"]
     refs = [["con mèo", "mèo"], ["2 người", "hai người"], ["dừng lại"]]
     qtypes = ["what", "counting", "text-reading"]
