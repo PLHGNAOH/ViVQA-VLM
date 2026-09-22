@@ -224,6 +224,7 @@ def download_image(
         got_response = True
         if resp.status_code == 200:
             tmp = dest + ".part"
+            os.makedirs(os.path.dirname(tmp), exist_ok=True)  # chắc chắn có thư mục ảnh
             try:
                 with open(tmp, "wb") as fh:
                     for chunk in resp.iter_content(chunk_size=1 << 16):
@@ -363,6 +364,9 @@ def main() -> int:
     images_dir = os.path.join(out_dir, "images")
     os.makedirs(out_dir, exist_ok=True)
     os.makedirs(csv_dir, exist_ok=True)
+    # Tạo sẵn thư mục ảnh TRƯỚC cả smoke test lẫn vòng tải hàng loạt,
+    # tránh FileNotFoundError khi ghi file .part.
+    os.makedirs(images_dir, exist_ok=True)
 
     print("=" * 78)
     print(f"ViVQA prepare | out_dir={out_dir} | seed={args.seed} | "
@@ -382,8 +386,14 @@ def main() -> int:
     df_train = load_csv(csv_paths["train"])
     df_test = load_csv(csv_paths["test"])
     if args.limit is not None:
-        df_train = df_train.head(args.limit)
-        df_test = df_test.head(args.limit)
+        # Lấy MẪU NGẪU NHIÊN theo seed (thay vì N dòng đầu) để phân bố
+        # question_type trải đủ các loại khi smoke-test.
+        df_train = df_train.sample(
+            n=min(args.limit, len(df_train)), random_state=args.seed
+        ).reset_index(drop=True)
+        df_test = df_test.sample(
+            n=min(args.limit, len(df_test)), random_state=args.seed
+        ).reset_index(drop=True)
     print(f"  train.csv: {len(df_train)} dòng, cột={list(df_train.columns)}")
     print(f"  test.csv : {len(df_test)} dòng, cột={list(df_test.columns)}")
 
