@@ -22,7 +22,6 @@ ViVQA-VLM/
 │   ├── 02_references/        # PDF paper + Reading_Notes + báo cáo tham chiếu
 │   ├── 03_report/            # thesis LaTeX (đồng bộ Overleaf) + R1..R7
 │   ├── 04_slides/            # slide theo milestone (review1/review2/faculty_review/final_defense)
-│   ├── literature/           # paper reviews (SV1-4) + Literature Matrix
 │   ├── notes/ · templates/   # ghi chú & template nhóm
 │   ├── W01/ · W02/           # deliverable theo tuần (W02: literature + dataset)
 │   ├── master_instruction.md

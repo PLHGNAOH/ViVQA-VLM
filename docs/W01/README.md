@@ -46,10 +46,10 @@ Nhóm giải thích được bài toán, ràng buộc PEFT-only, 4 milestone, v�
 
 ## 6. Ràng buộc (nhắc lại)
 
-Tuần này trọng tâm không phải train. Khi có huấn luyện ở tuần khác: **CHỈ PEFT (LoRA/QLoRA 4/8-bit), KHÔNG full fine-tuning.** Cải tiến luôn so baseline cùng split/seed/hardware protocol. Chi tiết: `docs/Master_Instruction.md` Mục 4 và Mục 7.
+Tuần này trọng tâm không phải train. Khi có huấn luyện ở tuần khác: **CHỈ PEFT (LoRA/QLoRA 4/8-bit), KHÔNG full fine-tuning.** Cải tiến luôn so baseline cùng split/seed/hardware protocol. Chi tiết: `docs/master_instruction.md` Mục 4 và Mục 7.
 
 ## Liên kết
 
-- Master: [`docs/Master_Instruction.md`](../../Master_Instruction.md)
-- Template báo cáo: [`docs/templates/Weekly_Report_Template.md`](../../templates/Weekly_Report_Template.md)
-- Experiment log: [`docs/templates/Experiment_Log_Template.md`](../../templates/Experiment_Log_Template.md)
+- Master: [`docs/master_instruction.md`](../master_instruction.md)
+- Template báo cáo: [`docs/templates/Weekly_Report_Template.md`](../templates/Weekly_Report_Template.md)
+- Experiment log: [`docs/templates/Experiment_Log_Template.md`](../templates/Experiment_Log_Template.md)

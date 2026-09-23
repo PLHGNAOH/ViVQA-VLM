@@ -11,5 +11,10 @@
 *.jpg
 *.jpeg
 *.png
+!docs/**
 .ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+_archive/
+hand_off_to_claude.md
 

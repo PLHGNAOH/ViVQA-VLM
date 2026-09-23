@@ -33,7 +33,7 @@ Nhờ tách vậy, một dòng trong bảng ablation = đổi `mode` trong confi
 **Bước 2 (zero-shot baseline) — xong:**
 - [x] `data/vivqa_dataset.py` — loader ViVQA/ViTextVQA → schema chuẩn (test offline OK)
 - [x] `eval/run_eval.py` — runner eval + experiment-log (test offline OK)
-- [x] `notebooks/01_zeroshot_baseline_vivqa.ipynb` — notebook Colab chạy thật
+- [x] `notebooks/01_zeroshot_baseline.ipynb` — notebook Colab chạy thật
 
 **Bước 3 (OCR cache) — xong:**
 - [x] `data/ocr.py` — engine PaddleOCR/VietOCR + cache có resume (test offline OK)
