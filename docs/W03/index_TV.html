@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ViVQA-VLM — Review 1</title>
+<meta name="description" content="Efficient Vietnamese Visual Question Answering using Vision-Language Models — Review 1 Report">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+<script src="vendor/chart.umd.min.js"></script>
+<style>
+/* ======== TOKENS ======== */
+:root {
+  --ink: #13294B;
+  --teal: #1C7293;
+  --amber: #E8A33D;
+  --paper: #ffffff;
+  --wash: #F3F5F8;
+  --tealt: #E7F0F3;
+  --ambert: #FBF0DA;
+  --line: #E2E7EE;
+  --text: #243044;
+  --muted: #6B7280;
+  --tl-text: #ffffff;
+  --serif: 'Newsreader', 'Lora', 'Georgia', serif;
+  --sans: 'Inter', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --mono: 'IBM Plex Mono', 'Menlo', 'Consolas', monospace;
+  --nav-h: 56px;
+  --progress-h: 3px;
+  --radius: 12px;
+  --shadow: 0 2px 12px rgba(19,41,75,.07);
+  --shadow-lg: 0 8px 32px rgba(19,41,75,.10);
+  --container: 1200px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #A8C4E0;
+    --teal: #4DB8D5;
+    --amber: #F0B95A;
+    --paper: #0B1120;
+    --wash: #111827;
+    --tealt: #12242E;
+    --ambert: #2A2111;
+    --line: #1F2937;
+    --text: #E5E7EB;
+    --muted: #9CA3AF;
+    --tl-text: #0B1120;
+    --shadow: 0 2px 12px rgba(0,0,0,.3);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,.4);
+  }
+}
+
+/* ======== RESET ======== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + var(--progress-h) + 16px); }
+body {
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--paper);
+  line-height: 1.7;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+img { max-width: 100%; display: block; }
+a { color: var(--teal); text-decoration: none; }
+a:hover { text-decoration: underline; }
+a:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 4px; }
+
+/* ======== PROGRESS BAR ======== */
+.progress-bar {
+  position: fixed; top: 0; left: 0; height: var(--progress-h);
+  background: linear-gradient(90deg, var(--teal), var(--amber));
+  width: 0%; z-index: 1001;
+  transition: width 80ms linear;
+}
+
+/* ======== NAV ======== */
+nav {
+  position: sticky; top: var(--progress-h); z-index: 1000;
+  height: var(--nav-h);
+  background: color-mix(in srgb, var(--paper) 85%, transparent);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center;
+}
+.nav-inner {
+  max-width: var(--container); width: 100%; margin: 0 auto;
+  padding: 0 24px;
+  display: flex; align-items: center; gap: 8px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-logo {
+  font-family: var(--serif); font-weight: 700; font-size: 1.1rem;
+  color: var(--ink); white-space: nowrap; margin-right: 16px;
+  flex-shrink: 0;
+}
+.nav-link {
+  font-size: .8rem; font-weight: 500; color: var(--muted);
+  white-space: nowrap; padding: 6px 10px; border-radius: 6px;
+  transition: color .2s, background .2s; flex-shrink: 0;
+}
+.nav-link:hover, .nav-link:focus-visible { color: var(--ink); background: var(--wash); text-decoration: none; }
+.nav-link.active { color: var(--teal); background: var(--tealt); }
+
+/* ======== HERO ======== */
+.hero {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: var(--ink); color: #fff; text-align: center;
+  position: relative; overflow: hidden; padding: 80px 24px;
+}
+@media (prefers-color-scheme: dark) {
+  .hero { background: #060d1a; }
+}
+.hero::before {
+  content: ''; position: absolute; width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(28,114,147,.25) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.hero-content { position: relative; z-index: 1; max-width: 800px; }
+.eyebrow {
+  font-family: var(--mono); font-size: .85rem; font-weight: 500;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 24px; opacity: .9;
+}
+.hero-title {
+  font-family: var(--serif); font-size: clamp(3rem, 8vw, 5.5rem);
+  font-weight: 700; line-height: 1.05; margin-bottom: 20px;
+  background: linear-gradient(135deg, #fff 60%, var(--teal));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-thesis {
+  font-size: clamp(1.05rem, 2.5vw, 1.35rem); font-weight: 400;
+  line-height: 1.6; color: rgba(255,255,255,.8); max-width: 640px;
+  margin: 0 auto 36px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.chip {
+  font-size: .78rem; font-family: var(--mono); padding: 6px 14px;
+  border: 1px solid rgba(255,255,255,.2); border-radius: 999px;
+  color: rgba(255,255,255,.75); background: rgba(255,255,255,.06);
+  white-space: nowrap;
+}
+
+/* ======== SECTIONS ======== */
+section {
+  padding: 96px 24px;
+}
+section:nth-of-type(even) { background: var(--wash); }
+section:nth-of-type(odd)  { background: var(--paper); }
+.container { max-width: var(--container); margin: 0 auto; }
+.section-eyebrow {
+  font-family: var(--mono); font-size: .8rem; font-weight: 500;
+  color: var(--teal); letter-spacing: 1.5px; text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: var(--serif); font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700; color: var(--ink); line-height: 1.2;
+  margin-bottom: 16px;
+}
+.section-lead {
+  font-size: 1.1rem; color: var(--muted); max-width: 680px;
+  margin-bottom: 48px; line-height: 1.7;
+}
+
+/* ======== CARDS ======== */
+.card-grid { display: grid; gap: 20px; }
+.card-grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.card-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.card-grid-4 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+.card {
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 28px;
+  box-shadow: var(--shadow); transition: transform .25s, box-shadow .25s;
+}
+section:nth-of-type(odd) .card { background: var(--wash); }
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.card--accent { border-left: 4px solid var(--ink); }
+.card--teal { border-left: 4px solid var(--teal); }
+.card--amber { border-left: 4px solid var(--amber); }
+.card--highlight {
+  border-left: 4px solid var(--amber);
+  background: var(--ambert) !important;
+  box-shadow: 0 0 0 1px var(--amber), var(--shadow);
+}
+.card-tag {
+  font-family: var(--mono); font-size: .72rem; font-weight: 500;
+  color: var(--teal); margin-bottom: 10px; letter-spacing: .5px;
+}
+.card-title {
+  font-family: var(--serif); font-size: 1.15rem; font-weight: 600;
+  color: var(--ink); margin-bottom: 8px; line-height: 1.3;
+}
+.card p { font-size: .95rem; color: var(--muted); line-height: 1.65; }
+
+/* ======== STAT BLOCKS ======== */
+.stat-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 48px; }
+.stat {
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 28px 24px; text-align: center;
+  box-shadow: var(--shadow);
+}
+section:nth-of-type(odd) .stat { background: var(--wash); }
+.stat-number {
+  font-family: var(--serif); font-size: 2.4rem; font-weight: 700;
+  color: var(--teal); line-height: 1.1; margin-bottom: 6px;
+}
+.stat-label { font-size: .9rem; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.stat-source { font-family: var(--mono); font-size: .7rem; color: var(--muted); }
+
+/* ======== CHART CARDS ======== */
+.chart-grid { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+.chart-card {
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow);
+}
+section:nth-of-type(odd) .chart-card { background: var(--wash); }
+.chart-card h3 {
+  font-family: var(--serif); font-size: 1.05rem; font-weight: 600;
+  color: var(--ink); margin-bottom: 16px;
+}
+.chart-card canvas { width: 100% !important; max-height: 320px; }
+
+/* ======== PULL QUOTE ======== */
+.pull-quote {
+  border-left: 4px solid var(--amber);
+  padding: 24px 32px; margin: 40px 0;
+  background: var(--ambert); border-radius: 0 var(--radius) var(--radius) 0;
+}
+.pull-quote p {
+  font-family: var(--serif); font-style: italic;
+  font-size: 1.15rem; color: var(--ink); line-height: 1.7;
+}
+.pull-quote cite {
+  display: block; margin-top: 12px;
+  font-family: var(--mono); font-size: .78rem; color: var(--muted);
+  font-style: normal;
+}
+
+/* ======== FLOW DIAGRAM ======== */
+.flow {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; flex-wrap: wrap; margin: 32px 0 48px;
+}
+.flow-box {
+  background: var(--tealt); border: 1px solid var(--teal);
+  border-radius: var(--radius); padding: 16px 24px;
+  text-align: center; font-size: .9rem; font-weight: 600;
+  color: var(--ink); min-width: 140px;
+}
+.flow-box--accent { background: var(--ambert); border-color: var(--amber); }
+.flow-arrow { font-size: 1.5rem; color: var(--muted); flex-shrink: 0; }
+
+/* ======== BADGE ======== */
+.badge {
+  display: inline-block; font-family: var(--mono); font-size: .7rem;
+  font-weight: 500; padding: 4px 10px; border-radius: 999px;
+  letter-spacing: .5px;
+}
+.badge--teal { background: var(--tealt); color: var(--teal); }
+.badge--amber { background: var(--ambert); color: #b47e1e; }
+.badge--ink { background: var(--ink); color: #fff; }
+
+/* ======== TIMELINE ======== */
+.timeline-wrap { overflow-x: auto; padding: 24px 0 16px 0; margin: 16px 0 24px; scrollbar-width: thin; }
+.timeline {
+  display: flex; gap: 0; min-width: max-content;
+}
+.timeline-week {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 72px; position: relative;
+}
+.timeline-label {
+  font-family: var(--mono); font-size: .7rem; font-weight: 500;
+  color: var(--muted); margin-bottom: 8px;
+}
+.timeline-bar {
+  width: 100%; height: 32px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 700; color: var(--tl-text);
+  letter-spacing: .5px;
+}
+.tl-phase1 { background: var(--teal); }
+.tl-phase2 { background: var(--ink); }
+.tl-phase3 { background: var(--amber); }
+.tl-phase4 { background: var(--muted); }
+.tl-milestone {
+  margin-top: 8px; font-family: var(--mono); font-size: .65rem;
+  font-weight: 600; color: var(--amber); white-space: nowrap;
+}
+.tl-now {
+  position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+  font-family: var(--mono); font-size: .6rem; font-weight: 700;
+  color: #fff; background: #e53e3e; padding: 2px 8px; border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* ======== RISK TABLE ======== */
+.table-wrap { overflow-x: auto; margin: 32px 0; border-radius: var(--radius); border: 1px solid var(--line); }
+table {
+  width: 100%; border-collapse: collapse; font-size: .9rem; min-width: 640px;
+}
+thead { background: var(--ink); color: #fff; }
+th {
+  font-family: var(--mono); font-size: .78rem; font-weight: 600;
+  text-align: left; padding: 14px 16px; letter-spacing: .5px;
+}
+td {
+  padding: 14px 16px; border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+tbody tr:hover { background: var(--tealt); }
+.risk-high { color: #dc2626; font-weight: 600; }
+.risk-med { color: var(--amber); font-weight: 600; }
+
+/* ======== BANNER ======== */
+.banner {
+  background: linear-gradient(135deg, var(--ink) 0%, var(--teal) 100%);
+  color: #fff; border-radius: var(--radius); padding: 40px 48px;
+  text-align: center; margin-bottom: 48px;
+}
+@media (prefers-color-scheme: dark) {
+  .banner { background: linear-gradient(135deg, #1a2744, #13495e); }
+}
+.banner h3 {
+  font-family: var(--serif); font-size: 1.6rem; font-weight: 700;
+  margin-bottom: 8px;
+}
+.banner p {
+  font-family: var(--mono); font-size: .95rem; opacity: .85;
+}
+
+/* ======== CLOSING SECTION ======== */
+.closing {
+  background: var(--ink) !important; color: #fff; text-align: center;
+}
+@media (prefers-color-scheme: dark) {
+  .closing { background: #060d1a !important; }
+}
+.closing .section-title { color: #fff; }
+.closing .section-lead { color: rgba(255,255,255,.7); }
+.closing .card {
+  background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12);
+}
+.closing .card-title { color: #fff; }
+.closing .card p { color: rgba(255,255,255,.7); }
+.closing .sign-off {
+  margin-top: 64px; font-family: var(--serif); font-size: 1.2rem;
+  color: rgba(255,255,255,.6);
+}
+
+/* ======== NOTE LINE ======== */
+.note {
+  font-family: var(--mono); font-size: .8rem; color: var(--muted);
+  margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line);
+}
+
+/* ======== TWO COLUMNS ======== */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+@media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ======== HYPOTHESIS LIST ======== */
+.hypo-list { display: grid; gap: 12px; }
+.hypo-item {
+  display: flex; gap: 16px; align-items: flex-start;
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 20px 24px;
+  box-shadow: var(--shadow); transition: transform .2s;
+}
+section:nth-of-type(odd) .hypo-item { background: var(--wash); }
+.hypo-item:hover { transform: translateX(4px); }
+.hypo-item--highlight {
+  border-left: 4px solid var(--amber);
+  background: var(--ambert) !important;
+}
+.hypo-id {
+  font-family: var(--mono); font-size: .85rem; font-weight: 600;
+  color: var(--teal); flex-shrink: 0; min-width: 32px;
+}
+.hypo-text { font-size: .92rem; color: var(--text); line-height: 1.6; }
+
+/* ======== SCROLL REVEAL ======== */
+.reveal {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal.visible { opacity: 1; transform: none; }
+}
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 768px) {
+  section { padding: 64px 16px; }
+  .hero { padding: 60px 16px; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .card-grid-4 { grid-template-columns: 1fr 1fr; }
+  .chart-grid { grid-template-columns: 1fr; }
+  .banner { padding: 28px 24px; }
+  .flow { gap: 8px; }
+  .flow-box { min-width: 100px; padding: 12px 16px; font-size: .82rem; }
+}
+@media (max-width: 480px) {
+  .card-grid-4 { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: 1fr; }
+  .nav-logo { font-size: .95rem; margin-right: 8px; }
+}
+
+/* ======== FOOTER ======== */
+footer {
+  background: var(--wash); border-top: 1px solid var(--line);
+  text-align: center; padding: 32px 24px;
+  font-family: var(--mono); font-size: .78rem; color: var(--muted);
+}
+</style>
+</head>
+<body>
+
+<!-- ====== PROGRESS BAR ====== -->
+<div class="progress-bar" id="progressBar" role="progressbar" aria-label="Tiến trình đọc trang"></div>
+
+<!-- ====== NAV ====== -->
+<nav aria-label="Điều hướng chính">
+  <div class="nav-inner">
+    <span class="nav-logo">ViVQA-VLM</span>
+    <a class="nav-link" href="#problem">Vấn đề</a>
+    <a class="nav-link" href="#gap">Khoảng trống</a>
+    <a class="nav-link" href="#questions">Câu hỏi NC</a>
+    <a class="nav-link" href="#hypotheses">Giả thuyết</a>
+    <a class="nav-link" href="#dataset">Dữ liệu</a>
+    <a class="nav-link" href="#methods">Phương pháp</a>
+    <a class="nav-link" href="#deliverables">Sản phẩm</a>
+    <a class="nav-link" href="#value">Giá trị</a>
+    <a class="nav-link" href="#plan">Kế hoạch</a>
+    <a class="nav-link" href="#risk">Rủi ro</a>
+    <a class="nav-link" href="#constraint">Ràng buộc</a>
+    <a class="nav-link" href="#team">Nhóm</a>
+    <a class="nav-link" href="#questions-reviewers">Q&A</a>
+  </div>
+</nav>
+
+<!-- ====== HERO ====== -->
+<header class="hero" id="hero">
+  <div class="hero-content">
+    <p class="eyebrow">Review 1 · Phạm vi Báo cáo 1</p>
+    <h1 class="hero-title">ViVQA-VLM</h1>
+    <p class="hero-thesis">Efficient Vietnamese Visual Question Answering<br>using Vision-Language Models</p>
+    <div class="chips">
+      <span class="chip">AI (LLM/VLM) · FPT University</span>
+      <span class="chip">GVHD: Đặng Ngọc Minh Đức · Phạm Minh Trí</span>
+      <span class="chip">github.com/PLHGNAOH/ViVQA-VLM</span>
+    </div>
+    <div class="chips" style="margin-top:12px">
+      <span class="chip">SE182670 · Phạm Lê Huy Hoàng</span>
+      <span class="chip">SE182458 · Văn Quang Trường</span>
+      <span class="chip">SE193642 · Trần Quốc Huân</span>
+      <span class="chip">SE183249 · Hồ Đắc Toàn</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ====== §1 PROBLEM ====== -->
+<section id="problem">
+  <div class="container">
+    <p class="section-eyebrow reveal">Phần 01</p>
+    <h2 class="section-title reveal">Vấn đề &amp; Động lực</h2>
+    <p class="section-lead reveal">Khác với phân loại hay nhận diện vật thể, VQA đòi hỏi mô hình hiểu <strong>cả hình ảnh lẫn ngôn ngữ</strong> và có khả năng <strong>suy luận</strong> để trả lời câu hỏi.</p>
+
+    <div class="flow reveal">
+      <div class="flow-box">🖼️ Ảnh tiếng Việt<br>+ ❓ Câu hỏi tiếng Việt</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box flow-box--accent">🤖 Vision-Language Model</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">💬 Câu trả lời tiếng Việt</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== §2 GAP ====== -->
+<section id="gap">
+  <div class="container">
+    <p class="section-eyebrow reveal">Phần 02</p>
+    <h2 class="section-title reveal">Khoảng trống Nghiên cứu</h2>
+
+
+    <div class="card-grid card-grid-2 reveal">
+      <div class="card card--teal">
+        <div class="card-tag">G1</div>
+        <div class="card-title">Tiền huấn luyện thiên lệch English</div>
+        <p>Alignment của VLM được tối ưu hóa cho tiếng Anh — chuyển giao sang tiếng Việt chưa được nghiên cứu kỹ.</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Nguồn: <a href="https://arxiv.org/abs/2310.03744" target="_blank" rel="noopener" style="color:var(--muted)">LLaVA-1.5 (Liu 2024) ↗</a></p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">G2</div>
+        <div class="card-title">VQA tiếng Việt yếu, đặc biệt scene-text</div>
+        <p>Hiệu suất trên ViTextVQA thấp: OCR, dấu tiếng Việt, và code-switching chưa được giải quyết triệt để.</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Nguồn: <a href="https://arxiv.org/abs/2404.10652" target="_blank" rel="noopener" style="color:var(--muted)">ViTextVQA (Nguyen 2024) ↗</a> · <a href="https://arxiv.org/abs/2310.03744" target="_blank" rel="noopener" style="color:var(--muted)">LLaVA-1.5 (Liu 2024) ↗</a></p>
+      </div>
+      <div class="card card--highlight">
+        <div class="card-tag">G3 — TRỌNG TÂM</div>
+        <div class="card-title">PEFT cho Vietnamese VLM chưa được khám phá</div>
+        <p>Chưa có nghiên cứu hệ thống nào về việc áp dụng LoRA/QLoRA lên VLM cho VQA tiếng Việt — đây là khoảng trống chính của đề tài.</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Căn cứ: đã khảo sát 3 paper Vietnamese VQA — không paper nào áp dụng PEFT/QLoRA (xem Literature Matrix).</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">G4</div>
+        <div class="card-title">Hallucination chưa đo lường cho tiếng Việt</div>
+        <p>Chưa có benchmark hallucination (dạng POPE) được đánh giá trên dữ liệu VQA tiếng Việt.</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Nguồn: POPE (Li et al., 2023, EMNLP) · <a href="https://arxiv.org/abs/2310.03744" target="_blank" rel="noopener" style="color:var(--muted)">LLaVA-1.5 (Liu 2024) ↗</a></p>
+      </div>
+    </div>
+
+
+  </div>
+</section>
+
+<!-- ====== §3 QUESTIONS ====== -->
+<section id="questions">
+  <div class="container">
+    <p class="section-eyebrow reveal">Phần 03</p>
+    <h2 class="section-title reveal">Câu hỏi Nghiên cứu</h2>
+    <p class="section-lead reveal">Bốn câu hỏi nghiên cứu định hướng toàn bộ nghiên cứu thực nghiệm và phân tích ablation.</p>
+
+    <div class="card-grid card-grid-2 reveal">
+      <div class="card card--teal">
+        <div class="card-tag">RQ1</div>
+        <div class="card-title">Hiệu suất zero-shot trên ViVQA/ViTextVQA</div>
+        <p>VLM hoạt động thế nào khi zero-shot trên hai benchmark tiếng Việt? Đo bằng EM, VQA-Acc, ANLS.</p>
+      </div>
+      <div class="card card--highlight">
+        <div class="card-tag">RQ2 — TRỌNG TÂM</div>
+        <div class="card-title">PEFT (QLoRA) cải thiện bao nhiêu so với zero-shot?</div>
+        <p>QLoRA cải thiện được bao nhiêu so với zero-shot / prompting — không full fine-tuning? Đây là câu hỏi trung tâm.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">RQ3</div>
+        <div class="card-title">OCR-prompting × PEFT trên ViTextVQA</div>
+        <p>Kết hợp OCR prompting với PEFT có hiệp lực (synergy) trên ViTextVQA không? Đo bằng ANLS.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">RQ4</div>
+        <div class="card-title">PEFT ảnh hưởng hallucination như thế nào?</div>
+        <p>PEFT có làm tăng hay giảm hallucination? Đánh giá theo phong cách POPE-vi.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ====== §4 HYPOTHESES ====== -->
+<section id="hypotheses">
+  <div class="container">
+    <p class="section-eyebrow reveal">Phần 04</p>
+    <h2 class="section-title reveal">Giả thuyết (H1–H8)</h2>
+    <p class="section-lead reveal">Tám giả thuyết kiểm chứng được — ngưỡng lấy từ văn liệu quốc tế, chưa đo trên tiếng Việt.</p>
+
+    <div class="hypo-list reveal">
+      <div class="hypo-item hypo-item--highlight">
+        <span class="hypo-id">H1</span>
+        <span class="hypo-text">QLoRA đạt ≥ +5 EM/VQA-Acc so với zero-shot.</span>
+      </div>
+      <div class="hypo-item">
+        <span class="hypo-id">H2</span>
+        <span class="hypo-text">4-bit đạt ≥ 97% hiệu suất so với 16-bit, VRAM giảm ≥ 40%.</span>
+      </div>
+      <div class="hypo-item">
+        <span class="hypo-id">H3</span>
+        <span class="hypo-text">LoRA all-linear tốt hơn attention-only.</span>
+      </div>
+      <div class="hypo-item">
+        <span class="hypo-id">H4</span>
+        <span class="hypo-text">Rank bão hòa tại r ≤ 16 (tăng thêm không cải thiện đáng kể).</span>
+      </div>
+      <div class="hypo-item">
+        <span class="hypo-id">H5</span>
+        <span class="hypo-text">PEFT không làm tăng hallucination.</span>
+      </div>
+      <div class="hypo-item">
+        <span class="hypo-id">H6</span>
+        <span class="hypo-text">OCR cải thiện ≥ +3 ANLS, có hiệp lực với QLoRA.</span>
+      </div>
+      <div class="hypo-item">
+        <span class="hypo-id">H7</span>
+        <span class="hypo-text">Vietnamese format-prompt cải thiện ≥ +3 EM.</span>
+      </div>
+      <div class="hypo-item">
+        <span class="hypo-id">H8</span>
+        <span class="hypo-text">Shared adapter ≥ hiệu suất per-dataset adapter.</span>
+      </div>
+    </div>
+
+    <p class="note reveal">Ngưỡng được kế thừa từ văn liệu — CHƯA đo lường trên tiếng Việt. H9–H11 nằm ngoài phạm vi.</p>
+  </div>
+</section>
+
+<!-- ====== §5 DATASET ====== -->
+<section id="dataset">
+  <div class="container">
+    <p class="section-eyebrow reveal">Phần 05</p>
+    <h2 class="section-title reveal">Phân tích Dữ liệu <span class="badge badge--teal">Số liệu thực · phân tích thực tế</span></h2>
+    <p class="section-lead reveal" style="margin-bottom: 8px;">Hai bộ dữ liệu benchmark cho VQA tiếng Việt — tất cả con số đều từ phân tích thực tế.</p>
+    <p class="note reveal" style="margin-top: 0; padding-top: 0; border-top: none; margin-bottom: 48px;">seed 42: split val ViVQA &amp; chọn sample</p>
+
+    <!-- ViVQA Stats -->
+    <h3 style="font-family:var(--serif);font-size:1.3rem;font-weight:600;color:var(--ink);margin-bottom:8px" class="reveal">
+      ViVQA <span style="font-family:var(--mono);font-size:.78rem;color:var(--muted);font-weight:400">github.com/kh4nh12/ViVQA (Tran et al., PACLIC 2021)</span>
+    </h3>
+    <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 20px;" class="reveal">Kích thước gốc (theo paper): 10,328 ảnh / 15,000 QA</p>
+    <div class="stat-grid reveal">
+      <div class="stat">
+        <div class="stat-number">15,000</div>
+        <div class="stat-label">Cặp QA</div>
+        <div class="stat-source">từ JSON</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">10,328</div>
+        <div class="stat-label">Ảnh</div>
+        <div class="stat-source">từ JSON</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">10,799</div>
+        <div class="stat-label">Train</div>
+        <div class="stat-source">prepare_vivqa.py · seed 42</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">1,200</div>
+        <div class="stat-label">Val</div>
+        <div class="stat-source">prepare_vivqa.py · seed 42</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">3,001</div>
+        <div class="stat-label">Test</div>
+        <div class="stat-source">test split</div>
+      </div>
+    </div>
+
+    <div class="card-grid card-grid-2 reveal" style="margin-bottom: 48px;">
+      <div class="card card--teal">
+        <div class="card-tag">ViVQA</div>
+        <div class="card-title">99.83% câu trả lời ≤ 3 từ</div>
+        <p>Đa số là nhãn ngắn, phân loại → Metric phù hợp: EM / VQA-Acc.</p>
+      </div>
+      <div class="card card--accent">
+        <div class="card-tag">ViTextVQA</div>
+        <div class="card-title">Trung bình 4.18 từ</div>
+        <p>Câu trả lời dài, phụ thuộc OCR → EM quá chặt → Cần metric <strong>ANLS</strong> (khoan dung sai lệch ký tự).</p>
+      </div>
+    </div>
+
+    <!-- ViTextVQA Stats -->
+    <h3 style="font-family:var(--serif);font-size:1.3rem;font-weight:600;color:var(--ink);margin:48px 0 8px" class="reveal">
+      ViTextVQA <span style="font-family:var(--mono);font-size:.78rem;color:var(--muted);font-weight:400">HF nhonhoccode/ViTextVQA (Nguyen et al., 2024)</span>
+    </h3>
+    <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 20px;" class="reveal">Kích thước gốc (theo paper): 16,762 ảnh / 50,342 QA (tỉ lệ split 7:1:2)</p>
+    <div class="stat-grid reveal">
+      <div class="stat">
+        <div class="stat-number">50,342</div>
+        <div class="stat-label">Cặp QA</div>
+        <div class="stat-source">theo paper</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">16,762</div>
+        <div class="stat-label">Ảnh</div>
+        <div class="stat-source">theo paper</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">35,159</div>
+        <div class="stat-label">Train</div>
+        <div class="stat-source">training split</div>
+      </div>
+      <div class="stat" style="border-style: dashed; background: var(--wash);">
+        <div class="stat-number">?</div>
+        <div class="stat-label">Dev</div>
+        <div class="stat-source">dev.json — sẽ tích hợp</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">10,028</div>
+        <div class="stat-label">Test</div>
+        <div class="stat-source">test split</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-grid reveal" style="margin-top: 48px;">
+      <div class="chart-card">
+        <h3>Quy mô dữ liệu: QA Pairs vs. Ảnh</h3>
+        <canvas id="chartScale" aria-label="Biểu đồ so sánh số lượng QA pairs và ảnh giữa ViVQA và ViTextVQA"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Phân bố Loại Câu hỏi (Heuristic)</h3>
+        <canvas id="chartQType" aria-label="Biểu đồ phân bố loại câu hỏi"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Phân chia Train / Test (có sẵn)</h3>
+        <canvas id="chartSplit" aria-label="Biểu đồ phân chia train/test cho ViVQA và ViTextVQA"></canvas>
+      </div>
+    </div>
+
+    <p class="note reveal">Run: src/data/analyze_dataset.py · 2026-09-14T14:55:58Z. Dataset licence = for research purposes.</p>
+  </div>
+</section>
+
+<!-- ====== §6 METHODS ====== -->
+<section id="methods">
+  <div class="container">
+    <p class="section-eyebrow reveal">Phần 06</p>
+    <h2 class="section-title reveal">Phương pháp &amp; Baseline</h2>
+    <p class="section-lead reveal">Chiến lược cải thiện chỉ dùng PEFT — không full fine-tuning.</p>
+
+    <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin-bottom:20px" class="reveal">Cải tiến ưu tiên (PEFT-only)</h3>
+    <div class="card-grid card-grid-3 reveal">
+      <div class="card card--teal">
+        <div class="card-tag">CORE</div>
+        <div class="card-title">QLoRA NF4 all-linear</div>
+        <p>Quantized LoRA 4-bit, áp dụng lên tất cả linear layers — phương pháp cốt lõi.</p>
+      </div>
+      <div class="card card--accent">
+        <div class="card-tag">PROMPTING</div>
+        <div class="card-title">Vietnamese format-prompt</div>
+        <p>Prompt template được thiết kế riêng cho tiếng Việt, chuẩn hóa định dạng đầu ra.</p>
+      </div>
+      <div class="card card--accent">
+        <div class="card-tag">OCR</div>
+        <div class="card-title">OCR-enhanced prompting</div>
+        <p>Trích xuất text từ ảnh bằng PaddleOCR/VietOCR, đưa vào prompt làm context bổ sung.</p>
+      </div>
+      <div class="card card--accent">
+        <div class="card-tag">MULTI-DATASET</div>
+        <div class="card-title">Shared adapter</div>
+        <p>Một adapter dùng chung cho nhiều dataset — tiết kiệm tham số, tăng tổng quát hóa.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--muted)">
+        <div class="card-tag" style="color:var(--muted)">OPTIONAL</div>
+        <div class="card-title">RAG</div>
+        <p>Retrieval-Augmented Generation — tùy chọn nếu đủ thời gian.</p>
+      </div>
+      <div class="card" style="border-left:4px dashed var(--muted)">
+        <div class="card-tag" style="color:var(--muted)">LOẠI TRỪ</div>
+        <div class="card-title">Soft-prompt tuning</div>
+        <p>Không thuộc phạm vi nghiên cứu — đã loại trừ.</p>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin:48px 0 20px" class="reveal">Baseline đề xuất</h3>
+    <div class="card-grid card-grid-3 reveal">
+      <div class="card card--highlight">
+        <div class="card-tag">BASELINE CHÍNH</div>
+        <div class="card-title">Qwen2.5-VL-3B-Instruct</div>
+        <span class="badge badge--amber">ĐỀ XUẤT — cần xác nhận với GVHD</span>
+        <p style="margin-top:12px">Mature tooling, nằm trong approved baseline list, chạy được trên Colab free T4, yêu cầu transformers thấp hơn → tái tạo dễ hơn.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">THAM CHIẾU</div>
+        <div class="card-title">Qwen3-VL-4B-Instruct</div>
+        <p>Dùng để so sánh zero-shot — không training, chỉ đánh giá khả năng zero-shot.</p>
+      </div>
+      <div class="card card--accent">
+        <div class="card-tag">DỰ PHÒNG</div>
+        <div class="card-title">Florence-2</div>
+        <p>Backup nếu baseline chính gặp vấn đề về VRAM hoặc tooling.</p>
+      </div>
+    </div>
+
+    <div class="pull-quote reveal">
+      <p>Nguyên tắc: tái tạo chính xác một baseline trước (W4–W5), sau đó mới cải thiện. Model 3B: vì chạy được trên Colab free T4 và tái tạo tốt hơn.</p>
+    </div>
+
+    <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin: 48px 0 20px" class="reveal">Đã reproduce — kết quả zero-shot (W4–W5)</h3>
+    <div class="card-grid card-grid-2 reveal" style="margin-bottom: 24px;">
+      <div class="card card--teal">
+        <div class="card-tag">Qwen2.5-VL-3B-Instruct</div>
+        <div class="card-title">EM 38.3% · ANLS 55.9%</div>
+        <p>ViTextVQA test (n=300, seed 42). Khoảng cách EM↔ANLS 17.6 điểm.</p>
+      </div>
+      <div class="card card--accent">
+        <div class="card-tag">3 Lever Cải tiến (Đã có chứng cứ)</div>
+        <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--muted); line-height: 1.6;">
+          <li><strong>Siết prompt:</strong> 29% trả lời thừa chữ (nguyên nhân EM rớt mạnh).</li>
+          <li><strong>OCR-enhanced:</strong> Model fail chữ cách điệu, chữ nhỏ.</li>
+          <li><strong>Đo hallucination:</strong> Fail trên infographic & biểu đồ.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="reveal" style="font-size: 0.9rem; color: var(--muted); background: var(--wash); padding: 16px; border-radius: var(--radius); line-height: 1.6;">
+      <strong>Protocol:</strong> greedy (do_sample=False), max_new_tokens=32, max_pixels=1024*28*28, float16, Colab T4.<br>
+      <strong>Reproducibility:</strong> Log ở <code>experiments/W04_zeroshot_qwen25vl_seed42/</code>, metric canonical <code>src/eval/metrics.py</code>, repo public <code>github.com/PLHGNAOH/ViVQA-VLM</code>.
+    </div>
+  </div>
+</section>
+
+<!-- ====== §7 DELIVERABLES ====== -->
+<section id="deliverables">
+  <div class="container">
+    <p class="section-eyebrow reveal">Phần 07</p>
+    <h2 class="section-title reveal">Sản phẩm Dự kiến</h2>
+    <p class="section-lead reveal">Ba nhóm sản phẩm chính khi hoàn thành đề tài.</p>
+
+    <div class="card-grid card-grid-3 reveal">
+      <div class="card card--teal">
+        <div class="card-tag">📄 ĐÓNG GÓP KHOA HỌC</div>
+        <div class="card-title">Báo cáo / Bài báo khoa học</div>
+        <p>≥ 1 cải tiến PEFT đã được xác nhận (validated) so với baseline, kèm ablation study + phân tích lỗi + phân tích hallucination.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">🌐 SẢN PHẨM PHẦN MỀM</div>
+        <div class="card-title">Web prototype</div>
+        <p>Upload ảnh tiếng Việt, đặt câu hỏi tiếng Việt, nhận câu trả lời — hiển thị confidence + OCR/evidence.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">📦 TÁI TẠO</div>
+        <div class="card-title">Luận văn + Gói tái tạo</div>
+        <p>Code, LoRA/QLoRA adapters, configs, inference script, experiment logs — đảm bảo có thể tái tạo kết quả.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== §8 VALUE ====== -->
+<section id="value">
+  <div class="container">
+    <p class="section-eyebrow reveal">Phần 08</p>
+    <h2 class="section-title reveal">Giá trị Thực tiễn &amp; Ý nghĩa</h2>
+    <p class="section-lead reveal">Đề tài mang lại cả giá trị ứng dụng thực tiễn và đóng góp khoa học.</p>
+
+    <div class="two-col reveal">
+      <div>
+        <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin-bottom:20px">🔧 Giá trị Thực tiễn</h3>
+        <div class="card card--accent" style="margin-bottom:12px">
+          <p>Đọc biển hiệu, nhãn hàng, giá cả từ ảnh tiếng Việt</p>
+        </div>
+        <div class="card card--accent" style="margin-bottom:12px">
+          <p>Công nghệ hỗ trợ cho người khiếm thị (assistive technology)</p>
+        </div>
+        <div class="card card--accent" style="margin-bottom:12px">
+          <p>Xử lý tài liệu, thực đơn, biểu mẫu bằng tiếng Việt</p>
+        </div>
+        <div class="card card--accent">
+          <p>Công cụ giáo dục tiếng Việt — hỏi đáp dựa trên hình ảnh</p>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin-bottom:20px">🔬 Ý nghĩa Khoa học / Tính mới</h3>
+        <div class="card card--teal" style="margin-bottom:12px">
+          <p><strong>Nghiên cứu PEFT hệ thống đầu tiên</strong> cho Vietnamese VLM (G3)</p>
+        </div>
+        <div class="card card--teal" style="margin-bottom:12px">
+          <p><strong>Đo lường hallucination đầu tiên</strong> cho Vietnamese VQA (G4)</p>
+        </div>
+        <div class="card card--teal" style="margin-bottom:12px">
+          <p>Thích nghi hiệu quả dưới ngân sách tham số nghiêm ngặt (không full FT)</p>
+        </div>
+        <div class="card card--teal">
+          <p>Quy trình tái tạo được (reproducible protocol)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== §9 PLAN ====== -->
+<section id="plan">
+  <div class="container">
+    <p class="section-eyebrow reveal">Phần 09</p>
+    <h2 class="section-title reveal">Kế hoạch 15 Tuần</h2>
+    <p class="section-lead reveal">Lộ trình từ W1 đến W15 với 4 mốc review chính.</p>
+
+    <div class="timeline-wrap reveal">
+      <div class="timeline" role="img" aria-label="Dòng thời gian 15 tuần kế hoạch thực hiện đề tài">
+        <!-- W1 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W1</span>
+          <div class="timeline-bar tl-phase1">Định hướng</div>
+        </div>
+        <!-- W2 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W2</span>
+          <div class="timeline-bar tl-phase1">Văn liệu</div>
+        </div>
+        <!-- W3 -->
+        <div class="timeline-week" style="position:relative">
+          <span class="tl-now">← HIỆN TẠI</span>
+          <span class="timeline-label">W3</span>
+          <div class="timeline-bar tl-phase1">Dataset</div>
+          <span class="tl-milestone">🔴 Review 1</span>
+        </div>
+        <!-- W4 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W4</span>
+          <div class="timeline-bar tl-phase2">Baseline</div>
+        </div>
+        <!-- W5 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W5</span>
+          <div class="timeline-bar tl-phase2">Baseline</div>
+        </div>
+        <!-- W6 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W6</span>
+          <div class="timeline-bar tl-phase2">Methods</div>
+        </div>
+        <!-- W7 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W7</span>
+          <div class="timeline-bar tl-phase2">Eval</div>
+          <span class="tl-milestone">🟡 Review 2</span>
+        </div>
+        <!-- W8 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W8</span>
+          <div class="timeline-bar tl-phase3">PEFT</div>
+        </div>
+        <!-- W9 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W9</span>
+          <div class="timeline-bar tl-phase3">OCR/RAG</div>
+        </div>
+        <!-- W10 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W10</span>
+          <div class="timeline-bar tl-phase3">Exp</div>
+        </div>
+        <!-- W11 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W11</span>
+          <div class="timeline-bar tl-phase3">Eval</div>
+        </div>
+        <!-- W12 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W12</span>
+          <div class="timeline-bar tl-phase3">Ablation</div>
+        </div>
+        <!-- W13 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W13</span>
+          <div class="timeline-bar tl-phase4">Review</div>
+          <span class="tl-milestone">🟠 Faculty Review</span>
+        </div>
+        <!-- W14 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W14</span>
+          <div class="timeline-bar tl-phase4">Proto/Thesis</div>
+        </div>
+        <!-- W15 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W15</span>
+          <div class="timeline-bar tl-phase4">Final</div>
+          <span class="tl-milestone">🟢 Final Defense</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-grid card-grid-4 reveal">
+      <div class="card card--teal">
+        <div class="card-tag" style="color:var(--teal)">GIAI ĐOẠN 1</div>
+        <div class="card-title">W1–W3</div>
+        <p>Định hướng, văn liệu, phân tích dataset.</p>
+      </div>
+      <div class="card card--accent">
+        <div class="card-tag">GIAI ĐOẠN 2</div>
+        <div class="card-title">W4–W7</div>
+        <p>Tái tạo baseline, phương pháp luận.</p>
+      </div>
+      <div class="card card--amber">
+        <div class="card-tag" style="color:var(--amber)">GIAI ĐOẠN 3</div>
+        <div class="card-title">W8–W12</div>
+        <p>PEFT/OCR/RAG, thực nghiệm, ablation, error + hallucination analysis.</p>
+      </div>
+      <div class="card" style="border-left:4px solid #6B7280">
+        <div class="card-tag" style="color:#6B7280">GIAI ĐOẠN 4</div>
+        <div class="card-title">W13–W15</div>
+        <p>Faculty review, prototype + luận văn, bảo vệ cuối kỳ.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== §10 RISK ====== -->
+<section id="risk">
+  <div class="container">
+    <p class="section-eyebrow reveal">Phần 10</p>
+    <h2 class="section-title reveal">Ma trận Rủi ro</h2>
+    <p class="section-lead reveal">Các rủi ro chính đã được xác định cùng biện pháp giảm thiểu và phương án dự phòng.</p>
+
+    <div class="table-wrap reveal">
+      <table>
+        <thead>
+          <tr>
+            <th>Rủi ro</th>
+            <th>Mức độ</th>
+            <th>Giảm thiểu</th>
+            <th>Dự phòng</th>
+            <th>Trạng thái (W5)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Model quá lớn / OOM</td>
+            <td class="risk-high">Cao</td>
+            <td>QLoRA 4-bit, model 3B</td>
+            <td>Florence-2</td>
+            <td><span class="badge badge--teal" style="font-size:0.75rem">Đã khử (3B chạy T4 4-bit)</span></td>
+          </tr>
+          <tr>
+            <td>GPU / Colab bị gián đoạn</td>
+            <td class="risk-high">Cao</td>
+            <td>Mount Drive, checkpoint thường xuyên</td>
+            <td>Colab Pro</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>QLoRA train chậm</td>
+            <td class="risk-med">Trung bình</td>
+            <td>Pilot subset, gradient accumulation</td>
+            <td>Giảm rank</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Dataset / licence</td>
+            <td class="risk-med">Trung bình</td>
+            <td>Preprocessing, kiểm tra licence</td>
+            <td>Mirror khác</td>
+            <td><span class="badge badge--teal" style="font-size:0.75rem">Đã verify + tách ViVQA-X</span></td>
+          </tr>
+          <tr>
+            <td>Baseline khó tái tạo</td>
+            <td class="risk-high">Cao</td>
+            <td>Source repo, fixed seed</td>
+            <td>Đổi VLM</td>
+            <td><span class="badge badge--teal" style="font-size:0.75rem">Đã khử (EM 38.3 reproduce)</span></td>
+          </tr>
+          <tr>
+            <td>OCR kém</td>
+            <td class="risk-med">Trung bình</td>
+            <td>Swap PaddleOCR ↔ VietOCR</td>
+            <td>Prompt fallback</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Training không hội tụ</td>
+            <td class="risk-high">Cao</td>
+            <td>Fall back to prompting / OCR</td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ====== §11 CONSTRAINT ====== -->
+<section id="constraint">
+  <div class="container">
+    <p class="section-eyebrow reveal">Phần 11</p>
+    <h2 class="section-title reveal">Ràng buộc Cốt lõi: PEFT-only</h2>
+
+    <div class="banner reveal">
+      <h3>Không full fine-tuning.</h3>
+      <p>Chỉ sử dụng LoRA / QLoRA (4-bit / 8-bit).</p>
+    </div>
+
+    <div class="card-grid card-grid-2 reveal">
+      <div class="card card--teal">
+        <div class="card-title">Tái tạo trước, cải tiến sau</div>
+        <p>Reproduce exactly one baseline first (W4–W5), sau đó mới áp dụng các cải tiến.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-title">Cùng split / seed / hardware</div>
+        <p>Đảm bảo tính so sánh: cùng data split, cùng seed, cùng phần cứng cho mọi thí nghiệm.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-title">Hiệu quả là ràng buộc thiết kế</div>
+        <p>Log VRAM và thời gian mỗi lần chạy — efficiency không phải là bonus mà là yêu cầu.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-title">Runtime: Google Colab</div>
+        <p>Free tier cho thí nghiệm nhẹ, Pro cho training; mount Google Drive; log GPU mỗi run.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== §12 TEAM ====== -->
+<section id="team">
+  <div class="container">
+    <p class="section-eyebrow reveal">Phần 12</p>
+    <h2 class="section-title reveal">Vai trò Nhóm</h2>
+    <p class="section-lead reveal">Bốn thành viên, mỗi người phụ trách một mảng chính.</p>
+
+    <div class="card-grid card-grid-4 reveal">
+      <div class="card card--highlight">
+        <div class="card-tag">SE182670 — LEADER</div>
+        <div class="card-title">Phạm Lê Huy Hoàng</div>
+        <p><strong>PEFT / Training</strong> — Thiết kế & chạy thí nghiệm QLoRA, ablation study.</p>
+      </div>
+      <div class="card card--accent">
+        <div class="card-tag">SE182458</div>
+        <div class="card-title">Văn Quang Trường</div>
+        <p><strong>Evaluation / Deploy</strong> — Metrics pipeline, hallucination analysis, web prototype, báo cáo.</p>
+      </div>
+      <div class="card card--accent">
+        <div class="card-tag">SE193642</div>
+        <div class="card-title">Trần Quốc Huân</div>
+        <p><strong>Dataset / OCR</strong> — Phân tích dữ liệu, preprocessing, tích hợp PaddleOCR / VietOCR.</p>
+      </div>
+      <div class="card card--accent">
+        <div class="card-tag">SE183249</div>
+        <div class="card-title">Hồ Đắc Toàn</div>
+        <p><strong>VLM / Baseline</strong> — Chọn mô hình, cấu hình inference, tái tạo baseline.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== §13 Q&A ====== -->
+<section id="questions-reviewers" class="closing">
+  <div class="container">
+    <p class="section-eyebrow reveal" style="color:var(--teal)">Phần 13</p>
+    <h2 class="section-title reveal">Câu hỏi cho quý thầy cô phản biện</h2>
+    <p class="section-lead reveal">Chúng tôi mong nhận được phản hồi từ quý thầy cô về các vấn đề sau.</p>
+
+    <div class="card-grid card-grid-2 reveal">
+      <div class="card">
+        <div class="card-tag" style="color:var(--teal)">01</div>
+        <div class="card-title">Phạm vi vấn đề có phù hợp cho capstone không?</div>
+        <p>Đề tài có đủ chiều sâu và phạm vi cho luận văn tốt nghiệp?</p>
+      </div>
+      <div class="card">
+        <div class="card-tag" style="color:var(--teal)">02</div>
+        <div class="card-title">Hướng baseline + PEFT có hợp lý?</div>
+        <p>Chiến lược tái tạo baseline rồi cải tiến bằng PEFT có phù hợp?</p>
+      </div>
+      <div class="card">
+        <div class="card-tag" style="color:var(--teal)">03</div>
+        <div class="card-title">Kiểm soát rủi ro ở giai đoạn QLoRA?</div>
+        <p>Với giới hạn VRAM (Colab T4), nhóm có nên ưu tiên đóng băng hoàn toàn LLM và chỉ train visual adapter, hay vẫn nên thử QLoRA trên LLM?</p>
+      </div>
+      <div class="card">
+        <div class="card-tag" style="color:var(--teal)">04</div>
+        <div class="card-title">Gợi ý về đánh giá?</div>
+        <p>Metrics, phương pháp đánh giá hallucination cho tiếng Việt — quý thầy cô có gợi ý gì?</p>
+      </div>
+    </div>
+
+    <p class="sign-off reveal">Cảm ơn — Nhóm ViVQA-VLM</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>ViVQA-VLM · Review 1 · FPT University · 2026</p>
+</footer>
+
+<script>
+/* ======== PROGRESS BAR ======== */
+const progressBar = document.getElementById('progressBar');
+function updateProgress() {
+  const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+  const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+  progressBar.style.width = progress + '%';
+}
+window.addEventListener('scroll', updateProgress, { passive: true });
+
+/* ======== ACTIVE NAV LINK ======== */
+const navLinks = document.querySelectorAll('.nav-link');
+const sections = document.querySelectorAll('section[id]');
+
+function updateActiveNav() {
+  const scrollPos = window.scrollY + 120;
+  let current = '';
+  sections.forEach(s => {
+    if (s.offsetTop <= scrollPos) current = s.id;
+  });
+  navLinks.forEach(link => {
+    link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+  });
+}
+window.addEventListener('scroll', updateActiveNav, { passive: true });
+
+/* ======== SCROLL REVEAL & FAILSAFE ======== */
+const reveals = document.querySelectorAll('.reveal');
+try {
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        revealObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  
+  if (typeof IntersectionObserver !== 'undefined') {
+    reveals.forEach(el => revealObserver.observe(el));
+  } else {
+    reveals.forEach(el => el.classList.add('visible'));
+  }
+} catch (err) {
+  console.error("Reveal observer failed:", err);
+  reveals.forEach(el => el.classList.add('visible'));
+}
+</script>
+
+<script>
+/* ======== CHART.JS ======== */
+try {
+  const chartFont = { family: "'Inter', sans-serif", size: 13 };
+  const ink = '#13294B';
+  const teal = '#1C7293';
+  const amber = '#E8A33D';
+  const muted = '#6B7280';
+
+  // Detect dark mode
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const gridColor = isDark ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.08)';
+  const labelColor = isDark ? '#9CA3AF' : '#6B7280';
+  const titleColor = isDark ? '#E5E7EB' : '#13294B';
+
+  Chart.defaults.font = chartFont;
+  Chart.defaults.color = labelColor;
+
+  // Chart 1: Scale comparison
+  const elScale = document.getElementById('chartScale');
+  if (elScale) {
+    new Chart(elScale, {
+      type: 'bar',
+      data: {
+        labels: ['ViVQA', 'ViTextVQA'],
+        datasets: [
+          {
+            label: 'QA Pairs',
+            data: [15000, 50342],
+            backgroundColor: teal,
+            borderRadius: 6,
+            barPercentage: 0.6,
+          },
+          {
+            label: 'Ảnh',
+            data: [10328, 16762],
+            backgroundColor: amber,
+            borderRadius: 6,
+            barPercentage: 0.6,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: gridColor },
+            ticks: { callback: v => v >= 1000 ? (v/1000)+'K' : v }
+          },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // Chart 2: Question Type
+  const elQType = document.getElementById('chartQType');
+  if (elQType) {
+    new Chart(elQType, {
+      type: 'bar',
+      data: {
+        labels: ['Object', 'Text', 'Count', 'Reason', 'Y/N', 'Other'],
+        datasets: [
+          {
+            label: 'ViVQA (%)',
+            data: [53.95, 1.63, 13.93, 0.42, 0.39, 29.69],
+            backgroundColor: teal,
+            borderRadius: 4,
+            barPercentage: 0.7,
+          },
+          {
+            label: 'ViTextVQA (%)',
+            data: [27.97, 20.34, 5.85, 5.0, 0.11, 40.73],
+            backgroundColor: amber,
+            borderRadius: 4,
+            barPercentage: 0.7,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: gridColor },
+            ticks: { callback: v => v + '%' }
+          },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // Chart 3: Train/Test split
+  const elSplit = document.getElementById('chartSplit');
+  if (elSplit) {
+    new Chart(elSplit, {
+      type: 'bar',
+      data: {
+        labels: ['ViVQA (có sẵn)', 'ViTextVQA (có sẵn)'],
+        datasets: [
+          {
+            label: 'Train',
+            data: [10799, 35159],
+            backgroundColor: teal,
+            borderRadius: 6,
+            barPercentage: 0.6,
+          },
+          {
+            label: 'Val',
+            data: [1200, 0],
+            backgroundColor: muted,
+            borderRadius: 6,
+            barPercentage: 0.6,
+          },
+          {
+            label: 'Test',
+            data: [3001, 10028],
+            backgroundColor: amber,
+            borderRadius: 6,
+            barPercentage: 0.6,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+        },
+        scales: {
+          x: { stacked: true, grid: { display: false } },
+          y: {
+            stacked: true,
+            beginAtZero: true,
+            grid: { color: gridColor },
+            ticks: { callback: v => v >= 1000 ? (v/1000)+'K' : v }
+          }
+        }
+      }
+    });
+  }
+} catch (err) {
+  console.error("Chart.js rendering failed:", err);
+}
+</script>
+</body>
+</html>
