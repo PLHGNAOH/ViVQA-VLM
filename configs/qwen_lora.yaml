@@ -21,9 +21,9 @@ run:
 model:
   backbone: "qwen2_5_vl"                        # định danh nội bộ (loader dựa vào đây)
   model_id: "Qwen/Qwen2.5-VL-3B-Instruct"       # checkpoint pretrained trên HuggingFace
-  torch_dtype: "bfloat16"                        # bf16 nếu GPU hỗ trợ (A100), else float16
+  torch_dtype: "float16"                         # T4 không hỗ trợ bf16 native; mọi run W05 thực tế dùng fp16.
   min_pixels: 200704                             # 256*28*28 — giảm để tiết kiệm VRAM
-  max_pixels: 1003520                            # 1280*28*28 — giới hạn ảnh lớn
+  max_pixels: 401408                             # Chuẩn chung cho baseline + QLoRA (chốt W05). Vừa VRAM T4; 1280*28*28 để ablation phụ.
 
 # --- Lượng tử hóa 4-bit (QLoRA). Đây là chỗ hiện thực "PEFT-only / no full-FT" ---
 quantization:
@@ -31,7 +31,7 @@ quantization:
   load_in_4bit: true
   bnb_4bit_quant_type: "nf4"                     # NormalFloat4 — chuẩn của QLoRA
   bnb_4bit_use_double_quant: true                # nén thêm hằng số lượng tử hóa
-  bnb_4bit_compute_dtype: "bfloat16"             # kiểu tính toán khi giải lượng tử hóa
+  bnb_4bit_compute_dtype: "float16"              # T4 không hỗ trợ bf16 native; mọi run W05 thực tế dùng fp16.
 
 # --- Cấu hình LoRA adapter (bộ tham số DUY NHẤT được huấn luyện) ---
 lora:
