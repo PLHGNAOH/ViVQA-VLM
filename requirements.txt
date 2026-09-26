@@ -7,3 +7,6 @@ tqdm
 
 # prepare_vitextvqa.py (tải ViTextVQA chính thức từ HF, gated)
 huggingface_hub
+
+# đọc configs/*.yaml (run_baseline.py, notebook)
+pyyaml
