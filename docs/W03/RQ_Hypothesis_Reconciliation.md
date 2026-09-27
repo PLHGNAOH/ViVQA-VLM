@@ -14,7 +14,7 @@ Nguồn weekly (đã là nội dung `docs/W02/` sau W02 closeout): bản H1–H8
 | RQ0 (draft, primary) | PEFT-only (LoRA/QLoRA) cải thiện Vietnamese VQA bao nhiêu so với frozen zero-shot, đo EM / VQA-Acc (ViVQA) và ANLS (ViTextVQA), cùng split/seed/hardware | **RQ2** | Scaffold gọi đây là RQ *chính*; weekly đặt zero-shot 3-backbone thành RQ1 và PEFT thành RQ2. Cùng ý PEFT-vs-zero-shot. |
 | RQ1 (draft, secondary) | OCR-enhanced prompting cải thiện ANLS trên ViTextVQA vs no-OCR? | **RQ3** | **Không** map vào canonical RQ1 (RQ1 weekly = zero-shot 3 VLM). |
 | RQ2 (draft, secondary) | LoRA target modules / rank / quantization (4-bit vs 8-bit) trade-off accuracy vs efficiency | **RQ2a + RQ2b + RQ2c** | Scaffold gộp 3 ablation thành 1 RQ. Weekly tách. 8-bit nằm RQ2c; scaffold không nêu 16-bit — weekly RQ2c có 16-bit (không mâu thuẫn, chỉ giàu hơn). |
-| RQ3 (draft, secondary) | PEFT có đổi hallucination (POPE-vi) so với zero-shot? | **RQ4** | Khớp H5. |
+| RQ3 (draft, secondary) | PEFT có đổi hallucination (POPE-vi) so với zero-shot? | **RQ4** | Khớp H8. |
 
 ### Ý weekly không có chỗ trong scaffold
 
@@ -33,7 +33,7 @@ Nguồn weekly (đã là nội dung `docs/W02/` sau W02 closeout): bản H1–H8
 | H1 | QLoRA cải thiện VQA-Acc trên ViVQA ≥ X pts vs zero-shot | **H1** | Cùng nghĩa. Weekly chốt ngưỡng **+5** (scaffold còn `TODO: set X`). Giữ +5; không đổi ở W03. |
 | H2 | OCR-enhanced prompting cải thiện ANLS trên ViTextVQA vs no-OCR | **H6** | **KHÔNG phải H2.** Canonical H2 = QLoRA 4-bit vs LoRA 16-bit. Trộn số = sai khoa học. |
 | H3 | All-linear LoRA targets > attention-only (cùng param budget) | **H3** | Cùng nghĩa (weekly gắn RQ2a / ablation A2). |
-| H4 | PEFT does not increase (may reduce) hallucination (POPE-vi F1) | **H5** | **KHÔNG phải H4.** Canonical H4 = bão hòa rank r≤16. |
+| H4 | PEFT does not increase (may reduce) hallucination (POPE-vi F1) | **H8** | **KHÔNG phải H4.** Canonical H4 = bão hòa rank r≤16. |
 
 ### Ý weekly không có chỗ trong scaffold H1–H4
 
@@ -42,7 +42,7 @@ Nguồn weekly (đã là nội dung `docs/W02/` sau W02 closeout): bản H1–H8
 | H2 | QLoRA 4-bit ≥ 97% LoRA 16-bit, VRAM −≥40% | **Giữ** — không có tương đương scaffold. |
 | H4 | Rank bão hòa r≤16 | **Giữ**. |
 | H7 | Format-prompt tiếng Việt +≥3 EM zero-shot | **Giữ**. |
-| H8 | Adapter chung ≥ adapter riêng trên ViTextVQA | **Giữ**. |
+| H5 | Adapter chung ≥ adapter riêng trên ViTextVQA | **Giữ**. |
 
 ## 3. Stub H9–H11
 
@@ -52,7 +52,7 @@ Chuyển **toàn bộ** sang "Future / out-of-scope" trong `docs/W02/Hypotheses.
 |------|---------------------------------------------|
 | H9 (Qwen2.5-VL zero-shot > BLIP-2 nhờ tokenizer đa ngữ) | Chỉ là ví dụ trong ngoặc; thiếu ngưỡng, thiếu điều kiện bác bỏ, thiếu protocol. Ý so sánh backbone đã cover bởi **RQ1** (câu hỏi đo lường, không phải H). |
 | H10 (dataset/OCR) | Rỗng. OCR falsifiable = **H6**. |
-| H11 (evaluation) | Rỗng. Eval/hallucination = **H5** + **RQ4a**. |
+| H11 (evaluation) | Rỗng. Eval/hallucination = **H8** + **RQ4a**. |
 
 ## 4. Reconciliation notes (ý không có chỗ / xung đột)
 

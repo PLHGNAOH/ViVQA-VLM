@@ -57,7 +57,7 @@ LVLM hallucinate đáng kể và **thiên về trả lời "yes"**; setting **ad
 - Không đo trực tiếp scene-text hallucination.
 
 ### 10. What can we learn/use for our project? **(BẮT BUỘC)**
-Xây **POPE-vi**: dịch/chuẩn hoá câu probing sang tiếng Việt trên một subset có annotation object, đo **F1 + yes-ratio** trước/sau PEFT (kiểm chứng H5). Cài trong `src/eval/` như một module độc lập.
+Xây **POPE-vi**: dịch/chuẩn hoá câu probing sang tiếng Việt trên một subset có annotation object, đo **F1 + yes-ratio** trước/sau PEFT (kiểm chứng H8). Cài trong `src/eval/` như một module độc lập.
 
 > ### Paper này liên quan gì đến đề tài ViVQA-VLM?
 > Cung cấp **rubric hallucination** để trả lời RQ4 và bảo vệ tuyên bố "cải tiến không đánh đổi độ tin cậy". POPE-vi là phần **analysis bắt buộc** (Master §7.2) ở W12; ảnh hưởng prototype (hiển thị confidence, cảnh báo khi model có thể hallucinate).

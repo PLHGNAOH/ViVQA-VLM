@@ -49,11 +49,11 @@
 | A2 | Target modules attention-only vs all-linear | H3 | SV3 | W08 |
 | A3 | Rank sweep | H4 | SV3 | W09 |
 | A4 | 4-bit vs 8-bit vs 16-bit LoRA (VRAM, thời gian) | H2 | SV3 | W09 |
-| A5 | Adapter chung vs riêng | H8 | SV3 | W09 |
+| A5 | Adapter chung vs riêng | H5 | SV3 | W09 |
 | A6 | Có vs không OCR-enhanced prompting | H6 | SV2, SV3 | W08–W11 |
 | A7 | Có vs không retrieval augmentation (nếu làm) | — | SV3 | W09+ |
 | A8 | Backbone khác (nếu tài nguyên cho phép) | — | SV1 | W10 |
-| A9 | Hallucination trước / sau PEFT | H5 | SV4, SV3 | W12 |
+| A9 | Hallucination trước / sau PEFT | H8 | SV4, SV3 | W12 |
 
 ## 5. Công cụ / thư viện
 

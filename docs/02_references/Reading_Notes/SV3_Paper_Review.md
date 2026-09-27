@@ -340,7 +340,7 @@ VQA accuracy (VQAv2, GQA, VizWiz, TextVQA), accuracy (SQA, MMBench, SEED), **F1 
 6. Cần 8×A100 để tái lập đầy đủ — **vượt tài nguyên nhóm**; nhóm chỉ tái lập ở quy mô nhỏ hoặc dùng checkpoint công khai.
 
 ### 10. Học/dùng được gì cho đề tài? (BẮT BUỘC)
-- **Bằng chứng LoRA ≈ full FT trên VLM 7B/13B** — bảng trên là lý lẽ mạnh nhất để hội đồng chấp nhận PEFT-only không giảm giá trị khoa học. Đặc biệt **POPE tăng** với LoRA gợi ý PEFT còn *giảm* hallucination (giữ prior của LLM gốc) — giả thuyết đáng kiểm chứng trên Vietnamese VQA (**H5**).
+- **Bằng chứng LoRA ≈ full FT trên VLM 7B/13B** — bảng trên là lý lẽ mạnh nhất để hội đồng chấp nhận PEFT-only không giảm giá trị khoa học. Đặc biệt **POPE tăng** với LoRA gợi ý PEFT còn *giảm* hallucination (giữ prior của LLM gốc) — giả thuyết đáng kiểm chứng trên Vietnamese VQA (**H8**).
 - **Response-format prompt tiếng Việt:** thêm *"Trả lời bằng một từ hoặc cụm từ ngắn."* vào mọi mẫu ViVQA/ViTextVQA khi fine-tune và khi eval ⇒ trực tiếp cải thiện **EM/VQA-Acc** mà không tốn tham số. Đây là *prompt optimization* trong §4.2.
 - **Hai learning rate:** LoRA trên LLM ~2e-4, projector/merger ~2e-5 (hoặc đóng băng). Với Qwen2.5-VL: cân nhắc mở `visual.merger` LR nhỏ, đóng băng ViT.
 - **Độ phân giải là đòn bẩy cho scene-text + hallucination:** với ViTextVQA, dùng độ phân giải cao nhất VRAM cho phép (Qwen2.5-VL hỗ trợ dynamic resolution qua `min_pixels/max_pixels`) — ablation "độ phân giải × OCR-prompting" hợp cho W12.

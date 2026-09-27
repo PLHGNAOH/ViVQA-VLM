@@ -443,7 +443,6 @@ footer {
     <a class="nav-link" href="#risk">Rủi ro</a>
     <a class="nav-link" href="#constraint">Ràng buộc</a>
     <a class="nav-link" href="#team">Nhóm</a>
-    <a class="nav-link" href="#questions-reviewers">Q&A</a>
   </div>
 </nav>
 
@@ -456,7 +455,6 @@ footer {
     <div class="chips">
       <span class="chip">AI (LLM/VLM) · FPT University</span>
       <span class="chip">GVHD: Đặng Ngọc Minh Đức · Phạm Minh Trí</span>
-      <span class="chip">github.com/PLHGNAOH/ViVQA-VLM</span>
     </div>
     <div class="chips" style="margin-top:12px">
       <span class="chip">SE182670 · Phạm Lê Huy Hoàng</span>
@@ -583,7 +581,7 @@ footer {
       </div>
       <div class="hypo-item">
         <span class="hypo-id">H5</span>
-        <span class="hypo-text">PEFT không làm tăng hallucination.</span>
+        <span class="hypo-text">Shared adapter ≥ hiệu suất per-dataset adapter.</span>
       </div>
       <div class="hypo-item">
         <span class="hypo-id">H6</span>
@@ -595,11 +593,11 @@ footer {
       </div>
       <div class="hypo-item">
         <span class="hypo-id">H8</span>
-        <span class="hypo-text">Shared adapter ≥ hiệu suất per-dataset adapter.</span>
+        <span class="hypo-text">PEFT không làm tăng hallucination.</span>
       </div>
     </div>
 
-    <p class="note reveal">Ngưỡng được kế thừa từ văn liệu — CHƯA đo lường trên tiếng Việt. H9–H11 nằm ngoài phạm vi.</p>
+
   </div>
 </section>
 
@@ -705,8 +703,6 @@ footer {
         <canvas id="chartSplit" aria-label="Biểu đồ phân chia train/test cho ViVQA và ViTextVQA"></canvas>
       </div>
     </div>
-
-    <p class="note reveal">Run: src/data/analyze_dataset.py · 2026-09-14T14:55:58Z. Dataset licence = for research purposes.</p>
   </div>
 </section>
 
@@ -744,25 +740,15 @@ footer {
         <div class="card-title">RAG</div>
         <p>Retrieval-Augmented Generation — tùy chọn nếu đủ thời gian.</p>
       </div>
-      <div class="card" style="border-left:4px dashed var(--muted)">
-        <div class="card-tag" style="color:var(--muted)">LOẠI TRỪ</div>
-        <div class="card-title">Soft-prompt tuning</div>
-        <p>Không thuộc phạm vi nghiên cứu — đã loại trừ.</p>
-      </div>
+
     </div>
 
     <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin:48px 0 20px" class="reveal">Baseline đề xuất</h3>
-    <div class="card-grid card-grid-3 reveal">
+    <div class="card-grid card-grid-2 reveal">
       <div class="card card--highlight">
         <div class="card-tag">BASELINE CHÍNH</div>
         <div class="card-title">Qwen2.5-VL-3B-Instruct</div>
-        <span class="badge badge--amber">ĐỀ XUẤT — cần xác nhận với GVHD</span>
         <p style="margin-top:12px">Mature tooling, nằm trong approved baseline list, chạy được trên Colab free T4, yêu cầu transformers thấp hơn → tái tạo dễ hơn.</p>
-      </div>
-      <div class="card card--teal">
-        <div class="card-tag">THAM CHIẾU</div>
-        <div class="card-title">Qwen3-VL-4B-Instruct</div>
-        <p>Dùng để so sánh zero-shot — không training, chỉ đánh giá khả năng zero-shot.</p>
       </div>
       <div class="card card--accent">
         <div class="card-tag">DỰ PHÒNG</div>
@@ -771,30 +757,12 @@ footer {
       </div>
     </div>
 
-    <div class="pull-quote reveal">
-      <p>Nguyên tắc: tái tạo chính xác một baseline trước (W4–W5), sau đó mới cải thiện. Model 3B: vì chạy được trên Colab free T4 và tái tạo tốt hơn.</p>
+    <div class="card card--highlight reveal" style="margin-top:32px">
+      <div class="card-tag">ĐÃ REPRODUCE (W4)</div>
+      <div class="card-title">Zero-shot baseline: EM 38,3% · ANLS 55,9%</div>
+      <p>Qwen2.5-VL-3B trên ViTextVQA (mirror), n=300, seed 42 — mốc tham chiếu để so mọi cải tiến. Số chính thức sẽ chốt trên official split.</p>
     </div>
 
-    <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin: 48px 0 20px" class="reveal">Đã reproduce — kết quả zero-shot (W4–W5)</h3>
-    <div class="card-grid card-grid-2 reveal" style="margin-bottom: 24px;">
-      <div class="card card--teal">
-        <div class="card-tag">Qwen2.5-VL-3B-Instruct</div>
-        <div class="card-title">EM 38.3% · ANLS 55.9%</div>
-        <p>ViTextVQA test (n=300, seed 42). Khoảng cách EM↔ANLS 17.6 điểm.</p>
-      </div>
-      <div class="card card--accent">
-        <div class="card-tag">3 Lever Cải tiến (Đã có chứng cứ)</div>
-        <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--muted); line-height: 1.6;">
-          <li><strong>Siết prompt:</strong> 29% trả lời thừa chữ (nguyên nhân EM rớt mạnh).</li>
-          <li><strong>OCR-enhanced:</strong> Model fail chữ cách điệu, chữ nhỏ.</li>
-          <li><strong>Đo hallucination:</strong> Fail trên infographic & biểu đồ.</li>
-        </ul>
-      </div>
-    </div>
-    <div class="reveal" style="font-size: 0.9rem; color: var(--muted); background: var(--wash); padding: 16px; border-radius: var(--radius); line-height: 1.6;">
-      <strong>Protocol:</strong> greedy (do_sample=False), max_new_tokens=32, max_pixels=1024*28*28, float16, Colab T4.<br>
-      <strong>Reproducibility:</strong> Log ở <code>experiments/W04_zeroshot_qwen25vl_seed42/</code>, metric canonical <code>src/eval/metrics.py</code>, repo public <code>github.com/PLHGNAOH/ViVQA-VLM</code>.
-    </div>
   </div>
 </section>
 
@@ -807,8 +775,8 @@ footer {
 
     <div class="card-grid card-grid-3 reveal">
       <div class="card card--teal">
-        <div class="card-tag">📄 ĐÓNG GÓP KHOA HỌC</div>
-        <div class="card-title">Báo cáo / Bài báo khoa học</div>
+        <div class="card-tag">📄 ĐÓNG GÓP NGHIÊN CỨU</div>
+        <div class="card-title">Đóng góp nghiên cứu (PEFT)</div>
         <p>≥ 1 cải tiến PEFT đã được xác nhận (validated) so với baseline, kèm ablation study + phân tích lỗi + phân tích hallucination.</p>
       </div>
       <div class="card card--teal">
@@ -851,10 +819,10 @@ footer {
       <div>
         <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin-bottom:20px">🔬 Ý nghĩa Khoa học / Tính mới</h3>
         <div class="card card--teal" style="margin-bottom:12px">
-          <p><strong>Nghiên cứu PEFT hệ thống đầu tiên</strong> cho Vietnamese VLM (G3)</p>
+          <p><strong>Nghiên cứu PEFT hệ thống</strong> cho Vietnamese VLM — theo khảo sát, chưa được khai thác (G3)</p>
         </div>
         <div class="card card--teal" style="margin-bottom:12px">
-          <p><strong>Đo lường hallucination đầu tiên</strong> cho Vietnamese VQA (G4)</p>
+          <p><strong>Đo lường hallucination</strong> cho Vietnamese VQA — hướng còn bỏ ngỏ (G4)</p>
         </div>
         <div class="card card--teal" style="margin-bottom:12px">
           <p>Thích nghi hiệu quả dưới ngân sách tham số nghiêm ngặt (không full FT)</p>
@@ -999,7 +967,7 @@ footer {
             <th>Mức độ</th>
             <th>Giảm thiểu</th>
             <th>Dự phòng</th>
-            <th>Trạng thái (W5)</th>
+            <th>Trạng thái hiện tại</th>
           </tr>
         </thead>
         <tbody>
@@ -1029,14 +997,14 @@ footer {
             <td class="risk-med">Trung bình</td>
             <td>Preprocessing, kiểm tra licence</td>
             <td>Mirror khác</td>
-            <td><span class="badge badge--teal" style="font-size:0.75rem">Đã verify + tách ViVQA-X</span></td>
+            <td><span class="badge badge--amber" style="font-size:0.75rem">Một phần: ViVQA xong; ViTextVQA còn mirror</span></td>
           </tr>
           <tr>
             <td>Baseline khó tái tạo</td>
             <td class="risk-high">Cao</td>
             <td>Source repo, fixed seed</td>
             <td>Đổi VLM</td>
-            <td><span class="badge badge--teal" style="font-size:0.75rem">Đã khử (EM 38.3 reproduce)</span></td>
+            <td><span class="badge badge--amber" style="font-size:0.75rem">Một phần: reproduce trên mirror (official pending)</span></td>
           </tr>
           <tr>
             <td>OCR kém</td>
@@ -1125,34 +1093,7 @@ footer {
 <!-- ====== §13 Q&A ====== -->
 <section id="questions-reviewers" class="closing">
   <div class="container">
-    <p class="section-eyebrow reveal" style="color:var(--teal)">Phần 13</p>
-    <h2 class="section-title reveal">Câu hỏi cho quý thầy cô phản biện</h2>
-    <p class="section-lead reveal">Chúng tôi mong nhận được phản hồi từ quý thầy cô về các vấn đề sau.</p>
-
-    <div class="card-grid card-grid-2 reveal">
-      <div class="card">
-        <div class="card-tag" style="color:var(--teal)">01</div>
-        <div class="card-title">Phạm vi vấn đề có phù hợp cho capstone không?</div>
-        <p>Đề tài có đủ chiều sâu và phạm vi cho luận văn tốt nghiệp?</p>
-      </div>
-      <div class="card">
-        <div class="card-tag" style="color:var(--teal)">02</div>
-        <div class="card-title">Hướng baseline + PEFT có hợp lý?</div>
-        <p>Chiến lược tái tạo baseline rồi cải tiến bằng PEFT có phù hợp?</p>
-      </div>
-      <div class="card">
-        <div class="card-tag" style="color:var(--teal)">03</div>
-        <div class="card-title">Kiểm soát rủi ro ở giai đoạn QLoRA?</div>
-        <p>Với giới hạn VRAM (Colab T4), nhóm có nên ưu tiên đóng băng hoàn toàn LLM và chỉ train visual adapter, hay vẫn nên thử QLoRA trên LLM?</p>
-      </div>
-      <div class="card">
-        <div class="card-tag" style="color:var(--teal)">04</div>
-        <div class="card-title">Gợi ý về đánh giá?</div>
-        <p>Metrics, phương pháp đánh giá hallucination cho tiếng Việt — quý thầy cô có gợi ý gì?</p>
-      </div>
-    </div>
-
-    <p class="sign-off reveal">Cảm ơn — Nhóm ViVQA-VLM</p>
+    <p class="sign-off reveal">Cảm ơn quý thầy cô phản biện · Nhóm GFA26AI35</p>
   </div>
 </section>
 
