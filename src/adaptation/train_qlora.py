@@ -196,7 +196,9 @@ def filter_trainable(samples: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]
 # 3) Config
 # --------------------------------------------------------------------------- #
 def load_config(path: str, max_pixels: Optional[int] = None, dtype: Optional[str] = None,
-                mode: Optional[str] = None) -> Dict[str, Any]:
+                mode: Optional[str] = None, batch_size: Optional[int] = None,
+                grad_accum: Optional[int] = None,
+                grad_checkpointing: Optional[bool] = None) -> Dict[str, Any]:
     """Đọc config + cho phép ghi đè vài tham số qua CLI (phục vụ ablation, không sửa file gốc)."""
     import yaml
     with open(path, encoding="utf-8") as fp:
@@ -208,6 +210,13 @@ def load_config(path: str, max_pixels: Optional[int] = None, dtype: Optional[str
         cfg.setdefault("quantization", {})["bnb_4bit_compute_dtype"] = dtype
     if mode is not None:
         cfg["prompting"]["mode"] = mode
+    # Ba núm vặn TỐC ĐỘ: quan trọng khi VRAM còn dư mà GPU chưa được dùng hết công suất.
+    if batch_size is not None:
+        cfg["training"]["per_device_batch_size"] = int(batch_size)
+    if grad_accum is not None:
+        cfg["training"]["gradient_accumulation_steps"] = int(grad_accum)
+    if grad_checkpointing is not None:
+        cfg["training"]["gradient_checkpointing"] = bool(grad_checkpointing)
     return cfg
 
 
@@ -269,7 +278,9 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
           config: str = os.path.join(REPO_ROOT, "configs/qwen_lora.yaml"),
           limit: Optional[int] = None, max_steps: Optional[int] = None,
           max_pixels: Optional[int] = None, dtype: Optional[str] = None,
-          mode: Optional[str] = None, image_dir: Optional[str] = None) -> Dict[str, Any]:
+          mode: Optional[str] = None, image_dir: Optional[str] = None,
+          batch_size: Optional[int] = None, grad_accum: Optional[int] = None,
+          grad_checkpointing: Optional[bool] = None) -> Dict[str, Any]:
     """Nạp data -> nạp model + LoRA -> train -> lưu adapter + train_log.json."""
     import torch
     from transformers import Trainer, TrainingArguments, set_seed
@@ -279,7 +290,9 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     if dataset not in DATASETS:
         raise ValueError(f"--dataset phải là một trong {list(DATASETS)}")
 
-    cfg = copy.deepcopy(load_config(config, max_pixels=max_pixels, dtype=dtype, mode=mode))
+    cfg = copy.deepcopy(load_config(config, max_pixels=max_pixels, dtype=dtype, mode=mode,
+                                    batch_size=batch_size, grad_accum=grad_accum,
+                                    grad_checkpointing=grad_checkpointing))
     cfg["run"]["name"] = run_name
     seed = cfg["run"]["seed"]
     set_seed(seed)
@@ -307,8 +320,15 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     _log("   nạp model + gắn LoRA...")
     model, processor = load_vlm_for_training(cfg)
     model.config.use_cache = False                  # bắt buộc khi bật gradient checkpointing
-    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    total = sum(p.numel() for p in model.parameters())
+    # Đếm tham số: với model 4-bit, p.numel() đếm THIẾU vì 2 giá trị được đóng gói
+    # trong 1 byte. PEFT có hàm riêng xử lý đúng -> ưu tiên dùng, chỉ tự đếm khi không có.
+    if hasattr(model, "get_nb_trainable_parameters"):
+        trainable, total = model.get_nb_trainable_parameters()
+        count_method = "peft.get_nb_trainable_parameters (4-bit aware)"
+    else:
+        trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        total = sum(p.numel() for p in model.parameters())
+        count_method = "p.numel() (CẢNH BÁO: đếm thiếu nếu model 4-bit)"
 
     # --- Tham số huấn luyện ---
     t = cfg["training"]
@@ -386,6 +406,7 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         "trainable_params": trainable,
         "total_params": total,
         "trainable_pct": round(100 * trainable / max(total, 1), 4),
+        "param_count_method": count_method,
         "seed": seed,
         "git_commit": git_commit(),
         "config_file": os.path.relpath(config, REPO_ROOT),
@@ -414,8 +435,11 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
                 {"meta": meta, "log_history": trainer.state.log_history})
 
     c = meta["cost"]
+    eff_batch = t["per_device_batch_size"] * t["gradient_accumulation_steps"]
     _log(f"== XONG: {c['steps']} step | {c['sec_per_step']}s/step | "
-         f"VRAM đỉnh {c['peak_vram_gb']} GB | loss {c['final_loss']}")
+         f"{c['sec_per_step'] / max(eff_batch, 1):.2f}s/mẫu | batch hiệu dụng {eff_batch} | "
+         f"grad_ckpt={t['gradient_checkpointing']} | VRAM đỉnh {c['peak_vram_gb']} GB | "
+         f"loss {c['final_loss']}")
     _log(f"   trainable {trainable:,} / {total:,} ({meta['trainable_pct']}%) -> PEFT-only OK")
     _log(f"   adapter -> {adapter_dir}")
     _log(f"   log     -> {out_dir}/train_log.json")
@@ -505,6 +529,10 @@ def main() -> None:
     ap.add_argument("--max_pixels", type=int, default=None, help="Ghi đè model.max_pixels")
     ap.add_argument("--dtype", default=None, choices=["float16", "bfloat16", "float32"])
     ap.add_argument("--mode", default=None, help="Ghi đè prompting.mode")
+    ap.add_argument("--batch_size", type=int, default=None, help="Ghi đè training.per_device_batch_size")
+    ap.add_argument("--grad_accum", type=int, default=None, help="Ghi đè training.gradient_accumulation_steps")
+    ap.add_argument("--grad_checkpointing", default=None, choices=["on", "off"],
+                    help="Bật/tắt gradient checkpointing (tắt = nhanh hơn, tốn VRAM hơn)")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
 
@@ -516,7 +544,8 @@ def main() -> None:
     train(a.dataset, a.run_name, drive_root=a.drive_root, data_file=a.data_file,
           out_root=a.out_root, adapter_root=a.adapter_root, config=a.config,
           limit=a.limit, max_steps=a.max_steps, max_pixels=a.max_pixels,
-          dtype=a.dtype, mode=a.mode)
+          dtype=a.dtype, mode=a.mode, batch_size=a.batch_size, grad_accum=a.grad_accum,
+          grad_checkpointing=None if a.grad_checkpointing is None else (a.grad_checkpointing == "on"))
 
 
 if __name__ == "__main__":
