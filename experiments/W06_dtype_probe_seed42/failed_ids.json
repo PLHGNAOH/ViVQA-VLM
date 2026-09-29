@@ -1,0 +1,217 @@
+{
+  "source_predictions": "experiments/W05_zeroshot_qwen25vl_vitextvqa_test2000_seed42/predictions.json",
+  "source_sha256": "b6b204cad484cde19f4e746e7bbe5715f6aeb957426744b9308fd35da0845699",
+  "num_total": 2000,
+  "num_degraded": 23,
+  "question_ids": [
+    "test_749",
+    "test_4007",
+    "test_4798",
+    "test_5273",
+    "test_5655",
+    "test_8823",
+    "test_10085",
+    "test_11453",
+    "test_13391",
+    "test_15291",
+    "test_15385",
+    "test_18344",
+    "test_18348",
+    "test_23863",
+    "test_23865",
+    "test_23977",
+    "test_26945",
+    "test_30176",
+    "test_34810",
+    "test_35375",
+    "test_41189",
+    "test_46724",
+    "test_47952"
+  ],
+  "records": [
+    {
+      "question_id": "test_749",
+      "question": "địa điểm này nằm ở đâu ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "nguyễn chi thanh , p . 9 , q . 5 , tp . hcm"
+      ]
+    },
+    {
+      "question_id": "test_4007",
+      "question": "tấm bảng trong ảnh nói về tinh thần gì ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "cách mạng tháng tám và quốc khánh 2 / 9 muôn năm"
+      ]
+    },
+    {
+      "question_id": "test_4798",
+      "question": "gian hàng đầu tiên từ trái qua tên gì ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "jimmy food"
+      ]
+    },
+    {
+      "question_id": "test_5273",
+      "question": "cửa hàng trà sữa happy life nằm ở quận mấy ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "5"
+      ]
+    },
+    {
+      "question_id": "test_5655",
+      "question": "cuốn sách này chủ yếu nói về điều gì ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "một lý thuyết cách mạng về thực tại giải thích được"
+      ]
+    },
+    {
+      "question_id": "test_8823",
+      "question": "ở đây có bán cái gì ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "trà chanh"
+      ]
+    },
+    {
+      "question_id": "test_10085",
+      "question": "tấm bảng màu xanh lá bên trái bức hình để giá nhứ thế nào ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "giá tốt mỗi ngày"
+      ]
+    },
+    {
+      "question_id": "test_11453",
+      "question": "liên hệ với quán qua số điệ thoại nào ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "0932 812 516"
+      ]
+    },
+    {
+      "question_id": "test_13391",
+      "question": "của hàng bên trái quán gochu tên gì ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "việt"
+      ]
+    },
+    {
+      "question_id": "test_15291",
+      "question": "cửa hàng này kinh doanh dịch vụ gì ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "nhà hàng"
+      ]
+    },
+    {
+      "question_id": "test_15385",
+      "question": "cửa hàng này bán sản phẩm gì ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "phở bò - bò kho"
+      ]
+    },
+    {
+      "question_id": "test_18344",
+      "question": "chén trứng được bán với giá bao nhiêu ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "5k"
+      ]
+    },
+    {
+      "question_id": "test_18348",
+      "question": "một phần tái + gân ở đây có giá bao nhiêu ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "30k"
+      ]
+    },
+    {
+      "question_id": "test_23863",
+      "question": "địa chỉ ghi trên quán là gì ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "99 / 18 / 5 / 38 đường thanh xuân 21 , kp 5 , p . thạnh xuân , q . 12"
+      ]
+    },
+    {
+      "question_id": "test_23865",
+      "question": "quận được ghi trên bảng là gì ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "q . 12"
+      ]
+    },
+    {
+      "question_id": "test_23977",
+      "question": "nội dung chính của tấm ảnh này là gì ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "siêu thị việt nam tại hàn quốc"
+      ]
+    },
+    {
+      "question_id": "test_26945",
+      "question": "những đứa trẻ bản lĩnh thì như thế nào ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "không tự nhiên mà có"
+      ]
+    },
+    {
+      "question_id": "test_30176",
+      "question": "ai là tác giả của cuốn sách này ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "nguyễn thị kim dung hồ thị vân anh"
+      ]
+    },
+    {
+      "question_id": "test_34810",
+      "question": "chữ màu trắng bên dưới góc trái là gì ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "xưởngmaysỉ"
+      ]
+    },
+    {
+      "question_id": "test_35375",
+      "question": "hanatech chuyên về mặt hàng nào ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "kệ siêu thị việt nam"
+      ]
+    },
+    {
+      "question_id": "test_41189",
+      "question": "cty cổ phần năng lượng đông á cần tuyển bao nhiêu điều phối bán hàng có nghiệp vụ kế toán ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "2"
+      ]
+    },
+    {
+      "question_id": "test_46724",
+      "question": "bản đồ này của tỉnh nào ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "tây ninh"
+      ]
+    },
+    {
+      "question_id": "test_47952",
+      "question": "bức thư trong ảnh là gửi cho ai ?",
+      "prediction": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "answers": [
+        "vợ yêu"
+      ]
+    }
+  ]
+}
