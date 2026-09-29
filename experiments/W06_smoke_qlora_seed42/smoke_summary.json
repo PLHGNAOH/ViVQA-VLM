@@ -21,7 +21,7 @@
       "trainable_pct": 0.3612,
       "param_count_method": null,
       "git_commit": "e7f9a40",
-      "note": "chạy trước commit d22595c; trainable_pct trong log bị đếm thiếu do 4-bit packing; giá trị đúng 0.196% (PEFT)"
+      "note": "chạy trước commit d22595c; trainable_pct (0.3612) và total_params (2,041,397,248) trong log bị đếm thiếu do 4-bit packing; giá trị đúng theo PEFT: 0.196% và 3,761,995,776"
     },
     {
       "run_name": "W06_smoke_qlora_qwen25vl_vivqa_mp512_fast_seed42",
@@ -52,7 +52,8 @@
       "total_params": 3761995776,
       "trainable_pct": 0.196,
       "param_count_method": "peft.get_nb_trainable_parameters (4-bit aware)",
-      "git_commit": "d22595c"
+      "git_commit": "d22595c",
+      "caveat": "chỉ 10 step (run (1) là 30 step); chi phí khởi động chiếm tỉ trọng lớn hơn nên sec_per_step có thể bị thổi lên. Hướng sai lệch làm batch 6 trông chậm hơn thực tế, kết luận 'không nhanh hơn đáng kể' không đổi."
     },
     {
       "run_name": "W06_smoke_qlora_qwen25vl_vivqa_mp1280_seed42",
@@ -60,5 +61,8 @@
       "note": "Chủ động ngắt: quyết định max_pixels dời sang W7, đo trên L4 bf16."
     }
   ],
-  "conclusion": "Tăng batch 2->6 (checkpointing bật) không tăng tốc: 4.93 vs 5.10 s/mẫu, VRAM 5.93 -> 11.6 GB. T4 bão hoà tính toán ở fp32; tối ưu phần mềm không cứu được, cần đổi GPU (L4 bf16, W7). Giữ batch 2 làm mặc định. 1 epoch ViVQA ~15 giờ trên T4."
+  "vivqa_train_samples": 10799,
+  "epoch_hours_t4_estimate": 14.77,
+  "epoch_estimate_basis": "N mẫu × 4.9254 s/mẫu (run (1), batch 2, fp32, T4)",
+  "conclusion": "Tăng batch 2->6 (checkpointing bật) không tăng tốc: 4.93 vs 5.10 s/mẫu, VRAM 5.93 -> 11.6 GB. T4 bão hoà tính toán ở fp32; tối ưu phần mềm không cứu được, cần đổi GPU (L4 bf16, W7). Giữ batch 2 làm mặc định. 1 epoch ViVQA (10799 mẫu) ~14.77 giờ trên T4."
 }
