@@ -145,6 +145,27 @@ def build_target_text(answer: str, turn_end: str = QWEN_TURN_END) -> str:
     return answer + turn_end
 
 
+def plan_schedule(n_samples: int, batch_size: int, grad_accum: int, epochs: float,
+                  warmup_ratio: float, max_steps: Optional[int] = None) -> Dict[str, int]:
+    """
+    Quy đổi lịch huấn luyện sang SỐ STEP.
+
+    Vì sao cần: `TrainingArguments` của transformers 5.x chỉ nhận `warmup_steps`,
+    không còn `warmup_ratio`. Nhưng config của dự án khai báo theo TỈ LỆ (hợp lý hơn
+    vì không phụ thuộc kích thước dataset), nên phải quy đổi ở đây — một chỗ duy nhất.
+
+    Trả về: {"steps_per_epoch", "total_steps", "warmup_steps"}.
+    """
+    import math
+    eff_batch = max(int(batch_size) * int(grad_accum), 1)
+    steps_per_epoch = max(1, math.ceil(max(int(n_samples), 1) / eff_batch))
+    total_steps = int(max_steps) if max_steps else max(1, int(round(steps_per_epoch * float(epochs))))
+    ratio = float(warmup_ratio or 0.0)
+    warmup_steps = max(1, int(round(ratio * total_steps))) if ratio > 0 else 0
+    return {"steps_per_epoch": steps_per_epoch, "total_steps": total_steps,
+            "warmup_steps": warmup_steps}
+
+
 def pick_answer(sample: Dict[str, Any]) -> str:
     """
     ViVQA mỗi câu 1 đáp án; ViTextVQA có thể nhiều. Quy ước: lấy đáp án ĐẦU TIÊN.
@@ -292,12 +313,18 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     # --- Tham số huấn luyện ---
     t = cfg["training"]
     compute_dtype = cfg["model"].get("torch_dtype", "float16")
-    args = TrainingArguments(
+    sched = plan_schedule(len(samples), t["per_device_batch_size"],
+                          t["gradient_accumulation_steps"], t["epochs"],
+                          t.get("warmup_ratio", 0.0), max_steps)
+    _log(f"   lịch: {sched['total_steps']} step tổng "
+         f"({sched['steps_per_epoch']} step/epoch), warmup {sched['warmup_steps']} step")
+
+    ta_kwargs = dict(
         output_dir=os.path.join(out_dir, "checkpoints"),
         per_device_train_batch_size=t["per_device_batch_size"],
         gradient_accumulation_steps=t["gradient_accumulation_steps"],
         learning_rate=t["learning_rate"],
-        warmup_ratio=t["warmup_ratio"],
+        warmup_steps=sched["warmup_steps"],          # transformers 5.x bỏ warmup_ratio
         weight_decay=t["weight_decay"],
         logging_steps=t["logging_steps"],
         save_strategy="no" if max_steps else t["save_strategy"],
@@ -311,6 +338,14 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         report_to="none",
         dataloader_num_workers=2,
     )
+    # Lớp phòng vệ: API TrainingArguments đổi theo phiên bản. Bỏ tham số không được
+    # hỗ trợ và BÁO RÕ, thay vì để script chết giữa chừng sau khi đã nạp model 4 phút.
+    import dataclasses
+    supported = {f.name for f in dataclasses.fields(TrainingArguments)}
+    unsupported = sorted(set(ta_kwargs) - supported)
+    if unsupported:
+        _log(f"   ⚠️ transformers hiện tại không nhận: {unsupported} -> bỏ qua (ghi vào log)")
+    args = TrainingArguments(**{k: v for k, v in ta_kwargs.items() if k in supported})
 
     trainer = Trainer(model=model, args=args, train_dataset=samples,
                       data_collator=make_collate_fn(processor, cfg))
@@ -345,7 +380,8 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         "torch_dtype": compute_dtype,
         "quantization": cfg["quantization"],
         "lora": cfg["lora"],
-        "training": {**t, "max_steps": max_steps, "limit": limit},
+        "training": {**t, "max_steps": max_steps, "limit": limit, **sched,
+                     "unsupported_training_args": unsupported},
         "peft_only": True,
         "trainable_params": trainable,
         "total_params": total,
@@ -419,6 +455,19 @@ def _selftest() -> None:
         raise AssertionError("không chặn số mẫu lệch")
     except ValueError:
         pass
+
+    # (d2) quy đổi lịch huấn luyện: tỉ lệ warmup -> số step
+    sc = plan_schedule(n_samples=200, batch_size=2, grad_accum=8, epochs=3,
+                       warmup_ratio=0.03)
+    assert sc["steps_per_epoch"] == 13, sc          # ceil(200/16)
+    assert sc["total_steps"] == 39, sc              # 13 * 3
+    assert sc["warmup_steps"] == 1, sc              # round(0.03*39)=1, sàn tối thiểu 1
+    sc = plan_schedule(200, 2, 8, 3, 0.03, max_steps=30)
+    assert sc["total_steps"] == 30 and sc["warmup_steps"] == 1, sc
+    sc = plan_schedule(100000, 2, 8, 3, 0.03)
+    # round(0.03*18750) = round(562.5) = 562 — Python làm tròn .5 về số CHẴN
+    assert sc["total_steps"] == 18750 and sc["warmup_steps"] == 562, sc
+    assert plan_schedule(200, 2, 8, 3, 0.0)["warmup_steps"] == 0   # tắt warmup
 
     # (e) văn bản đích luôn có token kết thúc lượt
     assert build_target_text("  màu   đỏ ") == "màu đỏ" + QWEN_TURN_END
