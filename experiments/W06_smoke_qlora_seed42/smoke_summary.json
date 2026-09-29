@@ -1,0 +1,64 @@
+{
+  "purpose": "Đo chi phí train QLoRA trên T4 (sec/step, VRAM đỉnh) để lập ngân sách W7-W12",
+  "hardware": "Tesla T4 15GB, Colab free, fp32 compute (theo dtype probe W6)",
+  "runs": [
+    {
+      "run_name": "W06_smoke_qlora_qwen25vl_vivqa_mp512_seed42",
+      "status": "ok",
+      "max_pixels": 401408,
+      "torch_dtype": "float32",
+      "per_device_batch_size": 2,
+      "gradient_accumulation_steps": 8,
+      "gradient_checkpointing": true,
+      "effective_batch": 16,
+      "steps": 30,
+      "sec_per_step": 78.807,
+      "sec_per_sample": 4.9254,
+      "peak_vram_gb": 5.93,
+      "final_loss": 1.1722,
+      "trainable_params": 7372800,
+      "total_params": 2041397248,
+      "trainable_pct": 0.3612,
+      "param_count_method": null,
+      "git_commit": "e7f9a40",
+      "note": "chạy trước commit d22595c; trainable_pct trong log bị đếm thiếu do 4-bit packing; giá trị đúng 0.196% (PEFT)"
+    },
+    {
+      "run_name": "W06_smoke_qlora_qwen25vl_vivqa_mp512_fast_seed42",
+      "status": "OOM",
+      "max_pixels": 401408,
+      "torch_dtype": "float32",
+      "per_device_batch_size": 6,
+      "gradient_accumulation_steps": 3,
+      "gradient_checkpointing": false,
+      "error": "CUDA OOM: tried to allocate 142 MiB; 14.46 GiB in use of 14.56 GiB",
+      "note": "OOM ngay step đầu. Tắt gradient checkpointing không khả thi trên T4 ở 512 token fp32."
+    },
+    {
+      "run_name": "W06_smoke_qlora_qwen25vl_vivqa_mp512_bs6_seed42",
+      "status": "ok",
+      "max_pixels": 401408,
+      "torch_dtype": "float32",
+      "per_device_batch_size": 6,
+      "gradient_accumulation_steps": 3,
+      "gradient_checkpointing": true,
+      "effective_batch": 18,
+      "steps": 10,
+      "sec_per_step": 91.711,
+      "sec_per_sample": 5.0951,
+      "peak_vram_gb": 11.6,
+      "final_loss": 1.5753,
+      "trainable_params": 7372800,
+      "total_params": 3761995776,
+      "trainable_pct": 0.196,
+      "param_count_method": "peft.get_nb_trainable_parameters (4-bit aware)",
+      "git_commit": "d22595c"
+    },
+    {
+      "run_name": "W06_smoke_qlora_qwen25vl_vivqa_mp1280_seed42",
+      "status": "not_run",
+      "note": "Chủ động ngắt: quyết định max_pixels dời sang W7, đo trên L4 bf16."
+    }
+  ],
+  "conclusion": "Tăng batch 2->6 (checkpointing bật) không tăng tốc: 4.93 vs 5.10 s/mẫu, VRAM 5.93 -> 11.6 GB. T4 bão hoà tính toán ở fp32; tối ưu phần mềm không cứu được, cần đổi GPU (L4 bf16, W7). Giữ batch 2 làm mặc định. 1 epoch ViVQA ~15 giờ trên T4."
+}
