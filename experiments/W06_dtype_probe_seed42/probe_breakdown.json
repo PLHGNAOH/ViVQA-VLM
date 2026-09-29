@@ -1,0 +1,52 @@
+{
+  "fp16_dir": "experiments/W06_probe_fp16_qwen25vl_vitextvqa73_seed42",
+  "fp32_dir": "experiments/W06_probe_fp32_qwen25vl_vitextvqa73_seed42",
+  "failed_ids_file": "experiments/W06_dtype_probe_seed42/failed_ids.json",
+  "metric_names": [
+    "exact_match",
+    "vqa_accuracy",
+    "anls"
+  ],
+  "anls_threshold": 0.5,
+  "n_failed": 23,
+  "n_control": 50,
+  "metrics": {
+    "fp16": {
+      "failed_group": {
+        "exact_match": 0.0,
+        "vqa_accuracy": 0.0,
+        "anls": 0.0
+      },
+      "control_group": {
+        "exact_match": 0.28,
+        "vqa_accuracy": 0.28,
+        "anls": 0.39559653599412636
+      }
+    },
+    "fp32": {
+      "failed_group": {
+        "exact_match": 0.34782608695652173,
+        "vqa_accuracy": 0.34782608695652173,
+        "anls": 0.5169529487741548
+      },
+      "control_group": {
+        "exact_match": 0.28,
+        "vqa_accuracy": 0.28,
+        "anls": 0.4066170887935594
+      }
+    }
+  },
+  "n_recovered": 8,
+  "recovered_ids": [
+    "test_11453",
+    "test_18344",
+    "test_18348",
+    "test_23865",
+    "test_41189",
+    "test_46724",
+    "test_4798",
+    "test_8823"
+  ],
+  "n_regressed": 0,
+  "regressed_ids": []
+}

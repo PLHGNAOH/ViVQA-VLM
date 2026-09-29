@@ -1,0 +1,67 @@
+{
+  "hardware": {
+    "gpu": "Tesla T4",
+    "compute_capability": "sm_75",
+    "bf16_supported": true,
+    "vram_gb": 14.6,
+    "torch": "2.11.0+cu128",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+  },
+  "probe_file": "probe_dtype73_seed42.json",
+  "n_probe": 73,
+  "n_failed_source": 23,
+  "verdict": "XÁC NHẬN: tràn số fp16 là nguyên nhân của 23 output hỏng.",
+  "decision": "Chốt compute_dtype=float32 cho baseline + QLoRA -> PHẢI chạy lại baseline với config mới.",
+  "runs": [
+    {
+      "run_name": "W06_probe_fp16_qwen25vl_vitextvqa73_seed42",
+      "status": "ok",
+      "compute_dtype": "float16",
+      "torch_dtype": "float16",
+      "max_pixels": 401408,
+      "exact_match": 0.1918,
+      "anls": 0.271,
+      "n_degraded": 23,
+      "degraded_ids": [
+        "test_749",
+        "test_4007",
+        "test_4798",
+        "test_5273",
+        "test_5655",
+        "test_8823",
+        "test_10085",
+        "test_11453",
+        "test_13391",
+        "test_15291",
+        "test_15385",
+        "test_18344",
+        "test_18348",
+        "test_23863",
+        "test_23865",
+        "test_23977",
+        "test_26945",
+        "test_30176",
+        "test_34810",
+        "test_35375",
+        "test_41189",
+        "test_46724",
+        "test_47952"
+      ],
+      "sec_per_sample": 1.965,
+      "elapsed_sec": 382.6
+    },
+    {
+      "run_name": "W06_probe_fp32_qwen25vl_vitextvqa73_seed42",
+      "status": "ok",
+      "compute_dtype": "float32",
+      "torch_dtype": "float32",
+      "max_pixels": 401408,
+      "exact_match": 0.3014,
+      "anls": 0.4414,
+      "n_degraded": 0,
+      "degraded_ids": [],
+      "sec_per_sample": 2.739,
+      "elapsed_sec": 236.1
+    }
+  ]
+}
