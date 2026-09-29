@@ -85,7 +85,7 @@ Bảng chéo EM: 93 cùng đúng · 7 chỉ 512 đúng · 15 chỉ 1.280 đúng 
 
 | # | Vấn đề | Mức | Hướng xử lý |
 |---|--------|-----|-------------|
-| B1 | Baseline Qwen2.5-VL-3B chưa được GVHD xác nhận (treo từ W4) | Trung bình | Gửi thầy tin nhắn kèm kết quả W5–W6 |
+| B1 | Baseline Qwen2.5-VL-3B chưa được GVHD xác nhận (treo từ W4) | Trung bình | Trao đổi trực tiếp với hai GVHD tại buổi họp offline |
 | B2 | T4 không có bf16, fp32 quá chậm: 14,77 giờ/epoch | **Cao** | Colab Pro, GPU L4 từ W7 |
 | B3 | Cấu hình baseline W5 dùng fp16 (đã chứng minh gây lỗi) | Cao | Chạy lại baseline **một lần** sau khi đóng băng cấu hình ở W7 |
 | B4 | `run_baseline.py` kiểm tra cứng `torch_dtype = float16` (`CANONICAL`) | Trung bình | Cập nhật cùng lúc với việc đóng băng cấu hình ở W7 |
