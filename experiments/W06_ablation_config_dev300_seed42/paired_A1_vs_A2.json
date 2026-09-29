@@ -1,0 +1,48 @@
+{
+  "run_a": "experiments/W06_ablation_A1_mp512_4bit_qwen25vl_vitextvqa_dev300_seed42",
+  "run_b": "experiments/W06_ablation_A2_mp1280_4bit_qwen25vl_vitextvqa_dev300_seed42",
+  "label_a": "A1_mp512",
+  "label_b": "A2_mp1280",
+  "n": 300,
+  "n_both_correct": 93,
+  "n_only_a": 7,
+  "n_only_b": 15,
+  "n_both_wrong": 185,
+  "b": 7,
+  "c": 15,
+  "p_value": 0.13380050659179688,
+  "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+  "em_a": 0.3333333333333333,
+  "em_b": 0.36,
+  "em_diff": 0.026666666666666672,
+  "anls_threshold": 0.5,
+  "anls_a": 0.4654258244231769,
+  "anls_b": 0.5041367336123113,
+  "anls_diff": 0.038710909189134286,
+  "anls_ci95": [
+    0.0115909719633507,
+    0.06557741418287795
+  ],
+  "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 42,
+    "method": "paired percentile"
+  },
+  "only_b_question_ids": [
+    "dev_656",
+    "dev_5066",
+    "dev_7892",
+    "dev_8778",
+    "dev_15529",
+    "dev_18765",
+    "dev_24925",
+    "dev_26157",
+    "dev_26856",
+    "dev_26857",
+    "dev_43000",
+    "dev_46429",
+    "dev_46569",
+    "dev_48105",
+    "dev_50009"
+  ]
+}
