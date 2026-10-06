@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ViVQA-VLM — Review 1</title>
+<title>ViVQA-VLM — Review 1 (cập nhật sau góp ý)</title>
 <meta name="description" content="Efficient Vietnamese Visual Question Answering using Vision-Language Models — Review 1 Report">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -414,6 +414,40 @@ section:nth-of-type(odd) .hypo-item { background: var(--wash); }
   .nav-logo { font-size: .95rem; margin-right: 8px; }
 }
 
+
+/* ======== LISTS IN CARDS ======== */
+.card ul, .card ol { margin: 10px 0 0 20px; font-size: .92rem; color: var(--muted); line-height: 1.6; }
+.card li { margin: 4px 0; }
+.card li strong, .card p strong { color: var(--text); }
+
+/* ======== PIPELINE ======== */
+.pipe { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); margin: 8px 0 24px; }
+.pipe-step {
+  background: var(--paper); border: 1px solid var(--line); border-top: 4px solid var(--teal);
+  border-radius: var(--radius); padding: 18px 18px 16px; box-shadow: var(--shadow);
+}
+section:nth-of-type(odd) .pipe-step { background: var(--wash); }
+.pipe-step--core { border-top-color: var(--amber); background: var(--ambert) !important; }
+.pipe-num { font-family: var(--mono); font-size: .75rem; font-weight: 600; color: var(--teal); }
+.pipe-title { font-family: var(--serif); font-size: 1.05rem; font-weight: 600; color: var(--ink); margin: 2px 0 6px; line-height: 1.3; }
+.pipe-step p { font-size: .86rem; color: var(--muted); line-height: 1.55; }
+
+/* ======== PROMPT BOX ======== */
+.prompt-box {
+  font-family: var(--mono); font-size: .82rem; line-height: 1.7;
+  background: #0f1d36; color: #E5E7EB; border-radius: var(--radius);
+  padding: 18px 22px; white-space: pre-wrap; overflow-x: auto; margin-top: 12px;
+}
+.prompt-box .ph { color: #F0B95A; }
+
+/* ======== TABLE HELPERS ======== */
+.yes { color: #15803d; font-weight: 600; }
+.no  { color: #b91c1c; font-weight: 600; }
+td.num { font-family: var(--mono); white-space: nowrap; }
+tr.row-key td { background: var(--ambert); }
+.sub-h { font-family: var(--serif); font-size: 1.2rem; font-weight: 600; color: var(--ink); margin: 48px 0 16px; }
+
+
 /* ======== FOOTER ======== */
 footer {
   background: var(--wash); border-top: 1px solid var(--line);
@@ -431,8 +465,9 @@ footer {
 <nav aria-label="Điều hướng chính">
   <div class="nav-inner">
     <span class="nav-logo">ViVQA-VLM</span>
-    <a class="nav-link" href="#problem">Vấn đề</a>
+    <a class="nav-link" href="#problem">Bài toán</a>
     <a class="nav-link" href="#gap">Khoảng trống</a>
+    <a class="nav-link" href="#prior">Công trình trước</a>
     <a class="nav-link" href="#questions">Câu hỏi NC</a>
     <a class="nav-link" href="#hypotheses">Giả thuyết</a>
     <a class="nav-link" href="#dataset">Dữ liệu</a>
@@ -443,13 +478,14 @@ footer {
     <a class="nav-link" href="#risk">Rủi ro</a>
     <a class="nav-link" href="#constraint">Ràng buộc</a>
     <a class="nav-link" href="#team">Nhóm</a>
+    <a class="nav-link" href="#feedback">Góp ý R1</a>
   </div>
 </nav>
 
 <!-- ====== HERO ====== -->
 <header class="hero" id="hero">
   <div class="hero-content">
-    <p class="eyebrow">Review 1 · Phạm vi Báo cáo 1</p>
+    <p class="eyebrow">Review 1 · Bản cập nhật theo góp ý · 06/10/2026</p>
     <h1 class="hero-title">ViVQA-VLM</h1>
     <p class="hero-thesis">Efficient Vietnamese Visual Question Answering<br>using Vision-Language Models</p>
     <div class="chips">
@@ -471,16 +507,83 @@ footer {
 <section id="problem">
   <div class="container">
     <p class="section-eyebrow reveal">Phần 01</p>
-    <h2 class="section-title reveal">Vấn đề &amp; Động lực</h2>
-    <p class="section-lead reveal">Khác với phân loại hay nhận diện vật thể, VQA đòi hỏi mô hình hiểu <strong>cả hình ảnh lẫn ngôn ngữ</strong> và có khả năng <strong>suy luận</strong> để trả lời câu hỏi.</p>
+    <h2 class="section-title reveal">Bài toán &amp; Vấn đề của tiếng Việt</h2>
+    <p class="section-lead reveal">Cho một ảnh và một câu hỏi tiếng Việt về ảnh đó, hệ thống phải sinh ra câu trả lời tiếng Việt <strong>ngắn, đúng nội dung ảnh và đúng chính tả có dấu</strong>. Khác với phân loại hay nhận diện vật thể, VQA đòi hỏi hiểu đồng thời ảnh, ngôn ngữ và suy luận.</p>
 
     <div class="flow reveal">
-      <div class="flow-box">🖼️ Ảnh tiếng Việt<br>+ ❓ Câu hỏi tiếng Việt</div>
+      <div class="flow-box">🖼️ Ảnh<br>+ ❓ Câu hỏi tiếng Việt</div>
       <span class="flow-arrow">→</span>
-      <div class="flow-box flow-box--accent">🤖 Vision-Language Model</div>
+      <div class="flow-box flow-box--accent">🤖 Qwen2.5-VL-3B<br>+ QLoRA adapter</div>
       <span class="flow-arrow">→</span>
       <div class="flow-box">💬 Câu trả lời tiếng Việt</div>
     </div>
+
+    <div class="pull-quote reveal">
+      <p>Bài toán nghiên cứu: thích nghi một VLM mã nguồn mở (Qwen2.5-VL-3B) để trả lời câu hỏi tiếng Việt — đọc đúng chữ có dấu trong ảnh và trả lời đúng bằng tiếng Việt — chỉ bằng PEFT (QLoRA), chạy được trên một GPU T4.</p>
+      <cite>Phát biểu bài toán · cập nhật sau Review 1</cite>
+    </div>
+
+    <h3 class="sub-h reveal">Đặc tả Input / Output</h3>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Thành phần</th><th>Định nghĩa</th><th>ViVQA</th><th>ViTextVQA</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Input 1 — Ảnh</strong></td><td>Ảnh RGB, resize theo giới hạn <code>max_pixels</code></td><td>Ảnh đời thường (nguồn MS COCO), không tập trung vào chữ</td><td>Ảnh có chữ tiếng Việt: biển hiệu, menu, bao bì…</td></tr>
+          <tr><td><strong>Input 2 — Câu hỏi</strong></td><td>Văn bản tiếng Việt, chuẩn hoá Unicode NFC</td><td>Câu hỏi ngắn, sinh bán tự động</td><td>Do người viết, trung bình 9,59 từ</td></tr>
+          <tr><td><strong>Output — Câu trả lời</strong></td><td>Văn bản tiếng Việt có dấu, sinh tự do (generative)</td><td>99,83% đáp án ≤ 3 từ</td><td>Trung bình 4,18 từ; đáp án là đoạn chữ có trong ảnh</td></tr>
+          <tr><td><strong>Đánh giá</strong></td><td>So với đáp án chuẩn sau cùng một bước chuẩn hoá</td><td>EM · VQA-Acc</td><td>ANLS · EM</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-h reveal">Vấn đề của tiếng Việt khác tiếng Anh ở đâu?</h3>
+    <div class="card-grid card-grid-4 reveal">
+      <div class="card card--teal">
+        <div class="card-tag">V1</div>
+        <div class="card-title">Đọc chữ có dấu trong ảnh</div>
+        <p>Dấu thanh và chữ cái có dấu (ă, â, ê, ô, ơ, ư, đ) là các nét rất nhỏ trên ảnh. Model đọc sai hoặc bỏ dấu là đổi nghĩa (“má” ≠ “mà”). Đây là lỗi nhận thức ở mức pixel, không sửa được bằng chuẩn hoá văn bản.</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Bằng chứng: trên ViTextVQA, bỏ dấu làm giảm F1 của mọi mô hình baseline (Nguyen et al., ViTextVQA, §7.1).</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">V2</div>
+        <div class="card-title">Trả lời sai ngôn ngữ hoặc sai định dạng</div>
+        <p>VLM pretrain chủ yếu trên tiếng Anh/tiếng Trung dễ trả lời bằng tiếng Anh, trộn Anh–Việt (code-switching) hoặc trả lời dài dòng. Khi đó EM = 0 dù model hiểu đúng nội dung. Với tiếng Anh, vấn đề này gần như không có vì đó là ngôn ngữ chính của model.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">V3</div>
+        <div class="card-title">Thứ tự chữ &amp; ranh giới từ</div>
+        <p>Khoảng trắng tiếng Việt tách âm tiết chứ không tách từ (“thời gian” là một từ). Chữ trích từ ảnh sai thứ tự sẽ làm vỡ từ và sai nghĩa.</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Bằng chứng: sắp OCR theo thứ tự trái-trên → phải-dưới (TL-BR) cải thiện đa số mô hình trên ViTextVQA (Nguyen et al., §6.4).</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">V4</div>
+        <div class="card-title">Hallucination</div>
+        <p>Model trả lời trôi chảy nhưng nội dung không có trong ảnh (bịa vật thể hoặc bịa chữ). Chưa có đánh giá hallucination dạng POPE cho VQA tiếng Việt (G4).</p>
+      </div>
+    </div>
+
+    <h3 class="sub-h reveal">Tiền xử lý ≠ Vấn đề nghiên cứu</h3>
+    <div class="two-col reveal">
+      <div class="card card--accent">
+        <div class="card-title">Tiền xử lý — bước kỹ thuật bắt buộc, không phải đóng góp</div>
+        <ul>
+          <li>Chuẩn hoá Unicode NFC cho câu hỏi và đáp án</li>
+          <li>Lowercase, bỏ dấu câu thừa, gộp khoảng trắng</li>
+          <li>Áp dụng cùng một hàm chuẩn hoá cho đáp án chuẩn và đầu ra model trước khi tính metric</li>
+          <li>Resize ảnh theo <code>max_pixels</code></li>
+        </ul>
+      </div>
+      <div class="card card--highlight">
+        <div class="card-title">Vấn đề nghiên cứu — trọng tâm đề tài</div>
+        <ul>
+          <li>Đọc đúng chữ có dấu từ ảnh (V1, V3)</li>
+          <li>Trả lời đúng ngôn ngữ, đúng định dạng (V2)</li>
+          <li>Không bịa nội dung (V4)</li>
+          <li>Đạt được các điều trên chỉ bằng PEFT, trên GPU T4</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note reveal">Mốc thực tế: Qwen2.5-VL-3B zero-shot đạt EM 38,3% · ANLS 55,9% trên ViTextVQA (mirror, n=300, seed 42) — xem Phần 07.</p>
   </div>
 </section>
 
@@ -501,7 +604,7 @@ footer {
       <div class="card card--teal">
         <div class="card-tag">G2</div>
         <div class="card-title">VQA tiếng Việt yếu, đặc biệt scene-text</div>
-        <p>Hiệu suất trên ViTextVQA thấp: OCR, dấu tiếng Việt, và code-switching chưa được giải quyết triệt để.</p>
+        <p>Hiệu suất trên ViTextVQA thấp: OCR, dấu tiếng Việt và code-switching chưa được giải quyết triệt để. Kết quả cao nhất được báo cáo mới đạt EM 25,48%, trong khi con người đạt 88% (xem Phần 03).</p>
         <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Nguồn: <a href="https://arxiv.org/abs/2404.10652" target="_blank" rel="noopener" style="color:var(--muted)">ViTextVQA (Nguyen 2024) ↗</a> · <a href="https://arxiv.org/abs/2310.03744" target="_blank" rel="noopener" style="color:var(--muted)">LLaVA-1.5 (Liu 2024) ↗</a></p>
       </div>
       <div class="card card--highlight">
@@ -522,18 +625,65 @@ footer {
   </div>
 </section>
 
+<!-- ====== §3 PRIOR WORK ====== -->
+<section id="prior">
+  <div class="container">
+    <p class="section-eyebrow reveal">Phần 03</p>
+    <h2 class="section-title reveal">Công trình trước &amp; Baseline tham chiếu</h2>
+    <p class="section-lead reveal">Đề tài dùng hai loại mốc so sánh. (1) <strong>Baseline tái lập</strong>: một VLM nhóm tự chạy lại và dùng để kết luận cải tiến (Qwen2.5-VL-3B, Phần 07). (2) <strong>Baseline từ công trình trước</strong>: số liệu trích từ paper đã công bố, không chạy lại, dùng để định vị kết quả.</p>
+
+    <h3 class="sub-h reveal">ViTextVQA — tập test</h3>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Công trình</th><th>Hướng tiếp cận</th><th>Tham số được huấn luyện</th><th>F1 (%)</th><th>EM (%)</th><th>Liên quan tới đề tài</th></tr></thead>
+        <tbody>
+          <tr><td><strong>BLIP-2 large</strong><br><span style="color:var(--muted);font-size:.8rem">Li et al., ICML 2023</span></td><td>Encoder ảnh + LM đóng băng, chỉ train Q-Former; OCR SwinTextSpotter, LM ViT5</td><td class="num">≈8% / ≈1,4B</td><td class="num">38,47</td><td class="num">15,58</td><td>Đóng băng phần lớn mô hình — cùng tinh thần với PEFT</td></tr>
+          <tr><td><strong>PreSTU large</strong><br><span style="color:var(--muted);font-size:.8rem">Kil et al., ICCV 2023</span></td><td>T5 pretrain cho scene-text, sắp OCR theo bố cục</td><td class="num">≈100% / ≈860M</td><td class="num">44,93</td><td class="num">22,64</td><td>Baseline full fine-tuning mạnh nhất trong bảng</td></tr>
+          <tr class="row-key"><td><strong>ViTextBLIP-2</strong><br><span style="color:var(--muted);font-size:.8rem">Nguyen et al., ESWA 2025</span></td><td>BLIP-2 + OCR + caption, chỉ train Q-Former</td><td class="num">≈5% / ≈2,5B</td><td class="num">53,95</td><td class="num">25,48</td><td>Kết quả cao nhất được báo cáo trên ViTextVQA; cũng là hướng hiệu quả tham số</td></tr>
+          <tr><td><strong>QwenVL-7B zero-shot</strong><br><span style="color:var(--muted);font-size:.8rem">tham chiếu, cùng paper</span></td><td>VLM đa ngôn ngữ, không huấn luyện</td><td class="num">0%</td><td class="num">53,80</td><td class="num">28,00</td><td>Đo trên 100 mẫu ngẫu nhiên — VLM hiện đại zero-shot đã ngang mốc cao nhất</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note reveal" style="margin-top:0;border-top:none;padding-top:0">Nguồn: Nguyen et al., ViTextVQA (arXiv:2404.10652, bản Expert Systems with Applications), Bảng 6 và 7. Con người: F1 96,42% · EM 88,00%.</p>
+
+    <h3 class="sub-h reveal">ViVQA — tập test</h3>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Công trình</th><th>Hướng tiếp cận</th><th>Kết quả</th><th>Ghi chú</th></tr></thead>
+        <tbody>
+          <tr class="row-key"><td><strong>AViVQA-TranConI</strong><br><span style="color:var(--muted);font-size:.8rem">Nguyen et al., Computers &amp; Electrical Engineering 2024</span></td><td>BLIP-2 (đóng băng) + EfficientNet, chọn đáp án từ tập nhãn</td><td class="num">Accuracy 71,04%</td><td>Cao nhất trong các công trình nhóm đã khảo sát</td></tr>
+          <tr><td><strong>Multi-Vision Contextual Attention cải tiến</strong><br><span style="color:var(--muted);font-size:.8rem">Bui et al., Tạp chí KH ĐHSP TP.HCM 2025</span></td><td>Attention đa đặc trưng thị giác</td><td class="num">Accuracy 62,41%</td><td>Mô hình gốc đạt 60%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card card--amber reveal" style="margin-top:24px">
+      <div class="card-title">Lưu ý khi so sánh</div>
+      <p>Các mốc trên dùng metric và thiết lập khác nhóm (F1 theo token; accuracy dạng phân loại trên tập nhãn cố định), nên chỉ dùng để <strong>định vị</strong>, không đặt cạnh số của nhóm như so sánh trực tiếp. Nhóm tính thêm F1 theo token làm chỉ số phụ để đối chiếu với bảng ViTextVQA.</p>
+    </div>
+
+    <h3 class="sub-h reveal">Điều nhóm rút ra từ công trình trước</h3>
+    <div class="card-grid card-grid-4 reveal">
+      <div class="card card--teal"><div class="card-title">Hiệu quả tham số đã có cơ sở</div><p>ViTextBLIP-2 chỉ huấn luyện khoảng 5% tham số mà vượt các mô hình full fine-tuning → ủng hộ hướng QLoRA của nhóm.</p></div>
+      <div class="card card--teal"><div class="card-title">Dấu tiếng Việt là vấn đề cốt lõi</div><p>Bỏ dấu làm giảm hiệu năng mọi mô hình → V1 là vấn đề nghiên cứu, không chỉ là tiền xử lý.</p></div>
+      <div class="card card--teal"><div class="card-title">Thứ tự OCR ảnh hưởng kết quả</div><p>Sắp TL-BR cải thiện đa số mô hình → nhóm đưa OCR vào prompt theo thứ tự TL-BR.</p></div>
+      <div class="card card--highlight"><div class="card-title">Khoảng trống còn lại</div><p>Trong các công trình nhóm khảo sát, chưa có công trình nào thích nghi VLM đa ngôn ngữ hiện đại (họ Qwen-VL) bằng LoRA/QLoRA cho VQA tiếng Việt (G3).</p></div>
+    </div>
+  </div>
+</section>
+
 <!-- ====== §3 QUESTIONS ====== -->
 <section id="questions">
   <div class="container">
-    <p class="section-eyebrow reveal">Phần 03</p>
+    <p class="section-eyebrow reveal">Phần 04</p>
     <h2 class="section-title reveal">Câu hỏi Nghiên cứu</h2>
     <p class="section-lead reveal">Bốn câu hỏi nghiên cứu định hướng toàn bộ nghiên cứu thực nghiệm và phân tích ablation.</p>
 
     <div class="card-grid card-grid-2 reveal">
       <div class="card card--teal">
         <div class="card-tag">RQ1</div>
-        <div class="card-title">Hiệu suất zero-shot trên ViVQA/ViTextVQA</div>
-        <p>VLM hoạt động thế nào khi zero-shot trên hai benchmark tiếng Việt? Đo bằng EM, VQA-Acc, ANLS.</p>
+        <div class="card-title">Zero-shot &amp; prompting trên dữ liệu tiếng Việt</div>
+        <p>VLM đạt bao nhiêu khi zero-shot trên ViVQA/ViTextVQA, loại lỗi tiếng Việt nào (V1–V3) chiếm ưu thế, và prompt tiếng Việt cải thiện được đến đâu? Đo bằng EM, VQA-Acc, ANLS.</p>
       </div>
       <div class="card card--highlight">
         <div class="card-tag">RQ2 — TRỌNG TÂM</div>
@@ -542,13 +692,13 @@ footer {
       </div>
       <div class="card card--teal">
         <div class="card-tag">RQ3</div>
-        <div class="card-title">OCR-prompting × PEFT trên ViTextVQA</div>
-        <p>Kết hợp OCR prompting với PEFT có hiệp lực (synergy) trên ViTextVQA không? Đo bằng ANLS.</p>
+        <div class="card-title">OCR tiếng Việt × QLoRA trên ViTextVQA</div>
+        <p>Đưa chữ OCR có dấu, sắp TL-BR vào prompt có giúp đọc đúng chữ trong ảnh không, và có cộng hưởng với QLoRA không? Đo bằng ANLS.</p>
       </div>
       <div class="card card--teal">
         <div class="card-tag">RQ4</div>
-        <div class="card-title">PEFT ảnh hưởng hallucination như thế nào?</div>
-        <p>PEFT có làm tăng hay giảm hallucination? Đánh giá theo phong cách POPE-vi.</p>
+        <div class="card-title">QLoRA ảnh hưởng hallucination như thế nào?</div>
+        <p>Sau khi thích nghi bằng QLoRA, model bịa nội dung nhiều hơn hay ít hơn? Đánh giá theo phong cách POPE-vi.</p>
       </div>
     </div>
 
@@ -558,53 +708,45 @@ footer {
 <!-- ====== §4 HYPOTHESES ====== -->
 <section id="hypotheses">
   <div class="container">
-    <p class="section-eyebrow reveal">Phần 04</p>
-    <h2 class="section-title reveal">Giả thuyết (H1–H8)</h2>
-    <p class="section-lead reveal">Tám giả thuyết kiểm chứng được — ngưỡng lấy từ văn liệu quốc tế, chưa đo trên tiếng Việt.</p>
+    <p class="section-eyebrow reveal">Phần 05</p>
+    <h2 class="section-title reveal">Giả thuyết (H1–H4)</h2>
+    <p class="section-lead reveal">Mỗi giả thuyết gắn với một vấn đề tiếng Việt cụ thể (V1–V4) và được kiểm chứng bằng so sánh với baseline tái lập — cùng model, cùng split, cùng seed. Ngưỡng tham khảo từ văn liệu, chưa đo trên tiếng Việt.</p>
 
     <div class="hypo-list reveal">
       <div class="hypo-item hypo-item--highlight">
         <span class="hypo-id">H1</span>
-        <span class="hypo-text">QLoRA đạt ≥ +5 EM/VQA-Acc so với zero-shot.</span>
+        <span class="hypo-text"><strong>QLoRA thích nghi tiếng Việt</strong> — QLoRA trên Qwen2.5-VL-3B tăng ≥ +5 EM so với zero-shot của chính model đó. <span style="color:var(--muted)">(RQ2 · V1–V3)</span></span>
       </div>
       <div class="hypo-item">
         <span class="hypo-id">H2</span>
-        <span class="hypo-text">4-bit đạt ≥ 97% hiệu suất so với 16-bit, VRAM giảm ≥ 40%.</span>
+        <span class="hypo-text"><strong>OCR tiếng Việt</strong> — Đưa chữ OCR có dấu, sắp TL-BR vào prompt tăng ≥ +3 ANLS trên ViTextVQA; kết hợp với QLoRA cho kết quả cao nhất. <span style="color:var(--muted)">(RQ3 · V1, V3)</span></span>
       </div>
       <div class="hypo-item">
         <span class="hypo-id">H3</span>
-        <span class="hypo-text">LoRA all-linear tốt hơn attention-only.</span>
+        <span class="hypo-text"><strong>Ràng buộc ngôn ngữ đầu ra</strong> — Prompt định dạng tiếng Việt (trả lời ngắn, có dấu) tăng ≥ +3 EM và giảm tỉ lệ câu trả lời sai ngôn ngữ hoặc mất dấu. <span style="color:var(--muted)">(RQ1 · V2)</span></span>
       </div>
       <div class="hypo-item">
         <span class="hypo-id">H4</span>
-        <span class="hypo-text">Rank bão hòa tại r ≤ 16 (tăng thêm không cải thiện đáng kể).</span>
-      </div>
-      <div class="hypo-item">
-        <span class="hypo-id">H5</span>
-        <span class="hypo-text">Shared adapter ≥ hiệu suất per-dataset adapter.</span>
-      </div>
-      <div class="hypo-item">
-        <span class="hypo-id">H6</span>
-        <span class="hypo-text">OCR cải thiện ≥ +3 ANLS, có hiệp lực với QLoRA.</span>
-      </div>
-      <div class="hypo-item">
-        <span class="hypo-id">H7</span>
-        <span class="hypo-text">Vietnamese format-prompt cải thiện ≥ +3 EM.</span>
-      </div>
-      <div class="hypo-item">
-        <span class="hypo-id">H8</span>
-        <span class="hypo-text">PEFT không làm tăng hallucination.</span>
+        <span class="hypo-text"><strong>Độ tin cậy</strong> — QLoRA không làm tăng tỉ lệ hallucination (POPE-vi) so với zero-shot. <span style="color:var(--muted)">(RQ4 · V4)</span></span>
       </div>
     </div>
 
-
+    <div class="card card--accent reveal" style="margin-top:32px">
+      <div class="card-title">Không còn là giả thuyết — chuyển sang đo lường hoặc ablation</div>
+      <ul>
+        <li><strong>4-bit so với 16-bit, mức giảm VRAM:</strong> đây là đặc tính đã được chứng minh của QLoRA (Dettmers et al., NeurIPS 2023), không phải lời giải cho tiếng Việt → chỉ báo cáo VRAM, thời gian và số tham số được huấn luyện ở mỗi run.</li>
+        <li><strong>LoRA all-linear vs attention-only, rank r:</strong> là lựa chọn cấu hình → đưa vào ablation phụ.</li>
+        <li><strong>Shared adapter vs adapter riêng từng dataset:</strong> tuỳ chọn, chỉ làm nếu đủ thời gian.</li>
+      </ul>
+    </div>
+    <p class="note reveal">Đối chiếu với bản Review 1: H1 → H1 · H6 → H2 · H7 → H3 · giả thuyết hallucination → H4.</p>
   </div>
 </section>
 
 <!-- ====== §5 DATASET ====== -->
 <section id="dataset">
   <div class="container">
-    <p class="section-eyebrow reveal">Phần 05</p>
+    <p class="section-eyebrow reveal">Phần 06</p>
     <h2 class="section-title reveal">Phân tích Dữ liệu <span class="badge badge--teal">Số liệu thực · phân tích thực tế</span></h2>
     <p class="section-lead reveal" style="margin-bottom: 8px;">Hai bộ dữ liệu benchmark cho VQA tiếng Việt — tất cả con số đều từ phân tích thực tế.</p>
     <p class="note reveal" style="margin-top: 0; padding-top: 0; border-top: none; margin-bottom: 48px;">seed 42: split val ViVQA &amp; chọn sample</p>
@@ -688,6 +830,14 @@ footer {
       </div>
     </div>
 
+    <div class="card card--amber reveal" style="margin-top:32px">
+      <div class="card-title">Cập nhật nguồn dữ liệu &amp; thứ tự xử lý</div>
+      <ul>
+        <li>Từ W5, ViTextVQA chuyển sang repo chính thức <code>minhquan6203/ViTextVQA</code> (HuggingFace, cần cấp quyền) thay cho bản mirror; đáp án test lấy từ <code>ViTextVQA_test_gt.json</code>; đánh giá trên tập con cố định 2.000 câu (seed 42). Số liệu split sẽ cập nhật theo bản chính thức.</li>
+        <li>Thứ tự xử lý: tiền xử lý (NFC, chuẩn hoá) áp dụng giống hệt cho mọi mẫu → cố định split → tập test không được dùng để chọn cấu hình (chỉnh prompt trên dev, báo cáo trên test).</li>
+      </ul>
+    </div>
+
     <!-- Charts -->
     <div class="chart-grid reveal" style="margin-top: 48px;">
       <div class="chart-card">
@@ -709,51 +859,96 @@ footer {
 <!-- ====== §6 METHODS ====== -->
 <section id="methods">
   <div class="container">
-    <p class="section-eyebrow reveal">Phần 06</p>
-    <h2 class="section-title reveal">Phương pháp &amp; Baseline</h2>
-    <p class="section-lead reveal">Chiến lược cải thiện chỉ dùng PEFT — không full fine-tuning.</p>
+    <p class="section-eyebrow reveal">Phần 07</p>
+    <h2 class="section-title reveal">Phương pháp đề xuất &amp; Pipeline</h2>
+    <p class="section-lead reveal">Một phương pháp duy nhất được chốt. Mọi thành phần còn lại là ablation để chứng minh phần nào tạo ra cải thiện.</p>
 
-    <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin-bottom:20px" class="reveal">Cải tiến ưu tiên (PEFT-only)</h3>
-    <div class="card-grid card-grid-3 reveal">
-      <div class="card card--teal">
-        <div class="card-tag">CORE</div>
-        <div class="card-title">QLoRA NF4 all-linear</div>
-        <p>Quantized LoRA 4-bit, áp dụng lên tất cả linear layers — phương pháp cốt lõi.</p>
-      </div>
-      <div class="card card--accent">
-        <div class="card-tag">PROMPTING</div>
-        <div class="card-title">Vietnamese format-prompt</div>
-        <p>Prompt template được thiết kế riêng cho tiếng Việt, chuẩn hóa định dạng đầu ra.</p>
-      </div>
-      <div class="card card--accent">
-        <div class="card-tag">OCR</div>
-        <div class="card-title">OCR-enhanced prompting</div>
-        <p>Trích xuất text từ ảnh bằng PaddleOCR/VietOCR, đưa vào prompt làm context bổ sung.</p>
-      </div>
-      <div class="card card--accent">
-        <div class="card-tag">MULTI-DATASET</div>
-        <div class="card-title">Shared adapter</div>
-        <p>Một adapter dùng chung cho nhiều dataset — tiết kiệm tham số, tăng tổng quát hóa.</p>
-      </div>
-      <div class="card" style="border-left:4px solid var(--muted)">
-        <div class="card-tag" style="color:var(--muted)">OPTIONAL</div>
-        <div class="card-title">RAG</div>
-        <p>Retrieval-Augmented Generation — tùy chọn nếu đủ thời gian.</p>
-      </div>
-
+    <div class="card card--highlight reveal">
+      <div class="card-tag">PHƯƠNG PHÁP ĐỀ XUẤT</div>
+      <div class="card-title">QLoRA trên Qwen2.5-VL-3B-Instruct + prompt tiếng Việt có OCR</div>
+      <p>Mô hình gốc được đóng băng ở 4-bit (NF4); chỉ các LoRA adapter được huấn luyện trên ViVQA và ViTextVQA. Đầu vào gồm ảnh, câu hỏi, chữ OCR (sắp TL-BR, chỉ với ViTextVQA) và chỉ dẫn trả lời ngắn bằng tiếng Việt có dấu.</p>
     </div>
 
-    <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin:48px 0 20px" class="reveal">Baseline đề xuất</h3>
-    <div class="card-grid card-grid-2 reveal">
-      <div class="card card--highlight">
-        <div class="card-tag">BASELINE CHÍNH</div>
-        <div class="card-title">Qwen2.5-VL-3B-Instruct</div>
-        <p style="margin-top:12px">Mature tooling, nằm trong approved baseline list, chạy được trên Colab free T4, yêu cầu transformers thấp hơn → tái tạo dễ hơn.</p>
+    <h3 class="sub-h reveal">Pipeline hệ thống</h3>
+    <div class="pipe reveal">
+      <div class="pipe-step"><div class="pipe-num">Bước 1</div><div class="pipe-title">Dữ liệu</div><p>ViVQA + ViTextVQA (repo chính thức): ảnh, câu hỏi, đáp án.</p></div>
+      <div class="pipe-step"><div class="pipe-num">Bước 2</div><div class="pipe-title">Tiền xử lý</div><p>NFC, lowercase, chuẩn hoá đáp án; resize ảnh theo <code>max_pixels</code>.</p></div>
+      <div class="pipe-step"><div class="pipe-num">Bước 3</div><div class="pipe-title">OCR (ViTextVQA)</div><p>PaddleOCR / VietOCR → sắp TL-BR → lưu cache JSON theo ảnh, chạy một lần.</p></div>
+      <div class="pipe-step"><div class="pipe-num">Bước 4</div><div class="pipe-title">Chia tập cố định</div><p>Split chính thức; val 1.200 tách từ train ViVQA và test subset 2.000 câu ViTextVQA (seed 42).</p></div>
+      <div class="pipe-step"><div class="pipe-num">Bước 5</div><div class="pipe-title">Prompt builder</div><p>Ghép ảnh + câu hỏi + OCR + chỉ dẫn tiếng Việt; cắt OCR theo ngân sách token.</p></div>
+      <div class="pipe-step pipe-step--core"><div class="pipe-num">Bước 6</div><div class="pipe-title">Qwen2.5-VL-3B 4-bit + LoRA</div><p><strong>Huấn luyện:</strong> loss chỉ trên token đáp án, chỉ cập nhật LoRA.<br><strong>Suy luận:</strong> greedy decoding, <code>max_new_tokens</code> nhỏ.</p></div>
+      <div class="pipe-step"><div class="pipe-num">Bước 7</div><div class="pipe-title">Hậu xử lý &amp; đánh giá</div><p>Chuẩn hoá đầu ra như đáp án; EM, VQA-Acc, ANLS (+ F1 phụ); POPE-vi; phân tích lỗi theo loại câu hỏi và V1–V4; log seed, VRAM, thời gian.</p></div>
+      <div class="pipe-step"><div class="pipe-num">Bước 8</div><div class="pipe-title">Prototype web</div><p>Gradio: upload ảnh, hỏi tiếng Việt, hiện câu trả lời, confidence và chữ OCR.</p></div>
+    </div>
+
+    <p style="font-size:.9rem;color:var(--muted)" class="reveal">Mẫu prompt (sẽ chốt qua ablation trên tập dev):</p>
+    <div class="prompt-box reveal">&lt;ảnh&gt;
+Văn bản trong ảnh (OCR, trái→phải, trên→dưới): <span class="ph">{ocr_text}</span>
+Câu hỏi: <span class="ph">{question}</span>
+Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin có trong ảnh.</div>
+
+    <h3 class="sub-h reveal">QLoRA trong đề tài</h3>
+    <div class="two-col reveal">
+      <div class="card card--teal">
+        <div class="card-title">QLoRA hoạt động thế nào</div>
+        <ol>
+          <li><strong>Lượng tử hoá:</strong> trọng số gốc của model được nén xuống 4-bit (NF4) và đóng băng — không bị cập nhật.</li>
+          <li><strong>Gắn LoRA:</strong> mỗi lớp linear được gắn thêm hai ma trận nhỏ A·B (hạng r). Chỉ A và B được huấn luyện — một phần rất nhỏ tổng số tham số (con số chính xác log ở mỗi run).</li>
+          <li><strong>Kết quả:</strong> một adapter vài chục MB, gắn lên model gốc khi suy luận.</li>
+        </ol>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Nguồn: Hu et al., LoRA (ICLR 2022) · Dettmers et al., QLoRA (NeurIPS 2023).</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-title">Vì sao chỉ dùng QLoRA, không so LoRA với QLoRA</div>
+        <p>GPU khả dụng là T4 16 GB (Colab), không hỗ trợ bf16. Ước tính trọng số model 3B ở 16-bit đã chiếm khoảng 7–8 GB, chưa tính activation của ảnh độ phân giải cao; ở 4-bit còn khoảng 2–3 GB.</p>
+        <p style="margin-top:10px">→ QLoRA là <strong>điều kiện để chạy được</strong> trên phần cứng của đề tài, không phải biến cần so sánh. Phép so sánh duy nhất dùng để kết luận là <strong>QLoRA so với zero-shot/prompting trên cùng model</strong>.</p>
+      </div>
+    </div>
+
+    <h3 class="sub-h reveal">Ngân sách token mỗi mẫu</h3>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Thành phần</th><th>Cách tính / giới hạn</th><th>Ghi chú</th></tr></thead>
+        <tbody>
+          <tr><td>Visual tokens</td><td>≈ (cao/28) × (rộng/28) sau resize; chặn trên bởi <code>max_pixels</code></td><td>Ví dụ ảnh 896×672 → 32×24 = 768 token</td></tr>
+          <tr><td>Câu hỏi</td><td>Vài chục token</td><td>ViTextVQA: trung bình 9,59 từ</td></tr>
+          <tr><td>Chữ OCR</td><td>Cắt tối đa N token (cấu hình, log ở mỗi run)</td><td>Chỉ áp dụng cho ViTextVQA</td></tr>
+          <tr><td>Chỉ dẫn + template</td><td>Cố định</td><td>—</td></tr>
+          <tr><td>Đầu ra</td><td><code>max_new_tokens</code> nhỏ (ví dụ 32)</td><td>Đáp án trung bình 4,18 từ</td></tr>
+          <tr class="row-key"><td><strong>Tổng</strong></td><td>Ước tính khoảng 1.000–1.500 token / mẫu</td><td>Nhỏ hơn nhiều so với context window của model</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note reveal" style="margin-top:0;border-top:none;padding-top:0">Mỗi câu hỏi là một lượt độc lập (một ảnh + một câu hỏi), không cần bộ nhớ hội thoại hay cơ sở dữ liệu để “nhớ”. Giới hạn thật là VRAM của T4, được kiểm soát bằng <code>max_pixels</code> và độ dài OCR. Số token thực tế sẽ đo và log ở mỗi run.</p>
+
+    <h3 class="sub-h reveal">Vai trò của từng mô hình</h3>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Mô hình</th><th>Vai trò</th><th>Huấn luyện</th><th>Dùng để kết luận cải tiến?</th></tr></thead>
+        <tbody>
+          <tr class="row-key"><td><strong>Qwen2.5-VL-3B-Instruct</strong></td><td>Baseline tái lập + nền cho phương pháp đề xuất</td><td>Zero-shot → QLoRA</td><td class="yes">Có — cùng model, cùng split, cùng seed</td></tr>
+          <tr><td>Qwen3-VL-4B-Instruct</td><td>Tham chiếu zero-shot (tuỳ chọn)</td><td>Không</td><td class="no">Không — khác thế hệ và kích thước</td></tr>
+          <tr><td>Florence-2</td><td>Dự phòng nếu baseline gặp sự cố</td><td>Chỉ khi kích hoạt dự phòng</td><td class="no">Không</td></tr>
+          <tr><td>BLIP-2 · PreSTU · ViTextBLIP-2</td><td>Công trình trước (Phần 03)</td><td>Không chạy lại — số liệu từ paper</td><td class="no">Không — chỉ định vị</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note reveal" style="margin-top:0;border-top:none;padding-top:0">Nguyên tắc: chỉ kết luận “cải thiện” khi so trên cùng backbone, cùng kích thước, cùng split, seed và phần cứng. So model khác thế hệ hoặc khác kích thước không phản ánh hiệu quả của phương pháp.</p>
+
+    <h3 class="sub-h reveal">Ablation dự kiến &amp; vị trí của RAG</h3>
+    <div class="two-col reveal">
+      <div class="card card--accent">
+        <div class="card-title">Ablation (cùng model, cùng split)</div>
+        <ul>
+          <li>Zero-shot → prompt tiếng Việt → QLoRA</li>
+          <li>Có / không có OCR trong prompt</li>
+          <li>OCR thứ tự gốc vs TL-BR</li>
+          <li>Rank r và target modules của LoRA</li>
+        </ul>
       </div>
       <div class="card card--accent">
-        <div class="card-tag">DỰ PHÒNG</div>
-        <div class="card-title">Florence-2</div>
-        <p>Backup nếu baseline chính gặp vấn đề về VRAM hoặc tooling.</p>
+        <div class="card-title">RAG — tuỳ chọn có điều kiện</div>
+        <p>OCR trong prompt đóng vai trò “truy xuất bằng chứng” từ chính ảnh. RAG với kho tri thức ngoài (embedding + FAISS, top-k) chỉ làm ở W9 nếu phân tích lỗi cho thấy nhiều câu sai do thiếu tri thức ngoài ảnh. Khi đó sẽ đặc tả rõ: kho tri thức, mô hình embedding, cách truy xuất và ngân sách token.</p>
       </div>
     </div>
 
@@ -769,7 +964,7 @@ footer {
 <!-- ====== §7 DELIVERABLES ====== -->
 <section id="deliverables">
   <div class="container">
-    <p class="section-eyebrow reveal">Phần 07</p>
+    <p class="section-eyebrow reveal">Phần 08</p>
     <h2 class="section-title reveal">Sản phẩm Dự kiến</h2>
     <p class="section-lead reveal">Ba nhóm sản phẩm chính khi hoàn thành đề tài.</p>
 
@@ -796,7 +991,7 @@ footer {
 <!-- ====== §8 VALUE ====== -->
 <section id="value">
   <div class="container">
-    <p class="section-eyebrow reveal">Phần 08</p>
+    <p class="section-eyebrow reveal">Phần 09</p>
     <h2 class="section-title reveal">Giá trị Thực tiễn &amp; Ý nghĩa</h2>
     <p class="section-lead reveal">Đề tài mang lại cả giá trị ứng dụng thực tiễn và đóng góp khoa học.</p>
 
@@ -818,6 +1013,9 @@ footer {
       </div>
       <div>
         <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin-bottom:20px">🔬 Ý nghĩa Khoa học / Tính mới</h3>
+        <div class="card card--highlight" style="margin-bottom:12px">
+          <p><strong>Điểm nhấn: xử lý đặc thù tiếng Việt</strong> — đọc chữ có dấu, ràng buộc ngôn ngữ đầu ra, thứ tự OCR (V1–V3)</p>
+        </div>
         <div class="card card--teal" style="margin-bottom:12px">
           <p><strong>Nghiên cứu PEFT hệ thống</strong> cho Vietnamese VLM — theo khảo sát, chưa được khai thác (G3)</p>
         </div>
@@ -838,7 +1036,7 @@ footer {
 <!-- ====== §9 PLAN ====== -->
 <section id="plan">
   <div class="container">
-    <p class="section-eyebrow reveal">Phần 09</p>
+    <p class="section-eyebrow reveal">Phần 10</p>
     <h2 class="section-title reveal">Kế hoạch 15 Tuần</h2>
     <p class="section-lead reveal">Lộ trình từ W1 đến W15 với 4 mốc review chính.</p>
 
@@ -927,27 +1125,28 @@ footer {
       </div>
     </div>
 
-    <div class="card-grid card-grid-4 reveal">
-      <div class="card card--teal">
-        <div class="card-tag" style="color:var(--teal)">GIAI ĐOẠN 1</div>
-        <div class="card-title">W1–W3</div>
-        <p>Định hướng, văn liệu, phân tích dataset.</p>
-      </div>
-      <div class="card card--accent">
-        <div class="card-tag">GIAI ĐOẠN 2</div>
-        <div class="card-title">W4–W7</div>
-        <p>Tái tạo baseline, phương pháp luận.</p>
-      </div>
-      <div class="card card--amber">
-        <div class="card-tag" style="color:var(--amber)">GIAI ĐOẠN 3</div>
-        <div class="card-title">W8–W12</div>
-        <p>PEFT/OCR/RAG, thực nghiệm, ablation, error + hallucination analysis.</p>
-      </div>
-      <div class="card" style="border-left:4px solid #6B7280">
-        <div class="card-tag" style="color:#6B7280">GIAI ĐOẠN 4</div>
-        <div class="card-title">W13–W15</div>
-        <p>Faculty review, prototype + luận văn, bảo vệ cuối kỳ.</p>
-      </div>
+    <h3 class="sub-h reveal">Công việc cụ thể theo tuần</h3>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Tuần</th><th>Công việc cụ thể</th><th>Đầu ra kiểm chứng được</th><th>Xong</th></tr></thead>
+        <tbody>
+          <tr><td class="num"><strong>W1</strong></td><td>Đọc đề cương, phân vai, chọn 10 paper nền</td><td>W1 Report, kế hoạch 15 tuần</td><td class="yes">✔</td></tr>
+          <tr><td class="num"><strong>W2</strong></td><td>Literature Matrix; phân tích ViVQA / ViTextVQA (seed 42)</td><td>Literature_Matrix.md, Dataset_Analysis.md</td><td class="yes">✔</td></tr>
+          <tr class="row-key"><td class="num"><strong>W3</strong></td><td>Câu hỏi nghiên cứu, giả thuyết, đề xuất baseline; Review 1</td><td>Báo cáo + slide Review 1</td><td class="yes">✔</td></tr>
+          <tr><td class="num"><strong>W4</strong></td><td>Môi trường Colab; zero-shot Qwen2.5-VL-3B trên ViTextVQA (n=300)</td><td>EM 38,3 · ANLS 55,9; notebook zero-shot</td><td class="yes">✔</td></tr>
+          <tr><td class="num"><strong>W5</strong></td><td>Chuyển ViTextVQA sang repo chính thức; tiền xử lý NFC; cố định split và test subset 2.000 câu</td><td>Dữ liệu chính thức + log split</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W6</strong></td><td>Zero-shot chính thức trên 2 dataset; phân loại lỗi V1–V4; bảng công trình trước; vẽ pipeline</td><td>Bảng baseline chính thức; Methodology (Report 4)</td><td class="yes"></td></tr>
+          <tr class="row-key"><td class="num"><strong>W7</strong></td><td>Review 2: baseline + phương pháp đề xuất + QLoRA pilot trên tập con</td><td>Slide Review 2; log pilot run</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W8</strong></td><td>QLoRA đầy đủ trên ViVQA; log VRAM, thời gian, số tham số train</td><td>Adapter v1; experiments/W08_*</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W9</strong></td><td>OCR pipeline (PaddleOCR/VietOCR, TL-BR) + prompt tiếng Việt; QLoRA trên ViTextVQA</td><td>OCR cache; adapter v2</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W10</strong></td><td>Chạy chính: zero-shot / prompt / QLoRA / QLoRA + OCR trên cùng split, seed</td><td>Bảng kết quả chính</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W11</strong></td><td>Đánh giá đầy đủ EM, VQA-Acc, ANLS (+ F1); hallucination POPE-vi</td><td>Báo cáo metric + hallucination</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W12</strong></td><td>Ablation (OCR, thứ tự OCR, rank/target modules); phân tích lỗi theo loại câu hỏi và V1–V4</td><td>Bảng ablation; failure cases</td><td class="yes"></td></tr>
+          <tr class="row-key"><td class="num"><strong>W13</strong></td><td>Hội đồng cấp Khoa</td><td>Slide + Report 6–7</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W14</strong></td><td>Prototype Gradio; viết thesis</td><td>Demo chạy được; bản thesis</td><td class="yes"></td></tr>
+          <tr class="row-key"><td class="num"><strong>W15</strong></td><td>Bảo vệ cuối kỳ; nộp reproducibility package</td><td>Code, adapter, config, inference script, README, experiment log</td><td class="yes"></td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </section>
@@ -955,7 +1154,7 @@ footer {
 <!-- ====== §10 RISK ====== -->
 <section id="risk">
   <div class="container">
-    <p class="section-eyebrow reveal">Phần 10</p>
+    <p class="section-eyebrow reveal">Phần 11</p>
     <h2 class="section-title reveal">Ma trận Rủi ro</h2>
     <p class="section-lead reveal">Các rủi ro chính đã được xác định cùng biện pháp giảm thiểu và phương án dự phòng.</p>
 
@@ -1029,7 +1228,7 @@ footer {
 <!-- ====== §11 CONSTRAINT ====== -->
 <section id="constraint">
   <div class="container">
-    <p class="section-eyebrow reveal">Phần 11</p>
+    <p class="section-eyebrow reveal">Phần 12</p>
     <h2 class="section-title reveal">Ràng buộc Cốt lõi: PEFT-only</h2>
 
     <div class="banner reveal">
@@ -1061,7 +1260,7 @@ footer {
 <!-- ====== §12 TEAM ====== -->
 <section id="team">
   <div class="container">
-    <p class="section-eyebrow reveal">Phần 12</p>
+    <p class="section-eyebrow reveal">Phần 13</p>
     <h2 class="section-title reveal">Vai trò Nhóm</h2>
     <p class="section-lead reveal">Bốn thành viên, mỗi người phụ trách một mảng chính.</p>
 
@@ -1090,6 +1289,32 @@ footer {
   </div>
 </section>
 
+<!-- ====== §14 FEEDBACK ====== -->
+<section id="feedback">
+  <div class="container">
+    <p class="section-eyebrow reveal">Phần 14</p>
+    <h2 class="section-title reveal">Tiếp thu góp ý Review 1</h2>
+    <p class="section-lead reveal">Các góp ý của giảng viên review ngày 24/09/2026 và phần nhóm đã điều chỉnh trong báo cáo này.</p>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>#</th><th>Góp ý</th><th>Nhóm đã điều chỉnh</th><th>Phần</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td>Phát biểu bài toán chưa rõ; chưa rõ input/output; chưa nói được tiếng Việt khác tiếng Anh ở đâu</td><td>Phát biểu bài toán một câu; bảng Input/Output; bốn vấn đề tiếng Việt V1–V4</td><td class="num">01</td></tr>
+          <tr><td class="num">2</td><td>Dấu câu, khoảng trắng, từ nối chỉ là tiền xử lý</td><td>Tách rõ tiền xử lý với vấn đề nghiên cứu; dẫn thí nghiệm bỏ dấu của ViTextVQA</td><td class="num">01</td></tr>
+          <tr><td class="num">3</td><td>Giả thuyết 4-bit/16-bit, VRAM chưa giải quyết vấn đề tiếng Việt</td><td>Rút còn H1–H4, mỗi giả thuyết gắn một vấn đề tiếng Việt; hiệu quả bộ nhớ chuyển sang báo cáo đo lường</td><td class="num">05</td></tr>
+          <tr><td class="num">4</td><td>Chưa có phương pháp đề xuất; chưa có hình pipeline</td><td>Chốt một phương pháp; pipeline 8 bước; mẫu prompt</td><td class="num">07</td></tr>
+          <tr><td class="num">5</td><td>Cần hiểu và trình bày được QLoRA; vì sao đưa cả LoRA và QLoRA</td><td>Giải thích QLoRA; chỉ dùng QLoRA vì ràng buộc phần cứng</td><td class="num">07</td></tr>
+          <tr><td class="num">6</td><td>So sánh mô hình khác thế hệ, khác kích thước (2.5 vs 2.0, 3B vs 4B)</td><td>Bảng vai trò mô hình; chỉ kết luận trên cùng backbone</td><td class="num">07</td></tr>
+          <tr><td class="num">7</td><td>Baseline là công trình trước; cần 3 baseline và state-of-the-art cho tiếng Việt</td><td>Bảng công trình trước trên ViTextVQA và ViVQA, kèm lưu ý so sánh</td><td class="num">03</td></tr>
+          <tr><td class="num">8</td><td>Khuyến nghị RAG; cần tính số lượng token</td><td>Bảng ngân sách token mỗi mẫu; RAG ngoài là tuỳ chọn có điều kiện</td><td class="num">07</td></tr>
+          <tr><td class="num">9</td><td>Tiền xử lý trước khi chia tập</td><td>Pipeline thể hiện tiền xử lý → split cố định; chỉnh trên dev, báo cáo trên test</td><td class="num">06, 07</td></tr>
+          <tr><td class="num">10</td><td>Kế hoạch chưa chi tiết</td><td>Bảng công việc theo tuần với đầu ra kiểm chứng được</td><td class="num">10</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
 <!-- ====== §13 Q&A ====== -->
 <section id="questions-reviewers" class="closing">
   <div class="container">
@@ -1100,7 +1325,7 @@ footer {
 </main>
 
 <footer>
-  <p>ViVQA-VLM · Review 1 · FPT University · 2026</p>
+  <p>ViVQA-VLM · Review 1 — bản cập nhật sau góp ý (06/10/2026) · FPT University</p>
 </footer>
 
 <script>
