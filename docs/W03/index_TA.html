@@ -1,1835 +1,1581 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ViVQA-VLM — Review 1</title>
-  <meta name="description"
-    content="Efficient Vietnamese Visual Question Answering using Vision-Language Models — Review 1 Report">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&display=swap"
-    rel="stylesheet">
-  <script src="vendor/chart.umd.min.js"></script>
-  <style>
-    /* ======== TOKENS ======== */
-    :root {
-      --ink: #13294B;
-      --teal: #1C7293;
-      --amber: #E8A33D;
-      --paper: #ffffff;
-      --wash: #F3F5F8;
-      --tealt: #E7F0F3;
-      --ambert: #FBF0DA;
-      --line: #E2E7EE;
-      --text: #243044;
-      --muted: #6B7280;
-      --tl-text: #ffffff;
-      --serif: 'Newsreader', 'Lora', 'Georgia', serif;
-      --sans: 'Inter', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
-      --mono: 'IBM Plex Mono', 'Menlo', 'Consolas', monospace;
-      --nav-h: 56px;
-      --progress-h: 3px;
-      --radius: 12px;
-      --shadow: 0 2px 12px rgba(19, 41, 75, .07);
-      --shadow-lg: 0 8px 32px rgba(19, 41, 75, .10);
-      --container: 1200px;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --ink: #A8C4E0;
-        --teal: #4DB8D5;
-        --amber: #F0B95A;
-        --paper: #0B1120;
-        --wash: #111827;
-        --tealt: #12242E;
-        --ambert: #2A2111;
-        --line: #1F2937;
-        --text: #E5E7EB;
-        --muted: #9CA3AF;
-        --tl-text: #0B1120;
-        --shadow: 0 2px 12px rgba(0, 0, 0, .3);
-        --shadow-lg: 0 8px 32px rgba(0, 0, 0, .4);
-      }
-    }
-
-    /* ======== RESET ======== */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-      scroll-padding-top: calc(var(--nav-h) + var(--progress-h) + 16px);
-    }
-
-    body {
-      font-family: var(--sans);
-      color: var(--text);
-      background: var(--paper);
-      line-height: 1.7;
-      font-size: 16px;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-
-    img {
-      max-width: 100%;
-      display: block;
-    }
-
-    a {
-      color: var(--teal);
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    a:focus-visible {
-      outline: 2px solid var(--teal);
-      outline-offset: 2px;
-      border-radius: 4px;
-    }
-
-    /* ======== PROGRESS BAR ======== */
-    .progress-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: var(--progress-h);
-      background: linear-gradient(90deg, var(--teal), var(--amber));
-      width: 0%;
-      z-index: 1001;
-      transition: width 80ms linear;
-    }
-
-    /* ======== NAV ======== */
-    nav {
-      position: sticky;
-      top: var(--progress-h);
-      z-index: 1000;
-      height: var(--nav-h);
-      background: color-mix(in srgb, var(--paper) 85%, transparent);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      align-items: center;
-    }
-
-    .nav-inner {
-      max-width: var(--container);
-      width: 100%;
-      margin: 0 auto;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-
-    .nav-inner::-webkit-scrollbar {
-      display: none;
-    }
-
-    .nav-logo {
-      font-family: var(--serif);
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: var(--ink);
-      white-space: nowrap;
-      margin-right: 16px;
-      flex-shrink: 0;
-    }
-
-    .nav-link {
-      font-size: .8rem;
-      font-weight: 500;
-      color: var(--muted);
-      white-space: nowrap;
-      padding: 6px 10px;
-      border-radius: 6px;
-      transition: color .2s, background .2s;
-      flex-shrink: 0;
-    }
-
-    .nav-link:hover,
-    .nav-link:focus-visible {
-      color: var(--ink);
-      background: var(--wash);
-      text-decoration: none;
-    }
-
-    .nav-link.active {
-      color: var(--teal);
-      background: var(--tealt);
-    }
-
-    /* ======== HERO ======== */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--ink);
-      color: #fff;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      padding: 80px 24px;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .hero {
-        background: #060d1a;
-      }
-    }
-
-    .hero::before {
-      content: '';
-      position: absolute;
-      width: 600px;
-      height: 600px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(28, 114, 147, .25) 0%, transparent 70%);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 1;
-      max-width: 800px;
-    }
-
-    .eyebrow {
-      font-family: var(--mono);
-      font-size: .85rem;
-      font-weight: 500;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--teal);
-      margin-bottom: 24px;
-      opacity: .9;
-    }
-
-    .hero-title {
-      font-family: var(--serif);
-      font-size: clamp(3rem, 8vw, 5.5rem);
-      font-weight: 700;
-      line-height: 1.05;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, #fff 60%, var(--teal));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero-thesis {
-      font-size: clamp(1.05rem, 2.5vw, 1.35rem);
-      font-weight: 400;
-      line-height: 1.6;
-      color: rgba(255, 255, 255, .8);
-      max-width: 640px;
-      margin: 0 auto 36px;
-    }
-
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-    }
-
-    .chip {
-      font-size: .78rem;
-      font-family: var(--mono);
-      padding: 6px 14px;
-      border: 1px solid rgba(255, 255, 255, .2);
-      border-radius: 999px;
-      color: rgba(255, 255, 255, .75);
-      background: rgba(255, 255, 255, .06);
-      white-space: nowrap;
-    }
-
-    /* ======== SECTIONS ======== */
-    section {
-      padding: 96px 24px;
-    }
-
-    section:nth-of-type(even) {
-      background: var(--wash);
-    }
-
-    section:nth-of-type(odd) {
-      background: var(--paper);
-    }
-
-    .container {
-      max-width: var(--container);
-      margin: 0 auto;
-    }
-
-    .section-eyebrow {
-      font-family: var(--mono);
-      font-size: .8rem;
-      font-weight: 500;
-      color: var(--teal);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-
-    .section-title {
-      font-family: var(--serif);
-      font-size: clamp(1.8rem, 4vw, 2.6rem);
-      font-weight: 700;
-      color: var(--ink);
-      line-height: 1.2;
-      margin-bottom: 16px;
-    }
-
-    .section-lead {
-      font-size: 1.1rem;
-      color: var(--muted);
-      max-width: 680px;
-      margin-bottom: 48px;
-      line-height: 1.7;
-    }
-
-    /* ======== CARDS ======== */
-    .card-grid {
-      display: grid;
-      gap: 20px;
-    }
-
-    .card-grid-2 {
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    }
-
-    .card-grid-3 {
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    }
-
-    .card-grid-4 {
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    }
-
-    .card {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 28px;
-      box-shadow: var(--shadow);
-      transition: transform .25s, box-shadow .25s;
-    }
-
-    section:nth-of-type(odd) .card {
-      background: var(--wash);
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .card--accent {
-      border-left: 4px solid var(--ink);
-    }
-
-    .card--teal {
-      border-left: 4px solid var(--teal);
-    }
-
-    .card--amber {
-      border-left: 4px solid var(--amber);
-    }
-
-    .card--highlight {
-      border-left: 4px solid var(--amber);
-      background: var(--ambert) !important;
-      box-shadow: 0 0 0 1px var(--amber), var(--shadow);
-    }
-
-    .card-tag {
-      font-family: var(--mono);
-      font-size: .72rem;
-      font-weight: 500;
-      color: var(--teal);
-      margin-bottom: 10px;
-      letter-spacing: .5px;
-    }
-
-    .card-title {
-      font-family: var(--serif);
-      font-size: 1.15rem;
-      font-weight: 600;
-      color: var(--ink);
-      margin-bottom: 8px;
-      line-height: 1.3;
-    }
-
-    .card p {
-      font-size: .95rem;
-      color: var(--muted);
-      line-height: 1.65;
-    }
-
-    /* ======== STAT BLOCKS ======== */
-    .stat-grid {
-      display: grid;
-      gap: 20px;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      margin-bottom: 48px;
-    }
-
-    .stat {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 28px 24px;
-      text-align: center;
-      box-shadow: var(--shadow);
-    }
-
-    section:nth-of-type(odd) .stat {
-      background: var(--wash);
-    }
-
-    .stat-number {
-      font-family: var(--serif);
-      font-size: 2.4rem;
-      font-weight: 700;
-      color: var(--teal);
-      line-height: 1.1;
-      margin-bottom: 6px;
-    }
-
-    .stat-label {
-      font-size: .9rem;
-      font-weight: 600;
-      color: var(--ink);
-      margin-bottom: 4px;
-    }
-
-    .stat-source {
-      font-family: var(--mono);
-      font-size: .7rem;
-      color: var(--muted);
-    }
-
-    /* ======== CHART CARDS ======== */
-    .chart-grid {
-      display: grid;
-      gap: 24px;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    }
-
-    .chart-card {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 28px;
-      box-shadow: var(--shadow);
-    }
-
-    section:nth-of-type(odd) .chart-card {
-      background: var(--wash);
-    }
-
-    .chart-card h3 {
-      font-family: var(--serif);
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--ink);
-      margin-bottom: 16px;
-    }
-
-    .chart-card canvas {
-      width: 100% !important;
-      max-height: 320px;
-    }
-
-    /* ======== PULL QUOTE ======== */
-    .pull-quote {
-      border-left: 4px solid var(--amber);
-      padding: 24px 32px;
-      margin: 40px 0;
-      background: var(--ambert);
-      border-radius: 0 var(--radius) var(--radius) 0;
-    }
-
-    .pull-quote p {
-      font-family: var(--serif);
-      font-style: italic;
-      font-size: 1.15rem;
-      color: var(--ink);
-      line-height: 1.7;
-    }
-
-    .pull-quote cite {
-      display: block;
-      margin-top: 12px;
-      font-family: var(--mono);
-      font-size: .78rem;
-      color: var(--muted);
-      font-style: normal;
-    }
-
-    /* ======== FLOW DIAGRAM ======== */
-    .flow {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin: 32px 0 48px;
-    }
-
-    .flow-box {
-      background: var(--tealt);
-      border: 1px solid var(--teal);
-      border-radius: var(--radius);
-      padding: 16px 24px;
-      text-align: center;
-      font-size: .9rem;
-      font-weight: 600;
-      color: var(--ink);
-      min-width: 140px;
-    }
-
-    .flow-box--accent {
-      background: var(--ambert);
-      border-color: var(--amber);
-    }
-
-    .flow-arrow {
-      font-size: 1.5rem;
-      color: var(--muted);
-      flex-shrink: 0;
-    }
-
-    /* ======== BADGE ======== */
-    .badge {
-      display: inline-block;
-      font-family: var(--mono);
-      font-size: .7rem;
-      font-weight: 500;
-      padding: 4px 10px;
-      border-radius: 999px;
-      letter-spacing: .5px;
-    }
-
-    .badge--teal {
-      background: var(--tealt);
-      color: var(--teal);
-    }
-
-    .badge--amber {
-      background: var(--ambert);
-      color: #b47e1e;
-    }
-
-    .badge--ink {
-      background: var(--ink);
-      color: #fff;
-    }
-
-    /* ======== TIMELINE ======== */
-    .timeline-wrap {
-      overflow-x: auto;
-      padding: 24px 0 16px 0;
-      margin: 16px 0 24px;
-      scrollbar-width: thin;
-    }
-
-    .timeline {
-      display: flex;
-      gap: 0;
-      min-width: max-content;
-    }
-
-    .timeline-week {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-width: 72px;
-      position: relative;
-    }
-
-    .timeline-label {
-      font-family: var(--mono);
-      font-size: .7rem;
-      font-weight: 500;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .timeline-bar {
-      width: 100%;
-      height: 32px;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .75rem;
-      font-weight: 700;
-      color: var(--tl-text);
-      letter-spacing: .5px;
-    }
-
-    .tl-phase1 {
-      background: var(--teal);
-    }
-
-    .tl-phase2 {
-      background: var(--ink);
-    }
-
-    .tl-phase3 {
-      background: var(--amber);
-    }
-
-    .tl-phase4 {
-      background: var(--muted);
-    }
-
-    .tl-milestone {
-      margin-top: 8px;
-      font-family: var(--mono);
-      font-size: .65rem;
-      font-weight: 600;
-      color: var(--amber);
-      white-space: nowrap;
-    }
-
-    .tl-now {
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: var(--mono);
-      font-size: .6rem;
-      font-weight: 700;
-      color: #fff;
-      background: #e53e3e;
-      padding: 2px 8px;
-      border-radius: 999px;
-      white-space: nowrap;
-    }
-
-    /* ======== RISK TABLE ======== */
-    .table-wrap {
-      overflow-x: auto;
-      margin: 32px 0;
-      border-radius: var(--radius);
-      border: 1px solid var(--line);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: .9rem;
-      min-width: 640px;
-    }
-
-    thead {
-      background: var(--ink);
-      color: #fff;
-    }
-
-    th {
-      font-family: var(--mono);
-      font-size: .78rem;
-      font-weight: 600;
-      text-align: left;
-      padding: 14px 16px;
-      letter-spacing: .5px;
-    }
-
-    td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
-      vertical-align: top;
-    }
-
-    tbody tr:hover {
-      background: var(--tealt);
-    }
-
-    .risk-high {
-      color: #dc2626;
-      font-weight: 600;
-    }
-
-    .risk-med {
-      color: var(--amber);
-      font-weight: 600;
-    }
-
-    /* ======== BANNER ======== */
-    .banner {
-      background: linear-gradient(135deg, var(--ink) 0%, var(--teal) 100%);
-      color: #fff;
-      border-radius: var(--radius);
-      padding: 40px 48px;
-      text-align: center;
-      margin-bottom: 48px;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .banner {
-        background: linear-gradient(135deg, #1a2744, #13495e);
-      }
-    }
-
-    .banner h3 {
-      font-family: var(--serif);
-      font-size: 1.6rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .banner p {
-      font-family: var(--mono);
-      font-size: .95rem;
-      opacity: .85;
-    }
-
-    /* ======== CLOSING SECTION ======== */
-    .closing {
-      background: var(--ink) !important;
-      color: #fff;
-      text-align: center;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .closing {
-        background: #060d1a !important;
-      }
-    }
-
-    .closing .section-title {
-      color: #fff;
-    }
-
-    .closing .section-lead {
-      color: rgba(255, 255, 255, .7);
-    }
-
-    .closing .card {
-      background: rgba(255, 255, 255, .08);
-      border-color: rgba(255, 255, 255, .12);
-    }
-
-    .closing .card-title {
-      color: #fff;
-    }
-
-    .closing .card p {
-      color: rgba(255, 255, 255, .7);
-    }
-
-    .closing .sign-off {
-      margin-top: 64px;
-      font-family: var(--serif);
-      font-size: 1.2rem;
-      color: rgba(255, 255, 255, .6);
-    }
-
-    /* ======== NOTE LINE ======== */
-    .note {
-      font-family: var(--mono);
-      font-size: .8rem;
-      color: var(--muted);
-      margin-top: 24px;
-      padding-top: 16px;
-      border-top: 1px solid var(--line);
-    }
-
-    /* ======== TWO COLUMNS ======== */
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
-    }
-
-    @media (max-width: 768px) {
-      .two-col {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* ======== HYPOTHESIS LIST ======== */
-    .hypo-list {
-      display: grid;
-      gap: 12px;
-    }
-
-    .hypo-item {
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 20px 24px;
-      box-shadow: var(--shadow);
-      transition: transform .2s;
-    }
-
-    section:nth-of-type(odd) .hypo-item {
-      background: var(--wash);
-    }
-
-    .hypo-item:hover {
-      transform: translateX(4px);
-    }
-
-    .hypo-item--highlight {
-      border-left: 4px solid var(--amber);
-      background: var(--ambert) !important;
-    }
-
-    .hypo-id {
-      font-family: var(--mono);
-      font-size: .85rem;
-      font-weight: 600;
-      color: var(--teal);
-      flex-shrink: 0;
-      min-width: 32px;
-    }
-
-    .hypo-text {
-      font-size: .92rem;
-      color: var(--text);
-      line-height: 1.6;
-    }
-
-    /* ======== SCROLL REVEAL ======== */
-    .reveal {
-      opacity: 0;
-      transform: translateY(32px);
-      transition: opacity .7s cubic-bezier(.22, 1, .36, 1), transform .7s cubic-bezier(.22, 1, .36, 1);
-    }
-
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .reveal {
-        opacity: 1;
-        transform: none;
-        transition: none;
-      }
-
-      .reveal.visible {
-        opacity: 1;
-        transform: none;
-      }
-    }
-
-    /* ======== RESPONSIVE ======== */
-    @media (max-width: 768px) {
-      section {
-        padding: 64px 16px;
-      }
-
-      .hero {
-        padding: 60px 16px;
-      }
-
-      .stat-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .card-grid-4 {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .chart-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .banner {
-        padding: 28px 24px;
-      }
-
-      .flow {
-        gap: 8px;
-      }
-
-      .flow-box {
-        min-width: 100px;
-        padding: 12px 16px;
-        font-size: .82rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .card-grid-4 {
-        grid-template-columns: 1fr;
-      }
-
-      .stat-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .nav-logo {
-        font-size: .95rem;
-        margin-right: 8px;
-      }
-    }
-
-    /* ======== FOOTER ======== */
-    footer {
-      background: var(--wash);
-      border-top: 1px solid var(--line);
-      text-align: center;
-      padding: 32px 24px;
-      font-family: var(--mono);
-      font-size: .78rem;
-      color: var(--muted);
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ViVQA-VLM — Review 1 (updated after feedback)</title>
+<meta name="description" content="Efficient Vietnamese Visual Question Answering using Vision-Language Models — Review 1 Report">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+<script src="vendor/chart.umd.min.js"></script>
+<style>
+/* ======== TOKENS ======== */
+:root {
+  --ink: #13294B;
+  --teal: #1C7293;
+  --amber: #E8A33D;
+  --paper: #ffffff;
+  --wash: #F3F5F8;
+  --tealt: #E7F0F3;
+  --ambert: #FBF0DA;
+  --line: #E2E7EE;
+  --text: #243044;
+  --muted: #6B7280;
+  --tl-text: #ffffff;
+  --serif: 'Newsreader', 'Lora', 'Georgia', serif;
+  --sans: 'Inter', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --mono: 'IBM Plex Mono', 'Menlo', 'Consolas', monospace;
+  --nav-h: 56px;
+  --progress-h: 3px;
+  --radius: 12px;
+  --shadow: 0 2px 12px rgba(19,41,75,.07);
+  --shadow-lg: 0 8px 32px rgba(19,41,75,.10);
+  --container: 1200px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #A8C4E0;
+    --teal: #4DB8D5;
+    --amber: #F0B95A;
+    --paper: #0B1120;
+    --wash: #111827;
+    --tealt: #12242E;
+    --ambert: #2A2111;
+    --line: #1F2937;
+    --text: #E5E7EB;
+    --muted: #9CA3AF;
+    --tl-text: #0B1120;
+    --shadow: 0 2px 12px rgba(0,0,0,.3);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,.4);
+  }
+}
+
+/* ======== RESET ======== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + var(--progress-h) + 16px); }
+body {
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--paper);
+  line-height: 1.7;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+img { max-width: 100%; display: block; }
+a { color: var(--teal); text-decoration: none; }
+a:hover { text-decoration: underline; }
+a:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 4px; }
+
+/* ======== PROGRESS BAR ======== */
+.progress-bar {
+  position: fixed; top: 0; left: 0; height: var(--progress-h);
+  background: linear-gradient(90deg, var(--teal), var(--amber));
+  width: 0%; z-index: 1001;
+  transition: width 80ms linear;
+}
+
+/* ======== NAV ======== */
+nav {
+  position: sticky; top: var(--progress-h); z-index: 1000;
+  height: var(--nav-h);
+  background: color-mix(in srgb, var(--paper) 85%, transparent);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center;
+}
+.nav-inner {
+  max-width: var(--container); width: 100%; margin: 0 auto;
+  padding: 0 24px;
+  display: flex; align-items: center; gap: 8px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-logo {
+  font-family: var(--serif); font-weight: 700; font-size: 1.1rem;
+  color: var(--ink); white-space: nowrap; margin-right: 16px;
+  flex-shrink: 0;
+}
+.nav-link {
+  font-size: .8rem; font-weight: 500; color: var(--muted);
+  white-space: nowrap; padding: 6px 10px; border-radius: 6px;
+  transition: color .2s, background .2s; flex-shrink: 0;
+}
+.nav-link:hover, .nav-link:focus-visible { color: var(--ink); background: var(--wash); text-decoration: none; }
+.nav-link.active { color: var(--teal); background: var(--tealt); }
+
+/* ======== HERO ======== */
+.hero {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: var(--ink); color: #fff; text-align: center;
+  position: relative; overflow: hidden; padding: 80px 24px;
+}
+@media (prefers-color-scheme: dark) {
+  .hero { background: #060d1a; }
+}
+.hero::before {
+  content: ''; position: absolute; width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(28,114,147,.25) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.hero-content { position: relative; z-index: 1; max-width: 800px; }
+.eyebrow {
+  font-family: var(--mono); font-size: .85rem; font-weight: 500;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 24px; opacity: .9;
+}
+.hero-title {
+  font-family: var(--serif); font-size: clamp(3rem, 8vw, 5.5rem);
+  font-weight: 700; line-height: 1.05; margin-bottom: 20px;
+  background: linear-gradient(135deg, #fff 60%, var(--teal));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-thesis {
+  font-size: clamp(1.05rem, 2.5vw, 1.35rem); font-weight: 400;
+  line-height: 1.6; color: rgba(255,255,255,.8); max-width: 640px;
+  margin: 0 auto 36px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.chip {
+  font-size: .78rem; font-family: var(--mono); padding: 6px 14px;
+  border: 1px solid rgba(255,255,255,.2); border-radius: 999px;
+  color: rgba(255,255,255,.75); background: rgba(255,255,255,.06);
+  white-space: nowrap;
+}
+
+/* ======== SECTIONS ======== */
+section {
+  padding: 96px 24px;
+}
+section:nth-of-type(even) { background: var(--wash); }
+section:nth-of-type(odd)  { background: var(--paper); }
+.container { max-width: var(--container); margin: 0 auto; }
+.section-eyebrow {
+  font-family: var(--mono); font-size: .8rem; font-weight: 500;
+  color: var(--teal); letter-spacing: 1.5px; text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: var(--serif); font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700; color: var(--ink); line-height: 1.2;
+  margin-bottom: 16px;
+}
+.section-lead {
+  font-size: 1.1rem; color: var(--muted); max-width: 680px;
+  margin-bottom: 48px; line-height: 1.7;
+}
+
+/* ======== CARDS ======== */
+.card-grid { display: grid; gap: 20px; }
+.card-grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.card-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.card-grid-4 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+.card {
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 28px;
+  box-shadow: var(--shadow); transition: transform .25s, box-shadow .25s;
+}
+section:nth-of-type(odd) .card { background: var(--wash); }
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.card--accent { border-left: 4px solid var(--ink); }
+.card--teal { border-left: 4px solid var(--teal); }
+.card--amber { border-left: 4px solid var(--amber); }
+.card--highlight {
+  border-left: 4px solid var(--amber);
+  background: var(--ambert) !important;
+  box-shadow: 0 0 0 1px var(--amber), var(--shadow);
+}
+.card-tag {
+  font-family: var(--mono); font-size: .72rem; font-weight: 500;
+  color: var(--teal); margin-bottom: 10px; letter-spacing: .5px;
+}
+.card-title {
+  font-family: var(--serif); font-size: 1.15rem; font-weight: 600;
+  color: var(--ink); margin-bottom: 8px; line-height: 1.3;
+}
+.card p { font-size: .95rem; color: var(--muted); line-height: 1.65; }
+
+/* ======== STAT BLOCKS ======== */
+.stat-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 48px; }
+.stat {
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 28px 24px; text-align: center;
+  box-shadow: var(--shadow);
+}
+section:nth-of-type(odd) .stat { background: var(--wash); }
+.stat-number {
+  font-family: var(--serif); font-size: 2.4rem; font-weight: 700;
+  color: var(--teal); line-height: 1.1; margin-bottom: 6px;
+}
+.stat-label { font-size: .9rem; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.stat-source { font-family: var(--mono); font-size: .7rem; color: var(--muted); }
+
+/* ======== CHART CARDS ======== */
+.chart-grid { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+.chart-card {
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow);
+}
+section:nth-of-type(odd) .chart-card { background: var(--wash); }
+.chart-card h3 {
+  font-family: var(--serif); font-size: 1.05rem; font-weight: 600;
+  color: var(--ink); margin-bottom: 16px;
+}
+.chart-card canvas { width: 100% !important; max-height: 320px; }
+
+/* ======== PULL QUOTE ======== */
+.pull-quote {
+  border-left: 4px solid var(--amber);
+  padding: 24px 32px; margin: 40px 0;
+  background: var(--ambert); border-radius: 0 var(--radius) var(--radius) 0;
+}
+.pull-quote p {
+  font-family: var(--serif); font-style: italic;
+  font-size: 1.15rem; color: var(--ink); line-height: 1.7;
+}
+.pull-quote cite {
+  display: block; margin-top: 12px;
+  font-family: var(--mono); font-size: .78rem; color: var(--muted);
+  font-style: normal;
+}
+
+/* ======== FLOW DIAGRAM ======== */
+.flow {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; flex-wrap: wrap; margin: 32px 0 48px;
+}
+.flow-box {
+  background: var(--tealt); border: 1px solid var(--teal);
+  border-radius: var(--radius); padding: 16px 24px;
+  text-align: center; font-size: .9rem; font-weight: 600;
+  color: var(--ink); min-width: 140px;
+}
+.flow-box--accent { background: var(--ambert); border-color: var(--amber); }
+.flow-arrow { font-size: 1.5rem; color: var(--muted); flex-shrink: 0; }
+
+/* ======== BADGE ======== */
+.badge {
+  display: inline-block; font-family: var(--mono); font-size: .7rem;
+  font-weight: 500; padding: 4px 10px; border-radius: 999px;
+  letter-spacing: .5px;
+}
+.badge--teal { background: var(--tealt); color: var(--teal); }
+.badge--amber { background: var(--ambert); color: #b47e1e; }
+.badge--ink { background: var(--ink); color: #fff; }
+
+/* ======== TIMELINE ======== */
+.timeline-wrap { overflow-x: auto; padding: 24px 0 16px 0; margin: 16px 0 24px; scrollbar-width: thin; }
+.timeline {
+  display: flex; gap: 0; min-width: max-content;
+}
+.timeline-week {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 72px; position: relative;
+}
+.timeline-label {
+  font-family: var(--mono); font-size: .7rem; font-weight: 500;
+  color: var(--muted); margin-bottom: 8px;
+}
+.timeline-bar {
+  width: 100%; height: 32px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 700; color: var(--tl-text);
+  letter-spacing: .5px;
+}
+.tl-phase1 { background: var(--teal); }
+.tl-phase2 { background: var(--ink); }
+.tl-phase3 { background: var(--amber); }
+.tl-phase4 { background: var(--muted); }
+.tl-milestone {
+  margin-top: 8px; font-family: var(--mono); font-size: .65rem;
+  font-weight: 600; color: var(--amber); white-space: nowrap;
+}
+.tl-now {
+  position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+  font-family: var(--mono); font-size: .6rem; font-weight: 700;
+  color: #fff; background: #e53e3e; padding: 2px 8px; border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* ======== RISK TABLE ======== */
+.table-wrap { overflow-x: auto; margin: 32px 0; border-radius: var(--radius); border: 1px solid var(--line); }
+table {
+  width: 100%; border-collapse: collapse; font-size: .9rem; min-width: 640px;
+}
+thead { background: var(--ink); color: #fff; }
+th {
+  font-family: var(--mono); font-size: .78rem; font-weight: 600;
+  text-align: left; padding: 14px 16px; letter-spacing: .5px;
+}
+td {
+  padding: 14px 16px; border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+tbody tr:hover { background: var(--tealt); }
+.risk-high { color: #dc2626; font-weight: 600; }
+.risk-med { color: var(--amber); font-weight: 600; }
+
+/* ======== BANNER ======== */
+.banner {
+  background: linear-gradient(135deg, var(--ink) 0%, var(--teal) 100%);
+  color: #fff; border-radius: var(--radius); padding: 40px 48px;
+  text-align: center; margin-bottom: 48px;
+}
+@media (prefers-color-scheme: dark) {
+  .banner { background: linear-gradient(135deg, #1a2744, #13495e); }
+}
+.banner h3 {
+  font-family: var(--serif); font-size: 1.6rem; font-weight: 700;
+  margin-bottom: 8px;
+}
+.banner p {
+  font-family: var(--mono); font-size: .95rem; opacity: .85;
+}
+
+/* ======== CLOSING SECTION ======== */
+.closing {
+  background: var(--ink) !important; color: #fff; text-align: center;
+}
+@media (prefers-color-scheme: dark) {
+  .closing { background: #060d1a !important; }
+}
+.closing .section-title { color: #fff; }
+.closing .section-lead { color: rgba(255,255,255,.7); }
+.closing .card {
+  background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12);
+}
+.closing .card-title { color: #fff; }
+.closing .card p { color: rgba(255,255,255,.7); }
+.closing .sign-off {
+  margin-top: 64px; font-family: var(--serif); font-size: 1.2rem;
+  color: rgba(255,255,255,.6);
+}
+
+/* ======== NOTE LINE ======== */
+.note {
+  font-family: var(--mono); font-size: .8rem; color: var(--muted);
+  margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line);
+}
+
+/* ======== TWO COLUMNS ======== */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+@media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ======== HYPOTHESIS LIST ======== */
+.hypo-list { display: grid; gap: 12px; }
+.hypo-item {
+  display: flex; gap: 16px; align-items: flex-start;
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 20px 24px;
+  box-shadow: var(--shadow); transition: transform .2s;
+}
+section:nth-of-type(odd) .hypo-item { background: var(--wash); }
+.hypo-item:hover { transform: translateX(4px); }
+.hypo-item--highlight {
+  border-left: 4px solid var(--amber);
+  background: var(--ambert) !important;
+}
+.hypo-id {
+  font-family: var(--mono); font-size: .85rem; font-weight: 600;
+  color: var(--teal); flex-shrink: 0; min-width: 32px;
+}
+.hypo-text { font-size: .92rem; color: var(--text); line-height: 1.6; }
+
+/* ======== SCROLL REVEAL ======== */
+.reveal {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal.visible { opacity: 1; transform: none; }
+}
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 768px) {
+  section { padding: 64px 16px; }
+  .hero { padding: 60px 16px; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .card-grid-4 { grid-template-columns: 1fr 1fr; }
+  .chart-grid { grid-template-columns: 1fr; }
+  .banner { padding: 28px 24px; }
+  .flow { gap: 8px; }
+  .flow-box { min-width: 100px; padding: 12px 16px; font-size: .82rem; }
+}
+@media (max-width: 480px) {
+  .card-grid-4 { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: 1fr; }
+  .nav-logo { font-size: .95rem; margin-right: 8px; }
+}
+
+
+/* ======== LISTS IN CARDS ======== */
+.card ul, .card ol { margin: 10px 0 0 20px; font-size: .92rem; color: var(--muted); line-height: 1.6; }
+.card li { margin: 4px 0; }
+.card li strong, .card p strong { color: var(--text); }
+
+/* ======== PIPELINE ======== */
+.pipe { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); margin: 8px 0 24px; }
+.pipe-step {
+  background: var(--paper); border: 1px solid var(--line); border-top: 4px solid var(--teal);
+  border-radius: var(--radius); padding: 18px 18px 16px; box-shadow: var(--shadow);
+}
+section:nth-of-type(odd) .pipe-step { background: var(--wash); }
+.pipe-step--core { border-top-color: var(--amber); background: var(--ambert) !important; }
+.pipe-num { font-family: var(--mono); font-size: .75rem; font-weight: 600; color: var(--teal); }
+.pipe-title { font-family: var(--serif); font-size: 1.05rem; font-weight: 600; color: var(--ink); margin: 2px 0 6px; line-height: 1.3; }
+.pipe-step p { font-size: .86rem; color: var(--muted); line-height: 1.55; }
+
+/* ======== PROMPT BOX ======== */
+.prompt-box {
+  font-family: var(--mono); font-size: .82rem; line-height: 1.7;
+  background: #0f1d36; color: #E5E7EB; border-radius: var(--radius);
+  padding: 18px 22px; white-space: pre-wrap; overflow-x: auto; margin-top: 12px;
+}
+.prompt-box .ph { color: #F0B95A; }
+
+/* ======== TABLE HELPERS ======== */
+.yes { color: #15803d; font-weight: 600; }
+.no  { color: #b91c1c; font-weight: 600; }
+td.num { font-family: var(--mono); white-space: nowrap; }
+tr.row-key td { background: var(--ambert); }
+.sub-h { font-family: var(--serif); font-size: 1.2rem; font-weight: 600; color: var(--ink); margin: 48px 0 16px; }
+
+
+/* ======== FOOTER ======== */
+footer {
+  background: var(--wash); border-top: 1px solid var(--line);
+  text-align: center; padding: 32px 24px;
+  font-family: var(--mono); font-size: .78rem; color: var(--muted);
+}
+</style>
 </head>
-
 <body>
 
-  <!-- ====== PROGRESS BAR ====== -->
-  <div class="progress-bar" id="progressBar" role="progressbar" aria-label="Reading progress"></div>
+<!-- ====== PROGRESS BAR ====== -->
+<div class="progress-bar" id="progressBar" role="progressbar" aria-label="Page reading progress"></div>
 
-  <!-- ====== NAV ====== -->
-  <nav aria-label="Main navigation">
-    <div class="nav-inner">
-      <span class="nav-logo">ViVQA-VLM</span>
-      <a class="nav-link" href="#problem">Problem</a>
-      <a class="nav-link" href="#gap">Gap</a>
-      <a class="nav-link" href="#questions">Research Questions</a>
-      <a class="nav-link" href="#hypotheses">Hypotheses</a>
-      <a class="nav-link" href="#dataset">Data</a>
-      <a class="nav-link" href="#methods">Method</a>
-      <a class="nav-link" href="#deliverables">Deliverables</a>
-      <a class="nav-link" href="#value">Value</a>
-      <a class="nav-link" href="#plan">Plan</a>
-      <a class="nav-link" href="#risk">Risks</a>
-      <a class="nav-link" href="#constraint">Constraints</a>
-      <a class="nav-link" href="#team">Team</a>
+<!-- ====== NAV ====== -->
+<nav aria-label="Main navigation">
+  <div class="nav-inner">
+    <span class="nav-logo">ViVQA-VLM</span>
+    <a class="nav-link" href="#problem">Problem</a>
+    <a class="nav-link" href="#gap">Gap</a>
+    <a class="nav-link" href="#prior">Prior Work</a>
+    <a class="nav-link" href="#questions">Research Questions</a>
+    <a class="nav-link" href="#hypotheses">Hypotheses</a>
+    <a class="nav-link" href="#dataset">Data</a>
+    <a class="nav-link" href="#methods">Method</a>
+    <a class="nav-link" href="#deliverables">Deliverables</a>
+    <a class="nav-link" href="#value">Value</a>
+    <a class="nav-link" href="#plan">Plan</a>
+    <a class="nav-link" href="#risk">Risks</a>
+    <a class="nav-link" href="#constraint">Constraints</a>
+    <a class="nav-link" href="#team">Team</a>
+    <a class="nav-link" href="#feedback">R1 Feedback</a>
+  </div>
+</nav>
+
+<!-- ====== HERO ====== -->
+<header class="hero" id="hero">
+  <div class="hero-content">
+    <p class="eyebrow">Review 1 · Updated with reviewer feedback + W4–W6 results · Oct 6, 2026</p>
+    <h1 class="hero-title">ViVQA-VLM</h1>
+    <p class="hero-thesis">Efficient Vietnamese Visual Question Answering<br>using Vision-Language Models</p>
+    <div class="chips">
+      <span class="chip">AI (LLM/VLM) · FPT University</span>
+      <span class="chip">Advisors: Đặng Ngọc Minh Đức · Phạm Minh Trí</span>
     </div>
-  </nav>
+    <div class="chips" style="margin-top:12px">
+      <span class="chip">SE182670 · Phạm Lê Huy Hoàng</span>
+      <span class="chip">SE182458 · Văn Quang Trường</span>
+      <span class="chip">SE193642 · Trần Quốc Huân</span>
+      <span class="chip">SE183249 · Hồ Đắc Toàn</span>
+    </div>
+  </div>
+</header>
 
-  <!-- ====== HERO ====== -->
-  <header class="hero" id="hero">
-    <div class="hero-content">
-      <p class="eyebrow">Review 1 · Scope of Report 1</p>
-      <h1 class="hero-title">ViVQA-VLM</h1>
-      <p class="hero-thesis">Efficient Vietnamese Visual Question Answering<br>using Vision-Language Models</p>
-      <div class="chips">
-        <span class="chip">AI (LLM/VLM) · FPT University</span>
-        <span class="chip">Supervisors: Đặng Ngọc Minh Đức · Phạm Minh Trí</span>
+<main>
+
+<!-- ====== §1 PROBLEM ====== -->
+<section id="problem">
+  <div class="container">
+    <p class="section-eyebrow reveal">Part 01</p>
+    <h2 class="section-title reveal">Problem &amp; the Vietnamese Challenge</h2>
+    <p class="section-lead reveal">Given an image and a Vietnamese question about it, the system must generate a Vietnamese answer that is <strong>short, faithful to the image content, and spelled correctly with diacritics</strong>. Unlike classification or object recognition, VQA requires understanding the image, the language, and reasoning at the same time.</p>
+
+    <div class="flow reveal">
+      <div class="flow-box">🖼️ Image<br>+ ❓ Vietnamese question</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box flow-box--accent">🤖 Qwen2.5-VL-3B<br>+ QLoRA adapter</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">💬 Vietnamese answer</div>
+    </div>
+
+    <div class="pull-quote reveal">
+      <p>Research problem: adapt an open-source VLM (Qwen2.5-VL-3B) to answer Vietnamese questions — reading diacritic-bearing text in images correctly and answering correctly in Vietnamese — using PEFT (QLoRA) alone, on a single T4 GPU.</p>
+      <cite>Problem statement · updated after Review 1</cite>
+    </div>
+
+    <h3 class="sub-h reveal">Input / Output Specification</h3>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Component</th><th>Definition</th><th>ViVQA</th><th>ViTextVQA</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Input 1 — Image</strong></td><td>RGB image, resized under the <code>max_pixels</code> limit</td><td>Everyday images (MS COCO source), not focused on text</td><td>Images with Vietnamese text: signs, menus, packaging…</td></tr>
+          <tr><td><strong>Input 2 — Question</strong></td><td>Vietnamese text, Unicode NFC normalization</td><td>Short questions, semi-automatically generated</td><td>Human-written, 9.59 words on average</td></tr>
+          <tr><td><strong>Output — Answer</strong></td><td>Vietnamese text with diacritics, free-form (generative)</td><td>99.83% of answers ≤ 3 words</td><td>4.18 words on average; the answer is a text span present in the image</td></tr>
+          <tr><td><strong>Evaluation</strong></td><td>Compared with the ground-truth answer after the same normalization step</td><td>EM · VQA-Acc · ANLS</td><td>EM · VQA-Acc · ANLS (+ auxiliary F1)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-h reveal">Where Does Vietnamese Differ from English?</h3>
+    <div class="card-grid card-grid-4 reveal">
+      <div class="card card--teal">
+        <div class="card-tag">V1</div>
+        <div class="card-title">Reading diacritic-bearing text in images</div>
+        <p>Diacritics and diacritic-bearing letters (ă, â, ê, ô, ơ, ư, đ) are tiny strokes in an image. If the model misreads or drops a diacritic, the meaning changes (“má” (cheek) ≠ “mà” (but)). This is a perception error at the pixel level and cannot be fixed by text normalization.</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Our evidence (W5, ViTextVQA 2,000 questions): purely Latin-script answers reach EM 0.394, while Vietnamese answers with diacritics reach only 0.224; 45 questions (2.3%) have the right letters but the wrong diacritics (e.g. “BUT DO” → “bút đỏ” (red pen)). Literature: removing diacritics lowers the F1 of every model on ViTextVQA (Nguyen et al., §7.1).</p>
       </div>
-      <div class="chips" style="margin-top:12px">
-        <span class="chip">SE182670 · Phạm Lê Huy Hoàng</span>
-        <span class="chip">SE182458 · Văn Quang Trường</span>
-        <span class="chip">SE193642 · Trần Quốc Huân</span>
-        <span class="chip">SE183249 · Hồ Đắc Toàn</span>
+      <div class="card card--teal">
+        <div class="card-tag">V2</div>
+        <div class="card-title">Wrong-language or wrong-format answers</div>
+        <p>VLMs pretrained mainly on English/Chinese tend to answer in English, mix English and Vietnamese (code-switching), or answer verbosely. In that case EM = 0 even though the model understood the content. For English this issue is almost absent because it is the model's primary language.</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Our evidence (W5): ViVQA contains at least 90 answers in English (“giraffe” 32, “kitchen” 24, “bus” 19…); in ViTextVQA, 19.6% of answers contain extra words (over-generation) (“Nhà thuốc Long Châu” (Long Châu Pharmacy) → “long châu”), and many echo the question instead of answering.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">V3</div>
+        <div class="card-title">Text order &amp; word boundaries</div>
+        <p>Vietnamese whitespace separates syllables, not words (“thời gian” (time) is a single word). Text extracted from an image in the wrong order breaks words and changes the meaning.</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Evidence: ordering OCR text top-left → bottom-right (TL-BR) improves most models on ViTextVQA (Nguyen et al., §6.4).</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">V4</div>
+        <div class="card-title">Hallucination</div>
+        <p>The model answers fluently but with content that is not in the image (invented objects or invented text). There is no POPE-style hallucination evaluation for Vietnamese VQA yet (G4).</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Our evidence (W5, ViVQA): the model invents the detail “Điện thoại Nokia 6310i” (Nokia 6310i phone) and answers “bò cạp” (scorpion) when the image shows a bird; it guesses “đỏ” (red) 117 times while the ground-truth answer “đỏ” occurs only 75 times.</p>
       </div>
     </div>
-  </header>
 
-  <main>
+    <h3 class="sub-h reveal">Preprocessing ≠ Research Problem</h3>
+    <div class="two-col reveal">
+      <div class="card card--accent">
+        <div class="card-title">Preprocessing — a mandatory technical step, not a contribution</div>
+        <ul>
+          <li>Unicode NFC normalization of questions and answers</li>
+          <li>Lowercasing, removing extra punctuation, collapsing whitespace</li>
+          <li>Apply the same normalization function to ground-truth answers and model outputs before computing metrics; the scoring rules are fixed <strong>before</strong> running the test (commit <code>37da80a</code>)</li>
+          <li>Resize images by <code>max_pixels</code></li>
+        </ul>
+      </div>
+      <div class="card card--highlight">
+        <div class="card-title">Research problem — the focus of the project</div>
+        <ul>
+          <li>Read diacritic-bearing text in images correctly (V1, V3)</li>
+          <li>Answer in the correct language and format (V2)</li>
+          <li>Do not fabricate content (V4)</li>
+          <li>Achieve all of the above with PEFT only, on a T4 GPU</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note reveal">Official reference points (W5, zero-shot Qwen2.5-VL-3B): ViVQA EM 0.225 · ANLS 0.288 (3,001 questions); ViTextVQA EM 0.285 · ANLS 0.468 (2,000 questions, seed 42) — see Part 07.</p>
+  </div>
+</section>
 
-    <!-- ====== §1 PROBLEM ====== -->
-    <section id="problem">
-      <div class="container">
-        <p class="section-eyebrow reveal">Part 01</p>
-        <h2 class="section-title reveal">Problem &amp; Motivation</h2>
-        <p class="section-lead reveal">Unlike image classification or object detection, VQA requires models to
-          understand <strong>both image and language</strong> and perform <strong>reasoning</strong> to answer
-          questions.</p>
+<!-- ====== §2 GAP ====== -->
+<section id="gap">
+  <div class="container">
+    <p class="section-eyebrow reveal">Part 02</p>
+    <h2 class="section-title reveal">Research Gap</h2>
 
-        <div class="flow reveal">
-          <div class="flow-box">🖼️ Vietnamese Image<br>+ ❓ Vietnamese Question</div>
-          <span class="flow-arrow">→</span>
-          <div class="flow-box flow-box--accent">🤖 Vision-Language Model</div>
-          <span class="flow-arrow">→</span>
-          <div class="flow-box">💬 Vietnamese Answer</div>
+
+    <div class="card-grid card-grid-2 reveal">
+      <div class="card card--teal">
+        <div class="card-tag">G1</div>
+        <div class="card-title">English-biased Pre-training</div>
+        <p>VLM alignment is optimized for English — transfer to Vietnamese has not been studied closely.</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Source: <a href="https://arxiv.org/abs/2310.03744" target="_blank" rel="noopener" style="color:var(--muted)">LLaVA-1.5 (Liu 2024) ↗</a></p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">G2</div>
+        <div class="card-title">Weak Vietnamese VQA, especially scene-text</div>
+        <p>Performance on ViTextVQA is low: OCR, Vietnamese diacritics and code-switching are not yet fully solved. The highest reported result reaches only EM 25.48%, while humans reach 88% (see Part 03).</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Source: <a href="https://arxiv.org/abs/2404.10652" target="_blank" rel="noopener" style="color:var(--muted)">ViTextVQA (Nguyen 2024) ↗</a> · <a href="https://arxiv.org/abs/2310.03744" target="_blank" rel="noopener" style="color:var(--muted)">LLaVA-1.5 (Liu 2024) ↗</a></p>
+      </div>
+      <div class="card card--highlight">
+        <div class="card-tag">G3 — FOCUS</div>
+        <div class="card-title">PEFT for Vietnamese VLM remains unexplored</div>
+        <p>No systematic study has applied LoRA/QLoRA to VLMs for Vietnamese VQA — this is the main gap of the project.</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Basis: 3 Vietnamese VQA papers surveyed — none applies PEFT/QLoRA (see Literature Matrix).</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">G4</div>
+        <div class="card-title">Hallucination not measured for Vietnamese</div>
+        <p>No hallucination benchmark (POPE-style) has been evaluated on Vietnamese VQA data.</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Source: POPE (Li et al., 2023, EMNLP) · <a href="https://arxiv.org/abs/2310.03744" target="_blank" rel="noopener" style="color:var(--muted)">LLaVA-1.5 (Liu 2024) ↗</a></p>
+      </div>
+    </div>
+
+
+  </div>
+</section>
+
+<!-- ====== §3 PRIOR WORK ====== -->
+<section id="prior">
+  <div class="container">
+    <p class="section-eyebrow reveal">Part 03</p>
+    <h2 class="section-title reveal">Prior Work &amp; Reference Baselines</h2>
+    <p class="section-lead reveal">The project uses two kinds of reference points. (1) <strong>Reproduced baseline</strong>: a VLM the team re-runs itself and uses to conclude improvements (Qwen2.5-VL-3B, Part 07). (2) <strong>Reported prior-work baseline</strong>: figures quoted from published papers, not re-run, used to position the results.</p>
+
+    <h3 class="sub-h reveal">ViTextVQA — test set</h3>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Work</th><th>Approach</th><th>Trained parameters</th><th>F1 (%)</th><th>EM (%)</th><th>Relevance to the project</th></tr></thead>
+        <tbody>
+          <tr><td><strong>BLIP-2 large</strong><br><span style="color:var(--muted);font-size:.8rem">Li et al., ICML 2023</span></td><td>Frozen image encoder + LM, only the Q-Former is trained; OCR SwinTextSpotter, LM ViT5</td><td class="num">≈8% / ≈1.4B</td><td class="num">38.47</td><td class="num">15.58</td><td>Freezes most of the model — same spirit as PEFT</td></tr>
+          <tr><td><strong>PreSTU large</strong><br><span style="color:var(--muted);font-size:.8rem">Kil et al., ICCV 2023</span></td><td>T5 pretrained for scene-text, OCR ordered by layout</td><td class="num">≈100% / ≈860M</td><td class="num">44.93</td><td class="num">22.64</td><td>Strongest full fine-tuning baseline in the table</td></tr>
+          <tr class="row-key"><td><strong>ViTextBLIP-2</strong><br><span style="color:var(--muted);font-size:.8rem">Nguyen et al., ESWA 2025</span></td><td>BLIP-2 + OCR + caption, only the Q-Former is trained</td><td class="num">≈5% / ≈2.5B</td><td class="num">53.95</td><td class="num">25.48</td><td>Highest reported result on ViTextVQA; also a parameter-efficient approach</td></tr>
+          <tr><td><strong>QwenVL-7B zero-shot</strong><br><span style="color:var(--muted);font-size:.8rem">reference, same paper</span></td><td>Multilingual VLM, no training</td><td class="num">0%</td><td class="num">53.80</td><td class="num">28.00</td><td>Measured on 100 random samples — a modern zero-shot VLM already matches the highest reported result</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note reveal" style="margin-top:0;border-top:none;padding-top:0">Source: Nguyen et al., ViTextVQA (arXiv:2404.10652, Expert Systems with Applications version), Tables 6 and 7. Human: F1 96.42% · EM 88.00%.</p>
+
+    <h3 class="sub-h reveal">ViVQA — test set</h3>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Work</th><th>Approach</th><th>Result</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr class="row-key"><td><strong>AViVQA-TranConI</strong><br><span style="color:var(--muted);font-size:.8rem">Nguyen et al., Computers &amp; Electrical Engineering 2024</span></td><td>BLIP-2 (frozen) + EfficientNet, selecting the answer from a label set</td><td class="num">Accuracy 71.04%</td><td>Highest among the works the team surveyed</td></tr>
+          <tr><td><strong>Improved Multi-Vision Contextual Attention</strong><br><span style="color:var(--muted);font-size:.8rem">Bui et al., Tạp chí KH ĐHSP TP.HCM (HCMUE Journal of Science) 2025</span></td><td>Attention over multiple visual features</td><td class="num">Accuracy 62.41%</td><td>The original model reaches 60%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card card--amber reveal" style="margin-top:24px">
+      <div class="card-title">Comparison caveats</div>
+      <p>The reference points above use different metrics and setups (token-level F1; classification accuracy over a fixed label set), so they serve only to <strong>position</strong> the results and are not placed next to the team's numbers as direct comparisons. The team has computed token-level F1 as an auxiliary metric: the team's zero-shot baseline reaches F1 0.530 on the 2,000-question subset — for reference only, because the evaluation set differs (subset vs. full test set) and so does the normalization.</p>
+    </div>
+
+    <h3 class="sub-h reveal">What the team takes from prior work</h3>
+    <div class="card-grid card-grid-4 reveal">
+      <div class="card card--teal"><div class="card-title">Parameter efficiency has precedent</div><p>ViTextBLIP-2 trains only about 5% of the parameters yet outperforms full fine-tuning models → supports the team's QLoRA direction.</p></div>
+      <div class="card card--teal"><div class="card-title">Vietnamese diacritics are a core problem</div><p>Removing diacritics lowers the performance of every model → V1 is a research problem, not just preprocessing.</p></div>
+      <div class="card card--teal"><div class="card-title">OCR order affects results</div><p>TL-BR ordering improves most models → the team feeds OCR text into the prompt in TL-BR order.</p></div>
+      <div class="card card--highlight"><div class="card-title">Remaining gap</div><p>Among the works the team surveyed, none adapts a modern multilingual VLM (Qwen-VL family) with LoRA/QLoRA for Vietnamese VQA (G3).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== §3 QUESTIONS ====== -->
+<section id="questions">
+  <div class="container">
+    <p class="section-eyebrow reveal">Part 04</p>
+    <h2 class="section-title reveal">Research Questions</h2>
+    <p class="section-lead reveal">Four research questions guide the entire experimental study and ablation analysis.</p>
+
+    <div class="card-grid card-grid-2 reveal">
+      <div class="card card--teal">
+        <div class="card-tag">RQ1</div>
+        <div class="card-title">Zero-shot &amp; prompting on Vietnamese data</div>
+        <p>How well do VLMs perform zero-shot on ViVQA/ViTextVQA, which Vietnamese error types (V1–V3) dominate, and how far does a Vietnamese prompt improve results? Measured with EM, VQA-Acc, ANLS.</p>
+      </div>
+      <div class="card card--highlight">
+        <div class="card-tag">RQ2 — FOCUS</div>
+        <div class="card-title">How much does PEFT (QLoRA) improve over zero-shot?</div>
+        <p>How much does QLoRA improve over zero-shot / prompting — without full fine-tuning? This is the central question.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">RQ3</div>
+        <div class="card-title">Vietnamese OCR × QLoRA on ViTextVQA</div>
+        <p>Does putting diacritic-bearing OCR text, ordered TL-BR, into the prompt help read the text in the image correctly, and does it combine synergistically with QLoRA? Measured with ANLS.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">RQ4</div>
+        <div class="card-title">How does QLoRA affect hallucination?</div>
+        <p>After QLoRA adaptation, does the model fabricate more or less content? Evaluated in the POPE-vi style.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ====== §4 HYPOTHESES ====== -->
+<section id="hypotheses">
+  <div class="container">
+    <p class="section-eyebrow reveal">Part 05</p>
+    <h2 class="section-title reveal">Hypotheses (H1–H4)</h2>
+    <p class="section-lead reveal">Each hypothesis is tied to a specific Vietnamese problem (V1–V4) and tested by comparison with the reproduced baseline — same model, same split, same seed. Thresholds are taken from the literature and have not yet been measured on Vietnamese.</p>
+
+    <div class="hypo-list reveal">
+      <div class="hypo-item hypo-item--highlight">
+        <span class="hypo-id">H1</span>
+        <span class="hypo-text"><strong>QLoRA adapts to Vietnamese</strong> — QLoRA on Qwen2.5-VL-3B improves EM by ≥ +5 over the zero-shot result of the same model. <span style="color:var(--muted)">(RQ2 · V1–V3)</span></span>
+      </div>
+      <div class="hypo-item">
+        <span class="hypo-id">H2</span>
+        <span class="hypo-text"><strong>Vietnamese OCR</strong> — Putting diacritic-bearing OCR text, ordered TL-BR, into the prompt improves ANLS by ≥ +3 on ViTextVQA; combining it with QLoRA gives the best result. <span style="color:var(--muted)">(RQ3 · V1, V3)</span></span>
+      </div>
+      <div class="hypo-item">
+        <span class="hypo-id">H3</span>
+        <span class="hypo-text"><strong>Output-language constraint</strong> — A Vietnamese format prompt (short answer, with diacritics) improves EM by ≥ +3 and reduces the rate of wrong-language or diacritic-dropped answers. <span style="color:var(--muted)">(RQ1 · V2)</span></span>
+      </div>
+      <div class="hypo-item">
+        <span class="hypo-id">H4</span>
+        <span class="hypo-text"><strong>Reliability</strong> — QLoRA does not increase the hallucination rate (POPE-vi) relative to zero-shot. <span style="color:var(--muted)">(RQ4 · V4)</span></span>
+      </div>
+    </div>
+
+    <div class="card card--accent reveal" style="margin-top:32px">
+      <div class="card-title">No longer hypotheses — moved to measurement or ablation</div>
+      <ul>
+        <li><strong>4-bit vs. 16-bit, VRAM reduction:</strong> this is an established property of QLoRA (Dettmers et al., NeurIPS 2023), not an answer to the Vietnamese problem → only VRAM, time and the number of trained parameters are reported for each run.</li>
+        <li><strong>LoRA all-linear vs. attention-only, rank r:</strong> these are configuration choices → moved to a secondary ablation.</li>
+        <li><strong>Shared adapter vs. a separate adapter per dataset:</strong> optional, done only if time permits.</li>
+      </ul>
+    </div>
+    <p class="note reveal">The “zero-shot” reference in H1–H4 is the baseline re-run under the frozen configuration at W7 (Part 07), not the W4 figure. Mapping to the Review 1 version: H1 → H1 · H6 → H2 · H7 → H3 · hallucination hypothesis → H4.</p>
+  </div>
+</section>
+
+<!-- ====== §5 DATASET ====== -->
+<section id="dataset">
+  <div class="container">
+    <p class="section-eyebrow reveal">Part 06</p>
+    <h2 class="section-title reveal">Data Analysis <span class="badge badge--teal">Real figures · actual analysis</span></h2>
+    <p class="section-lead reveal" style="margin-bottom: 8px;">Two benchmark datasets for Vietnamese VQA — all figures come from actual analysis.</p>
+    <p class="note reveal" style="margin-top: 0; padding-top: 0; border-top: none; margin-bottom: 48px;">seed 42: ViVQA val split &amp; sample selection</p>
+
+    <!-- ViVQA Stats -->
+    <h3 style="font-family:var(--serif);font-size:1.3rem;font-weight:600;color:var(--ink);margin-bottom:8px" class="reveal">
+      ViVQA <span style="font-family:var(--mono);font-size:.78rem;color:var(--muted);font-weight:400">github.com/kh4nh12/ViVQA (Tran et al., PACLIC 2021)</span>
+    </h3>
+    <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 20px;" class="reveal">Original size (per the paper): 10,328 images / 15,000 QA</p>
+    <div class="stat-grid reveal">
+      <div class="stat">
+        <div class="stat-number">15,000</div>
+        <div class="stat-label">QA pairs</div>
+        <div class="stat-source">from JSON</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">10,328</div>
+        <div class="stat-label">Images</div>
+        <div class="stat-source">from JSON</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">10,799</div>
+        <div class="stat-label">Train</div>
+        <div class="stat-source">prepare_vivqa.py · seed 42</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">1,200</div>
+        <div class="stat-label">Val</div>
+        <div class="stat-source">prepare_vivqa.py · seed 42</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">3,001</div>
+        <div class="stat-label">Test</div>
+        <div class="stat-source">test split</div>
+      </div>
+    </div>
+
+    <div class="card-grid card-grid-2 reveal" style="margin-bottom: 48px;">
+      <div class="card card--teal">
+        <div class="card-tag">ViVQA</div>
+        <div class="card-title">99.83% of answers ≤ 3 words</div>
+        <p>Mostly short labels, classification-like → suitable metrics: EM / VQA-Acc.</p>
+      </div>
+      <div class="card card--accent">
+        <div class="card-tag">ViTextVQA</div>
+        <div class="card-title">Average 4.18 words</div>
+        <p>Longer, OCR-dependent answers → EM is too strict → need the <strong>ANLS</strong> metric (tolerates character-level deviations).</p>
+      </div>
+    </div>
+
+    <!-- ViTextVQA Stats -->
+    <h3 style="font-family:var(--serif);font-size:1.3rem;font-weight:600;color:var(--ink);margin:48px 0 8px" class="reveal">
+      ViTextVQA <span style="font-family:var(--mono);font-size:.78rem;color:var(--muted);font-weight:400">HF minhquan6203/ViTextVQA — official release, CC BY-NC 3.0 (Nguyen et al., 2024)</span>
+    </h3>
+    <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 20px;" class="reveal">Size: 16,762 images / 50,342 QA (7:1:2 split) — matches the paper, all images present (0 missing)</p>
+    <div class="stat-grid reveal">
+      <div class="stat">
+        <div class="stat-number">50,342</div>
+        <div class="stat-label">QA pairs</div>
+        <div class="stat-source">official repo</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">16,762</div>
+        <div class="stat-label">Images</div>
+        <div class="stat-source">ViTextVQA_images.zip</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">35,159</div>
+        <div class="stat-label">Train</div>
+        <div class="stat-source">11,733 images</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">5,155</div>
+        <div class="stat-label">Dev</div>
+        <div class="stat-source">1,676 images</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">10,028</div>
+        <div class="stat-label">Test</div>
+        <div class="stat-source">3,353 images · test_gt.json</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">2,000</div>
+        <div class="stat-label">Test subset</div>
+        <div class="stat-source">seed 42 · used for reporting</div>
+      </div>
+    </div>
+
+    <div class="card card--amber reveal" style="margin-top:32px">
+      <div class="card-title">Official data source &amp; processing order</div>
+      <ul>
+        <li><strong>Switched (W5):</strong> ViTextVQA is taken from the official repo <code>minhquan6203/ViTextVQA</code> (HuggingFace, gated, CC BY-NC 3.0); test answers come from <code>ViTextVQA_test_gt.json</code> (<code>ViTextVQA_test.json</code> is only a Kaggle submission sample). ViVQA: 10,328/10,328 images present; ViTextVQA: 0 images missing. The mirror used in W4 was only a copy of the test set and is no longer used.</li>
+        <li>Processing order: preprocessing (NFC, normalization) applied identically to all samples → fixed splits → the test set is not used to choose configurations (tune the prompt on dev, report on test).</li>
+      </ul>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-grid reveal" style="margin-top: 48px;">
+      <div class="chart-card">
+        <h3>Data Scale: QA Pairs vs. Images</h3>
+        <canvas id="chartScale" aria-label="Chart comparing the number of QA pairs and images in ViVQA and ViTextVQA"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Question Type Distribution (Heuristic)</h3>
+        <canvas id="chartQType" aria-label="Chart of the question type distribution"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Train / Val (Dev) / Test Split</h3>
+        <canvas id="chartSplit" aria-label="Chart of the train/val/test split for ViVQA and ViTextVQA"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== §6 METHODS ====== -->
+<section id="methods">
+  <div class="container">
+    <p class="section-eyebrow reveal">Part 07</p>
+    <h2 class="section-title reveal">Proposed Method &amp; Pipeline</h2>
+    <p class="section-lead reveal">A single method is fixed. Every other component is an ablation to show which part produces the improvement.</p>
+
+    <div class="card card--highlight reveal">
+      <div class="card-tag">PROPOSED METHOD</div>
+      <div class="card-title">QLoRA on Qwen2.5-VL-3B-Instruct + Vietnamese prompt with OCR</div>
+      <p>The base model is frozen in 4-bit (NF4); only the LoRA adapters are trained on ViVQA and ViTextVQA. The input consists of the image, the question, the OCR text (ordered TL-BR, ViTextVQA only), and an instruction to answer briefly in Vietnamese with diacritics.</p>
+    </div>
+
+    <h3 class="sub-h reveal">System Pipeline</h3>
+    <div class="pipe reveal">
+      <div class="pipe-step"><div class="pipe-num">Step 1</div><div class="pipe-title">Data</div><p>ViVQA + ViTextVQA (official repos): images, questions, answers.</p></div>
+      <div class="pipe-step"><div class="pipe-num">Step 2</div><div class="pipe-title">Preprocessing</div><p>NFC, lowercase, answer normalization; resize images by <code>max_pixels</code>.</p></div>
+      <div class="pipe-step"><div class="pipe-num">Step 3</div><div class="pipe-title">OCR (ViTextVQA)</div><p>PaddleOCR / VietOCR → order TL-BR → cache as JSON per image, run once.</p></div>
+      <div class="pipe-step"><div class="pipe-num">Step 4</div><div class="pipe-title">Fixed splits</div><p>Official split; 1,200 val samples held out from the ViVQA train set and a 2,000-question ViTextVQA test subset (seed 42).</p></div>
+      <div class="pipe-step"><div class="pipe-num">Step 5</div><div class="pipe-title">Prompt builder</div><p>Combines image + question + OCR + Vietnamese instruction; truncates OCR to the token budget.</p></div>
+      <div class="pipe-step pipe-step--core"><div class="pipe-num">Step 6</div><div class="pipe-title">Qwen2.5-VL-3B 4-bit + LoRA</div><p>LoRA r=16 on q/k/v/o (0.196% of parameters).<br><strong>Training:</strong> loss on answer tokens only, only LoRA is updated.<br><strong>Inference:</strong> greedy decoding, small <code>max_new_tokens</code>.</p></div>
+      <div class="pipe-step"><div class="pipe-num">Step 7</div><div class="pipe-title">Post-processing &amp; evaluation</div><p>Normalize outputs like the ground truth; EM, VQA-Acc, ANLS (+ auxiliary F1); POPE-vi; error analysis by question type and V1–V4; log seed, VRAM, time.</p></div>
+      <div class="pipe-step"><div class="pipe-num">Step 8</div><div class="pipe-title">Web prototype</div><p>Gradio: upload an image, ask in Vietnamese, show the answer, confidence and OCR text.</p></div>
+    </div>
+
+    <p style="font-size:.9rem;color:var(--muted)" class="reveal">Prompt template (kept in Vietnamese — this is the exact text sent to the model): to be finalized through ablation on the dev set.</p>
+    <div class="prompt-box reveal">&lt;ảnh&gt;
+Văn bản trong ảnh (OCR, trái→phải, trên→dưới): <span class="ph">{ocr_text}</span>
+Câu hỏi: <span class="ph">{question}</span>
+Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin có trong ảnh.</div>
+
+    <h3 class="sub-h reveal">QLoRA in This Project</h3>
+    <div class="two-col reveal">
+      <div class="card card--teal">
+        <div class="card-title">How QLoRA works</div>
+        <ol>
+          <li><strong>Quantization:</strong> the model's base weights are compressed to 4-bit (NF4) and frozen — they are not updated.</li>
+          <li><strong>Attaching LoRA:</strong> each attention projection q/k/v/o in the 36 decoder layers gets two small matrices A·B of rank r=16. Only A and B are trained: <strong>7,372,800 parameters = 0.196%</strong> of the total (measured with PEFT in W6, matches the hand calculation).</li>
+          <li><strong>Result:</strong> an adapter of about 39 MB (measured in the W6 smoke run), attached to the base model at inference.</li>
+        </ol>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Source: Hu et al., LoRA (ICLR 2022) · Dettmers et al., QLoRA (NeurIPS 2023).</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-title">Why QLoRA only, not LoRA vs. QLoRA</div>
+        <p>The GPU through W6 is a T4 (Colab free), which does not support bf16. The estimated weights of a 3B model at 16-bit already take about 7–8 GB; at 4-bit about 2–3 GB. Measured in W6: QLoRA training with batch 2×8 and gradient checkpointing needs only <strong>5.93 GB peak VRAM</strong>.</p>
+        <p style="margin-top:10px">→ QLoRA is a <strong>prerequisite for running</strong> on the project's hardware, not a variable to compare. The only comparison used to draw conclusions is <strong>QLoRA vs. zero-shot/prompting on the same model, same configuration</strong>. Measuring 4-bit vs. no quantization in W7 is only for choosing the configuration (VRAM, speed), not a hypothesis.</p>
+      </div>
+    </div>
+
+    <h3 class="sub-h reveal">Token Budget per Sample</h3>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Component</th><th>Calculation / limit</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Visual tokens</td><td>≈ (height/28) × (width/28) after resize; upper-bounded by <code>max_pixels</code></td><td>Measured (W6): 512 tokens (<code>max_pixels</code>=401,408) vs. 1,280 tokens (1,003,520) — 1,280 tokens raise ANLS with statistical significance (CI95 [+0.012, +0.066]) but EM does not differ (McNemar p=0.134), inference cost ×1.46. To be fixed in W7.</td></tr>
+          <tr><td>Question</td><td>A few dozen tokens</td><td>ViTextVQA: 9.59 words on average</td></tr>
+          <tr><td>OCR text</td><td>Truncated to at most N tokens (configurable, logged in every run)</td><td>ViTextVQA only</td></tr>
+          <tr><td>Instruction + template</td><td>Fixed</td><td>—</td></tr>
+          <tr><td>Output</td><td>Small <code>max_new_tokens</code> (e.g. 32)</td><td>Answers average 4.18 words</td></tr>
+          <tr class="row-key"><td><strong>Total</strong></td><td>Estimated at about 0.8–1.8 thousand tokens / sample, depending on <code>max_pixels</code></td><td>Far below the model's context window</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note reveal" style="margin-top:0;border-top:none;padding-top:0">Each question is an independent turn (one image + one question), requiring no conversation memory or database to “remember”. The real limit is the VRAM of the T4, controlled via <code>max_pixels</code> and OCR length. Actual token counts will be measured and logged in every run.</p>
+
+    <h3 class="sub-h reveal">Role of Each Model</h3>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Model</th><th>Role</th><th>Training</th><th>Used to conclude improvement?</th></tr></thead>
+        <tbody>
+          <tr class="row-key"><td><strong>Qwen2.5-VL-3B-Instruct</strong></td><td>Reproduced baseline + base for the proposed method</td><td>Zero-shot → QLoRA</td><td class="yes">Yes — same model, same split, same seed</td></tr>
+          <tr><td>Qwen3-VL-4B-Instruct</td><td>Zero-shot reference (optional)</td><td>No</td><td class="no">No — different generation and size</td></tr>
+          <tr><td>Florence-2</td><td>Fallback if the baseline runs into problems</td><td>Only if the fallback is activated</td><td class="no">No</td></tr>
+          <tr><td>BLIP-2 · PreSTU · ViTextBLIP-2</td><td>Prior work (Part 03)</td><td>Not re-run — figures from the papers</td><td class="no">No — positioning only</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note reveal" style="margin-top:0;border-top:none;padding-top:0">Principle: conclude “improvement” only when comparing on the same backbone, same size, same split, seed and hardware. Comparing models of a different generation or size does not reflect the effectiveness of the method.</p>
+
+    <h3 class="sub-h reveal">Planned Ablations &amp; Where RAG Fits</h3>
+    <div class="two-col reveal">
+      <div class="card card--accent">
+        <div class="card-title">Ablation (same model, same split)</div>
+        <ul>
+          <li>Zero-shot → Vietnamese prompt → QLoRA</li>
+          <li>With / without OCR in the prompt</li>
+          <li>Original OCR order vs. TL-BR</li>
+          <li>LoRA rank r and target modules</li>
+        </ul>
+      </div>
+      <div class="card card--accent">
+        <div class="card-title">RAG — conditional option</div>
+        <p>OCR in the prompt acts as “evidence retrieval” from the image itself. RAG with an external knowledge base (embedding + FAISS, top-k) is done only in W9 if error analysis shows that many errors are caused by knowledge missing from the image. In that case the knowledge base, embedding model, retrieval method and token budget will be specified.</p>
+      </div>
+    </div>
+
+    <h3 class="sub-h reveal">Results So Far (W4–W6)</h3>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Dataset</th><th>Evaluation set</th><th>EM</th><th>VQA-Acc</th><th>ANLS</th><th>F1 (aux.)</th><th>Inference time</th></tr></thead>
+        <tbody>
+          <tr class="row-key"><td><strong>ViVQA</strong></td><td>Full test set, 3,001 questions</td><td class="num">0.225</td><td class="num">0.225</td><td class="num">0.288</td><td class="num">—</td><td class="num">0.84 s/sample</td></tr>
+          <tr class="row-key"><td><strong>ViTextVQA</strong></td><td>Test subset of 2,000 questions, seed 42</td><td class="num">0.285</td><td class="num">0.285</td><td class="num">0.468</td><td class="num">0.530</td><td class="num">1.35 s/sample</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note reveal" style="margin-top:0;border-top:none;padding-top:0">Official W5 zero-shot baseline: Qwen2.5-VL-3B-Instruct, 4-bit NF4, fp16, <code>max_pixels</code>=512·28·28, greedy, Colab T4. VQA-Acc = EM because each question has only one ground-truth answer. The W4 figures (EM 38.3% · ANLS 55.9%) were measured on the mirror, 300 questions, with the old scoring rules — indicative results only, not used for comparison.</p>
+
+    <div class="card-grid card-grid-3 reveal" style="margin-top:24px">
+      <div class="card card--teal">
+        <div class="card-tag">W6 · DTYPE DIAGNOSIS</div>
+        <div class="card-title">fp16 causes errors on T4</div>
+        <p>23/2,000 ViTextVQA questions (1.15%) generate only “!!!!”. Re-run in fp32: 23 → 0 broken outputs, 0 control questions degraded → the cause is fp16 overflow.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">W6 · RESOLUTION</div>
+        <div class="card-title">512 vs. 1,280 visual tokens</div>
+        <p>1,280 tokens raise ANLS significantly (CI95 [+0.012, +0.066]), EM does not differ (p=0.134), inference cost ×1.46.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">W6 · QLORA SMOKE RUN</div>
+        <div class="card-title">Training pipeline runs end to end</div>
+        <p>200 ViVQA samples, 30 steps: loss 1.61 → 0.88; 0.196% of parameters trained. On T4 in fp32: 4.93 s/sample ≈ 14.77 hours/epoch → switch to L4 (has bf16).</p>
+      </div>
+    </div>
+
+    <div class="card card--highlight reveal" style="margin-top:24px">
+      <div class="card-tag">NEXT (W7)</div>
+      <div class="card-title">Config freeze → re-run the baseline once → preliminary QLoRA</div>
+      <p>The W5 baseline used fp16 (shown to cause errors), and switching the GPU from T4 to L4 changes the run conditions. So that QLoRA and the baseline differ in exactly one variable (adapter or not), the team fixes dtype, <code>max_pixels</code> and the quantization mode on L4, then re-runs the baseline on both datasets <strong>once</strong>. This re-run is the official reference to compare against QLoRA. The W6 smoke adapter has been deleted and is not used for reporting.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ====== §7 DELIVERABLES ====== -->
+<section id="deliverables">
+  <div class="container">
+    <p class="section-eyebrow reveal">Part 08</p>
+    <h2 class="section-title reveal">Expected Deliverables</h2>
+    <p class="section-lead reveal">Three main groups of deliverables upon completion of the project.</p>
+
+    <div class="card-grid card-grid-3 reveal">
+      <div class="card card--teal">
+        <div class="card-tag">📄 RESEARCH CONTRIBUTION</div>
+        <div class="card-title">Research Contribution (PEFT)</div>
+        <p>≥ 1 validated PEFT improvement over the baseline, with an ablation study + error analysis + hallucination analysis.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">🌐 SOFTWARE PRODUCT</div>
+        <div class="card-title">Web prototype</div>
+        <p>Upload a Vietnamese image, ask a Vietnamese question, get an answer — displays confidence + OCR/evidence.</p>
+      </div>
+      <div class="card card--teal">
+        <div class="card-tag">📦 REPRODUCIBILITY</div>
+        <div class="card-title">Thesis + Reproducibility Package</div>
+        <p>Code, LoRA/QLoRA adapters, configs, inference script, experiment logs — ensuring the results can be reproduced.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== §8 VALUE ====== -->
+<section id="value">
+  <div class="container">
+    <p class="section-eyebrow reveal">Part 09</p>
+    <h2 class="section-title reveal">Practical Value &amp; Significance</h2>
+    <p class="section-lead reveal">The project offers both practical application value and scientific contribution.</p>
+
+    <div class="two-col reveal">
+      <div>
+        <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin-bottom:20px">🔧 Practical Value</h3>
+        <div class="card card--accent" style="margin-bottom:12px">
+          <p>Reading signs, product labels and prices from Vietnamese images</p>
+        </div>
+        <div class="card card--accent" style="margin-bottom:12px">
+          <p>Assistive technology for visually impaired users</p>
+        </div>
+        <div class="card card--accent" style="margin-bottom:12px">
+          <p>Processing Vietnamese documents, menus and forms</p>
+        </div>
+        <div class="card card--accent">
+          <p>Vietnamese educational tool — image-based question answering</p>
         </div>
       </div>
-    </section>
-
-    <!-- ====== §2 GAP ====== -->
-    <section id="gap">
-      <div class="container">
-        <p class="section-eyebrow reveal">Part 02</p>
-        <h2 class="section-title reveal">Research Gap</h2>
-
-
-        <div class="card-grid card-grid-2 reveal">
-          <div class="card card--teal">
-            <div class="card-tag">G1</div>
-            <div class="card-title">English-biased Pre-training</div>
-            <p>VLM alignments are optimized for English — their transferability to Vietnamese has not been thoroughly
-              investigated.</p>
-            <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Source: <a
-                href="https://arxiv.org/abs/2310.03744" target="_blank" rel="noopener"
-                style="color:var(--muted)">LLaVA-1.5 (Liu 2024) ↗</a></p>
-          </div>
-          <div class="card card--teal">
-            <div class="card-tag">G2</div>
-            <div class="card-title">Weak Vietnamese VQA, especially scene-text</div>
-            <p>Low performance on ViTextVQA: OCR, Vietnamese diacritics, and code-switching remain unresolved.</p>
-            <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Sources: <a
-                href="https://arxiv.org/abs/2404.10652" target="_blank" rel="noopener"
-                style="color:var(--muted)">ViTextVQA (Nguyen 2024) ↗</a> · <a href="https://arxiv.org/abs/2310.03744"
-                target="_blank" rel="noopener" style="color:var(--muted)">LLaVA-1.5 (Liu 2024) ↗</a></p>
-          </div>
-          <div class="card card--highlight">
-            <div class="card-tag">G3 — FOCUS</div>
-            <div class="card-title">PEFT for Vietnamese VLM remains unexplored</div>
-            <p>There is no systematic research on applying LoRA/QLoRA to VLMs for Vietnamese VQA — to the best of our
-              knowledge, under-explored.</p>
-            <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Evidence: surveyed 3 Vietnamese VQA
-              papers — none applied PEFT/QLoRA (see Literature Matrix).</p>
-          </div>
-          <div class="card card--teal">
-            <div class="card-tag">G4</div>
-            <div class="card-title">Hallucination not measured for Vietnamese</div>
-            <p>There is no hallucination benchmark (POPE-style) evaluated on Vietnamese VQA data — an open direction.
-            </p>
-            <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Sources: POPE (Li et al., 2023, EMNLP) ·
-              <a href="https://arxiv.org/abs/2310.03744" target="_blank" rel="noopener"
-                style="color:var(--muted)">LLaVA-1.5 (Liu 2024) ↗</a>
-            </p>
-          </div>
+      <div>
+        <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin-bottom:20px">🔬 Scientific Significance / Novelty</h3>
+        <div class="card card--highlight" style="margin-bottom:12px">
+          <p><strong>Highlight: Vietnamese-specific handling</strong> — reading diacritic-bearing text, output-language constraint, OCR order (V1–V3)</p>
         </div>
-
-
-      </div>
-    </section>
-
-    <!-- ====== §3 QUESTIONS ====== -->
-    <section id="questions">
-      <div class="container">
-        <p class="section-eyebrow reveal">Part 03</p>
-        <h2 class="section-title reveal">Research Questions</h2>
-        <p class="section-lead reveal">Four research questions guide the entire experimental and ablation analysis.</p>
-
-        <div class="card-grid card-grid-2 reveal">
-          <div class="card card--teal">
-            <div class="card-tag">RQ1</div>
-            <div class="card-title">Zero-shot performance on ViVQA/ViTextVQA</div>
-            <p>How do VLMs perform in a zero-shot setting on the two Vietnamese benchmarks? Evaluated via EM, VQA-Acc,
-              ANLS.</p>
-          </div>
-          <div class="card card--highlight">
-            <div class="card-tag">RQ2 — FOCUS</div>
-            <div class="card-title">How much does PEFT (QLoRA) improve over zero-shot?</div>
-            <p>How much improvement does QLoRA yield compared to zero-shot / prompting — without full fine-tuning? This
-              is the central question.</p>
-          </div>
-          <div class="card card--teal">
-            <div class="card-tag">RQ3</div>
-            <div class="card-title">OCR-prompting × PEFT on ViTextVQA</div>
-            <p>Does combining OCR prompting with PEFT create a synergy on ViTextVQA? Evaluated via ANLS.</p>
-          </div>
-          <div class="card card--teal">
-            <div class="card-tag">RQ4</div>
-            <div class="card-title">How does PEFT affect hallucination?</div>
-            <p>Does PEFT increase or decrease hallucination? Evaluated using a POPE-vi style approach.</p>
-          </div>
+        <div class="card card--teal" style="margin-bottom:12px">
+          <p><strong>Systematic PEFT study</strong> for Vietnamese VLMs — according to our survey, not yet explored (G3)</p>
         </div>
-
-      </div>
-    </section>
-
-    <!-- ====== §4 HYPOTHESES ====== -->
-    <section id="hypotheses">
-      <div class="container">
-        <p class="section-eyebrow reveal">Part 04</p>
-        <h2 class="section-title reveal">Hypotheses (H1–H8)</h2>
-        <p class="section-lead reveal">Eight verifiable hypotheses — thresholds drawn from international literature, yet
-          to be measured in Vietnamese.</p>
-
-        <div class="hypo-list reveal">
-          <div class="hypo-item hypo-item--highlight">
-            <span class="hypo-id">H1</span>
-            <span class="hypo-text">QLoRA achieves ≥ +5 EM/VQA-Acc over zero-shot.</span>
-          </div>
-          <div class="hypo-item">
-            <span class="hypo-id">H2</span>
-            <span class="hypo-text">4-bit retains ≥ 97% performance of 16-bit, with VRAM reduction ≥ 40%.</span>
-          </div>
-          <div class="hypo-item">
-            <span class="hypo-id">H3</span>
-            <span class="hypo-text">LoRA all-linear outperforms attention-only.</span>
-          </div>
-          <div class="hypo-item">
-            <span class="hypo-id">H4</span>
-            <span class="hypo-text">Rank saturates at r ≤ 16 (further increases yield negligible improvement).</span>
-          </div>
-          <div class="hypo-item">
-            <span class="hypo-id">H5</span>
-            <span class="hypo-text">Shared adapter ≥ performance of per-dataset adapters.</span>
-          </div>
-          <div class="hypo-item">
-            <span class="hypo-id">H6</span>
-            <span class="hypo-text">OCR improves ≥ +3 ANLS, demonstrating synergy with QLoRA.</span>
-          </div>
-          <div class="hypo-item">
-            <span class="hypo-id">H7</span>
-            <span class="hypo-text">Vietnamese format-prompt improves ≥ +3 EM.</span>
-          </div>
-          <div class="hypo-item">
-            <span class="hypo-id">H8</span>
-            <span class="hypo-text">PEFT does not increase hallucination.</span>
-          </div>
+        <div class="card card--teal" style="margin-bottom:12px">
+          <p><strong>Hallucination measurement</strong> for Vietnamese VQA — a direction that remains open (G4)</p>
         </div>
-
-
-      </div>
-    </section>
-
-    <!-- ====== §5 DATASET ====== -->
-    <section id="dataset">
-      <div class="container">
-        <p class="section-eyebrow reveal">Part 05</p>
-        <h2 class="section-title reveal">Data Analysis <span class="badge badge--teal">Real figures · actual
-            analysis</span></h2>
-        <p class="section-lead reveal" style="margin-bottom: 8px;">Two dataset benchmarks for Vietnamese VQA — all
-          numbers are from actual analysis.</p>
-        <p class="note reveal" style="margin-top: 0; padding-top: 0; border-top: none; margin-bottom: 48px;">seed 42:
-          ViVQA val split &amp; sample selection</p>
-
-        <!-- ViVQA Stats -->
-        <h3 style="font-family:var(--serif);font-size:1.3rem;font-weight:600;color:var(--ink);margin-bottom:8px"
-          class="reveal">
-          ViVQA <span
-            style="font-family:var(--mono);font-size:.78rem;color:var(--muted);font-weight:400">github.com/kh4nh12/ViVQA
-            (Tran et al., PACLIC 2021)</span>
-        </h3>
-        <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 20px;" class="reveal">Original size (per
-          paper): 10,328 images / 15,000 QA</p>
-        <div class="stat-grid reveal">
-          <div class="stat">
-            <div class="stat-number">15,000</div>
-            <div class="stat-label">QA Pairs</div>
-            <div class="stat-source">from JSON</div>
-          </div>
-          <div class="stat">
-            <div class="stat-number">10,328</div>
-            <div class="stat-label">Images</div>
-            <div class="stat-source">from JSON</div>
-          </div>
-          <div class="stat">
-            <div class="stat-number">10,799</div>
-            <div class="stat-label">Train</div>
-            <div class="stat-source">prepare_vivqa.py · seed 42</div>
-          </div>
-          <div class="stat">
-            <div class="stat-number">1,200</div>
-            <div class="stat-label">Val</div>
-            <div class="stat-source">prepare_vivqa.py · seed 42</div>
-          </div>
-          <div class="stat">
-            <div class="stat-number">3,001</div>
-            <div class="stat-label">Test</div>
-            <div class="stat-source">test split</div>
-          </div>
+        <div class="card card--teal" style="margin-bottom:12px">
+          <p>Efficient adaptation under a strict parameter budget (no full FT)</p>
         </div>
-
-        <div class="card-grid card-grid-2 reveal" style="margin-bottom: 48px;">
-          <div class="card card--teal">
-            <div class="card-tag">ViVQA</div>
-            <div class="card-title">99.83% answers ≤ 3 words</div>
-            <p>Mostly short labels, classification → Suitable metrics: EM / VQA-Acc.</p>
-          </div>
-          <div class="card card--accent">
-            <div class="card-tag">ViTextVQA</div>
-            <div class="card-title">Average 4.18 words</div>
-            <p>Long answers, OCR-dependent → EM is too strict → Requires <strong>ANLS</strong> metric (tolerant to
-              character mismatch).</p>
-          </div>
-        </div>
-
-        <!-- ViTextVQA Stats -->
-        <h3 style="font-family:var(--serif);font-size:1.3rem;font-weight:600;color:var(--ink);margin:48px 0 8px"
-          class="reveal">
-          ViTextVQA <span style="font-family:var(--mono);font-size:.78rem;color:var(--muted);font-weight:400">HF
-            nhonhoccode/ViTextVQA (Nguyen et al., 2024)</span>
-        </h3>
-        <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 20px;" class="reveal">Original size (per
-          paper): 16,762 images / 50,342 QA (7:1:2 split ratio)</p>
-        <div class="stat-grid reveal">
-          <div class="stat">
-            <div class="stat-number">50,342</div>
-            <div class="stat-label">QA Pairs</div>
-            <div class="stat-source">per paper</div>
-          </div>
-          <div class="stat">
-            <div class="stat-number">16,762</div>
-            <div class="stat-label">Images</div>
-            <div class="stat-source">per paper</div>
-          </div>
-          <div class="stat">
-            <div class="stat-number">35,159</div>
-            <div class="stat-label">Train</div>
-            <div class="stat-source">training split</div>
-          </div>
-          <div class="stat" style="border-style: dashed; background: var(--wash);">
-            <div class="stat-number">?</div>
-            <div class="stat-label">Dev</div>
-            <div class="stat-source">dev.json — to be integrated</div>
-          </div>
-          <div class="stat">
-            <div class="stat-number">10,028</div>
-            <div class="stat-label">Test</div>
-            <div class="stat-source">test split</div>
-          </div>
-        </div>
-
-        <!-- Charts -->
-        <div class="chart-grid reveal" style="margin-top: 48px;">
-          <div class="chart-card">
-            <h3>Data Scale: QA Pairs vs. Images</h3>
-            <canvas id="chartScale"
-              aria-label="Scale comparison chart between QA pairs and images for ViVQA and ViTextVQA"></canvas>
-          </div>
-          <div class="chart-card">
-            <h3>Question Type Distribution (Heuristic)</h3>
-            <canvas id="chartQType" aria-label="Question type distribution chart"></canvas>
-          </div>
-          <div class="chart-card">
-            <h3>Train / Test Split (available)</h3>
-            <canvas id="chartSplit" aria-label="Train/test split chart for ViVQA and ViTextVQA"></canvas>
-          </div>
+        <div class="card card--teal">
+          <p>A reproducible protocol</p>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
-    <!-- ====== §6 METHODS ====== -->
-    <section id="methods">
-      <div class="container">
-        <p class="section-eyebrow reveal">Part 06</p>
-        <h2 class="section-title reveal">Method &amp; Baseline</h2>
+<!-- ====== §9 PLAN ====== -->
+<section id="plan">
+  <div class="container">
+    <p class="section-eyebrow reveal">Part 10</p>
+    <h2 class="section-title reveal">15-Week Plan</h2>
+    <p class="section-lead reveal">Roadmap from W1 to W15 with 4 main review milestones.</p>
 
-        <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin-bottom:20px"
-          class="reveal">Prioritized Improvements (PEFT-only)</h3>
-        <div class="card-grid card-grid-3 reveal">
-          <div class="card card--teal">
-            <div class="card-tag">CORE</div>
-            <div class="card-title">QLoRA NF4 all-linear</div>
-            <p>Quantized LoRA 4-bit, applied to all linear layers — the core method.</p>
-          </div>
-          <div class="card card--accent">
-            <div class="card-tag">PROMPTING</div>
-            <div class="card-title">Vietnamese format-prompt</div>
-            <p>A prompt template specifically designed for Vietnamese to standardize output format.</p>
-          </div>
-          <div class="card card--accent">
-            <div class="card-tag">OCR</div>
-            <div class="card-title">OCR-enhanced prompting</div>
-            <p>Extract text from images using PaddleOCR/VietOCR, passing it to the prompt as additional context.</p>
-          </div>
-          <div class="card card--accent">
-            <div class="card-tag">MULTI-DATASET</div>
-            <div class="card-title">Shared adapter</div>
-            <p>A single adapter shared across multiple datasets — saving parameters and increasing generalization.</p>
-          </div>
-          <div class="card" style="border-left:4px solid var(--muted)">
-            <div class="card-tag" style="color:var(--muted)">OPTIONAL</div>
-            <div class="card-title">RAG</div>
-            <p>Retrieval-Augmented Generation — optional if time permits.</p>
-          </div>
-
+    <div class="timeline-wrap reveal">
+      <div class="timeline" role="img" aria-label="Timeline of the 15-week project plan">
+        <!-- W1 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W1</span>
+          <div class="timeline-bar tl-phase1">Orientation</div>
         </div>
-
-        <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin:48px 0 20px"
-          class="reveal">Proposed Baseline</h3>
-        <div class="card-grid card-grid-2 reveal">
-          <div class="card card--highlight">
-            <div class="card-tag">MAIN BASELINE</div>
-            <div class="card-title">Qwen2.5-VL-3B-Instruct</div>
-            <p style="margin-top:12px">Mature tooling, listed in the approved baseline list, runnable on free Colab T4,
-              lower transformers requirement → easier to reproduce.</p>
-          </div>
-          <div class="card card--accent">
-            <div class="card-tag">BACKUP</div>
-            <div class="card-title">Florence-2</div>
-            <p>Backup in case the main baseline encounters VRAM or tooling issues.</p>
-          </div>
+        <!-- W2 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W2</span>
+          <div class="timeline-bar tl-phase1">Literature</div>
         </div>
-
-
-      </div>
-    </section>
-
-    <!-- ====== §7 DELIVERABLES ====== -->
-    <section id="deliverables">
-      <div class="container">
-        <p class="section-eyebrow reveal">Part 07</p>
-        <h2 class="section-title reveal">Deliverables</h2>
-        <p class="section-lead reveal">Three main groups of deliverables upon project completion.</p>
-
-        <div class="card-grid card-grid-3 reveal">
-          <div class="card card--teal">
-            <div class="card-tag">📄 RESEARCH CONTRIBUTION</div>
-            <div class="card-title">Research Contribution (PEFT)</div>
-            <p>≥ 1 validated PEFT improvement over the baseline, along with ablation study + error analysis +
-              hallucination analysis.</p>
-          </div>
-          <div class="card card--teal">
-            <div class="card-tag">🌐 SOFTWARE PRODUCT</div>
-            <div class="card-title">Web prototype</div>
-            <p>Upload Vietnamese images, ask Vietnamese questions, receive answers — displaying confidence +
-              OCR/evidence.</p>
-          </div>
-          <div class="card card--teal">
-            <div class="card-tag">📦 REPRODUCIBILITY</div>
-            <div class="card-title">Thesis + Reproducibility Package</div>
-            <p>Code, LoRA/QLoRA adapters, configs, inference scripts, experiment logs — ensuring results can be
-              reproduced.</p>
-          </div>
+        <!-- W3 -->
+        <div class="timeline-week" style="position:relative">
+          <span class="timeline-label">W3</span>
+          <div class="timeline-bar tl-phase1">Dataset</div>
+          <span class="tl-milestone">🔴 Review 1</span>
         </div>
-      </div>
-    </section>
-
-    <!-- ====== §8 VALUE ====== -->
-    <section id="value">
-      <div class="container">
-        <p class="section-eyebrow reveal">Part 08</p>
-        <h2 class="section-title reveal">Practical Value &amp; Significance</h2>
-        <p class="section-lead reveal">The project delivers both practical application value and scientific
-          contributions.</p>
-
-        <div class="two-col reveal">
-          <div>
-            <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin-bottom:20px">🔧
-              Practical Value</h3>
-            <div class="card card--accent" style="margin-bottom:12px">
-              <p>Reading signboards, labels, and prices from Vietnamese images</p>
-            </div>
-            <div class="card card--accent" style="margin-bottom:12px">
-              <p>Assistive technology for the visually impaired</p>
-            </div>
-            <div class="card card--accent" style="margin-bottom:12px">
-              <p>Processing documents, menus, and forms in Vietnamese</p>
-            </div>
-            <div class="card card--accent">
-              <p>Vietnamese educational tool — image-based Q&amp;A</p>
-            </div>
-          </div>
-          <div>
-            <h3 style="font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--ink);margin-bottom:20px">🔬
-              Scientific Significance / Novelty</h3>
-            <div class="card card--teal" style="margin-bottom:12px">
-              <p><strong>Systematic PEFT research</strong> for Vietnamese VLMs — to the best of our knowledge,
-                under-explored (G3)</p>
-            </div>
-            <div class="card card--teal" style="margin-bottom:12px">
-              <p><strong>Hallucination measurement</strong> for Vietnamese VQA — an open direction (G4)</p>
-            </div>
-            <div class="card card--teal" style="margin-bottom:12px">
-              <p>Efficient adaptation under strict parameter budgets</p>
-            </div>
-            <div class="card card--teal">
-              <p>Reproducible protocol</p>
-            </div>
-          </div>
+        <!-- W4 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W4</span>
+          <div class="timeline-bar tl-phase2">Baseline</div>
+        </div>
+        <!-- W5 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W5</span>
+          <div class="timeline-bar tl-phase2">Baseline</div>
+        </div>
+        <!-- W6 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W6</span>
+          <div class="timeline-bar tl-phase2">Methods</div>
+        </div>
+        <!-- W7 -->
+        <div class="timeline-week" style="position:relative">
+          <span class="tl-now">← NOW</span>
+          <span class="timeline-label">W7</span>
+          <div class="timeline-bar tl-phase2">Eval</div>
+          <span class="tl-milestone">🟡 Review 2</span>
+        </div>
+        <!-- W8 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W8</span>
+          <div class="timeline-bar tl-phase3">PEFT</div>
+        </div>
+        <!-- W9 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W9</span>
+          <div class="timeline-bar tl-phase3">OCR/RAG</div>
+        </div>
+        <!-- W10 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W10</span>
+          <div class="timeline-bar tl-phase3">Exp</div>
+        </div>
+        <!-- W11 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W11</span>
+          <div class="timeline-bar tl-phase3">Eval</div>
+        </div>
+        <!-- W12 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W12</span>
+          <div class="timeline-bar tl-phase3">Ablation</div>
+        </div>
+        <!-- W13 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W13</span>
+          <div class="timeline-bar tl-phase4">Review</div>
+          <span class="tl-milestone">🟠 Faculty Review</span>
+        </div>
+        <!-- W14 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W14</span>
+          <div class="timeline-bar tl-phase4">Proto/Thesis</div>
+        </div>
+        <!-- W15 -->
+        <div class="timeline-week">
+          <span class="timeline-label">W15</span>
+          <div class="timeline-bar tl-phase4">Final</div>
+          <span class="tl-milestone">🟢 Final Defense</span>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- ====== §9 PLAN ====== -->
-    <section id="plan">
-      <div class="container">
-        <p class="section-eyebrow reveal">Part 09</p>
-        <h2 class="section-title reveal">15-Week Plan</h2>
-        <p class="section-lead reveal">Roadmap from W1 to W15 with 4 main review milestones.</p>
+    <h3 class="sub-h reveal">Week-by-Week Tasks</h3>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Week</th><th>Specific tasks</th><th>Verifiable output</th><th>Done</th></tr></thead>
+        <tbody>
+          <tr><td class="num"><strong>W1</strong></td><td>Read the proposal, assign roles, choose 10 foundational papers</td><td>W1 Report, 15-week plan</td><td class="yes">✔</td></tr>
+          <tr><td class="num"><strong>W2</strong></td><td>Literature Matrix; analysis of ViVQA / ViTextVQA (seed 42)</td><td>Literature_Matrix.md, Dataset_Analysis.md</td><td class="yes">✔</td></tr>
+          <tr class="row-key"><td class="num"><strong>W3</strong></td><td>Research questions, hypotheses, baseline proposal; Review 1</td><td>Report + Review 1 slides</td><td class="yes">✔</td></tr>
+          <tr><td class="num"><strong>W4</strong></td><td>Colab environment; zero-shot Qwen2.5-VL-3B on the ViTextVQA mirror (300 questions)</td><td>Indicative result EM 38.3% · ANLS 55.9%; zero-shot notebook</td><td class="yes">✔</td></tr>
+          <tr><td class="num"><strong>W5</strong></td><td>Prepare ViVQA (all images) + official ViTextVQA; fix the scoring rules before testing; official zero-shot baseline on 2 datasets; preliminary error analysis</td><td>ViVQA EM 0.225 · ANLS 0.288; ViTextVQA EM 0.285 · ANLS 0.468; Baseline Report</td><td class="yes">✔</td></tr>
+          <tr><td class="num"><strong>W6</strong></td><td>fp16 diagnosis (23 → 0 broken outputs); ablation 512 vs. 1,280 tokens; build <code>train_qlora.py</code> + smoke run; Methodology (Report 4)</td><td>Ablation table; smoke log; R4 (Vietnamese version)</td><td class="yes">✔</td></tr>
+          <tr class="row-key"><td class="num"><strong>W7</strong></td><td>Colab Pro (L4): fix dtype, <code>max_pixels</code>, quantization → config freeze; re-run the baseline on 2 datasets; preliminary QLoRA evaluated on dev; Review 2</td><td>Frozen config; re-run baseline; preliminary QLoRA results; Review 2 slides</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W8</strong></td><td>Full QLoRA on ViVQA; build the OCR pipeline (moved from W6); log VRAM, time, number of trained parameters</td><td>Adapter v1; experiments/W08_*</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W9</strong></td><td>OCR pipeline (PaddleOCR/VietOCR, TL-BR) + Vietnamese prompt; QLoRA on ViTextVQA</td><td>OCR cache; adapter v2</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W10</strong></td><td>Main runs: zero-shot / prompt / QLoRA / QLoRA + OCR on the same split, seed</td><td>Main results table</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W11</strong></td><td>Full evaluation with EM, VQA-Acc, ANLS (+ F1); POPE-vi hallucination</td><td>Metrics + hallucination report</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W12</strong></td><td>Ablation (OCR, OCR order, rank/target modules); error analysis by question type and V1–V4</td><td>Ablation table; failure cases</td><td class="yes"></td></tr>
+          <tr class="row-key"><td class="num"><strong>W13</strong></td><td>Faculty Review</td><td>Slides + Report 6–7</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W14</strong></td><td>Gradio prototype; thesis writing</td><td>Working demo; thesis draft</td><td class="yes"></td></tr>
+          <tr class="row-key"><td class="num"><strong>W15</strong></td><td>Final Defense; submit the reproducibility package</td><td>Code, adapter, config, inference script, README, experiment log</td><td class="yes"></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
 
-        <div class="timeline-wrap reveal">
-          <div class="timeline" role="img" aria-label="15-week project implementation timeline">
-            <!-- W1 -->
-            <div class="timeline-week">
-              <span class="timeline-label">W1</span>
-              <div class="timeline-bar tl-phase1">Direction</div>
-            </div>
-            <!-- W2 -->
-            <div class="timeline-week">
-              <span class="timeline-label">W2</span>
-              <div class="timeline-bar tl-phase1">Literature</div>
-            </div>
-            <!-- W3 -->
-            <div class="timeline-week" style="position:relative">
-              <span class="tl-now">← CURRENT</span>
-              <span class="timeline-label">W3</span>
-              <div class="timeline-bar tl-phase1">Dataset</div>
-              <span class="tl-milestone">🔴 Review 1</span>
-            </div>
-            <!-- W4 -->
-            <div class="timeline-week">
-              <span class="timeline-label">W4</span>
-              <div class="timeline-bar tl-phase2">Baseline</div>
-            </div>
-            <!-- W5 -->
-            <div class="timeline-week">
-              <span class="timeline-label">W5</span>
-              <div class="timeline-bar tl-phase2">Baseline</div>
-            </div>
-            <!-- W6 -->
-            <div class="timeline-week">
-              <span class="timeline-label">W6</span>
-              <div class="timeline-bar tl-phase2">Methods</div>
-            </div>
-            <!-- W7 -->
-            <div class="timeline-week">
-              <span class="timeline-label">W7</span>
-              <div class="timeline-bar tl-phase2">Eval</div>
-              <span class="tl-milestone">🟡 Review 2</span>
-            </div>
-            <!-- W8 -->
-            <div class="timeline-week">
-              <span class="timeline-label">W8</span>
-              <div class="timeline-bar tl-phase3">PEFT</div>
-            </div>
-            <!-- W9 -->
-            <div class="timeline-week">
-              <span class="timeline-label">W9</span>
-              <div class="timeline-bar tl-phase3">OCR/RAG</div>
-            </div>
-            <!-- W10 -->
-            <div class="timeline-week">
-              <span class="timeline-label">W10</span>
-              <div class="timeline-bar tl-phase3">Exp</div>
-            </div>
-            <!-- W11 -->
-            <div class="timeline-week">
-              <span class="timeline-label">W11</span>
-              <div class="timeline-bar tl-phase3">Eval</div>
-            </div>
-            <!-- W12 -->
-            <div class="timeline-week">
-              <span class="timeline-label">W12</span>
-              <div class="timeline-bar tl-phase3">Ablation</div>
-            </div>
-            <!-- W13 -->
-            <div class="timeline-week">
-              <span class="timeline-label">W13</span>
-              <div class="timeline-bar tl-phase4">Review</div>
-              <span class="tl-milestone">🟠 Faculty Review</span>
-            </div>
-            <!-- W14 -->
-            <div class="timeline-week">
-              <span class="timeline-label">W14</span>
-              <div class="timeline-bar tl-phase4">Proto/Thesis</div>
-            </div>
-            <!-- W15 -->
-            <div class="timeline-week">
-              <span class="timeline-label">W15</span>
-              <div class="timeline-bar tl-phase4">Final</div>
-              <span class="tl-milestone">🟢 Final Defense</span>
-            </div>
-          </div>
-        </div>
+<!-- ====== §10 RISK ====== -->
+<section id="risk">
+  <div class="container">
+    <p class="section-eyebrow reveal">Part 11</p>
+    <h2 class="section-title reveal">Risk Matrix</h2>
+    <p class="section-lead reveal">The main risks have been identified, together with mitigations and fallback plans.</p>
 
-        <div class="card-grid card-grid-4 reveal">
-          <div class="card card--teal">
-            <div class="card-tag" style="color:var(--teal)">PHASE 1</div>
-            <div class="card-title">W1–W3</div>
-            <p>Direction, literature, dataset analysis.</p>
-          </div>
-          <div class="card card--accent">
-            <div class="card-tag">PHASE 2</div>
-            <div class="card-title">W4–W7</div>
-            <p>Baseline reproduction, methodology.</p>
-          </div>
-          <div class="card card--amber">
-            <div class="card-tag" style="color:var(--amber)">PHASE 3</div>
-            <div class="card-title">W8–W12</div>
-            <p>PEFT/OCR/RAG, experiments, ablation, error + hallucination analysis.</p>
-          </div>
-          <div class="card" style="border-left:4px solid #6B7280">
-            <div class="card-tag" style="color:#6B7280">PHASE 4</div>
-            <div class="card-title">W13–W15</div>
-            <p>Faculty review, prototype + thesis, final defense.</p>
-          </div>
-        </div>
+    <div class="table-wrap reveal">
+      <table>
+        <thead>
+          <tr>
+            <th>Risk</th>
+            <th>Severity</th>
+            <th>Mitigation</th>
+            <th>Fallback</th>
+            <th>Current status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Model too large / OOM</td>
+            <td class="risk-high">High</td>
+            <td>QLoRA 4-bit, 3B model</td>
+            <td>Florence-2</td>
+            <td><span class="badge badge--teal" style="font-size:0.75rem">Mitigated: QLoRA training peaks at 5.93 GB VRAM</span></td>
+          </tr>
+          <tr>
+            <td>T4 has no bf16; fp16 overflows</td>
+            <td class="risk-high">High</td>
+            <td>Compute in fp32</td>
+            <td>Colab Pro L4 (bf16)</td>
+            <td><span class="badge badge--teal" style="font-size:0.75rem">Diagnosed in W6: 23 → 0 broken outputs</span></td>
+          </tr>
+          <tr>
+            <td>GPU / Colab interrupted</td>
+            <td class="risk-high">High</td>
+            <td>Mount Drive, frequent checkpoints</td>
+            <td>Colab Pro</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>QLoRA training too slow</td>
+            <td class="risk-high">High</td>
+            <td>Pilot subset, gradient accumulation</td>
+            <td>Colab Pro L4 (bf16)</td>
+            <td><span class="badge badge--amber" style="font-size:0.75rem">Measured: T4 fp32 ≈ 14.77 hours/epoch → switch to L4</span></td>
+          </tr>
+          <tr>
+            <td>Dataset / licence</td>
+            <td class="risk-med">Medium</td>
+            <td>Preprocessing, licence check</td>
+            <td>—</td>
+            <td><span class="badge badge--teal" style="font-size:0.75rem">Mitigated: both datasets from official sources, all images present</span></td>
+          </tr>
+          <tr>
+            <td>Baseline hard to reproduce</td>
+            <td class="risk-high">High</td>
+            <td>Source repo, fixed seed</td>
+            <td>Switch VLM</td>
+            <td><span class="badge badge--amber" style="font-size:0.75rem">Reproduced in W5; awaiting advisor confirmation + re-run under the W7 config</span></td>
+          </tr>
+          <tr>
+            <td>Poor OCR quality</td>
+            <td class="risk-med">Medium</td>
+            <td>Swap PaddleOCR ↔ VietOCR</td>
+            <td>Prompt fallback</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Training does not converge</td>
+            <td class="risk-high">High</td>
+            <td>Fall back to prompting / OCR</td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ====== §11 CONSTRAINT ====== -->
+<section id="constraint">
+  <div class="container">
+    <p class="section-eyebrow reveal">Part 12</p>
+    <h2 class="section-title reveal">Core Constraint: PEFT-only</h2>
+
+    <div class="banner reveal">
+      <h3>No full fine-tuning.</h3>
+      <p>Only LoRA / QLoRA (4-bit / 8-bit).</p>
+    </div>
+
+    <div class="card-grid card-grid-2 reveal">
+      <div class="card card--teal">
+        <div class="card-title">Reproduce first, improve later</div>
+        <p>Reproduce exactly one baseline first (W4–W5), then apply the improvements.</p>
       </div>
-    </section>
-
-    <!-- ====== §10 RISK ====== -->
-    <section id="risk">
-      <div class="container">
-        <p class="section-eyebrow reveal">Part 10</p>
-        <h2 class="section-title reveal">Risk Matrix</h2>
-        <p class="section-lead reveal">Main risks have been identified along with mitigation and backup plans.</p>
-
-        <div class="table-wrap reveal">
-          <table>
-            <thead>
-              <tr>
-                <th>Risk</th>
-                <th>Impact</th>
-                <th>Mitigation</th>
-                <th>Backup</th>
-                <th>Current Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Model too large / OOM</td>
-                <td class="risk-high">High</td>
-                <td>QLoRA 4-bit, 3B model</td>
-                <td>Florence-2</td>
-                <td><span class="badge badge--teal" style="font-size:0.75rem">Mitigated (3B runs on T4 4-bit)</span>
-                </td>
-              </tr>
-              <tr>
-                <td>GPU / Colab interrupted</td>
-                <td class="risk-high">High</td>
-                <td>Mount Drive, frequent checkpoints</td>
-                <td>Colab Pro</td>
-                <td>—</td>
-              </tr>
-              <tr>
-                <td>Slow QLoRA training</td>
-                <td class="risk-med">Medium</td>
-                <td>Pilot subset, gradient accumulation</td>
-                <td>Reduce rank</td>
-                <td>—</td>
-              </tr>
-              <tr>
-                <td>Dataset / licence</td>
-                <td class="risk-med">Medium</td>
-                <td>Preprocessing, licence checking</td>
-                <td>Alternative mirror</td>
-                <td><span class="badge badge--amber" style="font-size:0.75rem">Partial: ViVQA done; ViTextVQA still
-                    mirror</span></td>
-              </tr>
-              <tr>
-                <td>Hard-to-reproduce baseline</td>
-                <td class="risk-high">High</td>
-                <td>Source repo, fixed seed</td>
-                <td>Change VLM</td>
-                <td><span class="badge badge--amber" style="font-size:0.75rem">Partial: reproduced on mirror (official
-                    pending)</span></td>
-              </tr>
-              <tr>
-                <td>Poor OCR</td>
-                <td class="risk-med">Medium</td>
-                <td>Swap PaddleOCR ↔ VietOCR</td>
-                <td>Prompt fallback</td>
-                <td>—</td>
-              </tr>
-              <tr>
-                <td>Training does not converge</td>
-                <td class="risk-high">High</td>
-                <td>Fall back to prompting / OCR</td>
-                <td>—</td>
-                <td>—</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="card card--teal">
+        <div class="card-title">Same split / seed / hardware</div>
+        <p>To keep results comparable: the same data split, the same seed and the same hardware for every experiment.</p>
       </div>
-    </section>
-
-    <!-- ====== §11 CONSTRAINT ====== -->
-    <section id="constraint">
-      <div class="container">
-        <p class="section-eyebrow reveal">Part 11</p>
-        <h2 class="section-title reveal">Core Constraint: PEFT-only</h2>
-
-        <div class="banner reveal">
-          <p>Strictly use LoRA / QLoRA (4-bit / 8-bit).</p>
-        </div>
-
-        <div class="card-grid card-grid-2 reveal">
-          <div class="card card--teal">
-            <div class="card-title">Reproduce first, improve later</div>
-            <p>Reproduce exactly one baseline first (W4–W5), then apply improvements.</p>
-          </div>
-          <div class="card card--teal">
-            <div class="card-title">Same split / seed / hardware</div>
-            <p>Ensure comparability: same data split, same seed, same hardware for all experiments.</p>
-          </div>
-          <div class="card card--teal">
-            <div class="card-title">Efficiency as a design constraint</div>
-            <p>Log VRAM and runtime for each run — efficiency is not a bonus, but a requirement.</p>
-          </div>
-          <div class="card card--teal">
-            <div class="card-title">Runtime: Google Colab</div>
-            <p>Free tier for lightweight experiments, Pro for training; mount Google Drive; log GPU each run.</p>
-          </div>
-        </div>
+      <div class="card card--teal">
+        <div class="card-title">Efficiency as a design constraint</div>
+        <p>Log VRAM and time for every run — efficiency is not a bonus but a requirement.</p>
       </div>
-    </section>
-
-    <!-- ====== §12 TEAM ====== -->
-    <section id="team">
-      <div class="container">
-        <p class="section-eyebrow reveal">Part 12</p>
-        <h2 class="section-title reveal">Team Roles</h2>
-        <p class="section-lead reveal">Four members, each in charge of a main area.</p>
-
-        <div class="card-grid card-grid-4 reveal">
-          <div class="card card--highlight">
-            <div class="card-tag">SE182670 — LEADER</div>
-            <div class="card-title">Phạm Lê Huy Hoàng</div>
-            <p><strong>PEFT / Training</strong> — Design &amp; run QLoRA experiments, ablation study.</p>
-          </div>
-          <div class="card card--accent">
-            <div class="card-tag">SE182458</div>
-            <div class="card-title">Văn Quang Trường</div>
-            <p><strong>Evaluation / Deploy</strong> — Metrics pipeline, hallucination analysis, web prototype, report.
-            </p>
-          </div>
-          <div class="card card--accent">
-            <div class="card-tag">SE193642</div>
-            <div class="card-title">Trần Quốc Huân</div>
-            <p><strong>Dataset / OCR</strong> — Data analysis, preprocessing, PaddleOCR / VietOCR integration.</p>
-          </div>
-          <div class="card card--accent">
-            <div class="card-tag">SE183249</div>
-            <div class="card-title">Hồ Đắc Toàn</div>
-            <p><strong>VLM / Baseline</strong> — Model selection, inference config, baseline reproduction.</p>
-          </div>
-        </div>
+      <div class="card card--teal">
+        <div class="card-title">Runtime: Google Colab</div>
+        <p>Colab free (T4) through W6; Colab Pro (L4, with bf16) is planned from W7 for training. Mount Google Drive; log GPU, dtype and commit for every run.</p>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
-    <!-- ====== §13 Q&A ====== -->
-    <section id="questions-reviewers" class="closing">
-      <div class="container">
-        <p class="sign-off reveal">Thank you, reviewers · Group GFA26AI35</p>
+<!-- ====== §12 TEAM ====== -->
+<section id="team">
+  <div class="container">
+    <p class="section-eyebrow reveal">Part 13</p>
+    <h2 class="section-title reveal">Team Roles</h2>
+    <p class="section-lead reveal">Four members, each responsible for one main area.</p>
+
+    <div class="card-grid card-grid-4 reveal">
+      <div class="card card--highlight">
+        <div class="card-tag">SE182670 — LEADER</div>
+        <div class="card-title">Phạm Lê Huy Hoàng</div>
+        <p><strong>PEFT / Training</strong> — Design &amp; run QLoRA experiments, ablation study.</p>
       </div>
-    </section>
+      <div class="card card--accent">
+        <div class="card-tag">SE182458</div>
+        <div class="card-title">Văn Quang Trường</div>
+        <p><strong>Evaluation / Deploy</strong> — Metrics pipeline, hallucination analysis, web prototype, reporting.</p>
+      </div>
+      <div class="card card--accent">
+        <div class="card-tag">SE193642</div>
+        <div class="card-title">Trần Quốc Huân</div>
+        <p><strong>Dataset / OCR</strong> — Data analysis, preprocessing, PaddleOCR / VietOCR integration.</p>
+      </div>
+      <div class="card card--accent">
+        <div class="card-tag">SE183249</div>
+        <div class="card-title">Hồ Đắc Toàn</div>
+        <p><strong>VLM / Baseline</strong> — Model selection, inference configuration, baseline reproduction.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-  </main>
+<!-- ====== §14 FEEDBACK ====== -->
+<section id="feedback">
+  <div class="container">
+    <p class="section-eyebrow reveal">Part 14</p>
+    <h2 class="section-title reveal">Incorporating Review 1 Feedback</h2>
+    <p class="section-lead reveal">The feedback from the reviewing lecturers on Sep 24, 2026, and what the team has adjusted in this report.</p>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>#</th><th>Feedback</th><th>What the team adjusted</th><th>Part</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td>Problem statement unclear; input/output unclear; did not say where Vietnamese differs from English</td><td>One-sentence problem statement; Input/Output table; four Vietnamese problems V1–V4</td><td class="num">01</td></tr>
+          <tr><td class="num">2</td><td>Punctuation, whitespace and connector words are only preprocessing</td><td>Clearly separated preprocessing from the research problem; cited the ViTextVQA diacritic-removal experiment</td><td class="num">01</td></tr>
+          <tr><td class="num">3</td><td>The 4-bit/16-bit and VRAM hypotheses do not address the Vietnamese problem</td><td>Reduced to H1–H4, each tied to one Vietnamese problem; memory efficiency moved to a measurement report</td><td class="num">05</td></tr>
+          <tr><td class="num">4</td><td>No proposed method yet; no pipeline figure</td><td>Fixed a single method; 8-step pipeline; prompt template</td><td class="num">07</td></tr>
+          <tr><td class="num">5</td><td>Need to understand and present QLoRA; why include both LoRA and QLoRA</td><td>Explained QLoRA; QLoRA only, because of the hardware constraint</td><td class="num">07</td></tr>
+          <tr><td class="num">6</td><td>Comparing models of different generations and sizes (2.5 vs 2.0, 3B vs 4B)</td><td>Model role table; conclusions only on the same backbone</td><td class="num">07</td></tr>
+          <tr><td class="num">7</td><td>The baseline is prior work; need 3 baselines and state-of-the-art for Vietnamese</td><td>Prior-work tables on ViTextVQA and ViVQA, with comparison caveats</td><td class="num">03</td></tr>
+          <tr><td class="num">8</td><td>Recommend RAG; need to count tokens</td><td>Token budget table per sample; external RAG is a conditional option</td><td class="num">07</td></tr>
+          <tr><td class="num">9</td><td>Preprocessing before splitting the data</td><td>Pipeline shows preprocessing → fixed split; tune on dev, report on test</td><td class="num">06, 07</td></tr>
+          <tr><td class="num">10</td><td>Plan not detailed enough</td><td>Week-by-week task table with verifiable outputs</td><td class="num">10</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
 
-  <footer>
-    <p>ViVQA-VLM · Review 1 · FPT University · 2026</p>
-  </footer>
+<!-- ====== §13 Q&A ====== -->
+<section id="questions-reviewers" class="closing">
+  <div class="container">
+    <p class="sign-off reveal">Thank you to the reviewers · Group GFA26AI35</p>
+  </div>
+</section>
 
-  <script>
-    /* ======== PROGRESS BAR ======== */
-    const progressBar = document.getElementById('progressBar');
-    function updateProgress() {
-      const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-      const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-      progressBar.style.width = progress + '%';
-    }
-    window.addEventListener('scroll', updateProgress, { passive: true });
+</main>
 
-    /* ======== ACTIVE NAV LINK ======== */
-    const navLinks = document.querySelectorAll('.nav-link');
-    const sections = document.querySelectorAll('section[id]');
+<footer>
+  <p>ViVQA-VLM · Review 1 — updated after feedback (Oct 6, 2026) · FPT University</p>
+</footer>
 
-    function updateActiveNav() {
-      const scrollPos = window.scrollY + 120;
-      let current = '';
-      sections.forEach(s => {
-        if (s.offsetTop <= scrollPos) current = s.id;
-      });
-      navLinks.forEach(link => {
-        link.classList.toggle('active', link.getAttribute('href') === '#' + current);
-      });
-    }
-    window.addEventListener('scroll', updateActiveNav, { passive: true });
+<script>
+/* ======== PROGRESS BAR ======== */
+const progressBar = document.getElementById('progressBar');
+function updateProgress() {
+  const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+  const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+  progressBar.style.width = progress + '%';
+}
+window.addEventListener('scroll', updateProgress, { passive: true });
 
-    /* ======== SCROLL REVEAL & FAILSAFE ======== */
-    const reveals = document.querySelectorAll('.reveal');
-    try {
-      const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add('visible');
-            revealObserver.unobserve(e.target);
-          }
-        });
-      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+/* ======== ACTIVE NAV LINK ======== */
+const navLinks = document.querySelectorAll('.nav-link');
+const sections = document.querySelectorAll('section[id]');
 
-      if (typeof IntersectionObserver !== 'undefined') {
-        reveals.forEach(el => revealObserver.observe(el));
-      } else {
-        reveals.forEach(el => el.classList.add('visible'));
+function updateActiveNav() {
+  const scrollPos = window.scrollY + 120;
+  let current = '';
+  sections.forEach(s => {
+    if (s.offsetTop <= scrollPos) current = s.id;
+  });
+  navLinks.forEach(link => {
+    link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+  });
+}
+window.addEventListener('scroll', updateActiveNav, { passive: true });
+
+/* ======== SCROLL REVEAL & FAILSAFE ======== */
+const reveals = document.querySelectorAll('.reveal');
+try {
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        revealObserver.unobserve(e.target);
       }
-    } catch (err) {
-      console.error("Reveal observer failed:", err);
-      reveals.forEach(el => el.classList.add('visible'));
-    }
-  </script>
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  
+  if (typeof IntersectionObserver !== 'undefined') {
+    reveals.forEach(el => revealObserver.observe(el));
+  } else {
+    reveals.forEach(el => el.classList.add('visible'));
+  }
+} catch (err) {
+  console.error("Reveal observer failed:", err);
+  reveals.forEach(el => el.classList.add('visible'));
+}
+</script>
 
-  <script>
-    /* ======== CHART.JS ======== */
-    try {
-      const chartFont = { family: "'Inter', sans-serif", size: 13 };
-      const ink = '#13294B';
-      const teal = '#1C7293';
-      const amber = '#E8A33D';
-      const muted = '#6B7280';
+<script>
+/* ======== CHART.JS ======== */
+try {
+  const chartFont = { family: "'Inter', sans-serif", size: 13 };
+  const ink = '#13294B';
+  const teal = '#1C7293';
+  const amber = '#E8A33D';
+  const muted = '#6B7280';
 
-      // Detect dark mode
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const gridColor = isDark ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.08)';
-      const labelColor = isDark ? '#9CA3AF' : '#6B7280';
-      const titleColor = isDark ? '#E5E7EB' : '#13294B';
+  // Detect dark mode
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const gridColor = isDark ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.08)';
+  const labelColor = isDark ? '#9CA3AF' : '#6B7280';
+  const titleColor = isDark ? '#E5E7EB' : '#13294B';
 
-      Chart.defaults.font = chartFont;
-      Chart.defaults.color = labelColor;
+  Chart.defaults.font = chartFont;
+  Chart.defaults.color = labelColor;
 
-      // Chart 1: Scale comparison
-      const elScale = document.getElementById('chartScale');
-      if (elScale) {
-        new Chart(elScale, {
-          type: 'bar',
-          data: {
-            labels: ['ViVQA', 'ViTextVQA'],
-            datasets: [
-              {
-                label: 'QA Pairs',
-                data: [15000, 50342],
-                backgroundColor: teal,
-                borderRadius: 6,
-                barPercentage: 0.6,
-              },
-              {
-                label: 'Images',
-                data: [10328, 16762],
-                backgroundColor: amber,
-                borderRadius: 6,
-                barPercentage: 0.6,
-              }
-            ]
+  // Chart 1: Scale comparison
+  const elScale = document.getElementById('chartScale');
+  if (elScale) {
+    new Chart(elScale, {
+      type: 'bar',
+      data: {
+        labels: ['ViVQA', 'ViTextVQA'],
+        datasets: [
+          {
+            label: 'QA Pairs',
+            data: [15000, 50342],
+            backgroundColor: teal,
+            borderRadius: 6,
+            barPercentage: 0.6,
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-              legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                grid: { color: gridColor },
-                ticks: { callback: v => v >= 1000 ? (v / 1000) + 'K' : v }
-              },
-              x: { grid: { display: false } }
-            }
+          {
+            label: 'Images',
+            data: [10328, 16762],
+            backgroundColor: amber,
+            borderRadius: 6,
+            barPercentage: 0.6,
           }
-        });
-      }
-
-      // Chart 2: Question Type
-      const elQType = document.getElementById('chartQType');
-      if (elQType) {
-        new Chart(elQType, {
-          type: 'bar',
-          data: {
-            labels: ['Object', 'Text', 'Count', 'Reason', 'Y/N', 'Other'],
-            datasets: [
-              {
-                label: 'ViVQA (%)',
-                data: [53.95, 1.63, 13.93, 0.42, 0.39, 29.69],
-                backgroundColor: teal,
-                borderRadius: 4,
-                barPercentage: 0.7,
-              },
-              {
-                label: 'ViTextVQA (%)',
-                data: [27.97, 20.34, 5.85, 5.0, 0.11, 40.73],
-                backgroundColor: amber,
-                borderRadius: 4,
-                barPercentage: 0.7,
-              }
-            ]
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: gridColor },
+            ticks: { callback: v => v >= 1000 ? (v/1000)+'K' : v }
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-              legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                grid: { color: gridColor },
-                ticks: { callback: v => v + '%' }
-              },
-              x: { grid: { display: false } }
-            }
-          }
-        });
+          x: { grid: { display: false } }
+        }
       }
+    });
+  }
 
-      // Chart 3: Train/Test split
-      const elSplit = document.getElementById('chartSplit');
-      if (elSplit) {
-        new Chart(elSplit, {
-          type: 'bar',
-          data: {
-            labels: ['ViVQA (available)', 'ViTextVQA (available)'],
-            datasets: [
-              {
-                label: 'Train',
-                data: [10799, 35159],
-                backgroundColor: teal,
-                borderRadius: 6,
-                barPercentage: 0.6,
-              },
-              {
-                label: 'Val',
-                data: [1200, 0],
-                backgroundColor: muted,
-                borderRadius: 6,
-                barPercentage: 0.6,
-              },
-              {
-                label: 'Test',
-                data: [3001, 10028],
-                backgroundColor: amber,
-                borderRadius: 6,
-                barPercentage: 0.6,
-              }
-            ]
+  // Chart 2: Question Type
+  const elQType = document.getElementById('chartQType');
+  if (elQType) {
+    new Chart(elQType, {
+      type: 'bar',
+      data: {
+        labels: ['Object', 'Text', 'Count', 'Reason', 'Y/N', 'Other'],
+        datasets: [
+          {
+            label: 'ViVQA (%)',
+            data: [53.95, 1.63, 13.93, 0.42, 0.39, 29.69],
+            backgroundColor: teal,
+            borderRadius: 4,
+            barPercentage: 0.7,
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-              legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
-            },
-            scales: {
-              x: { stacked: true, grid: { display: false } },
-              y: {
-                stacked: true,
-                beginAtZero: true,
-                grid: { color: gridColor },
-                ticks: { callback: v => v >= 1000 ? (v / 1000) + 'K' : v }
-              }
-            }
+          {
+            label: 'ViTextVQA (%)',
+            data: [27.97, 20.34, 5.85, 5.0, 0.11, 40.73],
+            backgroundColor: amber,
+            borderRadius: 4,
+            barPercentage: 0.7,
           }
-        });
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: gridColor },
+            ticks: { callback: v => v + '%' }
+          },
+          x: { grid: { display: false } }
+        }
       }
-    } catch (err) {
-      console.error("Chart.js rendering failed:", err);
-    }
-  </script>
+    });
+  }
+
+  // Chart 3: Train/Test split
+  const elSplit = document.getElementById('chartSplit');
+  if (elSplit) {
+    new Chart(elSplit, {
+      type: 'bar',
+      data: {
+        labels: ['ViVQA', 'ViTextVQA'],
+        datasets: [
+          {
+            label: 'Train',
+            data: [10799, 35159],
+            backgroundColor: teal,
+            borderRadius: 6,
+            barPercentage: 0.6,
+          },
+          {
+            label: 'Val / Dev',
+            data: [1200, 5155],
+            backgroundColor: muted,
+            borderRadius: 6,
+            barPercentage: 0.6,
+          },
+          {
+            label: 'Test',
+            data: [3001, 10028],
+            backgroundColor: amber,
+            borderRadius: 6,
+            barPercentage: 0.6,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+        },
+        scales: {
+          x: { stacked: true, grid: { display: false } },
+          y: {
+            stacked: true,
+            beginAtZero: true,
+            grid: { color: gridColor },
+            ticks: { callback: v => v >= 1000 ? (v/1000)+'K' : v }
+          }
+        }
+      }
+    });
+  }
+} catch (err) {
+  console.error("Chart.js rendering failed:", err);
+}
+</script>
 </body>
-
 </html>
