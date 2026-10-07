@@ -42,7 +42,13 @@ DATASETS = {
     "vivqa": {"data_rel": "data/vivqa/test.json"},
     "vitextvqa_official": {"data_rel": "data/vitextvqa_official/test_subset2000_seed42.json"},
 }
-CANONICAL = {"max_pixels": 401408, "torch_dtype": "float16"}   # chốt W05 (commit 37da80a)
+# Cấu hình chuẩn — chốt W07 trên GPU L4 (notebook 05, experiments/W07_config_freeze_L4_seed42/):
+#   bf16: không tràn số như fp16 (23/23 câu hỏng tái hiện trên cả T4 lẫn L4), nhanh hơn fp32 1,71×,
+#         thoái lui 1/50 câu đối chứng so với fp32 (luật định trước: <= 2).
+#   512 token: train ViTextVQA ở 1.280 token chậm 1,91× (luật định trước: chọn 1.280 nếu <= 1,5×).
+# Lịch sử: W05 dùng float16 (commit 37da80a) -> đã chứng minh gây lỗi, KHÔNG dùng để so sánh.
+CANONICAL = {"max_pixels": 401408, "torch_dtype": "bfloat16"}
+CANONICAL_QUANT = {"load_in_4bit": True, "bnb_4bit_quant_type": "nf4", "bnb_4bit_compute_dtype": "bfloat16"}
 
 
 # --------------------------------------------------------------------------- #
@@ -89,7 +95,11 @@ def load_config(path: str, mode: Optional[str] = None, check: bool = True) -> Di
         m = cfg["model"]
         for k, v in CANONICAL.items():
             if m.get(k) != v:
-                raise ValueError(f"Config {k}={m.get(k)} khác bản chuẩn W05 ({v}) -> git pull?")
+                raise ValueError(f"Config {k}={m.get(k)} khác bản chuẩn W07 ({v}) -> git pull?")
+        q = cfg.get("quantization", {})
+        for k, v in CANONICAL_QUANT.items():
+            if q.get(k) != v:
+                raise ValueError(f"Config quantization.{k}={q.get(k)} khác bản chuẩn W07 ({v}) -> git pull?")
     if mode:
         cfg["prompting"]["mode"] = mode
     return cfg
@@ -132,6 +142,43 @@ def prepare_images(dataset: str, drive_root: str) -> str:
                              images_dir="/content/vitextvqa_images")
         return info["image_root"]
     raise ValueError(f"dataset không hỗ trợ: {dataset}")
+
+
+# --------------------------------------------------------------------------- #
+# Chữ ký run: chặn việc "resume" lô cũ của cấu hình khác (vd W05 fp16) vào run mới
+# --------------------------------------------------------------------------- #
+SIGNATURE_FILE = "run_signature.json"
+
+
+def run_signature(cfg: Dict[str, Any], data_sha256: str, limit: Optional[int], chunk: int) -> Dict[str, Any]:
+    """Dấu vân tay của mọi thứ ảnh hưởng tới dự đoán. Khác chữ ký = run khác."""
+    c = copy.deepcopy(cfg)
+    c.get("run", {}).pop("name", None)
+    c.get("data", {}).pop("test_path", None)        # đường dẫn tuyệt đối đổi theo máy; nội dung đã có sha256
+    payload = {"model": c.get("model"), "quantization": c.get("quantization"),
+               "prompting": c.get("prompting"), "eval": c.get("eval"),
+               "data_sha256": data_sha256, "limit": limit, "chunk": chunk}
+    digest = hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+    return {"sha256": digest, **payload}
+
+
+def check_or_write_signature(out_dir: str, sig: Dict[str, Any]) -> None:
+    """
+    Lần đầu: ghi chữ ký. Lần sau: phải trùng.
+    Thư mục run CŨ đã có lô nhưng không có chữ ký (run trước W07) -> chặn, vì không chứng minh
+    được các lô đó chạy cùng cấu hình (vd lô W05 chạy fp16, config hiện tại bf16).
+    """
+    path = os.path.join(out_dir, SIGNATURE_FILE)
+    chunk_dir = os.path.join(out_dir, "chunks")
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as fp:
+            if json.load(fp).get("sha256") != sig["sha256"]:
+                raise ValueError(f"{path} khác cấu hình/dữ liệu hiện tại -> dùng run_name mới")
+        return
+    if os.path.isdir(chunk_dir) and os.listdir(chunk_dir):
+        raise ValueError(f"{out_dir} đã có lô nhưng không có {SIGNATURE_FILE} (run trước W07) "
+                         f"-> KHÔNG chạy tiếp được; dùng run_name mới")
+    _write_json(path, sig, indent=2)
 
 
 # --------------------------------------------------------------------------- #
@@ -179,7 +226,8 @@ def merge_and_report(samples: List[Dict[str, Any]], cfg: Dict[str, Any], out_dir
 
     metrics = evaluate_predictions(
         [r["prediction"] for r in records], [r["answers"] for r in records],
-        metric_names=cfg["eval"]["primary_metrics"], anls_threshold=cfg["eval"]["anls_threshold"],
+        metric_names=list(cfg["eval"]["primary_metrics"]) + list(cfg["eval"].get("secondary_metrics", [])),
+        anls_threshold=cfg["eval"]["anls_threshold"],
         question_types=[r["question_type"] for r in records])
     m, q = cfg["model"], cfg["quantization"]
     meta = {
@@ -240,6 +288,8 @@ def run(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     if missing:
         raise FileNotFoundError(f"{len(missing)} ảnh thiếu, vd {missing[0]}")
     _log(f"   {len(samples)} mẫu, ảnh đủ")
+    data_sha = _sha256(data_file)
+    check_or_write_signature(out_dir, run_signature(cfg, data_sha, limit, chunk))
 
     if model is None:
         _log("   nạp model...")
@@ -248,12 +298,13 @@ def run(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     result = merge_and_report(samples, cfg, out_dir, n_chunks, extra_meta={
         "dataset": dataset,
         "data_file": os.path.relpath(data_file, drive_root) if data_file.startswith(drive_root) else data_file,
-        "data_file_sha256": _sha256(data_file),
+        "data_file_sha256": data_sha,
         "limit": limit, "chunk_size": chunk,
     })
     mt = result["metrics"]
+    f1_txt = f" | token-F1 (phụ)={mt['token_f1']:.4f}" if "token_f1" in mt else ""
     _log(f"== KẾT QUẢ: EM={mt['exact_match']:.4f} | VQA-Acc={mt['vqa_accuracy']:.4f} | "
-         f"ANLS={mt['anls']:.4f} | {result['meta']['inference_time_sec']}s")
+         f"ANLS={mt['anls']:.4f}{f1_txt} | {result['meta']['inference_time_sec']}s")
     _log(f"   đã lưu -> {out_dir}")
     return result
 
@@ -276,11 +327,11 @@ def _selftest() -> None:
         cfg_path = os.path.join(td, "cfg.yaml")
         with open(cfg_path, "w", encoding="utf-8") as fp:
             fp.write("run: {name: x, seed: 42}\n"
-                     "model: {model_id: fake, torch_dtype: float16, min_pixels: 200704, max_pixels: 401408}\n"
+                     "model: {model_id: fake, torch_dtype: bfloat16, min_pixels: 200704, max_pixels: 401408}\n"
                      "quantization: {enabled: true, load_in_4bit: true, bnb_4bit_quant_type: nf4, "
-                     "bnb_4bit_use_double_quant: true, bnb_4bit_compute_dtype: float16}\n"
+                     "bnb_4bit_use_double_quant: true, bnb_4bit_compute_dtype: bfloat16}\n"
                      "prompting: {mode: zero_shot, max_new_tokens: 32}\n"
-                     "eval: {primary_metrics: [exact_match, vqa_accuracy, anls], anls_threshold: 0.5}\n")
+                     "eval: {primary_metrics: [exact_match, vqa_accuracy, anls], secondary_metrics: [token_f1], anls_threshold: 0.5}\n")
 
         calls = []
         def fake_gen(model, processor, image_path, prompt_text, max_new_tokens=32):
@@ -293,6 +344,7 @@ def _selftest() -> None:
                       model="fake", processor="fake", generate_fn=fake_gen)
         r1 = run(**common)
         assert r1["meta"]["num_samples"] == 7 and abs(r1["metrics"]["exact_match"] - 1.0) < 1e-9
+        assert abs(r1["metrics"]["token_f1"] - 1.0) < 1e-9, "token_f1 (metric phụ) phải được tính"
         assert len(calls) == 7 and r1["meta"]["data_file_sha256"] == _sha256(data)
 
         # resume: chạy lại -> không gọi model thêm lần nào
@@ -312,8 +364,27 @@ def _selftest() -> None:
         try:
             run(**common)
             raise AssertionError("không phát hiện lô cũ lệch dữ liệu")
+        except ValueError as exc:   # chữ ký (sha256 dữ liệu) chặn trước; lớp kiểm tra id lô là lớp thứ hai
+            assert "khác cấu hình/dữ liệu" in str(exc) or "không khớp" in str(exc), exc
+
+        # đổi CẤU HÌNH (vd prompt) mà giữ run_name -> chữ ký lệch -> chặn
+        recs[0]["question_id"] = "test_0"
+        _write_json(data, recs)
+        try:
+            run(**{**common, "mode": "ocr"})
+            raise AssertionError("không phát hiện chạy tiếp với cấu hình khác")
         except ValueError as exc:
-            assert "không khớp" in str(exc)
+            assert "chữ ký" in str(exc) or "khác cấu hình" in str(exc), exc
+
+        # thư mục run cũ (trước W07): có lô nhưng không có chữ ký -> chặn
+        legacy = os.path.join(td, "exp", "legacy", "chunks")
+        os.makedirs(legacy)
+        _write_json(os.path.join(legacy, "chunk_00.json"), {"predictions": []})
+        try:
+            run(**{**common, "run_name": "legacy"})
+            raise AssertionError("không chặn thư mục run cũ không có chữ ký")
+        except ValueError as exc:
+            assert "không có" in str(exc), exc
 
         # config sai bản chuẩn -> chặn
         bad = cfg_path.replace("cfg.yaml", "bad.yaml")
@@ -324,6 +395,18 @@ def _selftest() -> None:
             raise AssertionError("không chặn config sai")
         except ValueError:
             pass
+
+        # dtype cũ của W05 (float16) -> phải bị chặn, kể cả khi chỉ sai ở phần lượng tử hoá
+        for old, new in [("torch_dtype: bfloat16", "torch_dtype: float16"),
+                         ("bnb_4bit_compute_dtype: bfloat16", "bnb_4bit_compute_dtype: float16")]:
+            bad2 = cfg_path.replace("cfg.yaml", "bad2.yaml")
+            with open(cfg_path, encoding="utf-8") as fp:
+                open(bad2, "w", encoding="utf-8").write(fp.read().replace(old, new))
+            try:
+                load_config(bad2)
+                raise AssertionError(f"không chặn config sai ({new})")
+            except ValueError:
+                pass
     _log("SELFTEST OK")
 
 

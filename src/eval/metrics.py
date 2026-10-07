@@ -18,6 +18,7 @@ có 1 đáp án thì list có 1 phần tử — công thức vẫn đúng.
 from __future__ import annotations
 import re
 import unicodedata
+from collections import Counter
 from typing import List, Dict, Callable
 
 
@@ -198,13 +199,44 @@ def anls(pred: str, gts: List[str], threshold: float = 0.5) -> float:
 
 
 # =============================================================================
-# 5) TỔNG HỢP TRÊN CẢ TẬP TEST
+# 5) TOKEN-F1 (metric PHỤ — để so với số công bố của paper ViTextVQA)
+# =============================================================================
+def _token_f1_single(pred_norm: str, gold_norm: str) -> float:
+    """F1 trên túi token (kiểu SQuAD) giữa 2 chuỗi ĐÃ chuẩn hoá."""
+    p_tok, g_tok = pred_norm.split(), gold_norm.split()
+    if not p_tok and not g_tok:
+        return 1.0
+    if not p_tok or not g_tok:
+        return 0.0
+    common = sum((Counter(p_tok) & Counter(g_tok)).values())
+    if common == 0:
+        return 0.0
+    precision, recall = common / len(p_tok), common / len(g_tok)
+    return 2 * precision * recall / (precision + recall)
+
+
+def token_f1(pred: str, gts: List[str]) -> float:
+    """
+    Token-F1 = độ trùng từ giữa câu trả lời và đáp án (cho điểm một phần theo TỪ,
+    còn ANLS cho điểm một phần theo KÝ TỰ). Lấy giá trị tốt nhất trên mọi đáp án đúng.
+
+    Dùng cùng normalize_vi với EM/ANLS (giữ dấu thanh). Đây là metric PHỤ, chỉ để
+    đặt kết quả cạnh số F1 công bố của paper ViTextVQA (Nguyen et al., 2025);
+    không thay thế EM / VQA-Acc / ANLS.
+    """
+    p = normalize_vi(pred)
+    return max((_token_f1_single(p, normalize_vi(g)) for g in gts), default=0.0)
+
+
+# =============================================================================
+# 6) TỔNG HỢP TRÊN CẢ TẬP TEST
 # =============================================================================
 # Cho phép bật/tắt từng metric qua config. Chữ ký thống nhất (pred, gts, **kw).
 _METRIC_FUNCS: Dict[str, Callable] = {
     "exact_match": lambda p, g, **kw: exact_match(p, g),
     "vqa_accuracy": lambda p, g, **kw: vqa_accuracy(p, g),
     "anls": lambda p, g, **kw: anls(p, g, threshold=kw.get("anls_threshold", 0.5)),
+    "token_f1": lambda p, g, **kw: token_f1(p, g),
 }
 
 
@@ -299,9 +331,19 @@ if __name__ == "__main__":
         )
         print(f"ANLS  {pred!r:22s} / {gold!r:22s}  EM={em:.0f} ANLS={nl:.3f}")
 
+    # Token-F1: điểm một phần theo TỪ (metric phụ)
+    assert token_f1("con mèo", ["con mèo"]) == 1.0
+    assert abs(token_f1("con ngựa nhỏ", ["con ngựa"]) - 0.8) < 1e-9      # P=2/3, R=1 -> 0.8
+    assert token_f1("Màu đỏ", ["đỏ"]) == 1.0                              # cùng normalize_vi với EM
+    assert token_f1("xanh", ["đỏ", "vàng"]) == 0.0
+    assert token_f1("", [""]) == 1.0 and token_f1("", ["đỏ"]) == 0.0
+    assert abs(token_f1("a b", ["b c", "a b c"]) - 0.8) < 1e-9            # lấy max trên các đáp án
+    print("token_f1 OK")
+
     preds = ["con mèo", "hai người", "biển báo dừng lại"]
     refs = [["con mèo", "mèo"], ["2 người", "hai người"], ["dừng lại"]]
     qtypes = ["what", "counting", "text-reading"]
-    out = evaluate_predictions(preds, refs, question_types=qtypes)
+    out = evaluate_predictions(preds, refs, question_types=qtypes,
+                               metric_names=("exact_match", "vqa_accuracy", "anls", "token_f1"))
     for k, v in out.items():
         print(f"{k:35s} = {v:.3f}")

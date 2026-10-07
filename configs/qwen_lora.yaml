@@ -6,7 +6,8 @@
 # file này rồi đổi vài dòng. Điều này thỏa yêu cầu "Reproducibility package"
 # của PDF: config files + experiment log (split, seed, settings per run).
 #
-# Cách dùng:  python -m src.train.train_lora --config configs/qwen_lora.yaml
+# Cách dùng:  python -m src.adaptation.train_qlora --dataset vivqa --run_name <tên run>
+#             python -m src.eval.run_baseline --dataset vivqa --run_name <tên run>
 # =============================================================================
 
 # --- Định danh run: dùng để đặt tên thư mục log/checkpoint ---
@@ -21,9 +22,9 @@ run:
 model:
   backbone: "qwen2_5_vl"                        # định danh nội bộ (loader dựa vào đây)
   model_id: "Qwen/Qwen2.5-VL-3B-Instruct"       # checkpoint pretrained trên HuggingFace
-  torch_dtype: "float16"                         # T4 không hỗ trợ bf16 native; mọi run W05 thực tế dùng fp16.
+  torch_dtype: "bfloat16"                        # Chốt W07 trên L4: fp16 tràn số (23 câu hỏng), bf16 nhanh hơn fp32 1,71×.
   min_pixels: 200704                             # 256*28*28 — giảm để tiết kiệm VRAM
-  max_pixels: 401408                             # Chuẩn chung cho baseline + QLoRA (chốt W05). Vừa VRAM T4; 1280*28*28 để ablation phụ.
+  max_pixels: 401408                             # 512 token. Chốt W07: train ViTextVQA ở 1280 token chậm 1,91× -> 1280*28*28 để ablation.
 
 # --- Lượng tử hóa 4-bit (QLoRA). Đây là chỗ hiện thực "PEFT-only / no full-FT" ---
 quantization:
@@ -31,7 +32,7 @@ quantization:
   load_in_4bit: true
   bnb_4bit_quant_type: "nf4"                     # NormalFloat4 — chuẩn của QLoRA
   bnb_4bit_use_double_quant: true                # nén thêm hằng số lượng tử hóa
-  bnb_4bit_compute_dtype: "float16"              # T4 không hỗ trợ bf16 native; mọi run W05 thực tế dùng fp16.
+  bnb_4bit_compute_dtype: "bfloat16"             # Phải trùng model.torch_dtype (chốt W07, GPU L4).
 
 # --- Cấu hình LoRA adapter (bộ tham số DUY NHẤT được huấn luyện) ---
 lora:
@@ -73,10 +74,14 @@ training:
   warmup_ratio: 0.03
   weight_decay: 0.0
   logging_steps: 10
-  save_strategy: "epoch"
+  save_strategy: "steps"                         # lưu checkpoint định kỳ để CHẠY TIẾP được khi Colab ngắt
+  save_steps: 200                                # ViTextVQA ~1 giờ / 200 step trên L4 -> mất tối đa ~1 giờ khi đứt
+  save_total_limit: 2                            # chỉ giữ 2 checkpoint gần nhất (đủ để resume, đỡ tốn Drive)
+  # Ngoài ra train_qlora.py lưu riêng adapter cuối MỖI epoch -> adapters/<run>/epoch_<k>/ để chọn epoch trên dev.
   gradient_checkpointing: true                   # đánh đổi tốc độ lấy VRAM — cần trên Colab
 
 # --- Metric đánh giá (PRIMARY theo PDF: EM, VQA-Acc, ANLS) ---
 eval:
   primary_metrics: ["exact_match", "vqa_accuracy", "anls"]
+  secondary_metrics: ["token_f1"]                # chỉ để đặt cạnh F1 công bố của paper ViTextVQA
   anls_threshold: 0.5                            # ngưỡng chuẩn của ANLS

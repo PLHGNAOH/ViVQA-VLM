@@ -26,6 +26,8 @@ Cách chạy (Colab, GPU):
       --run_name W06_smoke_qlora_qwen25vl_vivqa_mp1280_seed42 \
       --limit 200 --max_steps 30 --max_pixels 1003520
 
+Chạy tiếp sau khi Colab ngắt: chạy lại ĐÚNG lệnh cũ (cùng --run_name) -> tự resume.
+
 Kiểm thử offline (không GPU, không mạng, không cần torch):
   python -m src.adaptation.train_qlora --selftest
 """
@@ -221,6 +223,65 @@ def load_config(path: str, max_pixels: Optional[int] = None, dtype: Optional[str
 
 
 # --------------------------------------------------------------------------- #
+# 3b) Chạy tiếp (resume) an toàn — thuần Python, kiểm thử được không cần GPU
+# --------------------------------------------------------------------------- #
+CKPT_PREFIX = "checkpoint-"
+SIGNATURE_FILE = "run_signature.json"
+# Khoá chỉ ảnh hưởng CÁCH LƯU, không ảnh hưởng phép tính -> không đưa vào chữ ký
+_SIG_EXCLUDE_TRAINING = ("save_strategy", "save_steps", "save_total_limit", "logging_steps")
+
+
+def find_resume_checkpoint(ckpt_dir: str) -> Optional[str]:
+    """Checkpoint HOÀN CHỈNH mới nhất (checkpoint-N có trainer_state.json), hoặc None."""
+    if not os.path.isdir(ckpt_dir):
+        return None
+    best, best_step = None, -1
+    for name in os.listdir(ckpt_dir):
+        if not name.startswith(CKPT_PREFIX):
+            continue
+        try:
+            step = int(name[len(CKPT_PREFIX):])
+        except ValueError:
+            continue
+        path = os.path.join(ckpt_dir, name)
+        # Checkpoint đang ghi dở khi Colab đứt sẽ thiếu trainer_state.json -> bỏ qua
+        if os.path.isfile(os.path.join(path, "trainer_state.json")) and step > best_step:
+            best, best_step = path, step
+    return best
+
+
+def run_signature(cfg: Dict[str, Any], data_sha256: str, n_samples: int,
+                  limit: Optional[int], max_steps: Optional[int]) -> Dict[str, Any]:
+    """Dấu vân tay của MỘT run: mọi thứ ảnh hưởng phép tính. Khác chữ ký = run khác."""
+    c = copy.deepcopy(cfg)
+    c.get("run", {}).pop("name", None)
+    for k in _SIG_EXCLUDE_TRAINING:
+        c.get("training", {}).pop(k, None)
+    payload = {"cfg": c, "data_sha256": data_sha256, "n_samples": n_samples,
+               "limit": limit, "max_steps": max_steps}
+    digest = hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+    return {"sha256": digest, **payload}
+
+
+def check_or_write_signature(out_dir: str, sig: Dict[str, Any]) -> bool:
+    """
+    Lần đầu: ghi chữ ký. Lần sau (chạy tiếp): chữ ký PHẢI trùng, nếu không báo lỗi —
+    tránh nối checkpoint của cấu hình/dữ liệu cũ vào một run mới (trộn kết quả).
+    Trả True nếu chữ ký đã tồn tại và khớp.
+    """
+    path = os.path.join(out_dir, SIGNATURE_FILE)
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as fp:
+            old = json.load(fp)
+        if old.get("sha256") != sig["sha256"]:
+            raise ValueError(f"{path} khác cấu hình/dữ liệu hiện tại -> dùng run_name mới "
+                             f"(hoặc xoá thư mục run cũ nếu thật sự muốn train lại từ đầu)")
+        return True
+    _write_json(path, sig)
+    return False
+
+
+# --------------------------------------------------------------------------- #
 # 4) Dataset + Collator (cần torch/transformers -> import trễ bên trong)
 # --------------------------------------------------------------------------- #
 def make_collate_fn(processor, cfg: Dict[str, Any]):
@@ -280,10 +341,18 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
           max_pixels: Optional[int] = None, dtype: Optional[str] = None,
           mode: Optional[str] = None, image_dir: Optional[str] = None,
           batch_size: Optional[int] = None, grad_accum: Optional[int] = None,
-          grad_checkpointing: Optional[bool] = None) -> Dict[str, Any]:
-    """Nạp data -> nạp model + LoRA -> train -> lưu adapter + train_log.json."""
+          grad_checkpointing: Optional[bool] = None, save_steps: Optional[int] = None,
+          debug_crash_at_step: Optional[int] = None) -> Dict[str, Any]:
+    """
+    Nạp data -> nạp model + LoRA -> train -> lưu adapter + train_log.json.
+
+    Chịu được việc Colab ngắt giữa chừng: checkpoint lưu mỗi `save_steps` step vào
+    <out_dir>/checkpoints/; chạy lại ĐÚNG lệnh cũ -> tự chạy tiếp từ checkpoint mới nhất
+    (sau khi kiểm tra chữ ký cấu hình + dữ liệu khớp). Adapter cuối mỗi epoch lưu riêng
+    ở <adapter_dir>/epoch_<k>/ để chọn epoch tốt nhất trên tập dev.
+    """
     import torch
-    from transformers import Trainer, TrainingArguments, set_seed
+    from transformers import Trainer, TrainerCallback, TrainingArguments, set_seed
     from src.data.vivqa_dataset import load_vivqa
     from src.models.vlm_loader import load_vlm_for_training
 
@@ -316,6 +385,20 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         raise ValueError("Không còn mẫu nào train được sau khi lọc")
     _log(f"   {len(samples)} mẫu train (loại {len(dropped)} mẫu thiếu ảnh/đáp án)")
 
+    # --- Chạy tiếp hay chạy mới? (kiểm tra TRƯỚC khi nạp model 4 phút) ---
+    t = cfg["training"]
+    if save_steps is not None:
+        t["save_steps"] = int(save_steps)
+    ckpt_dir = os.path.join(out_dir, "checkpoints")
+    data_sha = _sha256(data_file)
+    sig = run_signature(cfg, data_sha, len(samples), limit, max_steps)
+    sig_existed = check_or_write_signature(out_dir, sig)
+    resume_from = find_resume_checkpoint(ckpt_dir)
+    if resume_from:
+        _log(f"   ↻ CHẠY TIẾP từ {os.path.basename(resume_from)} (chữ ký cấu hình khớp)")
+    elif sig_existed:
+        _log("   chữ ký khớp nhưng chưa có checkpoint hoàn chỉnh -> train lại từ đầu")
+
     # --- Model + LoRA (PEFT-only; ràng buộc nằm trong vlm_loader) ---
     _log("   nạp model + gắn LoRA...")
     model, processor = load_vlm_for_training(cfg)
@@ -331,7 +414,6 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         count_method = "p.numel() (CẢNH BÁO: đếm thiếu nếu model 4-bit)"
 
     # --- Tham số huấn luyện ---
-    t = cfg["training"]
     compute_dtype = cfg["model"].get("torch_dtype", "float16")
     sched = plan_schedule(len(samples), t["per_device_batch_size"],
                           t["gradient_accumulation_steps"], t["epochs"],
@@ -347,7 +429,10 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         warmup_steps=sched["warmup_steps"],          # transformers 5.x bỏ warmup_ratio
         weight_decay=t["weight_decay"],
         logging_steps=t["logging_steps"],
-        save_strategy="no" if max_steps else t["save_strategy"],
+        # smoke run (max_steps) mặc định KHÔNG lưu, trừ khi truyền --save_steps (để thử resume)
+        save_strategy="no" if (max_steps and save_steps is None) else t.get("save_strategy", "steps"),
+        save_steps=t.get("save_steps", 200),
+        save_total_limit=t.get("save_total_limit", 2),
         gradient_checkpointing=t["gradient_checkpointing"],
         num_train_epochs=t["epochs"],
         max_steps=max_steps if max_steps else -1,
@@ -367,12 +452,28 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         _log(f"   ⚠️ transformers hiện tại không nhận: {unsupported} -> bỏ qua (ghi vào log)")
     args = TrainingArguments(**{k: v for k, v in ta_kwargs.items() if k in supported})
 
+    class EpochAdapterSaver(TrainerCallback):
+        """Lưu adapter (chỉ LoRA, vài chục MB) cuối mỗi epoch -> chọn epoch trên dev."""
+        def on_epoch_end(self, _args, state, _control, model=None, **_kw):
+            k = int(round(state.epoch or 0))
+            if model is not None and k >= 1:
+                path = os.path.join(adapter_dir, f"epoch_{k}")
+                model.save_pretrained(path)
+                _log(f"   💾 adapter epoch {k} -> {path}")
+
+    class DebugCrash(TrainerCallback):
+        """CHỈ để kiểm thử resume: giả lập Colab đứt tại 1 step cố định."""
+        def on_step_end(self, _args, state, _control, **_kw):
+            if debug_crash_at_step and state.global_step >= debug_crash_at_step:
+                raise RuntimeError(f"[debug] giả lập ngắt tại step {state.global_step}")
+
+    callbacks = [EpochAdapterSaver()] + ([DebugCrash()] if debug_crash_at_step else [])
     trainer = Trainer(model=model, args=args, train_dataset=samples,
-                      data_collator=make_collate_fn(processor, cfg))
+                      data_collator=make_collate_fn(processor, cfg), callbacks=callbacks)
 
     torch.cuda.reset_peak_memory_stats()
     t0 = time.time()
-    result = trainer.train()
+    result = trainer.train(resume_from_checkpoint=resume_from)
     elapsed = time.time() - t0
     peak_vram_gb = torch.cuda.max_memory_allocated() / 1024 ** 3
 
@@ -382,14 +483,15 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     processor.save_pretrained(adapter_dir)
 
     # --- Log tái lập ---
-    steps = int(result.metrics.get("train_steps_per_second", 0) * result.metrics.get(
-        "train_runtime", 0)) or int(max_steps or 0)
+    # Số step chạy TRONG PHIÊN NÀY (khi chạy tiếp, trừ phần đã làm trước checkpoint) -> s/step đúng
+    start_step = int(os.path.basename(resume_from)[len(CKPT_PREFIX):]) if resume_from else 0
+    steps = max(int(trainer.state.global_step) - start_step, 0) or int(max_steps or 0)
     meta = {
         "run_name": run_name,
         "finished_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "dataset": dataset,
         "data_file": os.path.relpath(data_file, drive_root) if data_file.startswith(drive_root) else data_file,
-        "data_file_sha256": _sha256(data_file),
+        "data_file_sha256": data_sha,
         "num_samples": len(samples),
         "num_dropped": len(dropped),
         "answer_policy": "đáp án đầu tiên trong trường answers",
@@ -402,6 +504,12 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         "lora": cfg["lora"],
         "training": {**t, "max_steps": max_steps, "limit": limit, **sched,
                      "unsupported_training_args": unsupported},
+        "run_signature_sha256": sig["sha256"],
+        "resumed_from": os.path.basename(resume_from) if resume_from else None,
+        "cost_note": ("cost chỉ tính PHIÊN CUỐI (đã chạy tiếp từ checkpoint)" if resume_from
+                      else "cost tính trọn run"),
+        "epoch_adapters": sorted(d for d in (os.listdir(adapter_dir) if os.path.isdir(adapter_dir) else [])
+                                 if d.startswith("epoch_")),
         "peft_only": True,
         "trainable_params": trainable,
         "total_params": total,
@@ -418,6 +526,7 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         "cost": {
             "train_runtime_sec": round(result.metrics.get("train_runtime", elapsed), 1),
             "steps": steps,
+            "global_step": int(trainer.state.global_step),
             "sec_per_step": round(result.metrics.get("train_runtime", elapsed) / max(steps, 1), 3),
             "peak_vram_gb": round(peak_vram_gb, 2),
             "final_loss": round(float(result.metrics.get("train_loss", float("nan"))), 4),
@@ -512,6 +621,36 @@ def _selftest() -> None:
     assert [s["question_id"] for s in keep] == ["a"], keep
     assert sorted(dropped) == ["b", "c"], dropped
 
+    # (g) chạy tiếp: chọn checkpoint HOÀN CHỈNH mới nhất, bỏ qua bản ghi dở / tên lạ
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        ck = os.path.join(td, "checkpoints")
+        assert find_resume_checkpoint(ck) is None                  # chưa có thư mục
+        for name, complete in [("checkpoint-200", True), ("checkpoint-400", True),
+                               ("checkpoint-600", False), ("checkpoint-abc", True), ("runs", True)]:
+            os.makedirs(os.path.join(ck, name))
+            if complete:
+                open(os.path.join(ck, name, "trainer_state.json"), "w").close()
+        assert os.path.basename(find_resume_checkpoint(ck)) == "checkpoint-400"
+
+        # (h) chữ ký run: cùng cấu hình -> khớp; đổi phép tính -> chặn; đổi cách lưu -> vẫn khớp
+        cfg = {"run": {"name": "a", "seed": 42}, "model": {"max_pixels": 401408},
+               "training": {"epochs": 3, "learning_rate": 2e-4, "save_steps": 200}}
+        sig = run_signature(cfg, "sha", 100, None, None)
+        assert check_or_write_signature(td, sig) is False          # lần đầu: ghi
+        assert check_or_write_signature(td, sig) is True           # lần sau: khớp
+        cfg2 = copy.deepcopy(cfg); cfg2["run"]["name"] = "b"; cfg2["training"]["save_steps"] = 50
+        assert run_signature(cfg2, "sha", 100, None, None)["sha256"] == sig["sha256"]
+        for bad in [run_signature({**cfg, "training": {**cfg["training"], "learning_rate": 1e-4}},
+                                  "sha", 100, None, None),
+                    run_signature(cfg, "sha_khac", 100, None, None),
+                    run_signature(cfg, "sha", 100, None, 30)]:
+            try:
+                check_or_write_signature(td, bad)
+                raise AssertionError("không chặn chạy tiếp với cấu hình/dữ liệu khác")
+            except ValueError:
+                pass
+
     _log("SELFTEST OK")
 
 
@@ -533,6 +672,10 @@ def main() -> None:
     ap.add_argument("--grad_accum", type=int, default=None, help="Ghi đè training.gradient_accumulation_steps")
     ap.add_argument("--grad_checkpointing", default=None, choices=["on", "off"],
                     help="Bật/tắt gradient checkpointing (tắt = nhanh hơn, tốn VRAM hơn)")
+    ap.add_argument("--save_steps", type=int, default=None,
+                    help="Ghi đè training.save_steps; với smoke run (--max_steps) thì BẬT lưu checkpoint")
+    ap.add_argument("--debug_crash_at_step", type=int, default=None,
+                    help="CHỈ để kiểm thử resume: giả lập Colab đứt tại step N")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
 
@@ -545,7 +688,8 @@ def main() -> None:
           out_root=a.out_root, adapter_root=a.adapter_root, config=a.config,
           limit=a.limit, max_steps=a.max_steps, max_pixels=a.max_pixels,
           dtype=a.dtype, mode=a.mode, batch_size=a.batch_size, grad_accum=a.grad_accum,
-          grad_checkpointing=None if a.grad_checkpointing is None else (a.grad_checkpointing == "on"))
+          grad_checkpointing=None if a.grad_checkpointing is None else (a.grad_checkpointing == "on"),
+          save_steps=a.save_steps, debug_crash_at_step=a.debug_crash_at_step)
 
 
 if __name__ == "__main__":
