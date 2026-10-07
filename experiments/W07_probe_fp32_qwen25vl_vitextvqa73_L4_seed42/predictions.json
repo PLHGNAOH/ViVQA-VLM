@@ -1,0 +1,659 @@
+[
+  {
+    "question_id": "test_313",
+    "question": "số fax của công ty sông tiền vĩnh long là bao nhiêu ?",
+    "prediction": "070.3830798",
+    "answers": [
+      "070 . 3830798"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_749",
+    "question": "địa điểm này nằm ở đâu ?",
+    "prediction": "TP.HCM",
+    "answers": [
+      "nguyễn chi thanh , p . 9 , q . 5 , tp . hcm"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_1731",
+    "question": "tết đến nơi nhưng chúng ta bị sao ?",
+    "prediction": "Tất nhiên, bạn đang nói đúng.",
+    "answers": [
+      "túi ta không một ngàn"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_1861",
+    "question": "ta cần bớt vô duyên để làm gì ?",
+    "prediction": "Để gắn kết với người thân, gia đình.",
+    "answers": [
+      "tết gắn kết"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_2030",
+    "question": "cửa hàng này nằm ở quận nào ?",
+    "prediction": "Quận 1",
+    "answers": [
+      "q . 1"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_2286",
+    "question": "cửa hàng bán điện thoại samsung dòng nào ?",
+    "prediction": "Galaxy S7 edge",
+    "answers": [
+      "galaxy s7 edge"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_4007",
+    "question": "tấm bảng trong ảnh nói về tinh thần gì ?",
+    "prediction": "Tinh thần cách mạng tháng Tám và Quốc khánh 2/9.",
+    "answers": [
+      "cách mạng tháng tám và quốc khánh 2 / 9 muôn năm"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_4621",
+    "question": "bức hình bên trong căn nhà này lấy nguồn từ đâu ?",
+    "prediction": "Bức hình này được lấy từ một trang web bất động sản.",
+    "answers": [
+      "alo nhà đất . com . vn"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_4798",
+    "question": "gian hàng đầu tiên từ trái qua tên gì ?",
+    "prediction": "Jimmy Food",
+    "answers": [
+      "jimmy food"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_4982",
+    "question": "tiệm hương trà chuyên bán món gì ?",
+    "prediction": "Tiệm Hương Trà chuyên bán cà phê, sữa chua trà và thức ăn nhanh.",
+    "answers": [
+      "coffee - milk tea - fastfood"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_5014",
+    "question": "tiêu chí của thủy hải sản là gì ?",
+    "prediction": "Đảm bảo vệ sinh an toàn.",
+    "answers": [
+      "đảm bảo vệ sinh an toàn"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_5273",
+    "question": "cửa hàng trà sữa happy life nằm ở quận mấy ?",
+    "prediction": "Quận 10",
+    "answers": [
+      "5"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_5563",
+    "question": "pharmacity là tên của chuỗi nơi gì ?",
+    "prediction": "Pharmacity là tên của chuỗi nhà thuốc tiện lợi.",
+    "answers": [
+      "nhà thuốc tiện lợi"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_5655",
+    "question": "cuốn sách này chủ yếu nói về điều gì ?",
+    "prediction": "Cuốn sách này chủ yếu nói về khoa học và công nghệ tương lai, đặc biệt là về lĩnh vực khoa học viễn tưởng và kho",
+    "answers": [
+      "một lý thuyết cách mạng về thực tại giải thích được"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_5833",
+    "question": "giá tiền của buffet nướng , lẩu buổi trưa từ thứ 2 - thứ 6 là bao nhiêu ?",
+    "prediction": "188.000 VND",
+    "answers": [
+      "188000"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_6945",
+    "question": "cửa hàng này là gì ?",
+    "prediction": "Cửa hàng bán quần áo.",
+    "answers": [
+      "phiên chợ tết"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_7657",
+    "question": "những cầu thủ trong hình thuộc biên chế câu lạc bộ nào ?",
+    "prediction": "Câu lạc bộ Hoàng Anh Gia Lai",
+    "answers": [
+      "hoàng anh gia lai"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_7869",
+    "question": "số điện thoại liên lạc cho trụ sở taxi phương linh là gì ?",
+    "prediction": "0932.123.456",
+    "answers": [
+      "38 333 333"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_8823",
+    "question": "ở đây có bán cái gì ?",
+    "prediction": "Trà Chanh",
+    "answers": [
+      "trà chanh"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_10085",
+    "question": "tấm bảng màu xanh lá bên trái bức hình để giá nhứ thế nào ?",
+    "prediction": "48.500 VND",
+    "answers": [
+      "giá tốt mỗi ngày"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_10148",
+    "question": "sản phẩm trong quầy trái cây sau người đàn ông như thế nào ?",
+    "prediction": "Đang được chọn lựa.",
+    "answers": [
+      "xuất xứ rõ ràng"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_11106",
+    "question": "quán ăn ở bên phải tấm ảnh chuyên bán loại đồ ăn gì ?",
+    "prediction": "Đồ nướng.",
+    "answers": [
+      "đồ nướng"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_11174",
+    "question": "ta gọi vào số hotline trong ảnh khi muốn làm gì ?",
+    "prediction": "Làm bảng quảng cáo.",
+    "answers": [
+      "bảng quảng cáo giá rẻ"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_11260",
+    "question": "giá của cần tây như thế nào ?",
+    "prediction": "35000",
+    "answers": [
+      "24900"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_11453",
+    "question": "liên hệ với quán qua số điệ thoại nào ?",
+    "prediction": "0932 812 516",
+    "answers": [
+      "0932 812 516"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_11512",
+    "question": "số điện thoại của quán là bao nhiêu ?",
+    "prediction": "0348 943 493",
+    "answers": [
+      "0348 943 493"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_11785",
+    "question": "đây là nhà thuốc chính hãng của thương hiệu nào ?",
+    "prediction": "Hisamitsu",
+    "answers": [
+      "hisamitsu việt nam"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_12482",
+    "question": "biển hiệu màu xanh lá cây bán gì ?",
+    "prediction": "Bán quần áo.",
+    "answers": [
+      "quần áo váy , đồ mẫu"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_13391",
+    "question": "của hàng bên trái quán gochu tên gì ?",
+    "prediction": "Mặt hàng bên trái tên là \"VIỆT\".",
+    "answers": [
+      "việt"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_14477",
+    "question": "sản phẩm trước hình là bao nhiêu phần trăm ?",
+    "prediction": "80%",
+    "answers": [
+      "80 %"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_14735",
+    "question": "địa chỉ cửa hàng ở đâu ?",
+    "prediction": "6C Trần Quang Diệu, Phường 13, Quận 3, TP.HCM",
+    "answers": [
+      "6c trần quang diệu , phường 13 , quận 3 , tp . hcm"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_15291",
+    "question": "cửa hàng này kinh doanh dịch vụ gì ?",
+    "prediction": "Dinh dưỡng",
+    "answers": [
+      "nhà hàng"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_15385",
+    "question": "cửa hàng này bán sản phẩm gì ?",
+    "prediction": "Bò kho, bò bê, tai, nam, gấu, bò viễn.",
+    "answers": [
+      "phở bò - bò kho"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_17624",
+    "question": "sản phẩm ở đây có ưu đãi gì ?",
+    "prediction": "Sản phẩm có ưu đãi 8.000 đồng.",
+    "answers": [
+      "mua 2 gói tặng 1 gói"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_17875",
+    "question": "cửa hàng này chuyên làm gì ?",
+    "prediction": "Chuyên cung cấp các thiết bị nuôi nhỏ giọt, thiết bị phụ súng, phun mưa công nghệ cao.",
+    "answers": [
+      "cung cấp các thiết bị tưới nhỏ giọt thiết bị phun sương - phun mưa công nghệ cao"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_18344",
+    "question": "chén trứng được bán với giá bao nhiêu ?",
+    "prediction": "5K",
+    "answers": [
+      "5k"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_18348",
+    "question": "một phần tái + gân ở đây có giá bao nhiêu ?",
+    "prediction": "30K",
+    "answers": [
+      "30k"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_22184",
+    "question": "nội dung chính của tấm poster vinmart này là gì ?",
+    "prediction": "Tuyển dụng Phỏng Vấn Online - Bái Bài Covid.",
+    "answers": [
+      "tuyển dụng"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_22262",
+    "question": "địa chỉ trang web của thế giới ad là gì ?",
+    "prediction": "https://thegioiad.com",
+    "answers": [
+      "https : / / thegioiad . com"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_22274",
+    "question": "tấm ảnh này của trang web nào ?",
+    "prediction": "diachiamthuc.vn",
+    "answers": [
+      "diachiamthuc . vn"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_23263",
+    "question": "cửa hàng có tên là gì ?",
+    "prediction": "KING BBQ DELI",
+    "answers": [
+      "king bbq"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_23863",
+    "question": "địa chỉ ghi trên quán là gì ?",
+    "prediction": "Đường Thạnh Xuân 21, KP 5, P. Thạnh Xuân, Q. 12",
+    "answers": [
+      "99 / 18 / 5 / 38 đường thanh xuân 21 , kp 5 , p . thạnh xuân , q . 12"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_23865",
+    "question": "quận được ghi trên bảng là gì ?",
+    "prediction": "Q. 12",
+    "answers": [
+      "q . 12"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_23977",
+    "question": "nội dung chính của tấm ảnh này là gì ?",
+    "prediction": "Nội dung chính của tấm ảnh này là giới thiệu về siêu thị ở Việt Nam tại Hàn Quốc.",
+    "answers": [
+      "siêu thị việt nam tại hàn quốc"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_26839",
+    "question": "biển hiệu của nhà hàng này được thi công bởi ai ?",
+    "prediction": "Nhà Thầu Thi Công Bảng Hiệu Cheap Adver.",
+    "answers": [
+      "nhà thầu"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_26945",
+    "question": "những đứa trẻ bản lĩnh thì như thế nào ?",
+    "prediction": "Những đứa trẻ bản lĩnh thường có khả năng tự nhiên mà có, không cần sự giúp đỡ của người khác để hoàn thành công việc.",
+    "answers": [
+      "không tự nhiên mà có"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_29047",
+    "question": "thành phố cách địa điểm này 87km là thành phố gì ?",
+    "prediction": "Đồng Hà City",
+    "answers": [
+      "tp . đông hà"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_29777",
+    "question": "dòng chữ chính giữa có nội dung là gì ?",
+    "prediction": "Phuc Long",
+    "answers": [
+      "co . op"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_30176",
+    "question": "ai là tác giả của cuốn sách này ?",
+    "prediction": "Nguyễn Thị Kim Dung, Hồ Thị Văn Anh",
+    "answers": [
+      "nguyễn thị kim dung hồ thị vân anh"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_31375",
+    "question": "tiệm tuấn đạt có số điện thoại nào ?",
+    "prediction": "0987654321",
+    "answers": [
+      "0903 . 016 . 329"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_31428",
+    "question": "người đàn ông đang cầm cuốn sách của quầy sách được bán như thế nào ?",
+    "prediction": "Đang đọc",
+    "answers": [
+      "đồng giá"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_32017",
+    "question": "dòng chữ màu xanh lá ở bên phải bức ảnh có nội dung gì ?",
+    "prediction": "Để trả lời câu hỏi này, tôi cần biết cụ thể dòng chữ màu xanh lá ở bên phải bức ảnh đó là gì. Bạn có thể c",
+    "answers": [
+      "kéo ra"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_33937",
+    "question": "gạo st 20 xuất xứ ở đâu ?",
+    "prediction": "Sóc Trăng",
+    "answers": [
+      "sóc trăng"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_34314",
+    "question": "ảnh lấy nguồn từ đâu ?",
+    "prediction": "VIETNET",
+    "answers": [
+      "vietnet"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_34810",
+    "question": "chữ màu trắng bên dưới góc trái là gì ?",
+    "prediction": "XƯƠNGMAYSỊ",
+    "answers": [
+      "xưởngmaysỉ"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_35375",
+    "question": "hanatech chuyên về mặt hàng nào ?",
+    "prediction": "Mặt hàng chính của Hanatech là thiết bị điện tử và công nghệ thông tin.",
+    "answers": [
+      "kệ siêu thị việt nam"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_35708",
+    "question": "bệnh viện a được quản lý bởi tổ chức nào ?",
+    "prediction": "SỞ Y TẾ THÀNH PHỐ HỒ CHÍ MINH",
+    "answers": [
+      "sở y tế thái nguyên"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_36888",
+    "question": "nhà thiết kế cho trang phục tên gì ?",
+    "prediction": "Thúy Nguyễn",
+    "answers": [
+      "thủy nguyễn"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_36998",
+    "question": "bức ảnh này lấy nguồn từ đâu ?",
+    "prediction": "Toquoc",
+    "answers": [
+      "tổ quốc"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_37776",
+    "question": "ngày bắt đầu diễn ra chương trình khai trương của quán mì vịt tiềm là ?",
+    "prediction": "13/11",
+    "answers": [
+      "13 / 11"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_38768",
+    "question": "đây là báo cáo gì ?",
+    "prediction": "Báo cáo hỗ trợ kỹ thuật về đánh giá đô thị hóa ở Việt Nam.",
+    "answers": [
+      "hỗ trợ kỹ thuật"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_38990",
+    "question": "chương trình thời sự đang nói về vấn để gì ?",
+    "prediction": "Chương trình thời sự đang nói về vấn đề doanh thu tổ hợp tác.",
+    "answers": [
+      "doanh thu tổ hợp tác"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_39023",
+    "question": "budweiser là gì ?",
+    "prediction": "Budweiser là một thương hiệu bia nổi tiếng của Đức.",
+    "answers": [
+      "king of beers"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_40025",
+    "question": "mr . thai là ai ?",
+    "prediction": "Mr. Thai là một giáo viên tiếng Anh với bằng Thạc sĩ giáo dục TESOL tại Mỹ và hơn 10 năm kinh nghiệm giảng",
+    "answers": [
+      "thạc sĩ giáo dục tesol tại mỹ"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_40196",
+    "question": "tên của đoạn tin tức đang được chiếu ?",
+    "prediction": "TIN TỨC VOV TV",
+    "answers": [
+      "phố cổ hà nội qua góc nhìn của nhiếp ảnh gia"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_41189",
+    "question": "cty cổ phần năng lượng đông á cần tuyển bao nhiêu điều phối bán hàng có nghiệp vụ kế toán ?",
+    "prediction": "2",
+    "answers": [
+      "2"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_42238",
+    "question": "xe tăng bazeille bị đại đội nào tiêu diệt ?",
+    "prediction": "Đại đội 674",
+    "answers": [
+      "đại đội 674"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_42346",
+    "question": "quán ăn này có tên là gì ?",
+    "prediction": "Quán ăn này có tên là \"Sal Chicken\".",
+    "answers": [
+      "ssail chicken"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_44902",
+    "question": "cần liên hệ ms lý thì gọi cho số nào ?",
+    "prediction": "0845608007",
+    "answers": [
+      "08 . 456 . 007"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_45949",
+    "question": "giờ mở cửa được ghi là mấy giờ ?",
+    "prediction": "05h30",
+    "answers": [
+      "05h30"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_46724",
+    "question": "bản đồ này của tỉnh nào ?",
+    "prediction": "Tây Ninh",
+    "answers": [
+      "tây ninh"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_47952",
+    "question": "bức thư trong ảnh là gửi cho ai ?",
+    "prediction": "Vợ yêu ạ",
+    "answers": [
+      "vợ yêu"
+    ],
+    "question_type": "unknown"
+  },
+  {
+    "question_id": "test_50051",
+    "question": "quán phố đêm có chương trình đặc biệt gì ?",
+    "prediction": "Chương trình đặc biệt: 10 ngày tri ân khách hàng.",
+    "answers": [
+      "với các món ăn đặc sản 3 miền"
+    ],
+    "question_type": "unknown"
+  }
+]
