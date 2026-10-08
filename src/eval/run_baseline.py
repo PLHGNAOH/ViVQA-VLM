@@ -150,14 +150,30 @@ def prepare_images(dataset: str, drive_root: str) -> str:
 SIGNATURE_FILE = "run_signature.json"
 
 
-def run_signature(cfg: Dict[str, Any], data_sha256: str, limit: Optional[int], chunk: int) -> Dict[str, Any]:
-    """Dấu vân tay của mọi thứ ảnh hưởng tới dự đoán. Khác chữ ký = run khác."""
+def adapter_fingerprint(adapter_dir: str) -> Dict[str, Any]:
+    """Định danh adapter LoRA bằng nội dung (sha256 trọng số + config), không bằng đường dẫn."""
+    w = os.path.join(adapter_dir, "adapter_model.safetensors")
+    c = os.path.join(adapter_dir, "adapter_config.json")
+    if not (os.path.isfile(w) and os.path.isfile(c)):
+        raise FileNotFoundError(f"{adapter_dir} thiếu adapter_model.safetensors / adapter_config.json")
+    return {"weights_sha256": _sha256(w), "config_sha256": _sha256(c),
+            "weights_mb": round(os.path.getsize(w) / 1e6, 2)}
+
+
+def run_signature(cfg: Dict[str, Any], data_sha256: str, limit: Optional[int], chunk: int,
+                  adapter: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Dấu vân tay của mọi thứ ảnh hưởng tới dự đoán. Khác chữ ký = run khác.
+
+    adapter=None (zero-shot) -> payload GIỮ NGUYÊN như W07 B1, nên chữ ký B1 không đổi.
+    """
     c = copy.deepcopy(cfg)
     c.get("run", {}).pop("name", None)
     c.get("data", {}).pop("test_path", None)        # đường dẫn tuyệt đối đổi theo máy; nội dung đã có sha256
     payload = {"model": c.get("model"), "quantization": c.get("quantization"),
                "prompting": c.get("prompting"), "eval": c.get("eval"),
                "data_sha256": data_sha256, "limit": limit, "chunk": chunk}
+    if adapter is not None:
+        payload["adapter"] = {k: adapter[k] for k in ("weights_sha256", "config_sha256")}
     digest = hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
     return {"sha256": digest, **payload}
 
@@ -266,6 +282,7 @@ def run(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         data_file: Optional[str] = None, out_root: Optional[str] = None,
         config: str = os.path.join(REPO_ROOT, "configs/qwen_lora.yaml"), mode: Optional[str] = None,
         chunk: int = 500, image_dir: Optional[str] = None, limit: Optional[int] = None,
+        adapter: Optional[str] = None,
         model=None, processor=None, generate_fn: Callable = generate_answer,
         check_config: bool = True) -> Dict[str, Any]:
     """Toàn bộ quy trình. model/processor/generate_fn truyền vào được để kiểm thử offline."""
@@ -289,17 +306,28 @@ def run(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         raise FileNotFoundError(f"{len(missing)} ảnh thiếu, vd {missing[0]}")
     _log(f"   {len(samples)} mẫu, ảnh đủ")
     data_sha = _sha256(data_file)
-    check_or_write_signature(out_dir, run_signature(cfg, data_sha, limit, chunk))
+    ad_info = None
+    if adapter:
+        ad_info = {"path": adapter, **adapter_fingerprint(adapter)}
+        _log(f"   adapter: {adapter} ({ad_info['weights_mb']} MB, sha256 {ad_info['weights_sha256'][:12]}…)")
+    check_or_write_signature(out_dir, run_signature(cfg, data_sha, limit, chunk, adapter=ad_info))
 
     if model is None:
         _log("   nạp model...")
         model, processor = load_model(cfg)
+        if adapter:
+            # Cùng model gốc 4-bit như B1, chỉ GẮN THÊM LoRA đã train -> khác B1 đúng một biến
+            from peft import PeftModel
+            model = PeftModel.from_pretrained(model, adapter)
+            model.eval()
+            _log("   đã gắn adapter LoRA (PEFT, chỉ suy luận)")
     n_chunks = run_chunks(samples, cfg, out_dir, chunk, model, processor, generate_fn)
     result = merge_and_report(samples, cfg, out_dir, n_chunks, extra_meta={
         "dataset": dataset,
         "data_file": os.path.relpath(data_file, drive_root) if data_file.startswith(drive_root) else data_file,
         "data_file_sha256": data_sha,
         "limit": limit, "chunk_size": chunk,
+        "adapter": ad_info,
     })
     mt = result["metrics"]
     f1_txt = f" | token-F1 (phụ)={mt['token_f1']:.4f}" if "token_f1" in mt else ""
@@ -407,6 +435,26 @@ def _selftest() -> None:
                 raise AssertionError(f"không chặn config sai ({new})")
             except ValueError:
                 pass
+    # adapter: chữ ký zero-shot giữ nguyên như W07 B1; có adapter -> chữ ký khác; thiếu file -> báo lỗi
+    import tempfile as _tf
+    base_cfg = {"run": {"name": "x"}, "model": {"m": 1}, "quantization": {"q": 1},
+                "prompting": {"mode": "zero_shot"}, "eval": {"e": 1}}
+    s0 = run_signature(base_cfg, "sha", None, 500)
+    assert "adapter" not in s0 and s0 == run_signature(base_cfg, "sha", None, 500, adapter=None)
+    with _tf.TemporaryDirectory() as ad:
+        try:
+            adapter_fingerprint(ad)
+            raise AssertionError("không báo thiếu adapter")
+        except FileNotFoundError:
+            pass
+        open(os.path.join(ad, "adapter_model.safetensors"), "wb").write(b"w1")
+        open(os.path.join(ad, "adapter_config.json"), "w").write("{}")
+        f1 = adapter_fingerprint(ad)
+        s1 = run_signature(base_cfg, "sha", None, 500, adapter={"path": "/x", **f1})
+        open(os.path.join(ad, "adapter_model.safetensors"), "wb").write(b"w2")
+        s2 = run_signature(base_cfg, "sha", None, 500, adapter={"path": "/y", **adapter_fingerprint(ad)})
+        assert s1["sha256"] != s0["sha256"] and s1["sha256"] != s2["sha256"], "adapter phải đổi chữ ký"
+    _log("adapter signature OK")
     _log("SELFTEST OK")
 
 
@@ -421,6 +469,8 @@ def main() -> None:
     ap.add_argument("--mode", default=None, help="Ghi đè prompting.mode (zero_shot, ocr, ...)")
     ap.add_argument("--chunk", type=int, default=500)
     ap.add_argument("--limit", type=int, default=None, help="Chỉ lấy N mẫu đầu (thử nhanh)")
+    ap.add_argument("--adapter", default=None,
+                    help="Thư mục adapter LoRA (vd <drive>/adapters/<run>/epoch_1) -> đánh giá B2; bỏ trống = zero-shot")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
     if a.selftest:
@@ -429,7 +479,7 @@ def main() -> None:
     if not a.dataset or not a.run_name:
         ap.error("cần --dataset và --run_name (trừ khi --selftest)")
     run(a.dataset, a.run_name, drive_root=a.drive_root, data_file=a.data_file, out_root=a.out_root,
-        config=a.config, mode=a.mode, chunk=a.chunk, limit=a.limit)
+        config=a.config, mode=a.mode, chunk=a.chunk, limit=a.limit, adapter=a.adapter)
 
 
 if __name__ == "__main__":

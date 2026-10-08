@@ -200,7 +200,8 @@ def filter_trainable(samples: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]
 def load_config(path: str, max_pixels: Optional[int] = None, dtype: Optional[str] = None,
                 mode: Optional[str] = None, batch_size: Optional[int] = None,
                 grad_accum: Optional[int] = None,
-                grad_checkpointing: Optional[bool] = None) -> Dict[str, Any]:
+                grad_checkpointing: Optional[bool] = None,
+                epochs: Optional[float] = None) -> Dict[str, Any]:
     """Đọc config + cho phép ghi đè vài tham số qua CLI (phục vụ ablation, không sửa file gốc)."""
     import yaml
     with open(path, encoding="utf-8") as fp:
@@ -219,6 +220,10 @@ def load_config(path: str, max_pixels: Optional[int] = None, dtype: Optional[str
         cfg["training"]["gradient_accumulation_steps"] = int(grad_accum)
     if grad_checkpointing is not None:
         cfg["training"]["gradient_checkpointing"] = bool(grad_checkpointing)
+    # Số epoch quyết định CẢ lịch learning rate (warmup + decay trải trên toàn bộ step),
+    # nên 1 epoch của lịch 3 epoch KHÁC một run 1 epoch -> ghi đè ở đây, có trong chữ ký.
+    if epochs is not None:
+        cfg["training"]["epochs"] = float(epochs)
     return cfg
 
 
@@ -359,7 +364,8 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
           mode: Optional[str] = None, image_dir: Optional[str] = None,
           batch_size: Optional[int] = None, grad_accum: Optional[int] = None,
           grad_checkpointing: Optional[bool] = None, save_steps: Optional[int] = None,
-          debug_crash_at_step: Optional[int] = None) -> Dict[str, Any]:
+          debug_crash_at_step: Optional[int] = None,
+          epochs: Optional[float] = None) -> Dict[str, Any]:
     """
     Nạp data -> nạp model + LoRA -> train -> lưu adapter + train_log.json.
 
@@ -378,7 +384,7 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
 
     cfg = copy.deepcopy(load_config(config, max_pixels=max_pixels, dtype=dtype, mode=mode,
                                     batch_size=batch_size, grad_accum=grad_accum,
-                                    grad_checkpointing=grad_checkpointing))
+                                    grad_checkpointing=grad_checkpointing, epochs=epochs))
     cfg["run"]["name"] = run_name
     seed = cfg["run"]["seed"]
     set_seed(seed)
@@ -669,6 +675,14 @@ def _selftest() -> None:
             except ValueError:
                 pass
 
+    # --epochs ghi đè lịch: B2 sơ bộ 1 epoch ViVQA = ceil(10.799 / 16) = 675 step; có trong chữ ký
+    cfg1 = load_config(os.path.join(REPO_ROOT, "configs/qwen_lora.yaml"), epochs=1)
+    assert cfg1["training"]["epochs"] == 1.0
+    assert plan_schedule(10799, 2, 8, 1, 0.03)["total_steps"] == 675, plan_schedule(10799, 2, 8, 1, 0.03)
+    cfg3 = load_config(os.path.join(REPO_ROOT, "configs/qwen_lora.yaml"))
+    assert run_signature(cfg1, "sha", 10799, None, None)["sha256"] != run_signature(cfg3, "sha", 10799, None, None)["sha256"]
+    _log("epochs override OK")
+
     # loss sau resume: transformers chia tổng loss 7 step cho global_step 12 -> phải hiệu chỉnh
     sl = session_losses(0.8226, 12, 7, [{"loss": 1.6}, {"loss": "1.451"}, {"train_loss": 0.8}])
     assert abs(sl["final_loss"] - 1.4102) < 1e-3 and sl["last_logged_loss"] == 1.451, sl
@@ -700,6 +714,8 @@ def main() -> None:
                     help="Ghi đè training.save_steps; với smoke run (--max_steps) thì BẬT lưu checkpoint")
     ap.add_argument("--debug_crash_at_step", type=int, default=None,
                     help="CHỈ để kiểm thử resume: giả lập Colab đứt tại step N")
+    ap.add_argument("--epochs", type=float, default=None,
+                    help="Ghi đè training.epochs (vd 1 cho B2 sơ bộ); đổi cả lịch learning rate")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
 
@@ -713,7 +729,7 @@ def main() -> None:
           limit=a.limit, max_steps=a.max_steps, max_pixels=a.max_pixels,
           dtype=a.dtype, mode=a.mode, batch_size=a.batch_size, grad_accum=a.grad_accum,
           grad_checkpointing=None if a.grad_checkpointing is None else (a.grad_checkpointing == "on"),
-          save_steps=a.save_steps, debug_crash_at_step=a.debug_crash_at_step)
+          save_steps=a.save_steps, debug_crash_at_step=a.debug_crash_at_step, epochs=a.epochs)
 
 
 if __name__ == "__main__":
