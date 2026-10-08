@@ -250,6 +250,23 @@ def find_resume_checkpoint(ckpt_dir: str) -> Optional[str]:
     return best
 
 
+def session_losses(hf_train_loss: float, global_step: int, session_steps: int,
+                   log_history: List[Dict[str, Any]]) -> Dict[str, float]:
+    """Loss báo cáo đúng cả khi chạy tiếp từ checkpoint.
+
+    transformers 5.x tính train_loss = (tổng loss các step CỦA PHIÊN NÀY) / global_step,
+    mà global_step gồm cả các step đã chạy trước khi resume -> loss bị kéo thấp
+    (vd. 7 step/12 -> thấp ~42%). Hiệu chỉnh: nhân lại global_step / session_steps.
+    Không resume thì session_steps == global_step -> giữ nguyên giá trị cũ.
+    """
+    nan = float("nan")
+    mean = (float(hf_train_loss) * global_step / session_steps) if session_steps else nan
+    logged = [float(h["loss"]) for h in (log_history or []) if "loss" in h]
+    return {"final_loss": round(mean, 4),
+            "last_logged_loss": round(logged[-1], 4) if logged else nan,
+            "hf_train_loss_raw": round(float(hf_train_loss), 4)}
+
+
 def run_signature(cfg: Dict[str, Any], data_sha256: str, n_samples: int,
                   limit: Optional[int], max_steps: Optional[int]) -> Dict[str, Any]:
     """Dấu vân tay của MỘT run: mọi thứ ảnh hưởng phép tính. Khác chữ ký = run khác."""
@@ -529,7 +546,8 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
             "global_step": int(trainer.state.global_step),
             "sec_per_step": round(result.metrics.get("train_runtime", elapsed) / max(steps, 1), 3),
             "peak_vram_gb": round(peak_vram_gb, 2),
-            "final_loss": round(float(result.metrics.get("train_loss", float("nan"))), 4),
+            **session_losses(result.metrics.get("train_loss", float("nan")),
+                             int(trainer.state.global_step), steps, trainer.state.log_history),
         },
         "adapter_dir": adapter_dir,
     }
@@ -650,6 +668,12 @@ def _selftest() -> None:
                 raise AssertionError("không chặn chạy tiếp với cấu hình/dữ liệu khác")
             except ValueError:
                 pass
+
+    # loss sau resume: transformers chia tổng loss 7 step cho global_step 12 -> phải hiệu chỉnh
+    sl = session_losses(0.8226, 12, 7, [{"loss": 1.6}, {"loss": "1.451"}, {"train_loss": 0.8}])
+    assert abs(sl["final_loss"] - 1.4102) < 1e-3 and sl["last_logged_loss"] == 1.451, sl
+    assert session_losses(1.2, 30, 30, [])["final_loss"] == 1.2   # không resume -> giữ nguyên
+    _log("session_losses OK")
 
     _log("SELFTEST OK")
 
