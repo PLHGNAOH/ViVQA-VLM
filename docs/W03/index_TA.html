@@ -485,7 +485,7 @@ footer {
 <!-- ====== HERO ====== -->
 <header class="hero" id="hero">
   <div class="hero-content">
-    <p class="eyebrow">Review 1 · Updated with reviewer feedback + W4–W6 results · Oct 6, 2026</p>
+    <p class="eyebrow">Review 1 · Updated after reviewer feedback · Oct 6, 2026</p>
     <h1 class="hero-title">ViVQA-VLM</h1>
     <p class="hero-thesis">Efficient Vietnamese Visual Question Answering<br>using Vision-Language Models</p>
     <div class="chips">
@@ -531,7 +531,7 @@ footer {
           <tr><td><strong>Input 1 — Image</strong></td><td>RGB image, resized under the <code>max_pixels</code> limit</td><td>Everyday images (MS COCO source), not focused on text</td><td>Images with Vietnamese text: signs, menus, packaging…</td></tr>
           <tr><td><strong>Input 2 — Question</strong></td><td>Vietnamese text, Unicode NFC normalization</td><td>Short questions, semi-automatically generated</td><td>Human-written, 9.59 words on average</td></tr>
           <tr><td><strong>Output — Answer</strong></td><td>Vietnamese text with diacritics, free-form (generative)</td><td>99.83% of answers ≤ 3 words</td><td>4.18 words on average; the answer is a text span present in the image</td></tr>
-          <tr><td><strong>Evaluation</strong></td><td>Compared with the ground-truth answer after the same normalization step</td><td>EM · VQA-Acc · ANLS</td><td>EM · VQA-Acc · ANLS (+ auxiliary F1)</td></tr>
+          <tr><td><strong>Evaluation</strong></td><td>Compared with the ground-truth answer after the same normalization step</td><td>EM · VQA-Acc</td><td>ANLS · EM</td></tr>
         </tbody>
       </table>
     </div>
@@ -542,13 +542,12 @@ footer {
         <div class="card-tag">V1</div>
         <div class="card-title">Reading diacritic-bearing text in images</div>
         <p>Diacritics and diacritic-bearing letters (ă, â, ê, ô, ơ, ư, đ) are tiny strokes in an image. If the model misreads or drops a diacritic, the meaning changes (“má” (cheek) ≠ “mà” (but)). This is a perception error at the pixel level and cannot be fixed by text normalization.</p>
-        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Our evidence (W5, ViTextVQA 2,000 questions): purely Latin-script answers reach EM 0.394, while Vietnamese answers with diacritics reach only 0.224; 45 questions (2.3%) have the right letters but the wrong diacritics (e.g. “BUT DO” → “bút đỏ” (red pen)). Literature: removing diacritics lowers the F1 of every model on ViTextVQA (Nguyen et al., §7.1).</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Evidence: on ViTextVQA, removing diacritics lowers the F1 of every baseline model (Nguyen et al., ViTextVQA, §7.1).</p>
       </div>
       <div class="card card--teal">
         <div class="card-tag">V2</div>
         <div class="card-title">Wrong-language or wrong-format answers</div>
         <p>VLMs pretrained mainly on English/Chinese tend to answer in English, mix English and Vietnamese (code-switching), or answer verbosely. In that case EM = 0 even though the model understood the content. For English this issue is almost absent because it is the model's primary language.</p>
-        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Our evidence (W5): ViVQA contains at least 90 answers in English (“giraffe” 32, “kitchen” 24, “bus” 19…); in ViTextVQA, 19.6% of answers contain extra words (over-generation) (“Nhà thuốc Long Châu” (Long Châu Pharmacy) → “long châu”), and many echo the question instead of answering.</p>
       </div>
       <div class="card card--teal">
         <div class="card-tag">V3</div>
@@ -560,7 +559,6 @@ footer {
         <div class="card-tag">V4</div>
         <div class="card-title">Hallucination</div>
         <p>The model answers fluently but with content that is not in the image (invented objects or invented text). There is no POPE-style hallucination evaluation for Vietnamese VQA yet (G4).</p>
-        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Our evidence (W5, ViVQA): the model invents the detail “Điện thoại Nokia 6310i” (Nokia 6310i phone) and answers “bò cạp” (scorpion) when the image shows a bird; it guesses “đỏ” (red) 117 times while the ground-truth answer “đỏ” occurs only 75 times.</p>
       </div>
     </div>
 
@@ -571,7 +569,7 @@ footer {
         <ul>
           <li>Unicode NFC normalization of questions and answers</li>
           <li>Lowercasing, removing extra punctuation, collapsing whitespace</li>
-          <li>Apply the same normalization function to ground-truth answers and model outputs before computing metrics; the scoring rules are fixed <strong>before</strong> running the test (commit <code>37da80a</code>)</li>
+          <li>Apply the same normalization function to ground-truth answers and model outputs before computing metrics</li>
           <li>Resize images by <code>max_pixels</code></li>
         </ul>
       </div>
@@ -585,7 +583,7 @@ footer {
         </ul>
       </div>
     </div>
-    <p class="note reveal">Official reference points (W5, zero-shot Qwen2.5-VL-3B): ViVQA EM 0.225 · ANLS 0.288 (3,001 questions); ViTextVQA EM 0.285 · ANLS 0.468 (2,000 questions, seed 42) — see Part 07.</p>
+    <p class="note reveal">Actual reference point: zero-shot Qwen2.5-VL-3B reaches EM 38.3% · ANLS 55.9% on ViTextVQA (mirror, n=300, seed 42) — see Part 07.</p>
   </div>
 </section>
 
@@ -661,7 +659,7 @@ footer {
 
     <div class="card card--amber reveal" style="margin-top:24px">
       <div class="card-title">Comparison caveats</div>
-      <p>The reference points above use different metrics and setups (token-level F1; classification accuracy over a fixed label set), so they serve only to <strong>position</strong> the results and are not placed next to the team's numbers as direct comparisons. The team has computed token-level F1 as an auxiliary metric: the team's zero-shot baseline reaches F1 0.530 on the 2,000-question subset — for reference only, because the evaluation set differs (subset vs. full test set) and so does the normalization.</p>
+      <p>The reference points above use different metrics and setups (token-level F1; classification accuracy over a fixed label set), so they serve only to <strong>position</strong> the results and are not placed next to the team's numbers as direct comparisons. The team also computes token-level F1 as an auxiliary metric to cross-check against the ViTextVQA table.</p>
     </div>
 
     <h3 class="sub-h reveal">What the team takes from prior work</h3>
@@ -741,7 +739,7 @@ footer {
         <li><strong>Shared adapter vs. a separate adapter per dataset:</strong> optional, done only if time permits.</li>
       </ul>
     </div>
-    <p class="note reveal">The “zero-shot” reference in H1–H4 is the baseline re-run under the frozen configuration at W7 (Part 07), not the W4 figure. Mapping to the Review 1 version: H1 → H1 · H6 → H2 · H7 → H3 · hallucination hypothesis → H4.</p>
+    <p class="note reveal">Mapping to the Review 1 version: H1 → H1 · H6 → H2 · H7 → H3 · hallucination hypothesis → H4.</p>
   </div>
 </section>
 
@@ -801,46 +799,41 @@ footer {
 
     <!-- ViTextVQA Stats -->
     <h3 style="font-family:var(--serif);font-size:1.3rem;font-weight:600;color:var(--ink);margin:48px 0 8px" class="reveal">
-      ViTextVQA <span style="font-family:var(--mono);font-size:.78rem;color:var(--muted);font-weight:400">HF minhquan6203/ViTextVQA — official release, CC BY-NC 3.0 (Nguyen et al., 2024)</span>
+      ViTextVQA <span style="font-family:var(--mono);font-size:.78rem;color:var(--muted);font-weight:400">HF nhonhoccode/ViTextVQA (Nguyen et al., 2024)</span>
     </h3>
-    <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 20px;" class="reveal">Size: 16,762 images / 50,342 QA (7:1:2 split) — matches the paper, all images present (0 missing)</p>
+    <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 20px;" class="reveal">Original size (per the paper): 16,762 images / 50,342 QA (7:1:2 split ratio)</p>
     <div class="stat-grid reveal">
       <div class="stat">
         <div class="stat-number">50,342</div>
         <div class="stat-label">QA pairs</div>
-        <div class="stat-source">official repo</div>
+        <div class="stat-source">per the paper</div>
       </div>
       <div class="stat">
         <div class="stat-number">16,762</div>
         <div class="stat-label">Images</div>
-        <div class="stat-source">ViTextVQA_images.zip</div>
+        <div class="stat-source">per the paper</div>
       </div>
       <div class="stat">
         <div class="stat-number">35,159</div>
         <div class="stat-label">Train</div>
-        <div class="stat-source">11,733 images</div>
+        <div class="stat-source">training split</div>
       </div>
-      <div class="stat">
-        <div class="stat-number">5,155</div>
+      <div class="stat" style="border-style: dashed; background: var(--wash);">
+        <div class="stat-number">?</div>
         <div class="stat-label">Dev</div>
-        <div class="stat-source">1,676 images</div>
+        <div class="stat-source">dev.json — to be integrated</div>
       </div>
       <div class="stat">
         <div class="stat-number">10,028</div>
         <div class="stat-label">Test</div>
-        <div class="stat-source">3,353 images · test_gt.json</div>
-      </div>
-      <div class="stat">
-        <div class="stat-number">2,000</div>
-        <div class="stat-label">Test subset</div>
-        <div class="stat-source">seed 42 · used for reporting</div>
+        <div class="stat-source">test split</div>
       </div>
     </div>
 
     <div class="card card--amber reveal" style="margin-top:32px">
-      <div class="card-title">Official data source &amp; processing order</div>
+      <div class="card-title">Data source update &amp; processing order</div>
       <ul>
-        <li><strong>Switched (W5):</strong> ViTextVQA is taken from the official repo <code>minhquan6203/ViTextVQA</code> (HuggingFace, gated, CC BY-NC 3.0); test answers come from <code>ViTextVQA_test_gt.json</code> (<code>ViTextVQA_test.json</code> is only a Kaggle submission sample). ViVQA: 10,328/10,328 images present; ViTextVQA: 0 images missing. The mirror used in W4 was only a copy of the test set and is no longer used.</li>
+        <li>From W5, ViTextVQA moves to the official repo <code>minhquan6203/ViTextVQA</code> (HuggingFace, access-gated) instead of the mirror; test answers come from <code>ViTextVQA_test_gt.json</code>; evaluation uses a fixed subset of 2,000 questions (seed 42). Split figures will be updated from the official release.</li>
         <li>Processing order: preprocessing (NFC, normalization) applied identically to all samples → fixed splits → the test set is not used to choose configurations (tune the prompt on dev, report on test).</li>
       </ul>
     </div>
@@ -856,7 +849,7 @@ footer {
         <canvas id="chartQType" aria-label="Chart of the question type distribution"></canvas>
       </div>
       <div class="chart-card">
-        <h3>Train / Val (Dev) / Test Split</h3>
+        <h3>Train / Test Split (provided)</h3>
         <canvas id="chartSplit" aria-label="Chart of the train/val/test split for ViVQA and ViTextVQA"></canvas>
       </div>
     </div>
@@ -883,7 +876,7 @@ footer {
       <div class="pipe-step"><div class="pipe-num">Step 3</div><div class="pipe-title">OCR (ViTextVQA)</div><p>PaddleOCR / VietOCR → order TL-BR → cache as JSON per image, run once.</p></div>
       <div class="pipe-step"><div class="pipe-num">Step 4</div><div class="pipe-title">Fixed splits</div><p>Official split; 1,200 val samples held out from the ViVQA train set and a 2,000-question ViTextVQA test subset (seed 42).</p></div>
       <div class="pipe-step"><div class="pipe-num">Step 5</div><div class="pipe-title">Prompt builder</div><p>Combines image + question + OCR + Vietnamese instruction; truncates OCR to the token budget.</p></div>
-      <div class="pipe-step pipe-step--core"><div class="pipe-num">Step 6</div><div class="pipe-title">Qwen2.5-VL-3B 4-bit + LoRA</div><p>LoRA r=16 on q/k/v/o (0.196% of parameters).<br><strong>Training:</strong> loss on answer tokens only, only LoRA is updated.<br><strong>Inference:</strong> greedy decoding, small <code>max_new_tokens</code>.</p></div>
+      <div class="pipe-step pipe-step--core"><div class="pipe-num">Step 6</div><div class="pipe-title">Qwen2.5-VL-3B 4-bit + LoRA</div><p><strong>Training:</strong> loss on answer tokens only, only LoRA is updated.<br><strong>Inference:</strong> greedy decoding, small <code>max_new_tokens</code>.</p></div>
       <div class="pipe-step"><div class="pipe-num">Step 7</div><div class="pipe-title">Post-processing &amp; evaluation</div><p>Normalize outputs like the ground truth; EM, VQA-Acc, ANLS (+ auxiliary F1); POPE-vi; error analysis by question type and V1–V4; log seed, VRAM, time.</p></div>
       <div class="pipe-step"><div class="pipe-num">Step 8</div><div class="pipe-title">Web prototype</div><p>Gradio: upload an image, ask in Vietnamese, show the answer, confidence and OCR text.</p></div>
     </div>
@@ -900,15 +893,15 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
         <div class="card-title">How QLoRA works</div>
         <ol>
           <li><strong>Quantization:</strong> the model's base weights are compressed to 4-bit (NF4) and frozen — they are not updated.</li>
-          <li><strong>Attaching LoRA:</strong> each attention projection q/k/v/o in the 36 decoder layers gets two small matrices A·B of rank r=16. Only A and B are trained: <strong>7,372,800 parameters = 0.196%</strong> of the total (measured with PEFT in W6, matches the hand calculation).</li>
-          <li><strong>Result:</strong> an adapter of about 39 MB (measured in the W6 smoke run), attached to the base model at inference.</li>
+          <li><strong>Attaching LoRA:</strong> each linear layer gets two extra small matrices A·B (rank r). Only A and B are trained — a very small fraction of all parameters (the exact number is logged in every run).</li>
+          <li><strong>Result:</strong> an adapter of a few tens of MB, attached to the base model at inference.</li>
         </ol>
         <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Source: Hu et al., LoRA (ICLR 2022) · Dettmers et al., QLoRA (NeurIPS 2023).</p>
       </div>
       <div class="card card--teal">
         <div class="card-title">Why QLoRA only, not LoRA vs. QLoRA</div>
-        <p>The GPU through W6 is a T4 (Colab free), which does not support bf16. The estimated weights of a 3B model at 16-bit already take about 7–8 GB; at 4-bit about 2–3 GB. Measured in W6: QLoRA training with batch 2×8 and gradient checkpointing needs only <strong>5.93 GB peak VRAM</strong>.</p>
-        <p style="margin-top:10px">→ QLoRA is a <strong>prerequisite for running</strong> on the project's hardware, not a variable to compare. The only comparison used to draw conclusions is <strong>QLoRA vs. zero-shot/prompting on the same model, same configuration</strong>. Measuring 4-bit vs. no quantization in W7 is only for choosing the configuration (VRAM, speed), not a hypothesis.</p>
+        <p>The available GPU is a T4 16 GB (Colab), which does not support bf16. The estimated weights of a 3B model at 16-bit already take about 7–8 GB, before counting the activations of high-resolution images; at 4-bit about 2–3 GB.</p>
+        <p style="margin-top:10px">→ QLoRA is a <strong>prerequisite for running</strong> on the project's hardware, not a variable to compare. The only comparison used to draw conclusions is <strong>QLoRA vs. zero-shot/prompting on the same model</strong>.</p>
       </div>
     </div>
 
@@ -917,12 +910,12 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
       <table>
         <thead><tr><th>Component</th><th>Calculation / limit</th><th>Notes</th></tr></thead>
         <tbody>
-          <tr><td>Visual tokens</td><td>≈ (height/28) × (width/28) after resize; upper-bounded by <code>max_pixels</code></td><td>Measured (W6): 512 tokens (<code>max_pixels</code>=401,408) vs. 1,280 tokens (1,003,520) — 1,280 tokens raise ANLS with statistical significance (CI95 [+0.012, +0.066]) but EM does not differ (McNemar p=0.134), inference cost ×1.46. To be fixed in W7.</td></tr>
+          <tr><td>Visual tokens</td><td>≈ (height/28) × (width/28) after resize; upper-bounded by <code>max_pixels</code></td><td>Example: an 896×672 image → 32×24 = 768 tokens</td></tr>
           <tr><td>Question</td><td>A few dozen tokens</td><td>ViTextVQA: 9.59 words on average</td></tr>
           <tr><td>OCR text</td><td>Truncated to at most N tokens (configurable, logged in every run)</td><td>ViTextVQA only</td></tr>
           <tr><td>Instruction + template</td><td>Fixed</td><td>—</td></tr>
           <tr><td>Output</td><td>Small <code>max_new_tokens</code> (e.g. 32)</td><td>Answers average 4.18 words</td></tr>
-          <tr class="row-key"><td><strong>Total</strong></td><td>Estimated at about 0.8–1.8 thousand tokens / sample, depending on <code>max_pixels</code></td><td>Far below the model's context window</td></tr>
+          <tr class="row-key"><td><strong>Total</strong></td><td>Estimated at about 1,000–1,500 tokens / sample</td><td>Far below the model's context window</td></tr>
         </tbody>
       </table>
     </div>
@@ -959,40 +952,10 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
       </div>
     </div>
 
-    <h3 class="sub-h reveal">Results So Far (W4–W6)</h3>
-    <div class="table-wrap reveal">
-      <table>
-        <thead><tr><th>Dataset</th><th>Evaluation set</th><th>EM</th><th>VQA-Acc</th><th>ANLS</th><th>F1 (aux.)</th><th>Inference time</th></tr></thead>
-        <tbody>
-          <tr class="row-key"><td><strong>ViVQA</strong></td><td>Full test set, 3,001 questions</td><td class="num">0.225</td><td class="num">0.225</td><td class="num">0.288</td><td class="num">—</td><td class="num">0.84 s/sample</td></tr>
-          <tr class="row-key"><td><strong>ViTextVQA</strong></td><td>Test subset of 2,000 questions, seed 42</td><td class="num">0.285</td><td class="num">0.285</td><td class="num">0.468</td><td class="num">0.530</td><td class="num">1.35 s/sample</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="note reveal" style="margin-top:0;border-top:none;padding-top:0">Official W5 zero-shot baseline: Qwen2.5-VL-3B-Instruct, 4-bit NF4, fp16, <code>max_pixels</code>=512·28·28, greedy, Colab T4. VQA-Acc = EM because each question has only one ground-truth answer. The W4 figures (EM 38.3% · ANLS 55.9%) were measured on the mirror, 300 questions, with the old scoring rules — indicative results only, not used for comparison.</p>
-
-    <div class="card-grid card-grid-3 reveal" style="margin-top:24px">
-      <div class="card card--teal">
-        <div class="card-tag">W6 · DTYPE DIAGNOSIS</div>
-        <div class="card-title">fp16 causes errors on T4</div>
-        <p>23/2,000 ViTextVQA questions (1.15%) generate only “!!!!”. Re-run in fp32: 23 → 0 broken outputs, 0 control questions degraded → the cause is fp16 overflow.</p>
-      </div>
-      <div class="card card--teal">
-        <div class="card-tag">W6 · RESOLUTION</div>
-        <div class="card-title">512 vs. 1,280 visual tokens</div>
-        <p>1,280 tokens raise ANLS significantly (CI95 [+0.012, +0.066]), EM does not differ (p=0.134), inference cost ×1.46.</p>
-      </div>
-      <div class="card card--teal">
-        <div class="card-tag">W6 · QLORA SMOKE RUN</div>
-        <div class="card-title">Training pipeline runs end to end</div>
-        <p>200 ViVQA samples, 30 steps: loss 1.61 → 0.88; 0.196% of parameters trained. On T4 in fp32: 4.93 s/sample ≈ 14.77 hours/epoch → switch to L4 (has bf16).</p>
-      </div>
-    </div>
-
-    <div class="card card--highlight reveal" style="margin-top:24px">
-      <div class="card-tag">NEXT (W7)</div>
-      <div class="card-title">Config freeze → re-run the baseline once → preliminary QLoRA</div>
-      <p>The W5 baseline used fp16 (shown to cause errors), and switching the GPU from T4 to L4 changes the run conditions. So that QLoRA and the baseline differ in exactly one variable (adapter or not), the team fixes dtype, <code>max_pixels</code> and the quantization mode on L4, then re-runs the baseline on both datasets <strong>once</strong>. This re-run is the official reference to compare against QLoRA. The W6 smoke adapter has been deleted and is not used for reporting.</p>
+    <div class="card card--highlight reveal" style="margin-top:32px">
+      <div class="card-tag">REPRODUCED (W4)</div>
+      <div class="card-title">Zero-shot baseline: EM 38.3% · ANLS 55.9%</div>
+      <p>Qwen2.5-VL-3B on ViTextVQA (mirror), n=300, seed 42 — the reference point for comparing every improvement. Official numbers will be fixed on the official split.</p>
     </div>
 
   </div>
@@ -1091,6 +1054,7 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
         </div>
         <!-- W3 -->
         <div class="timeline-week" style="position:relative">
+          <span class="tl-now">← NOW</span>
           <span class="timeline-label">W3</span>
           <div class="timeline-bar tl-phase1">Dataset</div>
           <span class="tl-milestone">🔴 Review 1</span>
@@ -1111,8 +1075,7 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
           <div class="timeline-bar tl-phase2">Methods</div>
         </div>
         <!-- W7 -->
-        <div class="timeline-week" style="position:relative">
-          <span class="tl-now">← NOW</span>
+        <div class="timeline-week">
           <span class="timeline-label">W7</span>
           <div class="timeline-bar tl-phase2">Eval</div>
           <span class="tl-milestone">🟡 Review 2</span>
@@ -1170,11 +1133,11 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
           <tr><td class="num"><strong>W1</strong></td><td>Read the proposal, assign roles, choose 10 foundational papers</td><td>W1 Report, 15-week plan</td><td class="yes">✔</td></tr>
           <tr><td class="num"><strong>W2</strong></td><td>Literature Matrix; analysis of ViVQA / ViTextVQA (seed 42)</td><td>Literature_Matrix.md, Dataset_Analysis.md</td><td class="yes">✔</td></tr>
           <tr class="row-key"><td class="num"><strong>W3</strong></td><td>Research questions, hypotheses, baseline proposal; Review 1</td><td>Report + Review 1 slides</td><td class="yes">✔</td></tr>
-          <tr><td class="num"><strong>W4</strong></td><td>Colab environment; zero-shot Qwen2.5-VL-3B on the ViTextVQA mirror (300 questions)</td><td>Indicative result EM 38.3% · ANLS 55.9%; zero-shot notebook</td><td class="yes">✔</td></tr>
-          <tr><td class="num"><strong>W5</strong></td><td>Prepare ViVQA (all images) + official ViTextVQA; fix the scoring rules before testing; official zero-shot baseline on 2 datasets; preliminary error analysis</td><td>ViVQA EM 0.225 · ANLS 0.288; ViTextVQA EM 0.285 · ANLS 0.468; Baseline Report</td><td class="yes">✔</td></tr>
-          <tr><td class="num"><strong>W6</strong></td><td>fp16 diagnosis (23 → 0 broken outputs); ablation 512 vs. 1,280 tokens; build <code>train_qlora.py</code> + smoke run; Methodology (Report 4)</td><td>Ablation table; smoke log; R4 (Vietnamese version)</td><td class="yes">✔</td></tr>
-          <tr class="row-key"><td class="num"><strong>W7</strong></td><td>Colab Pro (L4): fix dtype, <code>max_pixels</code>, quantization → config freeze; re-run the baseline on 2 datasets; preliminary QLoRA evaluated on dev; Review 2</td><td>Frozen config; re-run baseline; preliminary QLoRA results; Review 2 slides</td><td class="yes"></td></tr>
-          <tr><td class="num"><strong>W8</strong></td><td>Full QLoRA on ViVQA; build the OCR pipeline (moved from W6); log VRAM, time, number of trained parameters</td><td>Adapter v1; experiments/W08_*</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W4</strong></td><td>Colab environment; zero-shot Qwen2.5-VL-3B on ViTextVQA (n=300)</td><td>EM 38.3 · ANLS 55.9; zero-shot notebook</td><td class="yes">✔</td></tr>
+          <tr><td class="num"><strong>W5</strong></td><td>Move ViTextVQA to the official repo; NFC preprocessing; fix the split and the 2,000-question test subset</td><td>Official data + split log</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W6</strong></td><td>Official zero-shot on 2 datasets; error taxonomy V1–V4; prior-work table; draw the pipeline</td><td>Official baseline table; Methodology (Report 4)</td><td class="yes"></td></tr>
+          <tr class="row-key"><td class="num"><strong>W7</strong></td><td>Review 2: baseline + proposed method + QLoRA pilot on a subset</td><td>Review 2 slides; pilot run log</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W8</strong></td><td>Full QLoRA on ViVQA; log VRAM, time, number of trained parameters</td><td>Adapter v1; experiments/W08_*</td><td class="yes"></td></tr>
           <tr><td class="num"><strong>W9</strong></td><td>OCR pipeline (PaddleOCR/VietOCR, TL-BR) + Vietnamese prompt; QLoRA on ViTextVQA</td><td>OCR cache; adapter v2</td><td class="yes"></td></tr>
           <tr><td class="num"><strong>W10</strong></td><td>Main runs: zero-shot / prompt / QLoRA / QLoRA + OCR on the same split, seed</td><td>Main results table</td><td class="yes"></td></tr>
           <tr><td class="num"><strong>W11</strong></td><td>Full evaluation with EM, VQA-Acc, ANLS (+ F1); POPE-vi hallucination</td><td>Metrics + hallucination report</td><td class="yes"></td></tr>
@@ -1212,14 +1175,7 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
             <td class="risk-high">High</td>
             <td>QLoRA 4-bit, 3B model</td>
             <td>Florence-2</td>
-            <td><span class="badge badge--teal" style="font-size:0.75rem">Mitigated: QLoRA training peaks at 5.93 GB VRAM</span></td>
-          </tr>
-          <tr>
-            <td>T4 has no bf16; fp16 overflows</td>
-            <td class="risk-high">High</td>
-            <td>Compute in fp32</td>
-            <td>Colab Pro L4 (bf16)</td>
-            <td><span class="badge badge--teal" style="font-size:0.75rem">Diagnosed in W6: 23 → 0 broken outputs</span></td>
+            <td><span class="badge badge--teal" style="font-size:0.75rem">Mitigated (3B runs on T4 at 4-bit)</span></td>
           </tr>
           <tr>
             <td>GPU / Colab interrupted</td>
@@ -1230,24 +1186,24 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
           </tr>
           <tr>
             <td>QLoRA training too slow</td>
-            <td class="risk-high">High</td>
+            <td class="risk-med">Medium</td>
             <td>Pilot subset, gradient accumulation</td>
-            <td>Colab Pro L4 (bf16)</td>
-            <td><span class="badge badge--amber" style="font-size:0.75rem">Measured: T4 fp32 ≈ 14.77 hours/epoch → switch to L4</span></td>
+            <td>Reduce rank</td>
+            <td>—</td>
           </tr>
           <tr>
             <td>Dataset / licence</td>
             <td class="risk-med">Medium</td>
             <td>Preprocessing, licence check</td>
-            <td>—</td>
-            <td><span class="badge badge--teal" style="font-size:0.75rem">Mitigated: both datasets from official sources, all images present</span></td>
+            <td>Another mirror</td>
+            <td><span class="badge badge--amber" style="font-size:0.75rem">Partial: ViVQA done; ViTextVQA still on the mirror</span></td>
           </tr>
           <tr>
             <td>Baseline hard to reproduce</td>
             <td class="risk-high">High</td>
             <td>Source repo, fixed seed</td>
             <td>Switch VLM</td>
-            <td><span class="badge badge--amber" style="font-size:0.75rem">Reproduced in W5; awaiting advisor confirmation + re-run under the W7 config</span></td>
+            <td><span class="badge badge--amber" style="font-size:0.75rem">Partial: reproduced on the mirror (official pending)</span></td>
           </tr>
           <tr>
             <td>Poor OCR quality</td>
@@ -1295,7 +1251,7 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
       </div>
       <div class="card card--teal">
         <div class="card-title">Runtime: Google Colab</div>
-        <p>Colab free (T4) through W6; Colab Pro (L4, with bf16) is planned from W7 for training. Mount Google Drive; log GPU, dtype and commit for every run.</p>
+        <p>Free tier for light experiments, Pro for training; mount Google Drive; log the GPU for every run.</p>
       </div>
     </div>
   </div>
@@ -1530,7 +1486,7 @@ try {
     new Chart(elSplit, {
       type: 'bar',
       data: {
-        labels: ['ViVQA', 'ViTextVQA'],
+        labels: ['ViVQA (provided)', 'ViTextVQA (provided)'],
         datasets: [
           {
             label: 'Train',
@@ -1540,8 +1496,8 @@ try {
             barPercentage: 0.6,
           },
           {
-            label: 'Val / Dev',
-            data: [1200, 5155],
+            label: 'Val',
+            data: [1200, 0],
             backgroundColor: muted,
             borderRadius: 6,
             barPercentage: 0.6,

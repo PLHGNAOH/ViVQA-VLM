@@ -454,37 +454,6 @@ footer {
   text-align: center; padding: 32px 24px;
   font-family: var(--mono); font-size: .78rem; color: var(--muted);
 }
-
-/* ======== W07-BASELINE: SƠ ĐỒ BASELINE + NHIỄU DỮ LIỆU ======== */
-:root { --bl-red: #B42318; --bl-redt: #FDECEA; }
-@media (prefers-color-scheme: dark) { :root { --bl-red: #F97066; --bl-redt: #2A1414; } }
-.bl-fig { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; overflow-x: auto; margin: 16px 0 8px; }
-.bl-fig svg { display: block; width: 100%; min-width: 760px; height: auto; }
-.bl-fig svg text { font-family: var(--sans); fill: var(--text); font-size: 12.5px; }
-.bl-fig svg .bl-ts { font-size: 11px; fill: var(--muted); }
-.bl-fig svg .bl-tm { font-family: var(--mono); font-size: 10.5px; }
-.bl-fig svg .bl-tb { font-weight: 600; }
-.bl-fig svg .bl-box { fill: var(--paper); stroke: var(--line); stroke-width: 1.4; }
-.bl-fig svg .bl-grp { fill: var(--wash); stroke: var(--muted); stroke-width: 1; stroke-dasharray: 5 4; }
-.bl-fig svg .bl-boxa { fill: var(--tealt); stroke: var(--teal); stroke-width: 1.4; }
-.bl-fig svg .bl-boxt { fill: var(--ambert); stroke: var(--amber); stroke-width: 1.8; }
-.bl-fig svg .bl-arr { stroke: var(--muted); stroke-width: 1.5; fill: none; }
-.bl-fig svg .bl-ah { fill: var(--muted); }
-.bl-fig svg .bl-dot { fill: var(--bl-red); }
-.bl-fig svg .bl-dott { fill: var(--paper); font-weight: 600; font-size: 11px; }
-.bl-fig svg .bl-txtn { fill: var(--bl-red); font-weight: 600; }
-.bl-fig svg .bl-txtt { fill: var(--ink); font-weight: 600; }
-.bl-cap { font-size: .85rem; color: var(--muted); margin: 0 0 24px; }
-.bl-legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: .85rem; color: var(--muted); margin: 4px 0 8px; }
-.bl-legend span { display: inline-flex; align-items: center; gap: 8px; }
-.bl-sw { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid; display: inline-block; }
-.bl-sw--f { background: var(--wash); border-color: var(--muted); border-style: dashed; }
-.bl-sw--t { background: var(--ambert); border-color: var(--amber); }
-.bl-sw--a { background: var(--tealt); border-color: var(--teal); }
-.bl-pill { display: inline-block; font-family: var(--mono); font-size: .72rem; padding: 3px 8px; border-radius: 4px; border: 1px solid; white-space: nowrap; }
-.bl-pill--done { color: var(--teal); border-color: var(--teal); }
-.bl-pill--todo { color: var(--ink); border-color: var(--amber); background: var(--ambert); }
-.bl-limit { border-left: 4px solid var(--bl-red); background: var(--bl-redt); padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: .92rem; margin: 16px 0 0; }
 </style>
 </head>
 <body>
@@ -509,14 +478,14 @@ footer {
     <a class="nav-link" href="#risk">Rủi ro</a>
     <a class="nav-link" href="#constraint">Ràng buộc</a>
     <a class="nav-link" href="#team">Nhóm</a>
-    <a class="nav-link" href="#feedback">Góp ý</a>
+    <a class="nav-link" href="#feedback">Góp ý R1</a>
   </div>
 </nav>
 
 <!-- ====== HERO ====== -->
 <header class="hero" id="hero">
   <div class="hero-content">
-    <p class="eyebrow">Review 1 · Cập nhật theo góp ý R1, góp ý GVHD + kết quả W4–W6 · 07/10/2026</p>
+    <p class="eyebrow">Review 1 · Bản cập nhật theo góp ý · 06/10/2026</p>
     <h1 class="hero-title">ViVQA-VLM</h1>
     <p class="hero-thesis">Efficient Vietnamese Visual Question Answering<br>using Vision-Language Models</p>
     <div class="chips">
@@ -562,7 +531,7 @@ footer {
           <tr><td><strong>Input 1 — Ảnh</strong></td><td>Ảnh RGB, resize theo giới hạn <code>max_pixels</code></td><td>Ảnh đời thường (nguồn MS COCO), không tập trung vào chữ</td><td>Ảnh có chữ tiếng Việt: biển hiệu, menu, bao bì…</td></tr>
           <tr><td><strong>Input 2 — Câu hỏi</strong></td><td>Văn bản tiếng Việt, chuẩn hoá Unicode NFC</td><td>Câu hỏi ngắn, sinh bán tự động</td><td>Do người viết, trung bình 9,59 từ</td></tr>
           <tr><td><strong>Output — Câu trả lời</strong></td><td>Văn bản tiếng Việt có dấu, sinh tự do (generative)</td><td>99,83% đáp án ≤ 3 từ</td><td>Trung bình 4,18 từ; đáp án là đoạn chữ có trong ảnh</td></tr>
-          <tr><td><strong>Đánh giá</strong></td><td>So với đáp án chuẩn sau cùng một bước chuẩn hoá</td><td>EM · VQA-Acc · ANLS</td><td>EM · VQA-Acc · ANLS (+ F1 phụ)</td></tr>
+          <tr><td><strong>Đánh giá</strong></td><td>So với đáp án chuẩn sau cùng một bước chuẩn hoá</td><td>EM · VQA-Acc</td><td>ANLS · EM</td></tr>
         </tbody>
       </table>
     </div>
@@ -573,13 +542,12 @@ footer {
         <div class="card-tag">V1</div>
         <div class="card-title">Đọc chữ có dấu trong ảnh</div>
         <p>Dấu thanh và chữ cái có dấu (ă, â, ê, ô, ơ, ư, đ) là các nét rất nhỏ trên ảnh. Model đọc sai hoặc bỏ dấu là đổi nghĩa (“má” ≠ “mà”). Đây là lỗi nhận thức ở mức pixel, không sửa được bằng chuẩn hoá văn bản.</p>
-        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Bằng chứng của nhóm (W5, ViTextVQA 2.000 câu): đáp án thuần chữ Latin đạt EM 0,394, đáp án tiếng Việt có dấu chỉ 0,224; 45 câu (2,3%) đúng chữ nhưng sai dấu (vd. “BUT DO” → “bút đỏ”). Văn liệu: bỏ dấu làm giảm F1 của mọi mô hình trên ViTextVQA (Nguyen et al., §7.1).</p>
+        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Bằng chứng: trên ViTextVQA, bỏ dấu làm giảm F1 của mọi mô hình baseline (Nguyen et al., ViTextVQA, §7.1).</p>
       </div>
       <div class="card card--teal">
         <div class="card-tag">V2</div>
         <div class="card-title">Trả lời sai ngôn ngữ hoặc sai định dạng</div>
         <p>VLM pretrain chủ yếu trên tiếng Anh/tiếng Trung dễ trả lời bằng tiếng Anh, trộn Anh–Việt (code-switching) hoặc trả lời dài dòng. Khi đó EM = 0 dù model hiểu đúng nội dung. Với tiếng Anh, vấn đề này gần như không có vì đó là ngôn ngữ chính của model.</p>
-        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Bằng chứng của nhóm (W5): ViVQA có ít nhất 90 câu trả lời bằng tiếng Anh (“giraffe” 32, “kitchen” 24, “bus” 19…); ViTextVQA 19,6% câu thừa từ (“Nhà thuốc Long Châu” → “long châu”), nhiều câu lặp lại câu hỏi thay vì trả lời.</p>
       </div>
       <div class="card card--teal">
         <div class="card-tag">V3</div>
@@ -591,7 +559,6 @@ footer {
         <div class="card-tag">V4</div>
         <div class="card-title">Hallucination</div>
         <p>Model trả lời trôi chảy nhưng nội dung không có trong ảnh (bịa vật thể hoặc bịa chữ). Chưa có đánh giá hallucination dạng POPE cho VQA tiếng Việt (G4).</p>
-        <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Bằng chứng của nhóm (W5, ViVQA): bịa chi tiết “Điện thoại Nokia 6310i”, trả lời “bò cạp” khi ảnh là con chim; đoán “đỏ” 117 lần trong khi đáp án “đỏ” chỉ có 75 lần.</p>
       </div>
     </div>
 
@@ -602,7 +569,7 @@ footer {
         <ul>
           <li>Chuẩn hoá Unicode NFC cho câu hỏi và đáp án</li>
           <li>Lowercase, bỏ dấu câu thừa, gộp khoảng trắng</li>
-          <li>Áp dụng cùng một hàm chuẩn hoá cho đáp án chuẩn và đầu ra model trước khi tính metric; luật chấm được chốt <strong>trước</strong> khi chạy test (commit <code>37da80a</code>)</li>
+          <li>Áp dụng cùng một hàm chuẩn hoá cho đáp án chuẩn và đầu ra model trước khi tính metric</li>
           <li>Resize ảnh theo <code>max_pixels</code></li>
         </ul>
       </div>
@@ -616,7 +583,7 @@ footer {
         </ul>
       </div>
     </div>
-    <p class="note reveal">Mốc chính thức (W5, zero-shot Qwen2.5-VL-3B): ViVQA EM 0,225 · ANLS 0,288 (3.001 câu); ViTextVQA EM 0,285 · ANLS 0,468 (2.000 câu, seed 42) — xem Phần 07.</p>
+    <p class="note reveal">Mốc thực tế: Qwen2.5-VL-3B zero-shot đạt EM 38,3% · ANLS 55,9% trên ViTextVQA (mirror, n=300, seed 42) — xem Phần 07.</p>
   </div>
 </section>
 
@@ -692,7 +659,7 @@ footer {
 
     <div class="card card--amber reveal" style="margin-top:24px">
       <div class="card-title">Lưu ý khi so sánh</div>
-      <p>Các mốc trên dùng metric và thiết lập khác nhóm (F1 theo token; accuracy dạng phân loại trên tập nhãn cố định), nên chỉ dùng để <strong>định vị</strong>, không đặt cạnh số của nhóm như so sánh trực tiếp. Nhóm đã tính F1 theo token làm chỉ số phụ: baseline zero-shot của nhóm đạt F1 0,530 trên tập con 2.000 câu — chỉ để tham khảo, vì khác tập đánh giá (tập con so với full test) và khác cách chuẩn hoá.</p>
+      <p>Các mốc trên dùng metric và thiết lập khác nhóm (F1 theo token; accuracy dạng phân loại trên tập nhãn cố định), nên chỉ dùng để <strong>định vị</strong>, không đặt cạnh số của nhóm như so sánh trực tiếp. Nhóm tính thêm F1 theo token làm chỉ số phụ để đối chiếu với bảng ViTextVQA.</p>
     </div>
 
     <h3 class="sub-h reveal">Điều nhóm rút ra từ công trình trước</h3>
@@ -772,7 +739,7 @@ footer {
         <li><strong>Shared adapter vs adapter riêng từng dataset:</strong> tuỳ chọn, chỉ làm nếu đủ thời gian.</li>
       </ul>
     </div>
-    <p class="note reveal">Mốc “zero-shot” trong H1–H4 là baseline chạy lại với cấu hình đóng băng ở W7 (Phần 07), không phải số W4. Đối chiếu với bản Review 1: H1 → H1 · H6 → H2 · H7 → H3 · giả thuyết hallucination → H4.</p>
+    <p class="note reveal">Đối chiếu với bản Review 1: H1 → H1 · H6 → H2 · H7 → H3 · giả thuyết hallucination → H4.</p>
   </div>
 </section>
 
@@ -832,46 +799,41 @@ footer {
 
     <!-- ViTextVQA Stats -->
     <h3 style="font-family:var(--serif);font-size:1.3rem;font-weight:600;color:var(--ink);margin:48px 0 8px" class="reveal">
-      ViTextVQA <span style="font-family:var(--mono);font-size:.78rem;color:var(--muted);font-weight:400">HF minhquan6203/ViTextVQA — bản chính thức, CC BY-NC 3.0 (Nguyen et al., 2024)</span>
+      ViTextVQA <span style="font-family:var(--mono);font-size:.78rem;color:var(--muted);font-weight:400">HF nhonhoccode/ViTextVQA (Nguyen et al., 2024)</span>
     </h3>
-    <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 20px;" class="reveal">Kích thước: 16,762 ảnh / 50,342 QA (split 7:1:2) — khớp paper, đủ ảnh (thiếu 0)</p>
+    <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 20px;" class="reveal">Kích thước gốc (theo paper): 16,762 ảnh / 50,342 QA (tỉ lệ split 7:1:2)</p>
     <div class="stat-grid reveal">
       <div class="stat">
         <div class="stat-number">50,342</div>
         <div class="stat-label">Cặp QA</div>
-        <div class="stat-source">repo chính thức</div>
+        <div class="stat-source">theo paper</div>
       </div>
       <div class="stat">
         <div class="stat-number">16,762</div>
         <div class="stat-label">Ảnh</div>
-        <div class="stat-source">ViTextVQA_images.zip</div>
+        <div class="stat-source">theo paper</div>
       </div>
       <div class="stat">
         <div class="stat-number">35,159</div>
         <div class="stat-label">Train</div>
-        <div class="stat-source">11,733 ảnh</div>
+        <div class="stat-source">training split</div>
       </div>
-      <div class="stat">
-        <div class="stat-number">5,155</div>
+      <div class="stat" style="border-style: dashed; background: var(--wash);">
+        <div class="stat-number">?</div>
         <div class="stat-label">Dev</div>
-        <div class="stat-source">1,676 ảnh</div>
+        <div class="stat-source">dev.json — sẽ tích hợp</div>
       </div>
       <div class="stat">
         <div class="stat-number">10,028</div>
         <div class="stat-label">Test</div>
-        <div class="stat-source">3,353 ảnh · test_gt.json</div>
-      </div>
-      <div class="stat">
-        <div class="stat-number">2,000</div>
-        <div class="stat-label">Test subset</div>
-        <div class="stat-source">seed 42 · dùng để báo cáo</div>
+        <div class="stat-source">test split</div>
       </div>
     </div>
 
     <div class="card card--amber reveal" style="margin-top:32px">
-      <div class="card-title">Nguồn dữ liệu chính thức &amp; thứ tự xử lý</div>
+      <div class="card-title">Cập nhật nguồn dữ liệu &amp; thứ tự xử lý</div>
       <ul>
-        <li><strong>Đã chuyển (W5):</strong> ViTextVQA lấy từ repo chính thức <code>minhquan6203/ViTextVQA</code> (HuggingFace, gated, CC BY-NC 3.0); đáp án test lấy từ <code>ViTextVQA_test_gt.json</code> (<code>ViTextVQA_test.json</code> chỉ là mẫu nộp Kaggle). ViVQA đủ 10.328/10.328 ảnh; ViTextVQA thiếu 0 ảnh. Bản mirror dùng ở W4 chỉ là bản sao tập test, nay không dùng nữa.</li>
+        <li>Từ W5, ViTextVQA chuyển sang repo chính thức <code>minhquan6203/ViTextVQA</code> (HuggingFace, cần cấp quyền) thay cho bản mirror; đáp án test lấy từ <code>ViTextVQA_test_gt.json</code>; đánh giá trên tập con cố định 2.000 câu (seed 42). Số liệu split sẽ cập nhật theo bản chính thức.</li>
         <li>Thứ tự xử lý: tiền xử lý (NFC, chuẩn hoá) áp dụng giống hệt cho mọi mẫu → cố định split → tập test không được dùng để chọn cấu hình (chỉnh prompt trên dev, báo cáo trên test).</li>
       </ul>
     </div>
@@ -887,73 +849,10 @@ footer {
         <canvas id="chartQType" aria-label="Biểu đồ phân bố loại câu hỏi"></canvas>
       </div>
       <div class="chart-card">
-        <h3>Phân chia Train / Val (Dev) / Test</h3>
+        <h3>Phân chia Train / Test (có sẵn)</h3>
         <canvas id="chartSplit" aria-label="Biểu đồ phân chia train/test cho ViVQA và ViTextVQA"></canvas>
       </div>
     </div>
-
-    <!-- W07-BASELINE: quy trình xây dựng ViVQA + nhiễu dữ liệu (góp ý GVHD 07/10/2026) -->
-    <h3 class="sub-h reveal">Dữ liệu được xây dựng thế nào và nhiễu nằm ở đâu</h3>
-    <p class="reveal">ViVQA không được gán nhãn tiếng Việt từ đầu. Cặp câu hỏi–đáp án được sinh tự động từ caption ảnh COCO (bộ COCO-QA), dịch máy sang tiếng Việt, rồi người gán nhãn kiểm tra lại. Mỗi chấm đỏ trong hình là một điểm nhiễu nhóm đã đo được trên tập test.</p>
-    <div class="bl-fig reveal">
-    <svg viewBox="0 0 900 330" role="img" aria-label="Quy trình xây dựng ViVQA và các điểm nhiễu N1 đến N4">
-      <defs><marker id="blah1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="bl-ah"/></marker></defs>
-      <rect class="bl-box" x="10" y="40" width="140" height="70" rx="4"/>
-      <text x="80" y="68" text-anchor="middle" class="bl-tb">MS COCO</text><text x="80" y="86" text-anchor="middle" class="bl-ts">ảnh + caption</text>
-      <rect class="bl-box" x="190" y="40" width="160" height="70" rx="4"/>
-      <text x="270" y="68" text-anchor="middle" class="bl-tb">COCO-QA</text><text x="270" y="86" text-anchor="middle" class="bl-ts">QA sinh tự động từ caption</text>
-      <rect class="bl-box" x="390" y="40" width="140" height="70" rx="4"/>
-      <text x="460" y="68" text-anchor="middle" class="bl-tb">Google Translate</text><text x="460" y="86" text-anchor="middle" class="bl-ts">EN → VI</text>
-      <rect class="bl-box" x="570" y="40" width="150" height="70" rx="4"/>
-      <text x="645" y="68" text-anchor="middle" class="bl-tb">Translated dataset</text><text x="645" y="86" text-anchor="middle" class="bl-ts">ViVQA_translate</text>
-      <rect class="bl-boxa" x="760" y="40" width="130" height="70" rx="4"/>
-      <text x="825" y="62" text-anchor="middle" class="bl-tb">Validation</text><text x="825" y="80" text-anchor="middle" class="bl-ts">guidelines +</text><text x="825" y="94" text-anchor="middle" class="bl-ts">annotators</text>
-      <path class="bl-arr" d="M150 75H188" marker-end="url(#blah1)"/><path class="bl-arr" d="M350 75H388" marker-end="url(#blah1)"/>
-      <path class="bl-arr" d="M530 75H568" marker-end="url(#blah1)"/><path class="bl-arr" d="M720 75H758" marker-end="url(#blah1)"/>
-      <path class="bl-arr" d="M825 110V168" marker-end="url(#blah1)"/>
-      <rect class="bl-box" x="760" y="170" width="130" height="62" rx="4"/>
-      <text x="825" y="195" text-anchor="middle" class="bl-tb">Checking</text><text x="825" y="213" text-anchor="middle" class="bl-ts">kiểm tra lại mẫu</text>
-      <path class="bl-arr" d="M760 201H724" marker-end="url(#blah1)"/>
-      <rect class="bl-box" x="570" y="170" width="150" height="62" rx="4"/>
-      <text x="645" y="195" text-anchor="middle" class="bl-tb">Checked dataset</text><text x="645" y="213" text-anchor="middle" class="bl-ts">bản đã kiểm</text>
-      <path class="bl-arr" d="M570 201H534" marker-end="url(#blah1)"/>
-      <rect class="bl-boxa" x="370" y="170" width="160" height="62" rx="4"/>
-      <text x="450" y="193" text-anchor="middle" class="bl-tb">ViVQA dataset</text><text x="450" y="211" text-anchor="middle" class="bl-ts">10.328 ảnh · 15.000 QA</text>
-      <path class="bl-arr" d="M370 201H334" marker-end="url(#blah1)"/>
-      <rect class="bl-box" x="190" y="154" width="140" height="42" rx="4"/>
-      <text x="260" y="171" text-anchor="middle" class="bl-tb">Train 10.799</text><text x="260" y="187" text-anchor="middle" class="bl-ts">dev 1.200 (tách, seed 42)</text>
-      <rect class="bl-box" x="190" y="206" width="140" height="42" rx="4"/>
-      <text x="260" y="223" text-anchor="middle" class="bl-tb">Test 3.001</text><text x="260" y="239" text-anchor="middle" class="bl-ts">khóa, không chỉnh</text>
-      <circle class="bl-dot" cx="352" cy="42" r="11"/><text class="bl-dott" x="352" y="46" text-anchor="middle">N1</text>
-      <circle class="bl-dot" cx="532" cy="42" r="11"/><text class="bl-dott" x="532" y="46" text-anchor="middle">N2</text>
-      <circle class="bl-dot" cx="878" cy="42" r="11"/><text class="bl-dott" x="878" y="46" text-anchor="middle">N3</text>
-      <circle class="bl-dot" cx="532" cy="172" r="11"/><text class="bl-dott" x="532" y="176" text-anchor="middle">N4</text>
-      <text class="bl-txtn" x="10" y="280">N1</text><text x="38" y="280" class="bl-ts">Đáp án chỉ một cụm ngắn nên mất chi tiết: gold “gấu”, model trả “gấu bông” hoặc “gấu bắc cực”.</text>
-      <text class="bl-txtn" x="10" y="298">N2</text><text x="38" y="298" class="bl-ts">Dịch máy sai ngữ cảnh: “enclosure” → “bao vây” (11 câu), “purple” → “tía” (41 nhãn, 0 nhãn “tím”).</text>
-      <text class="bl-txtn" x="10" y="316">N3, N4</text><text x="64" y="316" class="bl-ts">Sau kiểm tay vẫn sót lỗi: ký tự `` và từ tiếng Anh (“twig”) trong câu hỏi; 2.998/3.001 câu hỏi không có “?”.</text>
-    </svg>
-    </div>
-    <p class="bl-cap">Hình 6.A. Quy trình xây dựng ViVQA (Tran et al., PACLIC 2021) và các điểm nhiễu N1–N4 nhóm quan sát trên tập test.</p>
-
-    <p class="reveal">Bảng dưới kiểm cột đáp án gold của hai tập test dùng ở W05 (ViVQA 3.001 câu; ViTextVQA subset 2.000 câu, seed 42), dùng đúng hàm chuẩn hoá <code>normalize_vi</code> của metric.</p>
-    <div class="table-wrap reveal">
-      <table>
-        <thead><tr><th>Tập</th><th>Hiện tượng</th><th>Số đo</th><th>Hệ quả</th><th>Cách xử lý đề xuất</th></tr></thead>
-        <tbody>
-          <tr><td>ViVQA</td><td>Đáp án rất ít loại, lệch phân bố</td><td class="num">256 gold khác nhau / 3.001; top-20 chiếm 43,7%</td><td>Model có thể học prior (“hai”, “màu trắng”) thay vì nhìn ảnh</td><td>Báo cáo EM theo loại câu hỏi; so thêm với mốc “luôn đoán đáp án phổ biến nhất”</td></tr>
-          <tr><td>ViVQA</td><td>Dịch máy sai ngữ cảnh</td><td class="num">“bao vây” 11 câu; “tía” 41 nhãn, “tím” 0</td><td>Model trả “tím” bị tính sai (8 câu)</td><td>Rà train/dev theo danh sách lỗi dịch; sửa hoặc loại sau khi 2 người cùng duyệt</td></tr>
-          <tr><td>ViVQA</td><td>Nhãn màu luôn có tiền tố “màu”; số viết bằng chữ</td><td class="num">625/625 câu màu; 444 câu đếm</td><td>Model trả “Đỏ”, “2” khác dạng gold</td><td>Đã xử lý bằng chuẩn hoá đối xứng (bỏ “màu ”, số chữ ↔ chữ số); không sửa gold</td></tr>
-          <tr><td>ViVQA</td><td>Biến thể cùng nghĩa</td><td class="num">“xanh lá cây” vs “xanh lá”: 62; “tím” vs “tía”: 8</td><td>EM thấp hơn thực tế khoảng 2,3 điểm</td><td>Chỉ báo như phân tích phụ, ghi rõ; không đổi metric chính</td></tr>
-          <tr><td>ViVQA</td><td>Nhãn vị trí mơ hồ</td><td class="num">“phòng” 49, “phòng bếp” 52, “phòng tắm” 40</td><td>Location EM chỉ 1,2% (685 câu)</td><td>Phân tích riêng trong error analysis</td></tr>
-          <tr><td>ViVQA</td><td>Câu trả lời dài hơn gold</td><td class="num">489 câu gold nằm trọn trong pred (16,3%)</td><td>Lệch phong cách trả lời, không phải lỗi dữ liệu</td><td>Chỉnh prompt trên dev; QLoRA học độ dài từ train</td></tr>
-          <tr><td>ViTextVQA</td><td>Gold toàn chữ thường, dấu câu tách rời</td><td class="num">0/2.000 có chữ hoa; 452 gold dạng “k - mart”</td><td>Không ảnh hưởng EM vì chuẩn hoá bỏ dấu câu</td><td>Giữ nguyên</td></tr>
-          <tr><td>ViTextVQA</td><td>Lệch dấu thanh</td><td class="num">45 câu sai chỉ vì dấu (2,3%)</td><td>Gồm cả biển hiệu in không dấu và lỗi dấu của model</td><td>Duyệt tay trên dev để tách hai nguồn; đưa vào hallucination analysis</td></tr>
-          <tr><td>ViTextVQA</td><td>Gold là đoạn ngắn trên biển, model trả cả câu</td><td class="num">391 câu gold nằm trọn trong pred (19,6%)</td><td>EM thấp dù model đọc đúng chữ</td><td>ANLS bù một phần; chỉnh prompt trên dev</td></tr>
-          <tr><td>ViTextVQA</td><td>Gần như mọi đáp án là duy nhất</td><td class="num">1.828 gold khác nhau / 2.000</td><td>Phụ thuộc đọc chữ, không học được prior</td><td>OCR hỗ trợ (PaddleOCR / VietOCR) là hướng cải tiến, sau khi baseline xong</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="bl-limit reveal"><strong>Giới hạn:</strong> số đo trên là trên tập test, chưa kiểm train. Mọi chỉnh sửa dữ liệu chỉ áp dụng cho train và dev. Tập test và luật chuẩn hoá giữ nguyên (khóa từ commit <code>37da80a</code>) để so sánh công bằng với baseline.</p>
   </div>
 </section>
 
@@ -963,134 +862,6 @@ footer {
     <p class="section-eyebrow reveal">Phần 07</p>
     <h2 class="section-title reveal">Phương pháp đề xuất &amp; Pipeline</h2>
     <p class="section-lead reveal">Một phương pháp duy nhất được chốt. Mọi thành phần còn lại là ablation để chứng minh phần nào tạo ra cải thiện.</p>
-
-    <!-- W07-BASELINE: kiến trúc baseline + giao thức đánh giá (góp ý GVHD 07/10/2026) -->
-    <h3 class="sub-h reveal" style="margin-top:8px">Baseline: Qwen2.5-VL-3B-Instruct</h3>
-    <p class="reveal">Baseline là phương pháp nhóm tái lập và đo trước khi cải tiến: <strong>Qwen2.5-VL-3B-Instruct, nén 4-bit NF4, prompt P0, greedy decoding, không huấn luyện (zero-shot)</strong>. Mọi cải tiến sau này chỉ được so với baseline này, trên cùng tập test và cùng metric. Mốc SOTA trong các công trình nhóm đã khảo sát là ViTextBLIP-2 trên ViTextVQA và AViVQA-TranConI trên ViVQA (Phần 03); các mốc này khác metric nên chỉ dùng để định vị.</p>
-    <p class="reveal" style="margin-top:12px">Ảnh và câu hỏi đi qua hai nhánh riêng, được ghép thành một chuỗi token, rồi decoder 36 lớp sinh câu trả lời. Thông số lấy từ <code>config.json</code> của model trên Hugging Face.</p>
-    <div class="bl-fig reveal">
-    <svg viewBox="0 0 900 500" role="img" aria-label="Kiến trúc Qwen2.5-VL-3B-Instruct dùng làm baseline">
-      <defs><marker id="blah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="bl-ah"/></marker></defs>
-      <rect class="bl-box" x="10" y="110" width="150" height="92" rx="4"/>
-      <text x="85" y="132" text-anchor="middle" class="bl-tb">Ảnh</text>
-      <text x="85" y="150" text-anchor="middle" class="bl-ts">kích thước bất kỳ</text>
-      <text x="85" y="166" text-anchor="middle" class="bl-ts">dynamic resolution</text>
-      <text x="85" y="184" text-anchor="middle" class="bl-tm">min 200.704 px</text>
-      <text x="85" y="198" text-anchor="middle" class="bl-tm">max 401.408 px</text>
-      <rect class="bl-box" x="10" y="350" width="150" height="70" rx="4"/>
-      <text x="85" y="376" text-anchor="middle" class="bl-tb">Câu hỏi (VI)</text>
-      <text x="85" y="394" text-anchor="middle" class="bl-ts">chat template + prompt P0</text>
-      <rect class="bl-grp" x="195" y="20" width="250" height="295" rx="6"/>
-      <text x="205" y="40" class="bl-tb">Vision encoder (ViT) · đóng băng</text>
-      <rect class="bl-box" x="210" y="54" width="220" height="56" rx="4"/>
-      <text x="320" y="76" text-anchor="middle" class="bl-tb">Patchify</text>
-      <text x="320" y="94" text-anchor="middle" class="bl-ts">patch 14×14, temporal patch 2</text>
-      <rect class="bl-box" x="210" y="122" width="220" height="104" rx="4"/>
-      <text x="320" y="144" text-anchor="middle" class="bl-tb">32 ViT blocks</text>
-      <text x="320" y="162" text-anchor="middle" class="bl-ts">hidden 1280 · 16 heads · FFN 3420</text>
-      <text x="320" y="178" text-anchor="middle" class="bl-ts">window attention (112 px)</text>
-      <text x="320" y="194" text-anchor="middle" class="bl-ts">full attention ở block 7, 15, 23, 31</text>
-      <text x="320" y="210" text-anchor="middle" class="bl-ts">2D-RoPE</text>
-      <rect class="bl-box" x="210" y="238" width="220" height="62" rx="4"/>
-      <text x="320" y="257" text-anchor="middle" class="bl-tb">Patch merger</text>
-      <text x="320" y="274" text-anchor="middle" class="bl-ts">gộp 2×2 patch → 1 token (≈ 28×28 px)</text>
-      <text x="320" y="290" text-anchor="middle" class="bl-ts">MLP → 2048-d · 256–512 visual tokens</text>
-      <path class="bl-arr" d="M320 110V121" marker-end="url(#blah2)"/><path class="bl-arr" d="M320 226V237" marker-end="url(#blah2)"/>
-      <rect class="bl-grp" x="195" y="335" width="250" height="100" rx="6"/>
-      <text x="205" y="355" class="bl-tb">Text branch · đóng băng</text>
-      <rect class="bl-box" x="210" y="366" width="220" height="56" rx="4"/>
-      <text x="320" y="388" text-anchor="middle" class="bl-tb">Tokenizer + embedding</text>
-      <text x="320" y="406" text-anchor="middle" class="bl-ts">BPE, vocab 151.936 → 2048-d</text>
-      <path class="bl-arr" d="M160 156H194" marker-end="url(#blah2)"/>
-      <path class="bl-arr" d="M160 385H194" marker-end="url(#blah2)"/>
-      <path class="bl-arr" d="M445 160H468V84H494" marker-end="url(#blah2)"/>
-      <path class="bl-arr" d="M445 394H468V84"/>
-      <rect class="bl-grp" x="495" y="20" width="270" height="415" rx="6"/>
-      <text x="505" y="40" class="bl-tb">LLM decoder · 36 lớp · base 4-bit NF4 đóng băng</text>
-      <rect class="bl-boxa" x="510" y="54" width="240" height="62" rx="4"/>
-      <text x="630" y="74" text-anchor="middle" class="bl-tb">Chuỗi đầu vào</text>
-      <text x="630" y="92" text-anchor="middle" class="bl-tm" style="font-size:10px">&lt;vision_start&gt; visual × N &lt;vision_end&gt;</text>
-      <text x="630" y="107" text-anchor="middle" class="bl-tm">question tokens</text>
-      <path class="bl-arr" d="M630 116V130" marker-end="url(#blah2)"/>
-      <rect class="bl-box" x="510" y="132" width="240" height="196" rx="4"/>
-      <text x="630" y="152" text-anchor="middle" class="bl-tb">Decoder block × 36</text>
-      <text x="630" y="170" text-anchor="middle" class="bl-ts">hidden 2048 · RMSNorm</text>
-      <rect class="bl-boxt" x="524" y="180" width="212" height="70" rx="3"/>
-      <text x="630" y="198" text-anchor="middle" class="bl-tb">Self-attention (GQA)</text>
-      <text x="630" y="214" text-anchor="middle" class="bl-ts">16 query heads · 2 KV heads · M-RoPE</text>
-      <text x="630" y="234" text-anchor="middle" class="bl-txtt">LoRA r=16 trên q, k, v, o</text>
-      <rect class="bl-box" x="524" y="262" width="212" height="54" rx="3"/>
-      <text x="630" y="282" text-anchor="middle" class="bl-tb">FFN (SwiGLU)</text>
-      <text x="630" y="300" text-anchor="middle" class="bl-ts">2048 → 11008 → 2048</text>
-      <path class="bl-arr" d="M630 328V344" marker-end="url(#blah2)"/>
-      <rect class="bl-box" x="510" y="346" width="240" height="72" rx="4"/>
-      <text x="630" y="368" text-anchor="middle" class="bl-tb">LM head (tied embeddings)</text>
-      <text x="630" y="386" text-anchor="middle" class="bl-ts">logits trên vocab 151.936</text>
-      <text x="630" y="404" text-anchor="middle" class="bl-ts">context tối đa 128.000 token</text>
-      <path class="bl-arr" d="M765 382H796" marker-end="url(#blah2)"/>
-      <rect class="bl-boxa" x="798" y="340" width="96" height="84" rx="4"/>
-      <text x="846" y="364" text-anchor="middle" class="bl-tb">Câu trả lời</text>
-      <text x="846" y="382" text-anchor="middle" class="bl-ts">greedy</text>
-      <text x="846" y="397" text-anchor="middle" class="bl-ts">max_new_</text>
-      <text x="846" y="411" text-anchor="middle" class="bl-ts">tokens = 32</text>
-      <text x="10" y="470" class="bl-ts">Ô màu cam là adapter LoRA (≈ 39 MB), chỉ có ở bước QLoRA; ở baseline zero-shot không có adapter. Vision encoder, merger và embedding giữ nguyên trọng số gốc.</text>
-      <text x="10" y="488" class="bl-ts">N = số visual token: 200.704 / 784 = 256 đến 401.408 / 784 = 512 (mỗi token phủ 28×28 = 784 px).</text>
-    </svg>
-    </div>
-    <div class="bl-legend">
-      <span><i class="bl-sw bl-sw--f"></i>đóng băng</span>
-      <span><i class="bl-sw bl-sw--t"></i>huấn luyện (LoRA, chỉ ở bước QLoRA)</span>
-      <span><i class="bl-sw bl-sw--a"></i>dữ liệu đi qua</span>
-    </div>
-    <p class="bl-cap">Hình 7.A. Kiến trúc Qwen2.5-VL-3B-Instruct (Bai et al., 2025). LoRA r=16 trên q, k, v, o của 36 lớp: 7.372.800 tham số huấn luyện (0,196%).</p>
-
-    <div class="table-wrap reveal">
-      <table>
-        <thead><tr><th>Thành phần</th><th>Làm gì</th><th>Thông số</th><th>Trong đề tài</th></tr></thead>
-        <tbody>
-          <tr><td>Dynamic resolution</td><td>Giữ tỉ lệ ảnh, co về khoảng số pixel cho trước thay vì ép về một kích thước cố định</td><td class="num">min 200.704 · max 401.408 px</td><td>Cố định trong config; ablation A1/A2 đổi mức này</td></tr>
-          <tr><td>Patchify</td><td>Cắt ảnh thành ô 14×14 px, mỗi ô thành một vector</td><td class="num">patch 14, temporal 2</td><td>Đóng băng</td></tr>
-          <tr><td>ViT blocks</td><td>Cho các ô ảnh “nhìn” nhau để hiểu vật thể, chữ, bố cục</td><td class="num">32 block · hidden 1280</td><td>Đóng băng</td></tr>
-          <tr><td>Patch merger</td><td>Gộp 4 ô kề nhau thành 1 token và đổi về kích thước của LLM; giảm 4 lần số token ảnh</td><td class="num">2×2 → 2048-d</td><td>Đóng băng</td></tr>
-          <tr><td>Tokenizer + embedding</td><td>Cắt câu hỏi tiếng Việt thành token và đổi thành vector</td><td class="num">vocab 151.936</td><td>Đóng băng</td></tr>
-          <tr><td>Self-attention (GQA, M-RoPE)</td><td>Mỗi token đọc các token khác, cả ảnh lẫn chữ; M-RoPE cho biết vị trí theo thời gian, chiều cao, chiều rộng</td><td class="num">16 Q / 2 KV heads</td><td>Gắn LoRA ở bước QLoRA</td></tr>
-          <tr><td>FFN (SwiGLU)</td><td>Biến đổi thông tin trong từng token</td><td class="num">2048 → 11008</td><td>Đóng băng</td></tr>
-          <tr><td>LM head</td><td>Tính xác suất token tiếp theo trên toàn bộ từ vựng</td><td class="num">tied embeddings</td><td>Đóng băng</td></tr>
-          <tr><td>Decoding</td><td>Chọn token có xác suất cao nhất cho tới khi dừng</td><td class="num">greedy · 32 token</td><td>Giữ nguyên mọi run</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3 class="sub-h reveal">Giao thức đánh giá và thí nghiệm baseline</h3>
-    <p class="reveal">Mọi lần chạy đi qua cùng một chuỗi bước. Tập test và luật chuẩn hoá được khóa từ commit <code>37da80a</code>, trước khi xem kết quả test; prompt chỉ được chỉnh trên dev.</p>
-    <div class="bl-fig reveal">
-    <svg viewBox="0 0 900 150" role="img" aria-label="Giao thức đánh giá baseline">
-      <defs><marker id="blah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="bl-ah"/></marker></defs>
-      <rect class="bl-box" x="6" y="30" width="130" height="90" rx="4"/><text x="71" y="56" text-anchor="middle" class="bl-tb">Data split</text><text x="71" y="74" text-anchor="middle" class="bl-ts">train / dev / test</text><text x="71" y="90" text-anchor="middle" class="bl-ts">seed 42, cố định</text>
-      <rect class="bl-box" x="156" y="30" width="130" height="90" rx="4"/><text x="221" y="56" text-anchor="middle" class="bl-tb">Prompt builder</text><text x="221" y="74" text-anchor="middle" class="bl-ts">P0 zero-shot</text><text x="221" y="90" text-anchor="middle" class="bl-ts">giống nhau mọi run</text>
-      <rect class="bl-boxa" x="306" y="30" width="130" height="90" rx="4"/><text x="371" y="56" text-anchor="middle" class="bl-tb">Model run</text><text x="371" y="74" text-anchor="middle" class="bl-ts">dtype, pixels, 4-bit</text><text x="371" y="90" text-anchor="middle" class="bl-ts">khóa trong config</text>
-      <rect class="bl-box" x="456" y="30" width="130" height="90" rx="4"/><text x="521" y="56" text-anchor="middle" class="bl-tb">Chuẩn hoá</text><text x="521" y="74" text-anchor="middle" class="bl-ts">NFC, lowercase,</text><text x="521" y="90" text-anchor="middle" class="bl-ts">bỏ dấu câu, “màu ”, số</text>
-      <rect class="bl-boxa" x="606" y="30" width="130" height="90" rx="4"/><text x="671" y="56" text-anchor="middle" class="bl-tb">Metrics</text><text x="671" y="74" text-anchor="middle" class="bl-ts">EM · VQA-Acc · ANLS</text><text x="671" y="90" text-anchor="middle" class="bl-ts">phụ: token-F1</text>
-      <rect class="bl-box" x="756" y="30" width="138" height="90" rx="4"/><text x="825" y="56" text-anchor="middle" class="bl-tb">Log</text><text x="825" y="74" text-anchor="middle" class="bl-ts">metrics, predictions</text><text x="825" y="90" text-anchor="middle" class="bl-ts">commit, GPU, thời gian</text>
-      <path class="bl-arr" d="M136 75H154" marker-end="url(#blah3)"/><path class="bl-arr" d="M286 75H304" marker-end="url(#blah3)"/>
-      <path class="bl-arr" d="M436 75H454" marker-end="url(#blah3)"/><path class="bl-arr" d="M586 75H604" marker-end="url(#blah3)"/>
-      <path class="bl-arr" d="M736 75H754" marker-end="url(#blah3)"/>
-    </svg>
-    </div>
-    <p class="bl-cap">Hình 7.B. Giao thức đánh giá áp dụng cho mọi thí nghiệm.</p>
-
-    <div class="table-wrap reveal">
-      <table>
-        <thead><tr><th>ID</th><th>Thí nghiệm</th><th>Phần cứng</th><th>Kết quả hiện có</th><th>Trạng thái</th></tr></thead>
-        <tbody>
-          <tr><td class="num">B0</td><td>Zero-shot, 4-bit, prompt P0, test ViVQA 3.001 câu và ViTextVQA 2.000 câu</td><td>T4, fp16</td><td class="num">ViVQA EM 22,46 · ANLS 28,76<br>ViTextVQA EM 28,50 · ANLS 46,76</td><td><span class="bl-pill bl-pill--done">xong · chỉ tham chiếu</span></td></tr>
-          <tr><td class="num">A1, A2</td><td>Ablation mức pixel: tối đa 512 và 1.280 visual token, dev ViTextVQA 300 câu</td><td>T4, fp32</td><td class="num">A1 EM 33,33 · ANLS 46,54<br>A2 EM 36,00 · ANLS 50,41</td><td><span class="bl-pill bl-pill--done">xong</span></td></tr>
-          <tr><td class="num">B1</td><td>Chạy lại B0 với config khóa, cả hai tập — <strong>baseline chính thức</strong></td><td>L4, bf16</td><td>chưa có</td><td><span class="bl-pill bl-pill--todo">W7</span></td></tr>
-          <tr><td class="num">B2</td><td>QLoRA r=16 (q, k, v, o), đánh giá trên cùng test với B1</td><td>L4, bf16</td><td>chưa có</td><td><span class="bl-pill bl-pill--todo">W7 · sơ bộ</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="note reveal">B0 chạy fp16 trên T4 nên ViTextVQA có 23/2.000 câu lỗi tràn số (đầu ra “!!!!”); vì vậy B0 chỉ để tham chiếu và B1 trên L4 bf16 mới là baseline dùng để so sánh. Phương pháp đề xuất dưới đây chỉ được so với B1, trong điều kiện y hệt.</p>
 
     <div class="card card--highlight reveal">
       <div class="card-tag">PHƯƠNG PHÁP ĐỀ XUẤT</div>
@@ -1105,7 +876,7 @@ footer {
       <div class="pipe-step"><div class="pipe-num">Bước 3</div><div class="pipe-title">OCR (ViTextVQA)</div><p>PaddleOCR / VietOCR → sắp TL-BR → lưu cache JSON theo ảnh, chạy một lần.</p></div>
       <div class="pipe-step"><div class="pipe-num">Bước 4</div><div class="pipe-title">Chia tập cố định</div><p>Split chính thức; val 1.200 tách từ train ViVQA và test subset 2.000 câu ViTextVQA (seed 42).</p></div>
       <div class="pipe-step"><div class="pipe-num">Bước 5</div><div class="pipe-title">Prompt builder</div><p>Ghép ảnh + câu hỏi + OCR + chỉ dẫn tiếng Việt; cắt OCR theo ngân sách token.</p></div>
-      <div class="pipe-step pipe-step--core"><div class="pipe-num">Bước 6</div><div class="pipe-title">Qwen2.5-VL-3B 4-bit + LoRA</div><p>LoRA r=16 trên q/k/v/o (0,196% tham số).<br><strong>Huấn luyện:</strong> loss chỉ trên token đáp án, chỉ cập nhật LoRA.<br><strong>Suy luận:</strong> greedy decoding, <code>max_new_tokens</code> nhỏ.</p></div>
+      <div class="pipe-step pipe-step--core"><div class="pipe-num">Bước 6</div><div class="pipe-title">Qwen2.5-VL-3B 4-bit + LoRA</div><p><strong>Huấn luyện:</strong> loss chỉ trên token đáp án, chỉ cập nhật LoRA.<br><strong>Suy luận:</strong> greedy decoding, <code>max_new_tokens</code> nhỏ.</p></div>
       <div class="pipe-step"><div class="pipe-num">Bước 7</div><div class="pipe-title">Hậu xử lý &amp; đánh giá</div><p>Chuẩn hoá đầu ra như đáp án; EM, VQA-Acc, ANLS (+ F1 phụ); POPE-vi; phân tích lỗi theo loại câu hỏi và V1–V4; log seed, VRAM, thời gian.</p></div>
       <div class="pipe-step"><div class="pipe-num">Bước 8</div><div class="pipe-title">Prototype web</div><p>Gradio: upload ảnh, hỏi tiếng Việt, hiện câu trả lời, confidence và chữ OCR.</p></div>
     </div>
@@ -1122,15 +893,15 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
         <div class="card-title">QLoRA hoạt động thế nào</div>
         <ol>
           <li><strong>Lượng tử hoá:</strong> trọng số gốc của model được nén xuống 4-bit (NF4) và đóng băng — không bị cập nhật.</li>
-          <li><strong>Gắn LoRA:</strong> mỗi phép chiếu attention q/k/v/o ở 36 lớp decoder được gắn hai ma trận nhỏ A·B, hạng r=16. Chỉ A và B được huấn luyện: <strong>7.372.800 tham số = 0,196%</strong> tổng số (đo bằng PEFT ở W6, khớp tính tay).</li>
-          <li><strong>Kết quả:</strong> một adapter khoảng 39 MB (đo ở smoke run W6), gắn lên model gốc khi suy luận.</li>
+          <li><strong>Gắn LoRA:</strong> mỗi lớp linear được gắn thêm hai ma trận nhỏ A·B (hạng r). Chỉ A và B được huấn luyện — một phần rất nhỏ tổng số tham số (con số chính xác log ở mỗi run).</li>
+          <li><strong>Kết quả:</strong> một adapter vài chục MB, gắn lên model gốc khi suy luận.</li>
         </ol>
         <p style="font-family:var(--mono);font-size:.78rem;margin:12px 0 0">Nguồn: Hu et al., LoRA (ICLR 2022) · Dettmers et al., QLoRA (NeurIPS 2023).</p>
       </div>
       <div class="card card--teal">
         <div class="card-title">Vì sao chỉ dùng QLoRA, không so LoRA với QLoRA</div>
-        <p>GPU đến W6 là T4 (Colab free), không hỗ trợ bf16. Ước tính trọng số model 3B ở 16-bit đã chiếm khoảng 7–8 GB; ở 4-bit còn khoảng 2–3 GB. Đo thật ở W6: train QLoRA với batch 2×8 và gradient checkpointing chỉ cần <strong>5,93 GB VRAM đỉnh</strong>.</p>
-        <p style="margin-top:10px">→ QLoRA là <strong>điều kiện để chạy được</strong> trên phần cứng của đề tài, không phải biến cần so sánh. Phép so sánh duy nhất dùng để kết luận là <strong>QLoRA so với zero-shot/prompting trên cùng model, cùng cấu hình</strong>. Việc đo 4-bit so với không lượng tử hoá ở W7 chỉ để chọn cấu hình (VRAM, tốc độ), không phải giả thuyết.</p>
+        <p>GPU khả dụng là T4 16 GB (Colab), không hỗ trợ bf16. Ước tính trọng số model 3B ở 16-bit đã chiếm khoảng 7–8 GB, chưa tính activation của ảnh độ phân giải cao; ở 4-bit còn khoảng 2–3 GB.</p>
+        <p style="margin-top:10px">→ QLoRA là <strong>điều kiện để chạy được</strong> trên phần cứng của đề tài, không phải biến cần so sánh. Phép so sánh duy nhất dùng để kết luận là <strong>QLoRA so với zero-shot/prompting trên cùng model</strong>.</p>
       </div>
     </div>
 
@@ -1139,12 +910,12 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
       <table>
         <thead><tr><th>Thành phần</th><th>Cách tính / giới hạn</th><th>Ghi chú</th></tr></thead>
         <tbody>
-          <tr><td>Visual tokens</td><td>≈ (cao/28) × (rộng/28) sau resize; chặn trên bởi <code>max_pixels</code></td><td>Đã đo (W6): 512 token (<code>max_pixels</code>=401.408) so với 1.280 token (1.003.520) — 1.280 tăng ANLS có ý nghĩa thống kê (CI95 [+0,012; +0,066]) nhưng EM không khác biệt (McNemar p=0,134), chi phí suy luận ×1,46. Chốt ở W7.</td></tr>
+          <tr><td>Visual tokens</td><td>≈ (cao/28) × (rộng/28) sau resize; chặn trên bởi <code>max_pixels</code></td><td>Ví dụ ảnh 896×672 → 32×24 = 768 token</td></tr>
           <tr><td>Câu hỏi</td><td>Vài chục token</td><td>ViTextVQA: trung bình 9,59 từ</td></tr>
           <tr><td>Chữ OCR</td><td>Cắt tối đa N token (cấu hình, log ở mỗi run)</td><td>Chỉ áp dụng cho ViTextVQA</td></tr>
           <tr><td>Chỉ dẫn + template</td><td>Cố định</td><td>—</td></tr>
           <tr><td>Đầu ra</td><td><code>max_new_tokens</code> nhỏ (ví dụ 32)</td><td>Đáp án trung bình 4,18 từ</td></tr>
-          <tr class="row-key"><td><strong>Tổng</strong></td><td>Ước tính khoảng 0,8–1,8 nghìn token / mẫu, tuỳ <code>max_pixels</code></td><td>Nhỏ hơn nhiều so với context window của model</td></tr>
+          <tr class="row-key"><td><strong>Tổng</strong></td><td>Ước tính khoảng 1.000–1.500 token / mẫu</td><td>Nhỏ hơn nhiều so với context window của model</td></tr>
         </tbody>
       </table>
     </div>
@@ -1181,40 +952,10 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
       </div>
     </div>
 
-    <h3 class="sub-h reveal">Kết quả đã có (W4–W6)</h3>
-    <div class="table-wrap reveal">
-      <table>
-        <thead><tr><th>Dataset</th><th>Tập đánh giá</th><th>EM</th><th>VQA-Acc</th><th>ANLS</th><th>F1 (phụ)</th><th>Thời gian suy luận</th></tr></thead>
-        <tbody>
-          <tr class="row-key"><td><strong>ViVQA</strong></td><td>Test đầy đủ, 3.001 câu</td><td class="num">0,225</td><td class="num">0,225</td><td class="num">0,288</td><td class="num">—</td><td class="num">0,84 s/mẫu</td></tr>
-          <tr class="row-key"><td><strong>ViTextVQA</strong></td><td>Tập con test 2.000 câu, seed 42</td><td class="num">0,285</td><td class="num">0,285</td><td class="num">0,468</td><td class="num">0,530</td><td class="num">1,35 s/mẫu</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="note reveal" style="margin-top:0;border-top:none;padding-top:0">Baseline zero-shot chính thức W5: Qwen2.5-VL-3B-Instruct, 4-bit NF4, fp16, <code>max_pixels</code>=512·28·28, greedy, Colab T4. VQA-Acc = EM vì mỗi câu chỉ có một đáp án chuẩn. Số W4 (EM 38,3% · ANLS 55,9%) đo trên bản mirror, 300 câu, luật chấm cũ — chỉ là số chỉ báo, không dùng để so sánh.</p>
-
-    <div class="card-grid card-grid-3 reveal" style="margin-top:24px">
-      <div class="card card--teal">
-        <div class="card-tag">W6 · CHẨN ĐOÁN DTYPE</div>
-        <div class="card-title">fp16 gây lỗi trên T4</div>
-        <p>23/2.000 câu ViTextVQA (1,15%) sinh toàn “!!!!”. Chạy lại ở fp32: 23 → 0 câu hỏng, 0 câu đối chứng bị kém đi → nguyên nhân là tràn số fp16.</p>
-      </div>
-      <div class="card card--teal">
-        <div class="card-tag">W6 · ĐỘ PHÂN GIẢI</div>
-        <div class="card-title">512 so với 1.280 visual token</div>
-        <p>1.280 token tăng ANLS có ý nghĩa (CI95 [+0,012; +0,066]), EM không khác biệt (p=0,134), chi phí suy luận ×1,46.</p>
-      </div>
-      <div class="card card--teal">
-        <div class="card-tag">W6 · SMOKE RUN QLORA</div>
-        <div class="card-title">Đường ray huấn luyện chạy được</div>
-        <p>200 mẫu ViVQA, 30 step: loss 1,61 → 0,88; 0,196% tham số được train. Trên T4 ở fp32: 4,93 s/mẫu ≈ 14,77 giờ/epoch → chuyển sang L4 (có bf16).</p>
-      </div>
-    </div>
-
-    <div class="card card--highlight reveal" style="margin-top:24px">
-      <div class="card-tag">VIỆC TIẾP THEO (W7)</div>
-      <div class="card-title">Đóng băng cấu hình → chạy lại baseline một lần → QLoRA sơ bộ</div>
-      <p>Baseline W5 dùng fp16 (đã chứng minh gây lỗi) và đổi GPU từ T4 sang L4 sẽ đổi điều kiện chạy. Để QLoRA và baseline chỉ khác đúng một biến (có adapter hay không), nhóm chốt dtype, <code>max_pixels</code> và chế độ lượng tử hoá trên L4, rồi chạy lại baseline trên cả hai dataset <strong>một lần</strong>. Số chạy lại này là mốc chính thức để so với QLoRA. Smoke adapter W6 đã xoá, không dùng để báo cáo.</p>
+    <div class="card card--highlight reveal" style="margin-top:32px">
+      <div class="card-tag">ĐÃ REPRODUCE (W4)</div>
+      <div class="card-title">Zero-shot baseline: EM 38,3% · ANLS 55,9%</div>
+      <p>Qwen2.5-VL-3B trên ViTextVQA (mirror), n=300, seed 42 — mốc tham chiếu để so mọi cải tiến. Số chính thức sẽ chốt trên official split.</p>
     </div>
 
   </div>
@@ -1313,6 +1054,7 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
         </div>
         <!-- W3 -->
         <div class="timeline-week" style="position:relative">
+          <span class="tl-now">← HIỆN TẠI</span>
           <span class="timeline-label">W3</span>
           <div class="timeline-bar tl-phase1">Dataset</div>
           <span class="tl-milestone">🔴 Review 1</span>
@@ -1333,8 +1075,7 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
           <div class="timeline-bar tl-phase2">Methods</div>
         </div>
         <!-- W7 -->
-        <div class="timeline-week" style="position:relative">
-          <span class="tl-now">← HIỆN TẠI</span>
+        <div class="timeline-week">
           <span class="timeline-label">W7</span>
           <div class="timeline-bar tl-phase2">Eval</div>
           <span class="tl-milestone">🟡 Review 2</span>
@@ -1392,11 +1133,11 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
           <tr><td class="num"><strong>W1</strong></td><td>Đọc đề cương, phân vai, chọn 10 paper nền</td><td>W1 Report, kế hoạch 15 tuần</td><td class="yes">✔</td></tr>
           <tr><td class="num"><strong>W2</strong></td><td>Literature Matrix; phân tích ViVQA / ViTextVQA (seed 42)</td><td>Literature_Matrix.md, Dataset_Analysis.md</td><td class="yes">✔</td></tr>
           <tr class="row-key"><td class="num"><strong>W3</strong></td><td>Câu hỏi nghiên cứu, giả thuyết, đề xuất baseline; Review 1</td><td>Báo cáo + slide Review 1</td><td class="yes">✔</td></tr>
-          <tr><td class="num"><strong>W4</strong></td><td>Môi trường Colab; zero-shot Qwen2.5-VL-3B trên ViTextVQA mirror (300 câu)</td><td>Số chỉ báo EM 38,3% · ANLS 55,9%; notebook zero-shot</td><td class="yes">✔</td></tr>
-          <tr><td class="num"><strong>W5</strong></td><td>Chuẩn bị ViVQA (đủ ảnh) + ViTextVQA chính thức; chốt luật chấm trước test; baseline zero-shot chính thức trên 2 dataset; error analysis sơ bộ</td><td>ViVQA EM 0,225 · ANLS 0,288; ViTextVQA EM 0,285 · ANLS 0,468; Baseline Report</td><td class="yes">✔</td></tr>
-          <tr><td class="num"><strong>W6</strong></td><td>Chẩn đoán fp16 (23 → 0 câu hỏng); ablation 512 vs 1.280 token; dựng <code>train_qlora.py</code> + smoke run; Methodology (Report 4)</td><td>Bảng ablation; smoke log; R4 bản tiếng Việt</td><td class="yes">✔</td></tr>
-          <tr class="row-key"><td class="num"><strong>W7</strong></td><td>Colab Pro (L4): chốt dtype, <code>max_pixels</code>, lượng tử hoá → đóng băng config; chạy lại baseline 2 dataset; QLoRA sơ bộ đánh giá trên dev; Review 2</td><td>Config đóng băng; baseline chạy lại; kết quả QLoRA sơ bộ; slide Review 2</td><td class="yes"></td></tr>
-          <tr><td class="num"><strong>W8</strong></td><td>QLoRA đầy đủ trên ViVQA; dựng OCR pipeline (dời từ W6); log VRAM, thời gian, số tham số train</td><td>Adapter v1; experiments/W08_*</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W4</strong></td><td>Môi trường Colab; zero-shot Qwen2.5-VL-3B trên ViTextVQA (n=300)</td><td>EM 38,3 · ANLS 55,9; notebook zero-shot</td><td class="yes">✔</td></tr>
+          <tr><td class="num"><strong>W5</strong></td><td>Chuyển ViTextVQA sang repo chính thức; tiền xử lý NFC; cố định split và test subset 2.000 câu</td><td>Dữ liệu chính thức + log split</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W6</strong></td><td>Zero-shot chính thức trên 2 dataset; phân loại lỗi V1–V4; bảng công trình trước; vẽ pipeline</td><td>Bảng baseline chính thức; Methodology (Report 4)</td><td class="yes"></td></tr>
+          <tr class="row-key"><td class="num"><strong>W7</strong></td><td>Review 2: baseline + phương pháp đề xuất + QLoRA pilot trên tập con</td><td>Slide Review 2; log pilot run</td><td class="yes"></td></tr>
+          <tr><td class="num"><strong>W8</strong></td><td>QLoRA đầy đủ trên ViVQA; log VRAM, thời gian, số tham số train</td><td>Adapter v1; experiments/W08_*</td><td class="yes"></td></tr>
           <tr><td class="num"><strong>W9</strong></td><td>OCR pipeline (PaddleOCR/VietOCR, TL-BR) + prompt tiếng Việt; QLoRA trên ViTextVQA</td><td>OCR cache; adapter v2</td><td class="yes"></td></tr>
           <tr><td class="num"><strong>W10</strong></td><td>Chạy chính: zero-shot / prompt / QLoRA / QLoRA + OCR trên cùng split, seed</td><td>Bảng kết quả chính</td><td class="yes"></td></tr>
           <tr><td class="num"><strong>W11</strong></td><td>Đánh giá đầy đủ EM, VQA-Acc, ANLS (+ F1); hallucination POPE-vi</td><td>Báo cáo metric + hallucination</td><td class="yes"></td></tr>
@@ -1434,14 +1175,7 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
             <td class="risk-high">Cao</td>
             <td>QLoRA 4-bit, model 3B</td>
             <td>Florence-2</td>
-            <td><span class="badge badge--teal" style="font-size:0.75rem">Đã khử: train QLoRA đỉnh 5,93 GB VRAM</span></td>
-          </tr>
-          <tr>
-            <td>T4 không có bf16; fp16 tràn số</td>
-            <td class="risk-high">Cao</td>
-            <td>Tính ở fp32</td>
-            <td>Colab Pro L4 (bf16)</td>
-            <td><span class="badge badge--teal" style="font-size:0.75rem">Đã chẩn đoán W6: 23 → 0 câu hỏng</span></td>
+            <td><span class="badge badge--teal" style="font-size:0.75rem">Đã khử (3B chạy T4 4-bit)</span></td>
           </tr>
           <tr>
             <td>GPU / Colab bị gián đoạn</td>
@@ -1452,24 +1186,24 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
           </tr>
           <tr>
             <td>QLoRA train chậm</td>
-            <td class="risk-high">Cao</td>
+            <td class="risk-med">Trung bình</td>
             <td>Pilot subset, gradient accumulation</td>
-            <td>Colab Pro L4 (bf16)</td>
-            <td><span class="badge badge--amber" style="font-size:0.75rem">Đã đo: T4 fp32 ≈ 14,77 giờ/epoch → chuyển L4</span></td>
+            <td>Giảm rank</td>
+            <td>—</td>
           </tr>
           <tr>
             <td>Dataset / licence</td>
             <td class="risk-med">Trung bình</td>
             <td>Preprocessing, kiểm tra licence</td>
-            <td>—</td>
-            <td><span class="badge badge--teal" style="font-size:0.75rem">Đã khử: cả 2 dataset từ nguồn chính thức, đủ ảnh</span></td>
+            <td>Mirror khác</td>
+            <td><span class="badge badge--amber" style="font-size:0.75rem">Một phần: ViVQA xong; ViTextVQA còn mirror</span></td>
           </tr>
           <tr>
             <td>Baseline khó tái tạo</td>
             <td class="risk-high">Cao</td>
             <td>Source repo, fixed seed</td>
             <td>Đổi VLM</td>
-            <td><span class="badge badge--amber" style="font-size:0.75rem">Đã reproduce W5; chờ GVHD xác nhận + chạy lại theo config W7</span></td>
+            <td><span class="badge badge--amber" style="font-size:0.75rem">Một phần: reproduce trên mirror (official pending)</span></td>
           </tr>
           <tr>
             <td>OCR kém</td>
@@ -1517,7 +1251,7 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
       </div>
       <div class="card card--teal">
         <div class="card-title">Runtime: Google Colab</div>
-        <p>Colab free (T4) đến W6; dự kiến Colab Pro (L4, có bf16) từ W7 cho huấn luyện. Mount Google Drive; log GPU, dtype, commit mỗi run.</p>
+        <p>Free tier cho thí nghiệm nhẹ, Pro cho training; mount Google Drive; log GPU mỗi run.</p>
       </div>
     </div>
   </div>
@@ -1559,7 +1293,7 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
 <section id="feedback">
   <div class="container">
     <p class="section-eyebrow reveal">Phần 14</p>
-    <h2 class="section-title reveal">Tiếp thu góp ý Review 1 và GVHD</h2>
+    <h2 class="section-title reveal">Tiếp thu góp ý Review 1</h2>
     <p class="section-lead reveal">Các góp ý của giảng viên review ngày 24/09/2026 và phần nhóm đã điều chỉnh trong báo cáo này.</p>
     <div class="table-wrap reveal">
       <table>
@@ -1578,20 +1312,6 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
         </tbody>
       </table>
     </div>
-
-    <!-- W07-BASELINE: góp ý GVHD Phạm Minh Trí -->
-    <h3 class="sub-h reveal">Góp ý GVHD Phạm Minh Trí (họp ngày 07/10/2026)</h3>
-    <div class="table-wrap reveal">
-      <table>
-        <thead><tr><th>#</th><th>Góp ý</th><th>Nhóm đã điều chỉnh</th><th>Phần</th></tr></thead>
-        <tbody>
-          <tr><td class="num">1</td><td>Chưa có sơ đồ baseline; phải hiểu từng thành phần của baseline</td><td>Sơ đồ kiến trúc Qwen2.5-VL-3B (Hình 7.A) và bảng vai trò từng thành phần</td><td class="num">07</td></tr>
-          <tr><td class="num">2</td><td>Dataset là gì, có nhiễu không, có đề xuất xử lý không</td><td>Quy trình xây dựng ViVQA (Hình 6.A), bảng nhiễu có số đo, đề xuất xử lý chỉ trên train/dev</td><td class="num">06</td></tr>
-          <tr><td class="num">3</td><td>Nhóm có biết SOTA là gì không</td><td>Nêu mốc SOTA trong các công trình đã khảo sát, kèm lưu ý khác metric</td><td class="num">03, 07</td></tr>
-          <tr><td class="num">4</td><td>Chạy lại baseline, nêu phương pháp đánh giá, chạy experiment trước khi cải tiến</td><td>Giao thức đánh giá cố định (Hình 7.B); bảng thí nghiệm B0–B2; B1 là baseline chính thức</td><td class="num">07</td></tr>
-        </tbody>
-      </table>
-    </div>
   </div>
 </section>
 
@@ -1605,7 +1325,7 @@ Trả lời ngắn gọn bằng tiếng Việt có dấu, chỉ dùng thông tin
 </main>
 
 <footer>
-  <p>ViVQA-VLM · Review 1 — bản cập nhật sau góp ý (07/10/2026) · FPT University</p>
+  <p>ViVQA-VLM · Review 1 — bản cập nhật sau góp ý (06/10/2026) · FPT University</p>
 </footer>
 
 <script>
@@ -1766,7 +1486,7 @@ try {
     new Chart(elSplit, {
       type: 'bar',
       data: {
-        labels: ['ViVQA', 'ViTextVQA'],
+        labels: ['ViVQA (có sẵn)', 'ViTextVQA (có sẵn)'],
         datasets: [
           {
             label: 'Train',
@@ -1776,8 +1496,8 @@ try {
             barPercentage: 0.6,
           },
           {
-            label: 'Val / Dev',
-            data: [1200, 5155],
+            label: 'Val',
+            data: [1200, 0],
             backgroundColor: muted,
             borderRadius: 6,
             barPercentage: 0.6,
