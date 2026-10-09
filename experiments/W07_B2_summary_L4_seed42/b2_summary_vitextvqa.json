@@ -1,0 +1,83 @@
+{
+  "what": "B2 = QLoRA sơ bộ 1 epoch trên vitextvqa_official train; so với B1 (zero-shot) cùng model 4-bit, prompt, decoding, test, GPU",
+  "pre_registered_rule": "cải thiện nếu EM tăng và McNemar exact p < 0.05 trên test vitextvqa_official; ANLS kèm CI95 bootstrap ghép cặp",
+  "train": {
+    "run": "W07_B2_qlora_r16_qwen25vl_vitextvqa_ep1_bf16_L4_seed42",
+    "adapter": "/content/drive/MyDrive/ViVQA-VLM/adapters/W07_B2_qlora_r16_qwen25vl_vitextvqa_ep1_bf16_L4_seed42/epoch_1",
+    "epochs": 1,
+    "global_step": 2198,
+    "sec_per_step": 19.634,
+    "train_hours": 11.99,
+    "peak_vram_gb": 6.88,
+    "final_loss": 0.6179,
+    "resumed_from": null,
+    "trainable_params": 7372800,
+    "trainable_pct": 0.196,
+    "data": "data/vitextvqa_official/train.json (35159 mẫu, chưa làm sạch nhiễu)"
+  },
+  "eval_runs": {
+    "vitextvqa": "W07_B2_eval_qlora_r16_ep1_vitextvqa_test2000_bf16_L4_seed42"
+  },
+  "table1": [
+    {
+      "tập": "vitextvqa",
+      "run": "B1 zero-shot",
+      "EM": 0.288,
+      "VQA-Acc": 0.288,
+      "ANLS": 0.47526612806793894,
+      "token-F1 (phụ)": 0.5376551062892471,
+      "câu hỏng": 0,
+      "s/câu": 0.862
+    },
+    {
+      "tập": "vitextvqa",
+      "run": "B2 QLoRA 1 epoch",
+      "EM": 0.497,
+      "VQA-Acc": 0.497,
+      "ANLS": 0.7190867530738418,
+      "token-F1 (phụ)": 0.7100743316681678,
+      "câu hỏng": 0,
+      "s/câu": 1.011
+    }
+  ],
+  "table2_by_type": [],
+  "table3_answer_length": {
+    "gold (đáp án đầu)": 3.6835,
+    "B1": 5.479,
+    "B2": 3.6615
+  },
+  "paired": {
+    "vitextvqa": {
+      "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B1_zeroshot_qwen25vl_vitextvqa_test2000_bf16_L4_seed42",
+      "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B2_eval_qlora_r16_ep1_vitextvqa_test2000_bf16_L4_seed42",
+      "label_a": "B1",
+      "label_b": "B2",
+      "n": 2000,
+      "n_both_correct": 490,
+      "n_only_a": 86,
+      "n_only_b": 504,
+      "n_both_wrong": 920,
+      "b": 86,
+      "c": 504,
+      "p_value": 7.119234867718256e-73,
+      "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+      "em_a": 0.288,
+      "em_b": 0.497,
+      "em_diff": 0.20900000000000002,
+      "anls_threshold": 0.5,
+      "anls_a": 0.4752661280679394,
+      "anls_b": 0.7190867530738413,
+      "anls_diff": 0.2438206250059018,
+      "anls_ci95": [
+        0.22353526442330235,
+        0.2642539900976649
+      ],
+      "bootstrap": {
+        "n_resamples": 10000,
+        "seed": 42,
+        "method": "paired percentile"
+      }
+    }
+  },
+  "gpu": "NVIDIA L4"
+}

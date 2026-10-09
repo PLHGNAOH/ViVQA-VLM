@@ -1,0 +1,77 @@
+{
+  "sha256": "e7d67f4ea97496de29acfba93bad0c756fd2564b86feb85e8335ba13172b5f39",
+  "cfg": {
+    "run": {
+      "seed": 42,
+      "output_dir": "experiments/runs"
+    },
+    "model": {
+      "backbone": "qwen2_5_vl",
+      "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+      "torch_dtype": "bfloat16",
+      "min_pixels": 200704,
+      "max_pixels": 401408
+    },
+    "quantization": {
+      "enabled": true,
+      "load_in_4bit": true,
+      "bnb_4bit_quant_type": "nf4",
+      "bnb_4bit_use_double_quant": true,
+      "bnb_4bit_compute_dtype": "bfloat16"
+    },
+    "lora": {
+      "r": 16,
+      "lora_alpha": 32,
+      "lora_dropout": 0.05,
+      "bias": "none",
+      "target_modules": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj"
+      ]
+    },
+    "data": {
+      "dataset_name": "vivqa",
+      "train_path": "data/vivqa/train.json",
+      "val_path": "data/vivqa/val.json",
+      "test_path": "data/vivqa/test.json",
+      "image_dir": "data/vivqa/images",
+      "ocr_cache": "data/vivqa/ocr_cache.json",
+      "max_samples": null,
+      "ocr": {
+        "backend": "paddleocr",
+        "image_pattern": null,
+        "field_map": null
+      }
+    },
+    "prompting": {
+      "mode": "zero_shot",
+      "max_new_tokens": 32
+    },
+    "training": {
+      "epochs": 1.0,
+      "per_device_batch_size": 2,
+      "gradient_accumulation_steps": 8,
+      "learning_rate": 0.0002,
+      "warmup_ratio": 0.03,
+      "weight_decay": 0.0,
+      "gradient_checkpointing": true
+    },
+    "eval": {
+      "primary_metrics": [
+        "exact_match",
+        "vqa_accuracy",
+        "anls"
+      ],
+      "secondary_metrics": [
+        "token_f1"
+      ],
+      "anls_threshold": 0.5
+    }
+  },
+  "data_sha256": "dec0acc1ca998272ddbf76ba97087d9f6b1d3f96f4000274e41483c02fbde46c",
+  "n_samples": 35159,
+  "limit": null,
+  "max_steps": null
+}
