@@ -194,6 +194,17 @@ def filter_trainable(samples: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]
     return keep, dropped
 
 
+MAX_DROP_FRAC = 0.01   # loại > 1% mẫu = gần như chắc chắn thiếu ảnh (chép dở), không phải dữ liệu xấu
+
+
+def check_drop_ratio(n_keep: int, n_drop: int, image_dir: str = "", max_frac: float = MAX_DROP_FRAC) -> None:
+    """Dừng hẳn nếu bị loại quá nhiều mẫu: train âm thầm trên dữ liệu thiếu sẽ làm sai lệch kết quả."""
+    total = n_keep + n_drop
+    if total and n_drop / total > max_frac:
+        raise ValueError(f"Bị loại {n_drop}/{total} mẫu (> {max_frac:.0%}) — gần như chắc chắn thiếu ảnh ở "
+                         f"{image_dir or 'thư mục ảnh'}. Chạy lại (ảnh sẽ được chép bù) hoặc kiểm tra dữ liệu.")
+
+
 # --------------------------------------------------------------------------- #
 # 3) Config
 # --------------------------------------------------------------------------- #
@@ -406,6 +417,7 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     samples, dropped = filter_trainable(samples)
     if not samples:
         raise ValueError("Không còn mẫu nào train được sau khi lọc")
+    check_drop_ratio(len(samples), len(dropped), image_dir)
     _log(f"   {len(samples)} mẫu train (loại {len(dropped)} mẫu thiếu ảnh/đáp án)")
 
     # --- Chạy tiếp hay chạy mới? (kiểm tra TRƯỚC khi nạp model 4 phút) ---
@@ -674,6 +686,16 @@ def _selftest() -> None:
                 raise AssertionError("không chặn chạy tiếp với cấu hình/dữ liệu khác")
             except ValueError:
                 pass
+
+    # loại quá 1% mẫu -> dừng (W07: thư mục ảnh chép dở từng làm loại 100% mẫu)
+    check_drop_ratio(10799, 0); check_drop_ratio(10799, 100)
+    for bad in [(10000, 799), (0, 10799)]:
+        try:
+            check_drop_ratio(*bad)
+            raise AssertionError(f"không chặn {bad}")
+        except ValueError:
+            pass
+    _log("drop guard OK")
 
     # --epochs ghi đè lịch: B2 sơ bộ 1 epoch ViVQA = ceil(10.799 / 16) = 675 step; có trong chữ ký
     cfg1 = load_config(os.path.join(REPO_ROOT, "configs/qwen_lora.yaml"), epochs=1)

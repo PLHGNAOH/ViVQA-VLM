@@ -127,15 +127,33 @@ def load_model(cfg: Dict[str, Any]):
 # --------------------------------------------------------------------------- #
 # Ảnh
 # --------------------------------------------------------------------------- #
+def sync_images(src: str, dst: str, label: str = "") -> str:
+    """
+    Chép ảnh src -> dst, CHỈ chép file còn thiếu; mỗi file ghi tạm rồi đổi tên (không để lại file dở).
+    W07: bản cũ bỏ qua cả bước chép nếu dst đã tồn tại -> thư mục chép dở (Colab bị ngắt) làm
+    mất ảnh âm thầm. Giờ luôn đối chiếu tên file với nguồn, nên chạy lại là tự bù đủ.
+    """
+    names = sorted(n for n in os.listdir(src) if not n.startswith("."))
+    os.makedirs(dst, exist_ok=True)
+    have = {n for n in os.listdir(dst) if not n.startswith(".")}
+    missing = [n for n in names if n not in have]
+    if missing:
+        t0 = time.time()
+        for n in missing:
+            tmp = os.path.join(dst, f".{n}.part")
+            shutil.copyfile(os.path.join(src, n), tmp)
+            os.replace(tmp, os.path.join(dst, n))
+        _log(f"  chép {len(missing)} ảnh {label} về {dst} (đã có sẵn {len(names) - len(missing)}) "
+             f"trong {time.time() - t0:.0f}s")
+    else:
+        _log(f"  [có sẵn] đủ {len(names)} ảnh {label} ở {dst}")
+    return dst
+
+
 def prepare_images(dataset: str, drive_root: str) -> str:
     """Đưa ảnh về đĩa Colab (/content) cho nhanh; trả thư mục chứa ảnh."""
     if dataset == "vivqa":
-        src, dst = os.path.join(drive_root, "data/vivqa/images"), "/content/vivqa_images"
-        if not os.path.exists(dst):
-            t0 = time.time()
-            shutil.copytree(src, dst)
-            _log(f"  chép {len(os.listdir(dst))} ảnh ViVQA về {dst} trong {time.time() - t0:.0f}s")
-        return dst
+        return sync_images(os.path.join(drive_root, "data/vivqa/images"), "/content/vivqa_images", "ViVQA")
     if dataset == "vitextvqa_official":
         from src.data.prepare_vitextvqa import ensure_images
         info = ensure_images(zip_dir=os.path.join(drive_root, "data/vitextvqa_official"),
@@ -455,6 +473,20 @@ def _selftest() -> None:
         s2 = run_signature(base_cfg, "sha", None, 500, adapter={"path": "/y", **adapter_fingerprint(ad)})
         assert s1["sha256"] != s0["sha256"] and s1["sha256"] != s2["sha256"], "adapter phải đổi chữ ký"
     _log("adapter signature OK")
+    # sync_images: thư mục đích chép dở (thiếu file + file .part rác) -> chạy lại phải bù đủ, đúng nội dung
+    with _tf.TemporaryDirectory() as root:
+        src, dst = os.path.join(root, "src"), os.path.join(root, "dst")
+        os.makedirs(src); os.makedirs(dst)
+        for i in range(5):
+            open(os.path.join(src, f"{i}.jpg"), "w").write(f"img{i}")
+        open(os.path.join(dst, "0.jpg"), "w").write("img0")
+        open(os.path.join(dst, ".3.jpg.part"), "w").write("rác")
+        sync_images(src, dst, "test")
+        got = sorted(n for n in os.listdir(dst) if not n.startswith("."))
+        assert got == [f"{i}.jpg" for i in range(5)], got
+        assert open(os.path.join(dst, "4.jpg")).read() == "img4"
+        sync_images(src, dst, "test")      # lần 2: không chép gì
+    _log("sync_images OK")
     _log("SELFTEST OK")
 
 
