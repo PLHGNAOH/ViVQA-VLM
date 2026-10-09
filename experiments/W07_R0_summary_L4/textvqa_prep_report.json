@@ -1,0 +1,14 @@
+{
+  "hf_repo": "lmms-lab/textvqa",
+  "split": "validation",
+  "revision": "9c0699cd19768ac5ab97568f6b3cbac4c0062884",
+  "files": [
+    "data/validation-00000-of-00003.parquet",
+    "data/validation-00001-of-00003.parquet",
+    "data/validation-00002-of-00003.parquet"
+  ],
+  "num_questions": 5000,
+  "num_images": 3166,
+  "data_sha256": "49470cde31fb91e11abaa1fcde8fc1923b6d3c4bcfdbff7cc0de1e40d81c2981",
+  "prepared_utc": "2026-10-09T05:59:10.287719+00:00"
+}

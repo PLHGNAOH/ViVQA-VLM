@@ -1,0 +1,22 @@
+{
+  "sha256": "2da92077da21712d7bc6024f2a3ebe0ba293b5a90d33487d62a6b8cbda370d2c",
+  "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+  "variant": {
+    "quant": {
+      "load_in_4bit": true,
+      "bnb_4bit_quant_type": "nf4",
+      "bnb_4bit_use_double_quant": true,
+      "bnb_4bit_compute_dtype": "bfloat16"
+    },
+    "torch_dtype": "bfloat16",
+    "min_pixels": 200704,
+    "max_pixels": 401408
+  },
+  "prompt_suffix": "\nAnswer the question using a single word or phrase.",
+  "max_new_tokens": 32,
+  "decoding": "greedy",
+  "hf_repo": "lmms-lab/textvqa",
+  "revision": "9c0699cd19768ac5ab97568f6b3cbac4c0062884",
+  "data_sha256": "49470cde31fb91e11abaa1fcde8fc1923b6d3c4bcfdbff7cc0de1e40d81c2981",
+  "limit": null
+}

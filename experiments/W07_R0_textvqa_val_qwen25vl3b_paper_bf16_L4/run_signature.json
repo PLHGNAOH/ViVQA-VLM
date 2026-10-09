@@ -1,0 +1,17 @@
+{
+  "sha256": "474ae5094a4f075556b2bc6ddc77d0b1e3e4f12cf81584a8bc6a10a476397935",
+  "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+  "variant": {
+    "quant": null,
+    "torch_dtype": "bfloat16",
+    "min_pixels": null,
+    "max_pixels": null
+  },
+  "prompt_suffix": "\nAnswer the question using a single word or phrase.",
+  "max_new_tokens": 32,
+  "decoding": "greedy",
+  "hf_repo": "lmms-lab/textvqa",
+  "revision": "9c0699cd19768ac5ab97568f6b3cbac4c0062884",
+  "data_sha256": "49470cde31fb91e11abaa1fcde8fc1923b6d3c4bcfdbff7cc0de1e40d81c2981",
+  "limit": null
+}
