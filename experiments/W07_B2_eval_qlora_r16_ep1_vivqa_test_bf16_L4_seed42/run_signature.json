@@ -1,0 +1,39 @@
+{
+  "sha256": "b95267c0c766a2f8c7824642aa097e0936989a8d5efb59c4e86ea0994220f2a9",
+  "model": {
+    "backbone": "qwen2_5_vl",
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "torch_dtype": "bfloat16",
+    "min_pixels": 200704,
+    "max_pixels": 401408
+  },
+  "quantization": {
+    "enabled": true,
+    "load_in_4bit": true,
+    "bnb_4bit_quant_type": "nf4",
+    "bnb_4bit_use_double_quant": true,
+    "bnb_4bit_compute_dtype": "bfloat16"
+  },
+  "prompting": {
+    "mode": "zero_shot",
+    "max_new_tokens": 32
+  },
+  "eval": {
+    "primary_metrics": [
+      "exact_match",
+      "vqa_accuracy",
+      "anls"
+    ],
+    "secondary_metrics": [
+      "token_f1"
+    ],
+    "anls_threshold": 0.5
+  },
+  "data_sha256": "0a09f7bac471ce7359eda5b965d94821ae78fd151217f84cf9a59b14b6ccb787",
+  "limit": null,
+  "chunk": 500,
+  "adapter": {
+    "weights_sha256": "ccc6c671d125bc65d0a456239a48e71d8412da98bd94ba85403078cb58d8cb73",
+    "config_sha256": "4cacecf893b23be805e48d0b78b227b11124a978d7f4f071bd2b214454cfa489"
+  }
+}
