@@ -1,0 +1,200 @@
+{
+  "sizes": {
+    "train": 10799,
+    "val": 1200,
+    "test": 3001
+  },
+  "num_images": {
+    "train": 8255,
+    "val": 1167,
+    "test": 2789
+  },
+  "image_overlap_with_test": {
+    "train": 1274,
+    "val": 165
+  },
+  "question_overlap_with_test": {
+    "train": {
+      "test_questions_seen_verbatim": 703,
+      "test_question_answer_pairs_seen": 541,
+      "same_image_and_question": 57
+    },
+    "val": {
+      "test_questions_seen_verbatim": 464,
+      "test_question_answer_pairs_seen": 267,
+      "same_image_and_question": 9
+    }
+  },
+  "test_answer_in_train_vocab": {
+    "train_split": "train",
+    "covered": 2984,
+    "total": 3001,
+    "pct": 99.43,
+    "train_unique_answers": 333
+  },
+  "top20_answers_train": [
+    [
+      "2",
+      491
+    ],
+    [
+      "3",
+      449
+    ],
+    [
+      "4",
+      299
+    ],
+    [
+      "đen",
+      281
+    ],
+    [
+      "trắng",
+      279
+    ],
+    [
+      "đỏ",
+      265
+    ],
+    [
+      "xanh dương",
+      262
+    ],
+    [
+      "vàng",
+      247
+    ],
+    [
+      "phòng",
+      246
+    ],
+    [
+      "xanh lá",
+      245
+    ],
+    [
+      "phòng bếp",
+      222
+    ],
+    [
+      "nâu",
+      192
+    ],
+    [
+      "cam",
+      176
+    ],
+    [
+      "phòng tắm",
+      173
+    ],
+    [
+      "giường",
+      165
+    ],
+    [
+      "tía",
+      155
+    ],
+    [
+      "con chim",
+      151
+    ],
+    [
+      "con mèo",
+      149
+    ],
+    [
+      "5",
+      148
+    ],
+    [
+      "máy bay",
+      147
+    ]
+  ],
+  "top20_answers_test": [
+    [
+      "2",
+      134
+    ],
+    [
+      "3",
+      118
+    ],
+    [
+      "4",
+      96
+    ],
+    [
+      "trắng",
+      85
+    ],
+    [
+      "xanh lá",
+      76
+    ],
+    [
+      "đỏ",
+      75
+    ],
+    [
+      "xanh dương",
+      74
+    ],
+    [
+      "nâu",
+      72
+    ],
+    [
+      "vàng",
+      69
+    ],
+    [
+      "phòng",
+      57
+    ],
+    [
+      "đen",
+      56
+    ],
+    [
+      "phòng bếp",
+      53
+    ],
+    [
+      "phòng tắm",
+      50
+    ],
+    [
+      "hươu cao cổ",
+      46
+    ],
+    [
+      "cam",
+      43
+    ],
+    [
+      "giường",
+      42
+    ],
+    [
+      "con mèo",
+      42
+    ],
+    [
+      "tía",
+      41
+    ],
+    [
+      "gương",
+      41
+    ],
+    [
+      "gấu",
+      40
+    ]
+  ],
+  "data_dir": "G:/My Drive/ViVQA-VLM/data/vivqa"
+}

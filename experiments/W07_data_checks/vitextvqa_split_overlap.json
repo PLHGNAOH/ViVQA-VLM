@@ -1,0 +1,200 @@
+{
+  "sizes": {
+    "train": 35159,
+    "dev": 5155,
+    "test": 10028
+  },
+  "num_images": {
+    "train": 11733,
+    "dev": 1676,
+    "test": 3353
+  },
+  "image_overlap_with_test": {
+    "train": 0,
+    "dev": 0
+  },
+  "question_overlap_with_test": {
+    "train": {
+      "test_questions_seen_verbatim": 2486,
+      "test_question_answer_pairs_seen": 407,
+      "same_image_and_question": 0
+    },
+    "dev": {
+      "test_questions_seen_verbatim": 1555,
+      "test_question_answer_pairs_seen": 102,
+      "same_image_and_question": 0
+    }
+  },
+  "test_answer_in_train_vocab": {
+    "train_split": "train",
+    "covered": 4653,
+    "total": 10028,
+    "pct": 46.4,
+    "train_unique_answers": 23661
+  },
+  "top20_answers_train": [
+    [
+      "vinmart",
+      164
+    ],
+    [
+      "chợ",
+      106
+    ],
+    [
+      "kenh14 vn",
+      97
+    ],
+    [
+      "hà nội",
+      89
+    ],
+    [
+      "việt nam",
+      67
+    ],
+    [
+      "khuyến mãi",
+      58
+    ],
+    [
+      "đồng nai",
+      49
+    ],
+    [
+      "khai trương",
+      49
+    ],
+    [
+      "50",
+      46
+    ],
+    [
+      "10",
+      40
+    ],
+    [
+      "0935 248 949",
+      39
+    ],
+    [
+      "afamily vn",
+      37
+    ],
+    [
+      "vov",
+      36
+    ],
+    [
+      "20",
+      36
+    ],
+    [
+      "foody vn",
+      35
+    ],
+    [
+      "2",
+      34
+    ],
+    [
+      "vietnamnet vn",
+      34
+    ],
+    [
+      "bia phố cổ",
+      33
+    ],
+    [
+      "30",
+      32
+    ],
+    [
+      "vineco",
+      31
+    ]
+  ],
+  "top20_answers_test": [
+    [
+      "vinmart",
+      56
+    ],
+    [
+      "hà nội",
+      30
+    ],
+    [
+      "kenh14 vn",
+      30
+    ],
+    [
+      "chợ",
+      26
+    ],
+    [
+      "việt nam",
+      24
+    ],
+    [
+      "khuyến mãi",
+      20
+    ],
+    [
+      "khai trương",
+      18
+    ],
+    [
+      "điện biên phủ",
+      17
+    ],
+    [
+      "0935 248 949",
+      17
+    ],
+    [
+      "tây ninh",
+      15
+    ],
+    [
+      "vov",
+      14
+    ],
+    [
+      "2021",
+      13
+    ],
+    [
+      "hanatech",
+      13
+    ],
+    [
+      "50",
+      13
+    ],
+    [
+      "zing",
+      12
+    ],
+    [
+      "nhà xuất bản trẻ",
+      12
+    ],
+    [
+      "10",
+      12
+    ],
+    [
+      "phuot3mien com",
+      12
+    ],
+    [
+      "vtcnews",
+      11
+    ],
+    [
+      "đồng nai",
+      11
+    ]
+  ],
+  "data_dir": "G:/My Drive/ViVQA-VLM/data/vitextvqa_official"
+}
