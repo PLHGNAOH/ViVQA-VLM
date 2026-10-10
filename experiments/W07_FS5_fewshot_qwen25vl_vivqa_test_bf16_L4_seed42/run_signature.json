@@ -1,0 +1,63 @@
+{
+  "sha256": "aa772e5236b53d71d58503d19656f774cdaf8065c0fa41c91e1a36a156b39f58",
+  "model": {
+    "backbone": "qwen2_5_vl",
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "torch_dtype": "bfloat16",
+    "min_pixels": 200704,
+    "max_pixels": 401408
+  },
+  "quantization": {
+    "enabled": true,
+    "load_in_4bit": true,
+    "bnb_4bit_quant_type": "nf4",
+    "bnb_4bit_use_double_quant": true,
+    "bnb_4bit_compute_dtype": "bfloat16"
+  },
+  "prompting": {
+    "mode": "few_shot",
+    "max_new_tokens": 32,
+    "few_shot_examples": [
+      {
+        "question": "màu sắc của những con chim là gì",
+        "answer": "màu xanh lá"
+      },
+      {
+        "question": "khuôn mặt của một người phụ nữ trong kính râm phản chiếu",
+        "answer": "gương"
+      },
+      {
+        "question": "có bao nhiêu người phụ nữ chơi trò chơi điện tử trước ghế dài",
+        "answer": "hai"
+      },
+      {
+        "question": "những gì nằm trong lòng bàn tay của ai đó",
+        "answer": "thiết bị"
+      },
+      {
+        "question": "màu của chiếc xe là gì",
+        "answer": "màu xám"
+      }
+    ],
+    "few_shot": {
+      "k": 5,
+      "seed": 42,
+      "train_sha256": "892243fa732fc7fb5b9a3bd8d2f28c85d7e9f99bb0e617efd193e7303cee96ec",
+      "selection": "round-robin theo question_type, xáo bằng seed; answers[0]"
+    }
+  },
+  "eval": {
+    "primary_metrics": [
+      "exact_match",
+      "vqa_accuracy",
+      "anls"
+    ],
+    "secondary_metrics": [
+      "token_f1"
+    ],
+    "anls_threshold": 0.5
+  },
+  "data_sha256": "0a09f7bac471ce7359eda5b965d94821ae78fd151217f84cf9a59b14b6ccb787",
+  "limit": null,
+  "chunk": 500
+}

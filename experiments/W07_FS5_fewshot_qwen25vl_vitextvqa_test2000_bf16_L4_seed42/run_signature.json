@@ -1,0 +1,63 @@
+{
+  "sha256": "531c9bd50499ca3d8061b3bd585f25ba6737daf87f4b60f630e0e0a6bc49c480",
+  "model": {
+    "backbone": "qwen2_5_vl",
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "torch_dtype": "bfloat16",
+    "min_pixels": 200704,
+    "max_pixels": 401408
+  },
+  "quantization": {
+    "enabled": true,
+    "load_in_4bit": true,
+    "bnb_4bit_quant_type": "nf4",
+    "bnb_4bit_use_double_quant": true,
+    "bnb_4bit_compute_dtype": "bfloat16"
+  },
+  "prompting": {
+    "mode": "few_shot",
+    "max_new_tokens": 32,
+    "few_shot_examples": [
+      {
+        "question": "ai là tác giả của cuốn sách màu xanh ?",
+        "answer": "tom goodwin"
+      },
+      {
+        "question": "cửa hàng thời trang màu đen tên gì ?",
+        "answer": "the bo"
+      },
+      {
+        "question": "unatoto là nhà hàng nhật bản như thế nào ?",
+        "answer": "chuẩn vị washoku"
+      },
+      {
+        "question": "bên phải là bản tin của ai ?",
+        "answer": "cựu chiến binh"
+      },
+      {
+        "question": "cửa hàng thực phẩm sạch tên gì ?",
+        "answer": "3s 3 sạch"
+      }
+    ],
+    "few_shot": {
+      "k": 5,
+      "seed": 42,
+      "train_sha256": "dec0acc1ca998272ddbf76ba97087d9f6b1d3f96f4000274e41483c02fbde46c",
+      "selection": "round-robin theo question_type, xáo bằng seed; answers[0]"
+    }
+  },
+  "eval": {
+    "primary_metrics": [
+      "exact_match",
+      "vqa_accuracy",
+      "anls"
+    ],
+    "secondary_metrics": [
+      "token_f1"
+    ],
+    "anls_threshold": 0.5
+  },
+  "data_sha256": "69a8b35c64fb505147fbd7904b19dce3853d7b63a24bb888359bdff61b30f68e",
+  "limit": null,
+  "chunk": 500
+}
