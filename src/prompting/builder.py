@@ -19,7 +19,11 @@ from typing import List, Optional
 
 
 # Các chế độ prompt hợp lệ (khớp với mục prompting.mode trong config)
-VALID_MODES = {"zero_shot", "prompt_optimized", "ocr", "rag", "ocr_rag"}
+VALID_MODES = {"zero_shot", "prompt_optimized", "ocr", "rag", "ocr_rag", "few_shot"}
+
+# W07 few-shot control: tiêu đề khối ví dụ (CHỈ chữ, không kèm ảnh của ví dụ) — mục đích duy nhất là
+# cho model thấy ĐỊNH DẠNG đáp án của dataset (ngắn, đúng chữ), để tách "học định dạng" khỏi QLoRA.
+FEW_SHOT_HEADER = "Một số ví dụ về cách viết đáp án (không kèm ảnh của các ví dụ):"
 
 # Câu chỉ dẫn hệ thống: ép model trả lời NGẮN, bằng tiếng Việt -> hợp metric EM/VQA-Acc.
 # (Trả lời lan man sẽ trượt EM dù ý đúng — nên ràng buộc độ dài ngay từ prompt.)
@@ -35,6 +39,7 @@ def build_prompt(
     mode: str = "zero_shot",
     ocr_texts: Optional[List[str]] = None,
     retrieved_context: Optional[str] = None,
+    examples: Optional[List[dict]] = None,
 ) -> str:
     """
     Ghép phần TEXT của prompt theo chế độ ablation.
@@ -49,6 +54,7 @@ def build_prompt(
             - ocr_rag        : dùng cả hai.
         ocr_texts: list chuỗi do PaddleOCR/VietOCR trích (Bước 3 sẽ cache sẵn).
         retrieved_context: đoạn văn bản do module RAG cung cấp.
+        examples: (chỉ mode few_shot) list {"question", "answer"} lấy từ TRAIN — ví dụ định dạng đáp án.
 
     Returns:
         Chuỗi prompt hoàn chỉnh (chưa gắn ảnh).
@@ -57,6 +63,16 @@ def build_prompt(
         raise ValueError(f"mode='{mode}' không hợp lệ. Chọn trong {VALID_MODES}.")
 
     parts: List[str] = []
+
+    # 0) few_shot: khối ví dụ (chỉ chữ) + câu hỏi theo đúng khuôn của ví dụ.
+    if mode == "few_shot":
+        if not examples:
+            raise ValueError("mode='few_shot' cần examples (list {question, answer} từ train)")
+        parts.append(FEW_SHOT_HEADER)
+        for e in examples:
+            parts.append(f"Câu hỏi: {e['question']}\nTrả lời: {e['answer']}")
+        parts.append(f"Câu hỏi: {question}\nTrả lời:")
+        return "\n".join(parts)
 
     # 1) Chèn bằng chứng OCR (chế độ ocr / ocr_rag) — đặt TRƯỚC câu hỏi để model
     #    coi đây là ngữ cảnh khi đọc chữ trong ảnh. Đây chính là "OCR-enhanced prompting".

@@ -18,6 +18,9 @@ Biến thể backbone (W07 R1, chỉ để đối chiếu paper / ablation backb
   --variant qwen2vl7b_paper   Qwen2-VL-7B-Instruct, bf16, không lượng tử, độ phân giải mặc định
   --variant qwen2vl7b_b1cfg   Qwen2-VL-7B-Instruct, đúng cấu hình B1 (4-bit NF4, 512 token)
   Config gốc vẫn phải đúng bản chốt W07; biến thể ghi đè TƯỜNG MINH và nằm trong run_signature.
+Few-shot control (W07, ablation "zero-shot vs prompt-optimized vs QLoRA"):
+  --few_shot_k 5 [--few_shot_seed 42]  -> mode few_shot, k ví dụ (câu hỏi, đáp án) CHỈ CHỮ lấy từ TRAIN,
+  chọn tất định (chia đều theo question_type), ghi nguyên văn vào run_signature.
 Kiểm thử offline (không GPU, không mạng):
   python -m src.eval.run_baseline --selftest
 """
@@ -43,8 +46,9 @@ from src.eval.run_eval import run_evaluation, generate_answer
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DEFAULT_DRIVE_ROOT = "/content/drive/MyDrive/ViVQA-VLM"
 DATASETS = {
-    "vivqa": {"data_rel": "data/vivqa/test.json"},
-    "vitextvqa_official": {"data_rel": "data/vitextvqa_official/test_subset2000_seed42.json"},
+    "vivqa": {"data_rel": "data/vivqa/test.json", "train_rel": "data/vivqa/train.json"},
+    "vitextvqa_official": {"data_rel": "data/vitextvqa_official/test_subset2000_seed42.json",
+                           "train_rel": "data/vitextvqa_official/train.json"},
 }
 # Cấu hình chuẩn — chốt W07 trên GPU L4 (notebook 05, experiments/W07_config_freeze_L4_seed42/):
 #   bf16: không tràn số như fp16 (23/23 câu hỏng tái hiện trên cả T4 lẫn L4), nhanh hơn fp32 1,71×,
@@ -237,6 +241,36 @@ def with_oom_fallback(generate_fn: Callable, max_pixels: int, log_path: str,
     return wrapped
 
 
+def select_few_shot_examples(train: List[Dict[str, Any]], k: int, seed: int = 42) -> List[Dict[str, str]]:
+    """
+    Chọn k ví dụ (question, answer) từ TRAIN, tất định theo seed:
+    nhóm theo question_type (sắp xếp tên), xáo từng nhóm bằng seed, rồi lấy lần lượt từng nhóm
+    (round-robin) -> ViVQA có đủ color/location/number/object; ViTextVQA (một loại) = ngẫu nhiên.
+    Bỏ mẫu không có đáp án; đáp án dùng answers[0] như lúc train QLoRA (khuôn đáp án của dataset).
+    """
+    import random
+    groups: Dict[str, List[Dict[str, Any]]] = {}
+    for r in train:
+        a = (r.get("answers") or [""])[0].strip()
+        q = str(r.get("question", "")).strip()
+        if a and q:
+            groups.setdefault(str(r.get("question_type", "unknown")), []).append({"question": q, "answer": a})
+    rng = random.Random(seed)
+    order = sorted(groups)
+    for t in order:
+        rng.shuffle(groups[t])
+    out: List[Dict[str, str]] = []
+    i = 0
+    while len(out) < k and any(groups[t] for t in order):
+        t = order[i % len(order)]
+        if groups[t]:
+            out.append(groups[t].pop())
+        i += 1
+    if len(out) < k:
+        raise ValueError(f"train chỉ có {len(out)} mẫu hợp lệ, cần {k}")
+    return out
+
+
 # --------------------------------------------------------------------------- #
 # Ảnh
 # --------------------------------------------------------------------------- #
@@ -416,6 +450,7 @@ def run(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         config: str = os.path.join(REPO_ROOT, "configs/qwen_lora.yaml"), mode: Optional[str] = None,
         chunk: int = 500, image_dir: Optional[str] = None, limit: Optional[int] = None,
         adapter: Optional[str] = None, variant: Optional[str] = None,
+        few_shot_k: Optional[int] = None, few_shot_seed: int = 42, train_file: Optional[str] = None,
         model=None, processor=None, generate_fn: Callable = generate_answer,
         check_config: bool = True) -> Dict[str, Any]:
     """Toàn bộ quy trình. model/processor/generate_fn truyền vào được để kiểm thử offline."""
@@ -427,6 +462,14 @@ def run(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     out_dir = os.path.join(out_root or os.path.join(drive_root, "experiments"), run_name)
     cfg = copy.deepcopy(load_config(config, mode=mode, check=check_config))   # config gốc phải đúng bản chốt
     cfg = apply_variant(cfg, variant)                                            # rồi mới ghi đè tường minh
+    if few_shot_k:
+        # ví dụ nằm trong cfg["prompting"] -> tự vào run_signature; zero-shot không có khoá này -> chữ ký B1/B2 không đổi
+        train_file = train_file or os.path.join(drive_root, DATASETS[dataset]["train_rel"])
+        train = load_vivqa(train_file, image_dir="")
+        cfg["prompting"]["mode"] = "few_shot"
+        cfg["prompting"]["few_shot_examples"] = select_few_shot_examples(train, few_shot_k, few_shot_seed)
+        cfg["prompting"]["few_shot"] = {"k": few_shot_k, "seed": few_shot_seed, "train_sha256": _sha256(train_file),
+                                        "selection": "round-robin theo question_type, xáo bằng seed; answers[0]"}
     cfg["run"]["name"] = run_name
     cfg.setdefault("data", {})                     # run_evaluation ghi meta từ mục này
     cfg["data"]["dataset_name"] = dataset
@@ -434,6 +477,10 @@ def run(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
 
     _log(f"== {run_name} | dataset={dataset} | mode={cfg['prompting']['mode']} | model={cfg['model']['model_id']}"
          + (f" | variant={variant}" if variant else ""))
+    if few_shot_k:
+        _log(f"   few-shot k={few_shot_k} seed={few_shot_seed}:")
+        for e in cfg["prompting"]["few_shot_examples"]:
+            _log(f"     Q: {e['question']}  ->  {e['answer']}")
     _log(f"   data: {data_file}")
     _log(f"   out : {out_dir}")
     image_dir = image_dir or prepare_images(dataset, drive_root)
@@ -483,6 +530,8 @@ def run(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         "data_file_sha256": data_sha,
         "limit": limit, "chunk_size": chunk,
         "adapter": ad_info,
+        "few_shot": ({**cfg["prompting"]["few_shot"], "examples": cfg["prompting"]["few_shot_examples"]}
+                     if few_shot_k else None),
     })
     mt = result["metrics"]
     f1_txt = f" | token-F1 (phụ)={mt['token_f1']:.4f}" if "token_f1" in mt else ""
@@ -625,7 +674,66 @@ def _selftest() -> None:
         sync_images(src, dst, "test")      # lần 2: không chép gì
     _log("sync_images OK")
     _selftest_variants()
+    _selftest_few_shot()
     _log("SELFTEST OK")
+
+
+def _selftest_few_shot() -> None:
+    """Few-shot control: chọn ví dụ tất định + chia đều loại câu hỏi; prompt có ví dụ; chữ ký riêng; meta ghi ví dụ."""
+    import tempfile
+    from PIL import Image
+    train = [{"question": f"màu {i}?", "answers": [f"đỏ{i}"], "question_type": "color"} for i in range(20)] + \
+            [{"question": f"mấy {i}?", "answers": [str(i)], "question_type": "number"} for i in range(20)] + \
+            [{"question": f"ở đâu {i}?", "answers": [f"bếp{i}"], "question_type": "location"} for i in range(3)] + \
+            [{"question": "rỗng?", "answers": [""], "question_type": "location"}]
+    e1, e2 = select_few_shot_examples(train, 5, 42), select_few_shot_examples(train, 5, 42)
+    assert e1 == e2 and len(e1) == 5, "phải tất định"
+    assert e1 != select_few_shot_examples(train, 5, 7), "seed khác -> ví dụ khác"
+    kinds = [x["question"].split()[0] for x in e1]
+    assert {"màu", "mấy", "ở"} <= set(kinds), kinds          # đủ 3 loại câu hỏi
+    assert all(x["answer"] for x in e1)
+    with tempfile.TemporaryDirectory() as td:
+        img = os.path.join(td, "img")
+        os.makedirs(img)
+        recs = []
+        for i in range(3):
+            Image.new("RGB", (32, 32)).save(os.path.join(img, f"{i}.jpg"))
+            recs.append({"question_id": f"t{i}", "question": f"hỏi {i}?", "answers": ["ok"],
+                         "image": f"{i}.jpg", "question_type": "color"})
+        data, trainf = os.path.join(td, "test.json"), os.path.join(td, "train.json")
+        _write_json(data, recs)
+        _write_json(trainf, train)
+        cfgp = os.path.join(td, "cfg.yaml")
+        with open(cfgp, "w", encoding="utf-8") as fp:
+            fp.write("run: {name: x, seed: 42}\n"
+                     "model: {model_id: fake, torch_dtype: bfloat16, min_pixels: 200704, max_pixels: 401408}\n"
+                     "quantization: {enabled: true, load_in_4bit: true, bnb_4bit_quant_type: nf4, "
+                     "bnb_4bit_use_double_quant: true, bnb_4bit_compute_dtype: bfloat16}\n"
+                     "prompting: {mode: zero_shot, max_new_tokens: 32}\n"
+                     "eval: {primary_metrics: [exact_match, vqa_accuracy, anls], secondary_metrics: [token_f1], anls_threshold: 0.5}\n")
+        prompts = []
+
+        def fake_gen(model, processor, image_path, prompt_text, max_new_tokens=32):
+            prompts.append(prompt_text)
+            return "ok"
+
+        common = dict(dataset="vivqa", drive_root=td, data_file=data, out_root=os.path.join(td, "exp"),
+                      config=cfgp, chunk=2, image_dir=img, model="fake", processor="fake", generate_fn=fake_gen)
+        r0 = run(**common, run_name="zs")
+        assert prompts[0] == "Câu hỏi: hỏi 0?" and r0["meta"]["few_shot"] is None
+        prompts.clear()
+        r = run(**common, run_name="fs", few_shot_k=5, train_file=trainf)
+        assert r["meta"]["prompting_mode"] == "few_shot" and len(r["meta"]["few_shot"]["examples"]) == 5
+        assert prompts[0].count("Trả lời:") == 6 and prompts[0].endswith("Câu hỏi: hỏi 0?\nTrả lời:"), prompts[0]
+        sz = json.load(open(os.path.join(td, "exp", "zs", SIGNATURE_FILE), encoding="utf-8"))["sha256"]
+        sf = json.load(open(os.path.join(td, "exp", "fs", SIGNATURE_FILE), encoding="utf-8"))
+        assert sz != sf["sha256"] and sf["prompting"]["few_shot_examples"] == e1
+        try:                                       # cùng thư mục, đổi seed -> ví dụ khác -> chữ ký lệch -> chặn
+            run(**common, run_name="fs", few_shot_k=5, few_shot_seed=7, train_file=trainf)
+            raise AssertionError("không chặn đổi ví dụ few-shot")
+        except ValueError:
+            pass
+    _log("few-shot OK")
 
 
 def _selftest_variants() -> None:
@@ -750,6 +858,9 @@ def main() -> None:
                     help="Thư mục adapter LoRA (vd <drive>/adapters/<run>/epoch_1) -> đánh giá B2; bỏ trống = zero-shot")
     ap.add_argument("--variant", default=None, choices=list(MODEL_VARIANTS),
                     help="Backbone khác cho R1/ablation (vd qwen2vl7b_paper); bỏ trống = baseline Qwen2.5-VL-3B")
+    ap.add_argument("--few_shot_k", type=int, default=None,
+                    help="Few-shot control: số ví dụ (chỉ chữ) lấy từ train; bỏ trống = zero-shot")
+    ap.add_argument("--few_shot_seed", type=int, default=42)
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
     if a.selftest:
@@ -758,7 +869,8 @@ def main() -> None:
     if not a.dataset or not a.run_name:
         ap.error("cần --dataset và --run_name (trừ khi --selftest)")
     run(a.dataset, a.run_name, drive_root=a.drive_root, data_file=a.data_file, out_root=a.out_root,
-        config=a.config, mode=a.mode, chunk=a.chunk, limit=a.limit, adapter=a.adapter, variant=a.variant)
+        config=a.config, mode=a.mode, chunk=a.chunk, limit=a.limit, adapter=a.adapter, variant=a.variant,
+        few_shot_k=a.few_shot_k, few_shot_seed=a.few_shot_seed)
 
 
 if __name__ == "__main__":

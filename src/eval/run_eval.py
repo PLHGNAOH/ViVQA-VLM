@@ -108,7 +108,8 @@ def run_evaluation(
             ocr_texts = ocr_lookup.get(s["question_id"]) or ocr_lookup.get(
                 os.path.basename(s["image_path"]))
 
-        prompt_text = build_prompt(s["question"], mode=mode, ocr_texts=ocr_texts)
+        prompt_text = build_prompt(s["question"], mode=mode, ocr_texts=ocr_texts,
+                                   examples=cfg["prompting"].get("few_shot_examples"))
         pred = generate_fn(model, processor, s["image_path"], prompt_text,
                            max_new_tokens=max_new_tokens)
 
