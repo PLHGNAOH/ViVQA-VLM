@@ -10,3 +10,6 @@ huggingface_hub
 
 # đọc configs/*.yaml (run_baseline.py, notebook)
 pyyaml
+
+# make_audit_sheet.py (bảng duyệt tay W07)
+openpyxl
