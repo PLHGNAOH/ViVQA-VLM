@@ -1,0 +1,50 @@
+ViVQA-VLM — Review 2 — Kịch bản thuyết trình (nói tiếng Việt, slide tiếng Anh)
+Mỗi slide khoảng 1–1,5 phút; tổng khoảng 18–22 phút.
+
+[Slide 1] ViVQA-VLM
+Chào hội đồng. Nhóm trình bày Review 2: tái lập baseline Qwen2.5-VL-3B và kết quả cải tiến đầu tiên bằng QLoRA. Toàn bộ số liệu đều có log và có thể chạy lại.
+
+[Slide 2] Three results of this milestone
+Ba con số cần nhớ. Một: pipeline đánh giá của nhóm tái lập đúng số công bố của Qwen2.5-VL-3B trên TextVQA (79,6 so với 79,3), nên các số tiếng Việt phía sau đáng tin. Hai: QLoRA chỉ train 0,2% tham số nhưng tăng EM rất mạnh trên cả hai bộ dữ liệu, có kiểm định thống kê. Ba: trên toàn bộ test ViTextVQA, B2 vượt SOTA của paper ViTextBLIP-2.
+
+[Slide 3] Advisor feedback (07/10) and what we did
+Sau buổi họp ngày 07/10, thầy Trí yêu cầu năm việc trước khi bàn cải tiến. Bảng này cho thấy mỗi yêu cầu được xử lý ở slide nào. Các góp ý của reviewer Review 1 đã được sửa trong bản báo cáo Review 1 và ghi trong checklist.
+
+[Slide 4] ViVQA is machine-translated — noise is built in
+ViVQA được tạo từ COCO-QA, câu hỏi sinh tự động rồi dịch bằng Google Translate. Vì vậy có các điểm nhiễu N1 đến N4, ví dụ purple bị dịch thành tía. Nhóm cũng kiểm tra rò rỉ: ở ViVQA, 46% ảnh test xuất hiện trong train; ở ViTextVQA thì không có ảnh trùng nào, nên đây là phép thử tổng quát hoá sạch hơn.
+
+[Slide 5] Qwen2.5-VL-3B-Instruct
+Đây là sơ đồ baseline mà thầy yêu cầu. Ảnh đi qua vision encoder 32 khối, được gộp còn 256 đến 512 token, rồi ghép với câu hỏi đưa vào decoder 36 lớp. Toàn bộ trọng số gốc đóng băng và lượng tử 4-bit. Phần duy nhất được train là LoRA ở 4 phép chiếu q, k, v, o của self-attention — ô màu cam.
+
+[Slide 6] Every run follows one frozen protocol
+Mọi run dùng chung một giao thức: split và seed cố định, cùng prompt, cấu hình khoá trong file config, cùng hàm chuẩn hoá và metric, và log đầy đủ commit, GPU, thời gian. So sánh hai run luôn dùng kiểm định ghép cặp McNemar cho EM và bootstrap cho ANLS. Luật kết luận được chốt trước khi chạy để tránh chọn kết quả có lợi.
+
+[Slide 7] Our pipeline reproduces the published number
+Vấn đề: chưa paper nào công bố Qwen2.5-VL-3B trên ViVQA hay ViTextVQA, nên không thể so trực tiếp. Nhóm kiểm chứng pipeline bằng một con số đã công bố: TextVQA val trong báo cáo Qwen2.5-VL là 79,3. Nhóm chạy được 79,6, nằm trong ngưỡng ±2 điểm đã chốt. Cấu hình tiết kiệm của nhóm (4-bit, 512 token) mất 4,4 điểm nhưng giảm VRAM 4,3 lần.
+
+[Slide 8] Zero-shot fails mostly on answer format
+B1 là baseline zero-shot chính thức. Lỗi lớn nhất là định dạng: model trả lời dài hơn đáp án chuẩn, ví dụ 'Lịch tết năm 2021' trong khi đáp án là '2021'. Trên ViTextVQA có 19% câu model đọc ra đúng đáp án nhưng EM vẫn tính sai. Theo loại câu hỏi, ViVQA rất yếu ở vị trí và đồ vật.
+
+[Slide 9] A larger model is not better here
+Table 7 của paper ViTextVQA có dòng QwenVL-7b đạt EM 28 trên 100 câu. Nhóm chạy Qwen2-VL-7B trong đúng điều kiện của baseline. Kết quả 7B kém 3B 12,6 điểm EM, p rất nhỏ, chậm hơn và tốn VRAM hơn. Nguyên nhân chính là 7B trả lời dài, trung bình 8,2 từ. Table 7 chỉ có 100 câu nên sai số khoảng ±9 điểm, không đủ để chọn giữa 3B và 7B. Vì vậy nhóm giữ Qwen2.5-VL-3B.
+
+[Slide 10] PART 05 · QLoRA (B2)
+B2 khác B1 đúng một biến: có adapter LoRA. Chỉ một epoch, EM ViVQA tăng từ 22 lên 74, ViTextVQA từ 29 lên 50 trên toàn bộ test. Cả hai đạt luật chốt trước: EM tăng và McNemar p nhỏ hơn 0,05. Chi phí rất thấp: 3 giờ train cho ViVQA, 12 giờ cho ViTextVQA, VRAM dưới 7 GB.
+
+[Slide 11] The gain is real, not leakage and not just format
+Ba phép đối chứng. Một: ở ViVQA, trên phần test sạch chưa từng xuất hiện trong train, EM vẫn tăng từ 25 lên 69. Hai: ViTextVQA không có ảnh trùng mà vẫn tăng 21 điểm. Ba: đưa 5 ví dụ đáp án vào prompt (few-shot) không giúp gì, thậm chí giảm ở ViVQA. Vậy QLoRA học được nhiều hơn là cách trả lời ngắn.
+
+[Slide 12] Full ViTextVQA test: above the published SOTA
+Trên toàn bộ 10.028 câu test, B2 đạt EM 50,3 và F1 71,2, cao hơn ViTextBLIP-2 là SOTA của paper, với cận dưới khoảng tin cậy vẫn cao hơn số công bố. B1 zero-shot chỉ cao hơn về EM, còn F1 thì ngang. Chạy lại trên 2.000 câu chung cho kết quả trùng 100%. Giới hạn: paper không công bố cách chuẩn hoá đáp án.
+
+[Slide 13] What the evidence says so far
+Đối chiếu với các giả thuyết đã nêu ở Review 1. H1 được ủng hộ mạnh. H2 chỉ đạt một nửa: VRAM giảm nhiều nhưng độ chính xác giữ 94,5%, dưới mức 97%. H7 chưa được ủng hộ với dạng few-shot đã thử. H8 về hallucination đang chờ kết quả duyệt tay. H3 đến H6 thuộc kế hoạch W8 đến W12.
+
+[Slide 14] Where B2 still fails
+Phân loại tự động 4.988 câu B2 còn sai trên full test ViTextVQA. 9% chỉ sai dấu thanh, ví dụ thủy và thúy — đây là thách thức riêng của tiếng Việt. 17% chỉ lệch một hai ký tự, thường là đọc chữ hoặc số. Khoảng 27% sai về độ dài: thừa hoặc thiếu chữ so với gold. 47% còn lại sai về nội dung hoặc vùng ảnh, cần duyệt tay để tách hallucination; nhóm đang duyệt tay 400 mẫu.
+
+[Slide 15] Plan to Review 3 (week 13)
+Từ tuần 8 đến tuần 13: chạy QLoRA chính thức nhiều epoch và chọn epoch trên tập dev, thử làm sạch nhãn nhiễu, OCR-enhanced prompting cho ViTextVQA, ablation cấu hình LoRA, adapter dùng chung cho hai dataset, đo hallucination có hệ thống, rồi dựng prototype web cho Review 3.
+
+[Slide 16] Thank you
+Cảm ơn hội đồng đã lắng nghe. Nhóm sẵn sàng trả lời câu hỏi.

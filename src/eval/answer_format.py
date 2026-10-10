@@ -9,6 +9,12 @@ trên cùng tập dự đoán:
     containment    % câu mà một đáp án gold (đã chuẩn hoá) nằm NGUYÊN CỤM TỪ trong câu trả lời
     contain_not_em % câu "đọc ra đúng đáp án nhưng EM vẫn sai" = phần mất vì định dạng
 So ghép cặp containment giữa 2 run: McNemar exact (cùng hàm với compare_runs).
+Phân nhóm lỗi tự động (error_buckets) cho các câu EM sai, theo thứ tự ưu tiên:
+    tone       chỉ khác dấu thanh (bỏ dấu thì trùng gold)       -> thách thức riêng của tiếng Việt
+    truncated  câu trả lời là một cụm nằm trong gold (thiếu chữ)
+    extended   gold là một cụm nằm trong câu trả lời (thừa chữ)
+    near_miss  lệch <= 2 ký tự (Levenshtein) — thường là đọc chữ/số sai; ở ViVQA hay rơi vào đếm sai ("năm"/"tám")
+    other      sai về nội dung/vùng ảnh -> cần duyệt tay để tách hallucination
 
 Giới hạn (ghi trong báo cáo): containment là chỉ số CHẨN ĐOÁN, rộng tay — câu trả lời rất dài dễ
 "chứa" đáp án ngắn một cách tình cờ; không dùng thay EM/ANLS.
@@ -59,6 +65,49 @@ def summarize(records: List[Dict[str, Any]]) -> Dict[str, Any]:
             "contain_not_em_pct": round(100 * sum(c and not e for c, e in zip(s["contain"], s["em"])) / n, 2)}
 
 
+def _strip_tones(text: str) -> str:
+    import unicodedata
+    t = unicodedata.normalize("NFD", text)
+    return "".join(c for c in t if unicodedata.category(c) != "Mn").replace("đ", "d")
+
+
+def _levenshtein(a: str, b: str) -> int:
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i]
+        for j, cb in enumerate(b, 1):
+            cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))
+        prev = cur
+    return prev[-1]
+
+
+BUCKETS = ["tone", "truncated", "extended", "near_miss", "other"]
+
+
+def error_bucket(pred: str, answers: List[str]) -> str:
+    """Nhóm lỗi của MỘT câu đã sai EM (xem docstring đầu file)."""
+    p = normalize_vi(pred)
+    gs = [normalize_vi(a) for a in answers if normalize_vi(a)]
+    if any(_strip_tones(p) == _strip_tones(g) for g in gs):
+        return "tone"
+    if p and any(f" {p} " in f" {g} " for g in gs):
+        return "truncated"
+    if any(f" {g} " in f" {p} " for g in gs):
+        return "extended"
+    if any(_levenshtein(p, g) <= 2 for g in gs):
+        return "near_miss"
+    return "other"
+
+
+def error_buckets(records: List[Dict[str, Any]]) -> Dict[str, Any]:
+    errs = [r for r in records if not exact_match(r["prediction"], r["answers"])]
+    counts = {b: 0 for b in BUCKETS}
+    for r in errs:
+        counts[error_bucket(r["prediction"], r["answers"])] += 1
+    n = max(len(errs), 1)
+    return {"n_errors": len(errs), "counts": counts, "pct": {b: round(100 * c / n, 1) for b, c in counts.items()}}
+
+
 def gold_summary(records: List[Dict[str, Any]]) -> Dict[str, Any]:
     w = [n_words(r["answers"][0]) for r in records]
     return {"mean_words": round(sum(w) / len(w), 2), "pct_gt3_words": round(100 * sum(x > 3 for x in w) / len(w), 2)}
@@ -89,6 +138,13 @@ def _selftest() -> None:
     pc = paired_containment(recs_a, recs_b)
     assert pc["only_a"] == 0 and pc["only_b"] == 1 and pc["delta_containment_pct"] == 33.33, pc
     assert gold_summary(recs_a)["mean_words"] == 1.33
+    assert error_bucket("đặng việt thủy", ["đặng việt thúy"]) == "tone"
+    assert error_bucket("nhân dân quận 2", ["ủy ban nhân dân quận 2"]) == "truncated"
+    assert error_bucket("trường tiểu học đông thành", ["đông thành"]) == "extended"
+    assert error_bucket("372 . 568 . 177", ["372 . 566 . 177"]) == "near_miss"
+    assert error_bucket("an anh", ["cơ sở trường"]) == "other"
+    eb = error_buckets(recs_a)
+    assert eb["n_errors"] == 2 and eb["counts"]["extended"] == 1 and eb["counts"]["other"] == 1, eb
     print("SELFTEST OK")
 
 
@@ -96,6 +152,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Chẩn đoán định dạng câu trả lời (containment).")
     ap.add_argument("--run", action="append", default=[], help="NHÃN=thư mục run (lặp lại được)")
     ap.add_argument("--pair", action="append", default=[], help="NHÃN_A,NHÃN_B để so ghép cặp containment")
+    ap.add_argument("--buckets", action="store_true", help="In thêm phân nhóm lỗi tự động cho từng run")
     ap.add_argument("--out", default=None)
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
@@ -109,6 +166,8 @@ def main() -> None:
            "pairs": {p: paired_containment(recs[p.split(",")[0]], recs[p.split(",")[1]]) for p in a.pair},
            "paths": {k: v.replace("\\", "/") for k, v in runs.items()},
            "note": "containment là chỉ số chẩn đoán (post-hoc), không thay EM/ANLS"}
+    if a.buckets:
+        res["error_buckets"] = {k: error_buckets(v) for k, v in recs.items()}
     print(f"{'run':<8}{'EM':>7}{'chứa gold':>11}{'chứa≠EM':>9}{'từ TB':>7}{'>3 từ %':>9}")
     print(f"{'gold':<8}{'':>7}{'':>11}{'':>9}{res['gold']['mean_words']:>7}{res['gold']['pct_gt3_words']:>9}")
     for k, s in res["runs"].items():
@@ -117,6 +176,8 @@ def main() -> None:
     for p, r in res["pairs"].items():
         print(f"{p}: chứa gold chỉ A {r['only_a']} | chỉ B {r['only_b']} | Δ {r['delta_containment_pct']:+} điểm | "
               f"McNemar p = {r['mcnemar_p']:.2g}")
+    for k, eb in res.get("error_buckets", {}).items():
+        print(f"{k}: {eb['n_errors']} câu sai EM -> " + " | ".join(f"{b} {eb['pct'][b]}%" for b in BUCKETS))
     if a.out:
         os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
         json.dump(res, open(a.out, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
