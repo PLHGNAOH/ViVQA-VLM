@@ -1,0 +1,62 @@
+{
+  "metrics": {
+    "exact_match": 0.5025927403270841,
+    "vqa_accuracy": 0.5025927403270841,
+    "anls": 0.7202041338874654,
+    "token_f1": 0.7116324131007207,
+    "exact_match__unknown": 0.5025927403270841,
+    "vqa_accuracy__unknown": 0.5025927403270841,
+    "anls__unknown": 0.7202041338874654,
+    "token_f1__unknown": 0.7116324131007207
+  },
+  "meta": {
+    "run_name": "W07_B2_eval_qlora_r16_ep1_vitextvqa_testfull_bf16_L4_seed42",
+    "finished_utc": "2026-10-10T12:01:03+00:00",
+    "num_samples": 10028,
+    "question_type_counts": {
+      "unknown": 10028
+    },
+    "prompting_mode": "zero_shot",
+    "decoding": "greedy (do_sample=False)",
+    "max_new_tokens": 32,
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "backbone": "qwen2_5_vl",
+    "variant": null,
+    "quantization": {
+      "4bit": true,
+      "type": "nf4",
+      "double_quant": true,
+      "compute_dtype": "bfloat16"
+    },
+    "torch_dtype": "bfloat16",
+    "min_pixels": 200704,
+    "max_pixels": 401408,
+    "seed": 42,
+    "git_commit": "884d964",
+    "config_file": "configs/qwen_lora.yaml",
+    "hardware": {
+      "gpus_seen": [
+        "NVIDIA L4"
+      ],
+      "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+    },
+    "inference_time_sec": 10039.5,
+    "sec_per_sample": 1.001,
+    "peak_vram_gb_this_session": 2.57,
+    "dataset": "vitextvqa_official",
+    "data_file": "data/vitextvqa_official/test.json",
+    "data_file_sha256": "956da0ae2a6a8f57fbfb52cbbdc6626e677be857417145bc3e1d25bb45f00f08",
+    "limit": null,
+    "chunk_size": 500,
+    "adapter": {
+      "path": "/content/drive/MyDrive/ViVQA-VLM/adapters/W07_B2_qlora_r16_qwen25vl_vitextvqa_ep1_bf16_L4_seed42/epoch_1",
+      "weights_sha256": "2e7b17d18b32b0f248b130dab4717b9b408b1da68e4fea5c3f5d6baaf9dcf863",
+      "config_sha256": "1ba81042eee2d9be37162536ef1ab53083fcc718679b62cfdb3d9b82b21aca94",
+      "weights_mb": 29.53
+    },
+    "versions": {
+      "transformers": "5.17.0",
+      "torch": "2.11.0+cu130"
+    }
+  }
+}
