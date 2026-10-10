@@ -1,0 +1,33 @@
+{
+  "sha256": "fdfdaf59cab949b8fee87f3919821720e8bb2d95bedd68205dfb6411f3f222f5",
+  "model": {
+    "backbone": "qwen2_vl",
+    "model_id": "Qwen/Qwen2-VL-7B-Instruct",
+    "torch_dtype": "bfloat16",
+    "min_pixels": null,
+    "max_pixels": null,
+    "oom_fallback_max_pixels": 1003520,
+    "variant": "qwen2vl7b_paper"
+  },
+  "quantization": {
+    "enabled": false
+  },
+  "prompting": {
+    "mode": "zero_shot",
+    "max_new_tokens": 32
+  },
+  "eval": {
+    "primary_metrics": [
+      "exact_match",
+      "vqa_accuracy",
+      "anls"
+    ],
+    "secondary_metrics": [
+      "token_f1"
+    ],
+    "anls_threshold": 0.5
+  },
+  "data_sha256": "69a8b35c64fb505147fbd7904b19dce3853d7b63a24bb888359bdff61b30f68e",
+  "limit": null,
+  "chunk": 500
+}
