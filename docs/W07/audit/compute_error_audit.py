@@ -76,7 +76,7 @@ def main():
     S['human_vs_ai'] = {'n': len(ind), **{f: dict(zip(['agree', 'kappa'], [round(x, 3) for x in cohen([human[s][i] for s in ind], [AI[s][i] for s in ind])])) for i, f in enumerate(F)}}
     S['adjudication'] = {'n': len(ADJ), 'choice': dict(Counter(d['chon'] for d in ADJ.values()))}
     S['provenance'] = dict(Counter(src.values()))
-    json.dump({'stats': S, 'final_labels': {s: list(v) for s, v in final.items()}, 'source': src}, open(a.out, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    json.dump({'stats': S, 'final_labels': {s: list(v) for s, v in final.items()}, 'source': src}, open(a.out, 'w', encoding='utf-8', newline='\n'), ensure_ascii=False, indent=1)
     for k, v in S.items(): print(k, v)
     print('Ghi ->', a.out)
 
