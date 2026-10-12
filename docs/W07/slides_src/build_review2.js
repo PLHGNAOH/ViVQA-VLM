@@ -372,7 +372,7 @@ pres.addSection({ title: L("Improvement", "Cải tiến") });
 pres.addSection({ title: L("Analysis & plan", "Phân tích & kế hoạch") });
 {
   const s = content(L("Analysis & plan", "Phân tích & kế hoạch"), L("PART 06 · HYPOTHESES", "PHẦN 06 · GIẢ THUYẾT"), L("What the evidence says so far", "Bằng chứng đến thời điểm này"),
-    "Đối chiếu với các giả thuyết đã nêu ở Review 1. H1 được ủng hộ mạnh. H2 chỉ đạt một nửa: VRAM giảm nhiều nhưng độ chính xác giữ 94,5%, dưới mức 97%. H7 chưa được ủng hộ với dạng few-shot đã thử. H8 về hallucination đang chờ kết quả duyệt tay. H3 đến H6 thuộc kế hoạch W8 đến W12.");
+    "Đối chiếu với các giả thuyết đã nêu ở Review 1. H1 được ủng hộ mạnh. H2 chỉ đạt một nửa: VRAM giảm nhiều nhưng độ chính xác giữ 94,5%, dưới mức 97%. H7 chưa được ủng hộ với dạng few-shot đã thử. H8: duyệt tay 200 lỗi của B2 cho thấy chỉ khoảng 7% là hallucination thật; nhưng H8 so sánh với zero-shot, nên cần đo thêm B1 ở tuần 11 — vì vậy vẫn để Đang chờ. H3 đến H6 thuộc kế hoạch W8 đến W12.");
   const OK = L("Supported", "Ủng hộ"), PART = L("Partly", "Một phần"), NO = L("Not supported", "Chưa ủng hộ"), WAIT = L("Pending", "Đang chờ");
   const col = { [OK]: HEX.teal, [PART]: HEX.amber, [NO]: HEX.red, [WAIT]: HEX.muted };
   const rows = [
@@ -380,7 +380,7 @@ pres.addSection({ title: L("Analysis & plan", "Phân tích & kế hoạch") });
     [L("H1  QLoRA ≥ +5 EM over zero-shot", "H1  QLoRA ≥ +5 EM so với zero-shot"), L("+51.7 (ViVQA), +21.1 (ViTextVQA full), p ≈ 0", "+51,7 (ViVQA), +21,1 (ViTextVQA đầy đủ), p ≈ 0"), OK],
     [L("H2  4-bit keeps ≥ 97% accuracy, VRAM −40%", "H2  4-bit giữ ≥ 97% độ chính xác, VRAM −40%"), L("Keeps 94.5%; VRAM −77% (R0 vs R0b)", "Giữ 94,5%; VRAM −77% (R0 so với R0b)"), PART],
     [L("H7  Vietnamese format prompt ≥ +3 EM", "H7  Prompt định dạng tiếng Việt ≥ +3 EM"), L("Few-shot variant: −2.1 / −1.2 EM", "Dạng few-shot: −2,1 / −1,2 EM"), NO],
-    [L("H8  PEFT does not increase hallucination", "H8  PEFT không làm tăng hallucination"), L("Manual audit of B2 errors in progress", "Đang duyệt tay lỗi của B2"), WAIT],
+    [L("H8  PEFT does not increase hallucination", "H8  PEFT không làm tăng hallucination"), L("Audit: 7% of B2 errors are hallucinations (CI 4–11%); B1 comparison in W11", "Duyệt tay: 7% lỗi của B2 là hallucination (CI 4–11%); so với B1 ở W11"), WAIT],
     [L("H3–H6  LoRA config, shared adapter, OCR prompting", "H3–H6  Cấu hình LoRA, adapter dùng chung, OCR prompting"), L("Planned W8–W12", "Kế hoạch W8–W12"), WAIT],
   ].map((r, i) => i === 0 ? r : r.map((c, j) => ({ text: c, options: { fontSize: 14, bold: j === 2, color: j === 2 ? col[c] : HEX.text } })));
   table(s, rows, { x: M, y: 1.55, w: CW, colW: [5.2, 4.93, 2.0], rowH: 0.62 });
@@ -393,7 +393,7 @@ pres.addSection({ title: L("Analysis & plan", "Phân tích & kế hoạch") });
 // 14. Error analysis
 {
   const s = content(L("Analysis & plan", "Phân tích & kế hoạch"), L("PART 06 · ERROR & HALLUCINATION ANALYSIS", "PHẦN 06 · PHÂN TÍCH LỖI & HALLUCINATION"), L("Where B2 still fails", "B2 còn sai ở đâu"),
-    "Phân loại tự động 4.988 câu B2 còn sai trên full test ViTextVQA. 9% chỉ sai dấu thanh, ví dụ thủy và thúy — đây là thách thức riêng của tiếng Việt. 17% chỉ lệch một hai ký tự, thường là đọc chữ hoặc số. Khoảng 27% sai về độ dài: thừa hoặc thiếu chữ so với gold. 47% còn lại sai về nội dung hoặc vùng ảnh, cần duyệt tay để tách hallucination; nhóm đang duyệt tay 400 mẫu.");
+    "Phân loại tự động 4.988 câu B2 còn sai trên full test ViTextVQA. 9% chỉ sai dấu thanh, ví dụ thủy và thúy — đây là thách thức riêng của tiếng Việt. 17% chỉ lệch một hai ký tự, thường là đọc chữ hoặc số. Khoảng 27% sai về độ dài: thừa hoặc thiếu chữ so với gold. 47% còn lại sai về nội dung hoặc vùng ảnh. Nhóm đã duyệt tay 200 lỗi của B2 có xem ảnh, 4 người cùng nhãn gợi ý của AI, trưởng nhóm phân xử các chỗ lệch. Kết quả: 54% câu bị EM chấm sai thực ra đúng ý — EM quá khắt khe; 12,5% do gold nhiễu; ở ViTextVQA lỗi thật chủ yếu là đọc sai chữ 28% và đọc nhầm vùng chữ 23%; hallucination thật chỉ 7%. Độ đồng thuận giữa hai người gán nhãn độc lập kappa 0,62; bỏ 42 dòng có AI hỗ trợ thì kết luận không đổi.");
   s.addChart(pres.charts.BAR, [{ name: L("% of B2 errors", "% lỗi của B2"),
       labels: [L("other: content / region", "khác: nội dung / vùng ảnh"), L("1–2 characters off", "lệch 1–2 ký tự"), L("answer too long", "trả lời thừa chữ"), L("answer too short", "trả lời thiếu chữ"), L("tone marks only", "chỉ sai dấu thanh")],
       values: [47.4, 16.8, 13.6, 13.2, 9.0] }],
@@ -409,13 +409,14 @@ pres.addSection({ title: L("Analysis & plan", "Phân tích & kế hoạch") });
   table(s, rows, { x: M, y: 4.75, w: 7.0, colW: [1.8, 2.45, 2.75], rowH: 0.5 });
   const x = M + 7.4, w = CW - 7.4;
   card(s, x, 1.5, w, 5.35);
-  txt(s, L("Manual audit (400 samples, in progress)", "Duyệt tay (400 mẫu, đang làm)"), { x: x + 0.3, y: 1.65, w: w - 0.6, h: 0.75, fontSize: 16, bold: true, color: C.text2 });
+  txt(s, L("Manual audit: 200 B2 errors (adjudicated)", "Duyệt tay 200 lỗi B2 (đã phân xử)"), { x: x + 0.3, y: 1.65, w: w - 0.6, h: 0.75, fontSize: 16, bold: true, color: C.text2 });
   bullets(s, [
-    L("200 B2 errors: format, synonym, OCR, tone marks, wrong region / hallucination, code-switching, counting, noisy gold", "200 lỗi của B2: định dạng, đồng nghĩa, OCR, dấu thanh, sai vùng / hallucination, chen tiếng Anh, đếm, gold nhiễu"),
-    L("200 train labels: correct / wrong / ambiguous + noise type", "200 nhãn train: đúng / sai / mơ hồ + loại nhiễu"),
-    L("Separates hallucination inside the 47% “other” bucket → evidence for H8", "Tách hallucination trong nhóm “khác” 47% → bằng chứng cho H8"),
-    L("Deterministic sample (seed 42), images attached", "Chọn mẫu tất định (seed 42), kèm ảnh"),
-  ], { x: x + 0.3, y: 2.5, w: w - 0.6, h: 4.2, fontSize: 14 });
+    L("54% are correct in meaning: EM is too strict (ViVQA 62%, ViTextVQA 46%)", "54% thực ra đúng ý: EM quá khắt khe (ViVQA 62%, ViTextVQA 46%)"),
+    L("Noisy gold: 12.5% (ViVQA 19%)", "Gold nhiễu: 12,5% (ViVQA 19%)"),
+    L("ViTextVQA real errors: OCR 28%, wrong text region 23%, tone marks 8%", "Lỗi thật ở ViTextVQA: đọc sai chữ 28%, nhầm vùng chữ 23%, dấu thanh 8%"),
+    L("Hallucination (not in the image): 7% of errors (95% CI 4–11%)", "Hallucination (không có trong ảnh): 7% số lỗi (CI95 4–11%)"),
+    L("4 annotators + AI pre-labels; κ = 0.62 (2 independent annotators); same conclusions without the 42 AI-assisted rows", "4 người + nhãn gợi ý của AI; κ = 0,62 (2 người độc lập); bỏ 42 dòng có AI hỗ trợ, kết luận không đổi"),
+  ], { x: x + 0.3, y: 2.4, w: w - 0.6, h: 4.35, fontSize: 15 });
 }
 
 // 15. Next steps

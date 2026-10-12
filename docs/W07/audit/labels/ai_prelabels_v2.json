@@ -1,0 +1,1278 @@
+{
+ "note": "Claude pre-labels v2 (after second pass on full-size images); codes F,S,O,T,H,C,N,G,K",
+ "code_names": {
+  "F": "Định dạng / độ dài (ý đúng)",
+  "S": "Đồng nghĩa / khác từ (ý đúng)",
+  "O": "Đọc chữ sai (OCR)",
+  "T": "Sai dấu thanh",
+  "H": "Sai vùng / không có trong ảnh (hallucination)",
+  "C": "Code-switching (tiếng Anh)",
+  "N": "Đếm sai",
+  "G": "Gold sai / nhiễu",
+  "K": "Khác"
+ },
+ "labels": {
+  "1": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Đấu trường rodeo có khán đài; 'sân vận động' gần nhưng khác gold 'chuồng' (corral). Không bịa vật thể."
+  },
+  "2": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Bồn tắm chim; B2 thiếu chữ 'tắm'."
+  },
+  "3": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Đĩa vuông sâu lòng, gọi 'bát' chấp nhận được."
+  },
+  "4": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Cam trong rổ inox (colander) đặt trong bồn rửa; 'chậu' sai vật chứa."
+  },
+  "5": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Thiếu chữ 'tối'."
+  },
+  "6": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Câu hỏi dịch máy ('serve' -> 'giao'); đáp án là quả bóng, B2 nêu cây vợt có trong ảnh."
+  },
+  "7": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Câu hỏi dịch máy khó hiểu; tàu hỏa có trong ảnh. B1 đúng, B2 sai."
+  },
+  "8": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Thiếu chữ 'quả'."
+  },
+  "9": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ly_do": "Em bé nằm trong găng tay bóng chày; không có giường. B1 đúng ý."
+  },
+  "10": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Nhà vệ sinh công cộng; 'phòng tắm' đồng nghĩa."
+  },
+  "11": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Vật chứa mơ hồ (cối máy xay/nồi/bát); 'bát' chấp nhận được."
+  },
+  "12": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Câu hỏi dịch máy khó hiểu; bé trượt tuyết trên đường tuyết."
+  },
+  "13": {
+   "code": "N",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "1 người đạp xe chở chuối + 2 người đi xe máy; B2 đếm cả 3."
+  },
+  "14": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Lồng tập đánh bóng (batting cage); 'chuồng' sai từ."
+  },
+  "15": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Chó trắng-đen có vệt nâu; gold chỉ 1 màu (nhiễu N1), 'trắng' cũng hợp lý."
+  },
+  "16": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ly_do": "Bé ăn cà rốt; không có 'hạt'. B1 'carrot' đúng ý nhưng tiếng Anh."
+  },
+  "17": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Xe máy đỗ cạnh bãi cỏ trước nhà; 'sân' hợp lý hơn gold 'đường phố'."
+  },
+  "18": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ly_do": "Máy bay trước nhà chứa máy bay; không có 'hành lang'."
+  },
+  "19": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Văn phòng; B2 'phòng' thiếu chữ."
+  },
+  "20": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Cam lát trên đĩa; gọi nhầm vật chứa thành 'bát'."
+  },
+  "21": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Quả táo màu xanh lá; gold 'màu cam' là màu của quả cam bên cạnh (nhãn sai)."
+  },
+  "22": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Áo thun màu tím, áo phao màu đỏ; B2 đúng ý nhưng dùng 'tía' (học từ nhãn dịch máy)."
+  },
+  "23": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Câu hỏi dịch máy ('mảnh' = tấm chăn đỏ); B2 tả màu con mèo."
+  },
+  "24": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ly_do": "Cậu bé ngồi trên ghế máy sấy tóc; không có nhà vệ sinh/bồn cầu."
+  },
+  "25": {
+   "code": "N",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Có 5 người đàn ông; B2 đếm 4."
+  },
+  "26": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Lối đi có hàng cây và ghế; 'đường bộ' gần nghĩa. (B1 lặp từ vô nghĩa.)"
+  },
+  "27": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Lồng tập đánh bóng ngoài trời; không phải sân vận động."
+  },
+  "28": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Bánh trong túi giấy; B2 gọi nhầm thành 'hộp'."
+  },
+  "29": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Mèo nằm cuộn trong một cái chậu/bát tròn; chấp nhận được."
+  },
+  "30": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Lồng tập đánh bóng (batting cage); 'chuồng' sai từ."
+  },
+  "31": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Vật cạnh ly nến là bình hoa hình cầu (có cây trúc); B2 đúng hơn gold 'quả bóng'."
+  },
+  "32": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ly_do": "Đàn bò, không có cừu."
+  },
+  "33": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Thiếu chữ 'quả'."
+  },
+  "34": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Mèo màu kem/vàng nhạt; 'nâu' không khớp."
+  },
+  "35": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Người thử rượu vang trắng; B2 gọi nhầm là 'nước'."
+  },
+  "36": {
+   "code": "G",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Gold 'món ăn' là dịch sai 'dish' (đĩa/khay); B2 'thùng chứa' cũng không đúng."
+  },
+  "37": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Nhảy từ sườn núi đá; 'vách đá' chấp nhận được."
+  },
+  "38": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Người phụ nữ ở cửa toa tàu; 'tàu hỏa' chấp nhận được (câu hỏi dịch máy)."
+  },
+  "39": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Hộp cơm nhiều ngăn; 'thùng chứa' hợp lý hơn gold 'cái mâm'."
+  },
+  "40": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Câu hỏi/gold dịch máy khó hiểu; B2 trả lời vật thể thay vì động tác."
+  },
+  "41": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Hỏi 'ở đâu' nhưng gold là 'cái túi' (dịch sai); B2 'đường phố' đúng."
+  },
+  "42": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Gold 'cửa sổ' (tủ kính trưng bày); B2 nêu 'cây' (cỏ có trong ảnh)."
+  },
+  "43": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Tủ lạnh trưng bày; 'tủ đá' ≈ 'tủ đông'."
+  },
+  "44": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Câu hỏi dịch máy khó hiểu; hàng rào có trong ảnh."
+  },
+  "45": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Gian trưng bày xe máy (Ducati); 'cửa tiệm' hợp lý."
+  },
+  "46": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Người nằm trên giường trong phòng ngủ; 'giường' đúng ý."
+  },
+  "47": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Câu hỏi dịch máy thiếu ý; gold 'cái túi'; xe ô tô có ở phía sau."
+  },
+  "48": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Nhân viên trong bếp cửa hàng đồ ăn nhanh; 'cửa hàng' hợp lý."
+  },
+  "49": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Túi xách trên ghế; 'túi' đúng (gold 'ví' là dịch 'purse')."
+  },
+  "50": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Chó chơi đĩa bay; gold 'dĩa' là biến thể chính tả của 'đĩa' — B2 đúng."
+  },
+  "51": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Đĩa bay màu vàng; gold 'xanh lá' sai."
+  },
+  "52": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Cặp đôi dùng dao cắt bánh; B2 nêu 'bánh' (có trong ảnh)."
+  },
+  "53": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Chó ngồi trên ca nô; 'con thuyền' đồng nghĩa."
+  },
+  "54": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Câu hỏi dịch máy khó hiểu; tủ lạnh có trong ảnh."
+  },
+  "55": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Bìa sách màu sáng/cam nhạt; B2 'đen' (chữ trên bìa) không khớp."
+  },
+  "56": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Thiếu chữ 'tối'."
+  },
+  "57": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Hải âu bay trên biển; 'con chim' đúng nhưng kém cụ thể."
+  },
+  "58": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Trụ cứu hỏa nắp xám, thân cam; 'áo' là dịch 'coat' (lớp sơn) — cả 2 màu đều có."
+  },
+  "59": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Đếm được 4 con bò; gold 'ba' có thể sai."
+  },
+  "60": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "'Bãi biển' ≈ 'bờ biển'."
+  },
+  "61": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Mèo vàng (lông cam-trắng); 'cam' chấp nhận được."
+  },
+  "62": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Tường màu be; 'nâu' không khớp gold 'vàng'."
+  },
+  "63": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "'Cửa hàng' = 'cửa tiệm'."
+  },
+  "64": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Câu hỏi mơ hồ: áo trắng (người nam) và áo vàng (người nữ) đều có."
+  },
+  "65": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Tủ lạnh cũ xếp hàng; 'tủ đá' gần nghĩa."
+  },
+  "66": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Băng chuyền hành lý ở sân bay; gold 'trạm' dịch máy, B2 đúng."
+  },
+  "67": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Búp bê ở cả xe nôi mây và giường; 'giường' cũng đúng."
+  },
+  "68": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Thừa chữ 'ngủ' — phòng ngủ."
+  },
+  "69": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Bồn cầu trong tủ/buồng gỗ; 'hộp' chấp nhận được."
+  },
+  "70": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Bên cạnh là đoàn tàu hàng; gold 'xe ô tô' dịch sai 'car' (toa xe)."
+  },
+  "71": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Giường là đồ nội thất; câu hỏi dịch máy."
+  },
+  "72": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Bánh trong khay thủy tinh sâu lòng; 'bát' chấp nhận được."
+  },
+  "73": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Mặt ván màu tối; B2 nêu màu xanh dương (giày/bánh xe)."
+  },
+  "74": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Chó ngồi ở ô cửa ra vào, không phải cửa sổ."
+  },
+  "75": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Thiếu chữ 'ngủ' — phòng ngủ."
+  },
+  "76": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Tủ kính tiệm bánh; 'cửa hàng' cũng đúng."
+  },
+  "77": {
+   "code": "C",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Hỏi loại bánh rán (sô cô la); B2 trả lời 'donut' (tiếng Anh, sai ý hỏi)."
+  },
+  "78": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Mèo màu cam-trắng; gold 'trắng' không đúng phần lớn bộ lông."
+  },
+  "79": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Xe bán tải cũ; 'xe ô tô' gần nghĩa."
+  },
+  "80": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Áo choàng tím đậm; B2 đúng màu nhưng dùng 'tía' (học từ nhãn dịch máy)."
+  },
+  "81": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Xe điện chạy trên đường; gold 'xe ô tô' dịch sai 'car'."
+  },
+  "82": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Người chơi đội mũ lưỡi trai/visor; B2 nêu quả bóng (có trong ảnh)."
+  },
+  "83": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Thừa chữ 'hỏa'."
+  },
+  "84": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Hỏi địa điểm (quán ăn); B2 trả lời 'đĩa ăn' (vật có trong ảnh)."
+  },
+  "85": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Tàu màu vàng và xanh lá; cả hai màu đều có."
+  },
+  "86": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Cầu thủ trong sân vận động; gold 'hộp' dịch sai 'batter's box'."
+  },
+  "87": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Voi trong khu nuôi của vườn thú; 'chuồng' chấp nhận được."
+  },
+  "88": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Thừa chữ 'cái'."
+  },
+  "89": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Hoa lan màu đỏ hồng; B2 nói 'tía' (nhãn nhiễu học từ train)."
+  },
+  "90": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Hươu cao cổ sau hàng rào khu nuôi; 'chuồng' chấp nhận được."
+  },
+  "91": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Vẹt mào (cockatiel); 'con vẹt' đúng và cụ thể hơn."
+  },
+  "92": {
+   "code": "N",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Có 8 máy bay; B2 đếm 7."
+  },
+  "93": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Thừa chữ 'ngủ'."
+  },
+  "94": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Đĩa bay; gold 'dĩa nhựa' là biến thể chính tả của 'đĩa nhựa' — B2 đúng."
+  },
+  "95": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Đồ ăn đặt trên tấm lót/mâm; B2 'đĩa ăn' chỉ một vật bên trong."
+  },
+  "96": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "'Tàu hỏa' = 'xe lửa'."
+  },
+  "97": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Dê núi ăn cỏ; B2 'cây' (cây thông có trong ảnh)."
+  },
+  "98": {
+   "code": "S",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Khay nướng bánh; 'chảo' gần nghĩa."
+  },
+  "99": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Chỉ thấy 2 bông cẩm chướng; gold 'bốn' sai."
+  },
+  "100": {
+   "code": "K",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Trên kệ là tượng; B2 'bức ảnh' (tranh treo tường có trong ảnh)."
+  },
+  "101": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Biển ghi 'USATutoring'; B2 đọc đúng, chỉ tách chữ khác gold."
+  },
+  "102": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Banner 'Mừng Xuân Canh Tý 2020'; B2 chỉ trả '2020'."
+  },
+  "103": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Biển ghi 'PHOTO COPPY'; B2 chép đúng chữ trên biển, gold đã sửa chính tả."
+  },
+  "104": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Thiếu 'nhà xuất bản'."
+  },
+  "105": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Ảnh ghi 'HOA KỲ'; B2 đúng, gold viết 'kì' (biến thể chính tả)."
+  },
+  "106": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Biển ghi 0702 200 670 - 0702 219 670; B2 đúng, gold sai số."
+  },
+  "107": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Áo khoác ghi 'BEMIN'; B2 đọc thành 'gome'."
+  },
+  "108": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Thiếu 'new zealand'."
+  },
+  "109": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển có cả 'bún thịt nướng' và 'bánh ướt'; B2 đọc nhầm dòng (chữ có thật)."
+  },
+  "110": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển: 'Đại lý mè xửng Thiên Hương — Cửa hàng Như Huệ'; B2 đọc nhầm vùng chữ."
+  },
+  "111": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Ảnh ghi 'Cựu Đại sứ Mỹ tại Việt Nam'; B2 đúng, gold thừa 'quán'."
+  },
+  "112": {
+   "code": "T",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Ảnh 'SÀIGÒN XƯA'; B2 viết 'saigon' (mất dấu, dính chữ)."
+  },
+  "113": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Logo ghi 'NHÂN'; B2 đọc thành 'nihan', lại trả lời tên quảng cáo thay vì tên công ty."
+  },
+  "114": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Biển 'ORGANIC CELERY'; B2 thiếu chữ 'celery'."
+  },
+  "115": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Băng rôn ghi 'F0'; B2 đọc thành 'f9' (sai 1 ký tự, đổi nghĩa)."
+  },
+  "116": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển ghi 0982 159 779; B2 đọc sai nhiều chữ số."
+  },
+  "117": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển có cả ngày diễn ra sự kiện và giờ miễn phí 8h30–15h30; B2 đọc nhầm dòng ngày (chữ có thật)."
+  },
+  "118": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Cột sắt ghi 0915327232; B2 chỉ đọc được một đoạn số và sai thứ tự."
+  },
+  "119": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển có slogan 'nông sản sạch cho mọi nhà'; B2 đọc nhầm dòng khác (chữ có thật)."
+  },
+  "120": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Áo ghi 'TCi'; B2 đọc thành 'tcj'."
+  },
+  "121": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ly_do": "Bên phải có biển 'The Coffee...' (gold 'coffee' đúng); không thấy chữ/vật 'đồ nâu' trong ảnh."
+  },
+  "122": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Câu hỏi về slogan 'thổi bay cơn nóng'; B2 đọc tên thương hiệu (và đọc sai) thay vì slogan."
+  },
+  "123": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 thiếu chữ 'nước' ở đầu, đúng ý."
+  },
+  "124": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển bị che một phần ('...NG VÀ BIỂN'); B2 đọc cụt 'ng và biển'."
+  },
+  "125": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Áo in đúng 'ĂN CỎM CHÁY' (chơi chữ); B2 chép trung thực, gold đã sửa thành 'cơm'."
+  },
+  "126": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 tách 'phuc long' thành 2 từ; đúng ý."
+  },
+  "127": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 thiếu chữ 'chuyên'; đúng ý."
+  },
+  "128": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển có '1 TỶ XU' và 'đố vui trực tuyến'; B2 đọc nhầm phần giải thưởng (và đọc sai)."
+  },
+  "129": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 viết dính 'saigoncentre'; đúng ý."
+  },
+  "130": {
+   "code": "C",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 trả lời tiếng Anh 'souvenir shop' cho 'lưu niệm' (chữ trên biển là tiếng Anh)."
+  },
+  "131": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Số điện thoại in rất nhỏ trên biển; B2 ra dãy số khác hẳn. Lưu ý: ảnh có vẻ ghi '0940 884 070', gold ghi '654' (có thể gold nhiễu)."
+  },
+  "132": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Ảnh ghi '0935.79 00 28'; B2 đúng số, chỉ khác cách ngắt khoảng trắng."
+  },
+  "133": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Thùng ghi '48 hộp x 180ml'; B2 đọc sai thành '100ml'."
+  },
+  "134": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ly_do": "Chữ xanh lá bên phải là 'KÉO RA' (trên cửa); không thấy '100 %' ở đâu trong ảnh."
+  },
+  "135": {
+   "code": "T",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Biển 'ẨM THỰC VIỆT - HÀN'; B2 mất dấu chữ 'việt'."
+  },
+  "136": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 thiếu cụm 'phòng giao dịch'; đúng ý."
+  },
+  "137": {
+   "code": "T",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Slogan 'Nâng Tầm Thương Hiệu Của Bạn'; B2 sai dấu 'năng tâm'."
+  },
+  "138": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ly_do": "Watermark ghi 'INOXGIACONG.NET'; 'quảng ngãi' không có trong ảnh."
+  },
+  "139": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển cạnh 'Bơ sữa Dairy' là 'BỮA NGON VÔ LO'; B2 đọc biển 'TRÁI CÂY' kế bên (chữ có thật)."
+  },
+  "140": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Ảnh dưới-trái là 'CỘNG cà phê'; B2 'đà kề' giống đọc biển 'D&K' bên cạnh (sai vùng chữ)."
+  },
+  "141": {
+   "code": "T",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Logo ghi 'Đạo cụ chụp ảnh - Decor - Bao bì'; B2 sai dấu 'bảo bì'."
+  },
+  "142": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ly_do": "Gian hàng ghi 'Xuân Canh Tý 2020'; 'tháng 6' không có trong ảnh."
+  },
+  "143": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển 'SSal CHICKEN' (chữ cách điệu); B2 đọc thành 'saad'."
+  },
+  "144": {
+   "code": "G",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ly_do": "Câu hỏi/gold nhiễu: 'QUÝ DẦN' là tên cửa hàng trên xe tải, không phải năm. B2 đoán '2021' không có căn cứ trong ảnh."
+  },
+  "145": {
+   "code": "T",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Biển 'Dr. Minh Tây'; B2 mất dấu 'tay'."
+  },
+  "146": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Ảnh có cả 'SX VÀ TM' và 'SX & TM'; B2 đúng, chỉ khác ký hiệu '&'."
+  },
+  "147": {
+   "code": "G",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Áo ghi 'I AM NOT ANYONE'; gold chỉ lấy 'anyone', B2 chỉ lấy 'i am not' — cả hai đều cụt."
+  },
+  "148": {
+   "code": "T",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Băng rôn 'ĐỜI ĐỜI NHỚ ƠN...'; B2 sai dấu 3 chữ ('đội đội nỏ ôn') → khó chấp nhận."
+  },
+  "149": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Logo góc trên-trái là 'VIHACO' (chữ V cách điệu); B2 đúng, gold thiếu 'v'."
+  },
+  "150": {
+   "code": "O",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Hỏi ngày bắt đầu: B2 đúng '23/01'; nhưng đọc sai ngày kết thúc (24/7 → 24/01)."
+  },
+  "151": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển 'GIẶT ỦI 7PLUS'; hỏi tên dịch vụ, B2 lấy phần loại dịch vụ 'giặt ủi' thay vì tên '7plus'."
+  },
+  "152": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển cửa hàng 'PAUL' bên phải; B2 đọc thành 'raul'."
+  },
+  "153": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 chép cả băng rôn 'khu vực phong tỏa phòng chống covid-19'; đúng ý, thừa chữ."
+  },
+  "154": {
+   "code": "G",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Phóng to: xe ghi 'ĐOÁN NHÀ VÔ ĐỊCH' (dự đoán, dịp World Cup 30/6–08/7/2018). Gold 'đón' sai; B2 'đoàn' cũng sai dấu."
+  },
+  "155": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Bên phải có biển 'TẤN ĐẠT' và logo 'VIETTEL'; B2 lấy tên nhà mạng thay vì tên cửa hàng (chữ có thật)."
+  },
+  "156": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Hotline ghi 0979 815 284; B2 đọc sai 1 chữ số (812)."
+  },
+  "157": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 'hẻm tự quản' trả lời đúng loại hẻm, thiếu tên phong trào 'bảo vệ vùng xanh' — chấp nhận một phần."
+  },
+  "158": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Chỉ khác khoảng trắng '2km' / '2 km'."
+  },
+  "159": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Watermark 'www.yan.vn YOUR ADVENTURE NOW'; B2 ghép sai thành 'vietnamyounow.vn'."
+  },
+  "160": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Số ghi 02976.604.999; B2 đọc sai 1 chữ số (399)."
+  },
+  "161": {
+   "code": "G",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ly_do": "Ảnh gốc không có số nào trên áo → câu hỏi không trả lời được từ ảnh (gold '43' không kiểm chứng được). B2 '01' là bịa."
+  },
+  "162": {
+   "code": "T",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Watermark 'BĐO'; B2 viết 'bdo' (đ → d)."
+  },
+  "163": {
+   "code": "T",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Nhãn 'Bánh Bông Lan Bà Xã'; B2 sai dấu 'bà xà'."
+  },
+  "164": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển 'Pé Bùm BOUTIQUE'; B2 đọc thành 'b & bum boutique'."
+  },
+  "165": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Logo 'Chợ Sale Sài Gòn'; B2 thiếu chữ 'sale'."
+  },
+  "166": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Biển 'TP.ĐÔNG HÀ 87 Km'; B2 thiếu 'tp.'."
+  },
+  "167": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Hotline 036 456 8777 - 081 777 6986; B2 đọc sai 1 chữ số (035)."
+  },
+  "168": {
+   "code": "T",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "'NTK: THỦY NGUYỄN'; B2 'thúy' là một tên khác."
+  },
+  "169": {
+   "code": "T",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Băng rôn 'Ngày Di sản Văn hóa Việt Nam'; B2 'đi săn' đổi hẳn nghĩa."
+  },
+  "170": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Gian hàng giữa ghi 'NGẬP TRÀN ƯU ĐÃI'; B2 lấy chữ khác trên kệ ('khuyến mại' / 'chuyên…')."
+  },
+  "171": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 '2 bước' đúng; gold chép nguyên câu."
+  },
+  "172": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 thiếu chữ 'lễ'; đúng ý."
+  },
+  "173": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 '2' đúng; gold 'cơ sở 2'."
+  },
+  "174": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Mũi tên thẳng chỉ 'PẮC BÓ'; B2 đọc nhãn của mũi tên rẽ phải 'TP. C...' (sai vùng)."
+  },
+  "175": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "B2 trả nhãn nhóm 'Yếu tố ngoại tại' thay vì nội dung 4 ô (chữ có thật, sai phần)."
+  },
+  "176": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Slogan nhỏ dưới logo TRUST là 'HỖ TRỢ KHỞI NGHIỆP'; B2 đọc tiêu đề lớn của ảnh."
+  },
+  "177": {
+   "code": "T",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Ảnh 'MÈO KHÓC, CUTE, BỰA, CƯỜI ĐỂU'; B2 sai dấu 'bụa', 'cười đều' và thiếu 'mèo'."
+  },
+  "178": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển ghi 'TRÁI CÂY NHẬP KHẨU'; B2 lấy chữ ở biển bên trái ('...các loại dụng cụ')."
+  },
+  "179": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "ĐT ghi 096 47 48 345; B2 ra dãy số sai."
+  },
+  "180": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 'chợ linh lang' đúng, thừa tên riêng so với gold 'chợ'."
+  },
+  "181": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Hộp ghi 'TH true BUTTER'; B2 thiếu 'th'."
+  },
+  "182": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 chép đủ băng rôn kèm 'tỉnh bắc ninh'; đúng ý, thừa chữ."
+  },
+  "183": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển '... THIẾT BỊ VỆ SINH CAO CẤP' (bị lá che một phần); B2 đúng 3 mục đầu, đọc sai cụm cuối thành 'cho căn'."
+  },
+  "184": {
+   "code": "G",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ly_do": "Ảnh là cửa hàng nội thất ô tô, không liên quan VinMart (câu hỏi/gold không khớp ảnh); B2 bịa 'sạch - an toàn - tiện lợi'."
+  },
+  "185": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Biển 'Fb.com/yamaguchi.com.vn'; B2 viết 'facebook: yamaguchi.com.vn' — cùng nghĩa."
+  },
+  "186": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Logo chữ viết tay (gold 'bewter'); B2 đọc thành 'beater'."
+  },
+  "187": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ly_do": "Biển ghi 'cấm phương tiện cơ giới và thô sơ'; B2 liệt kê 'giấy xe máy, xe đạp, xe tay ga' — không có trong ảnh."
+  },
+  "188": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển có 'Nướng Buffet 139k' và 'Buffet 169k'; B2 '159k' không khớp."
+  },
+  "189": {
+   "code": "G",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Ảnh ghi '0938.999.405'; B2 đúng theo ảnh, gold gõ nhầm '0939'."
+  },
+  "190": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 chép 'clb bóng đá hoàng anh gia lai'; đúng ý, thừa chữ."
+  },
+  "191": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 'giảm giá' đúng loại chương trình, thiếu mức 'đến 50%' — chấp nhận một phần."
+  },
+  "192": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển 'No 4 Rue NGUYEN THI MINH KHAI - HOI AN'; B2 đọc sai 'mến khai', 'hiếu an'."
+  },
+  "193": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Watermark chữ viết tay 'Thắng Nguyễn'; B2 đọc thành 'thường xuyên'."
+  },
+  "194": {
+   "code": "H",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ly_do": "Phóng to màn hình góc trái: 'Máy hút ẩm Fujie' (gold đúng). 'hưng gia' không có trong ảnh."
+  },
+  "195": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 '109.900 đ/kg' đúng, thừa '/kg'."
+  },
+  "196": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển 'Vinh Đinh'; B2 đọc thành 'dinh dinh'."
+  },
+  "197": {
+   "code": "O",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Watermark 'kenh14.vn'; B2 đọc thành 'kem14.vn'."
+  },
+  "198": {
+   "code": "F",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "B2 chép đủ 'cat ba beach resort'; đúng ý."
+  },
+  "199": {
+   "code": "T",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ly_do": "Biển 'BÀN ĐỌC SÁCH'; B2 sai dấu 'bán' (bàn → bán) đổi nghĩa."
+  },
+  "200": {
+   "code": "T",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ly_do": "Watermark 'Tranh Treo Tường Amia.Com'; B2 sai dấu 'tùng'."
+  }
+ },
+ "hoang_rows_1_10": {
+  "1": {
+   "loai_loi": "Khác",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ghi_chu": "sân vận động khác với trang trại và chuồng"
+  },
+  "2": {
+   "loai_loi": "Định dạng / độ dài (ý đúng)",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ghi_chu": ""
+  },
+  "3": {
+   "loai_loi": "Đồng nghĩa / khác từ (ý đúng)",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ghi_chu": ""
+  },
+  "4": {
+   "loai_loi": "Đồng nghĩa / khác từ (ý đúng)",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ghi_chu": ""
+  },
+  "5": {
+   "loai_loi": "Định dạng / độ dài (ý đúng)",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ghi_chu": ""
+  },
+  "6": {
+   "loai_loi": "Khác",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ghi_chu": "gold là quả bóng nó khác với vợt"
+  },
+  "7": {
+   "loai_loi": "Khác",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ghi_chu": "câu trả lời là đường sắt nhưng B2 lại trả lời là tàu hỏa"
+  },
+  "8": {
+   "loai_loi": "Định dạng / độ dài (ý đúng)",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Không",
+   "ghi_chu": ""
+  },
+  "9": {
+   "loai_loi": "Khác",
+   "b2_dung_nghia": "Không",
+   "hallucination": "Có",
+   "ghi_chu": "gold là găng tay nhưng b2 là trên giường"
+  },
+  "10": {
+   "loai_loi": "Đồng nghĩa / khác từ (ý đúng)",
+   "b2_dung_nghia": "Có",
+   "hallucination": "Không",
+   "ghi_chu": ""
+  }
+ }
+}

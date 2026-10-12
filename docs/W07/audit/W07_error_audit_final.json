@@ -1,0 +1,1338 @@
+{
+ "stats": {
+  "all": {
+   "n": 200,
+   "correct_in_meaning_pct": 54.0,
+   "correct_in_meaning_ci95": [
+    47.1,
+    60.8
+   ],
+   "hallucination_pct": 7.0,
+   "hallucination_ci95": [
+    4.2,
+    11.4
+   ],
+   "error_type_pct": {
+    "F": 21.0,
+    "S": 17.5,
+    "H": 15.5,
+    "O": 14.0,
+    "K": 12.5,
+    "G": 12.5,
+    "T": 4.0,
+    "N": 2.5,
+    "C": 0.5
+   }
+  },
+  "vivqa": {
+   "n": 100,
+   "correct_in_meaning_pct": 62.0,
+   "correct_in_meaning_ci95": [
+    52.2,
+    70.9
+   ],
+   "hallucination_pct": 5.0,
+   "hallucination_ci95": [
+    2.2,
+    11.2
+   ],
+   "error_type_pct": {
+    "S": 34.0,
+    "K": 25.0,
+    "G": 19.0,
+    "F": 9.0,
+    "H": 8.0,
+    "N": 5.0
+   }
+  },
+  "vitextvqa": {
+   "n": 100,
+   "correct_in_meaning_pct": 46.0,
+   "correct_in_meaning_ci95": [
+    36.6,
+    55.7
+   ],
+   "hallucination_pct": 9.0,
+   "hallucination_ci95": [
+    4.8,
+    16.2
+   ],
+   "error_type_pct": {
+    "F": 33.0,
+    "O": 28.0,
+    "H": 23.0,
+    "T": 8.0,
+    "G": 6.0,
+    "S": 1.0,
+    "C": 1.0
+   }
+  },
+  "all_without_ai_assisted": {
+   "n": 158,
+   "correct_in_meaning_pct": 53.8,
+   "correct_in_meaning_ci95": [
+    46.0,
+    61.4
+   ],
+   "hallucination_pct": 7.0,
+   "hallucination_ci95": [
+    3.9,
+    12.0
+   ],
+   "error_type_pct": {
+    "F": 20.9,
+    "S": 17.1,
+    "H": 15.8,
+    "O": 14.6,
+    "K": 12.7,
+    "G": 12.7,
+    "T": 3.8,
+    "N": 2.5
+   }
+  },
+  "iaa_shared_set_Huan_vs_Truong": {
+   "loai_loi": {
+    "agree": 0.7,
+    "kappa": 0.617
+   },
+   "b2_dung_nghia": {
+    "agree": 0.85,
+    "kappa": 0.571
+   }
+  },
+  "human_vs_ai": {
+   "n": 150,
+   "loai_loi": {
+    "agree": 0.58,
+    "kappa": 0.507
+   },
+   "b2_dung_nghia": {
+    "agree": 0.813,
+    "kappa": 0.624
+   },
+   "hallucination": {
+    "agree": 0.88,
+    "kappa": 0.297
+   }
+  },
+  "adjudication": {
+   "n": 58,
+   "choice": {
+    "AI": 56,
+    "Khác": 2
+   }
+  },
+  "provenance": {
+   "Hoàng (independent)": 10,
+   "Trường": 43,
+   "Huân+Trường (independent, shared set)": 20,
+   "AI-assisted (Claude v1 → Huân → Hoàng)": 42,
+   "Huân": 42,
+   "Toàn": 43
+  }
+ },
+ "final_labels": {
+  "1": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "2": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "3": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "4": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "5": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "6": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "7": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "8": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "9": [
+   "Khác",
+   "Không",
+   "Có"
+  ],
+  "10": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "11": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "12": [
+   "Gold sai / nhiễu",
+   "Không",
+   "Không"
+  ],
+  "13": [
+   "Đếm sai",
+   "Không",
+   "Không"
+  ],
+  "14": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "15": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "16": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Có"
+  ],
+  "17": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "18": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Có"
+  ],
+  "19": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "20": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "21": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "22": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "23": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "24": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Có"
+  ],
+  "25": [
+   "Đếm sai",
+   "Không",
+   "Không"
+  ],
+  "26": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "27": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "28": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "29": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "30": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "31": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "32": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Có"
+  ],
+  "33": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "34": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "35": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "36": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "37": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "38": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "39": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "40": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "41": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "42": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "43": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "44": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "45": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "46": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "47": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "48": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "49": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "50": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "51": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "52": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "53": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "54": [
+   "Gold sai / nhiễu",
+   "Không",
+   "Không"
+  ],
+  "55": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "56": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "57": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "58": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "59": [
+   "Đếm sai",
+   "Có",
+   "Không"
+  ],
+  "60": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "61": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "62": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "63": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "64": [
+   "Khác",
+   "Có",
+   "Không"
+  ],
+  "65": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "66": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "67": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "68": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "69": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "70": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "71": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "72": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "73": [
+   "Gold sai / nhiễu",
+   "Không",
+   "Không"
+  ],
+  "74": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "75": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "76": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "77": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "78": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "79": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "80": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "81": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "82": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "83": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "84": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "85": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "86": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "87": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "88": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "89": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "90": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "91": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "92": [
+   "Đếm sai",
+   "Không",
+   "Không"
+  ],
+  "93": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "94": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "95": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "96": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "97": [
+   "Khác",
+   "Không",
+   "Không"
+  ],
+  "98": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "99": [
+   "Đếm sai",
+   "Có",
+   "Không"
+  ],
+  "100": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "101": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "102": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "103": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "104": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "105": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "106": [
+   "Gold sai / nhiễu",
+   "Có",
+   "Không"
+  ],
+  "107": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "108": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "109": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "110": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "111": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "112": [
+   "Đồng nghĩa / khác từ (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "113": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "114": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "115": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "116": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "117": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "118": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "119": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "120": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "121": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Có"
+  ],
+  "122": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "123": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "124": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "125": [
+   "Đọc chữ sai (OCR)",
+   "Có",
+   "Không"
+  ],
+  "126": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "127": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "128": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "129": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "130": [
+   "Code-switching (tiếng Anh)",
+   "Có",
+   "Không"
+  ],
+  "131": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "132": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "133": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "134": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Có"
+  ],
+  "135": [
+   "Sai dấu thanh",
+   "Có",
+   "Không"
+  ],
+  "136": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "137": [
+   "Sai dấu thanh",
+   "Có",
+   "Không"
+  ],
+  "138": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Có"
+  ],
+  "139": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "140": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "141": [
+   "Sai dấu thanh",
+   "Có",
+   "Không"
+  ],
+  "142": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Có"
+  ],
+  "143": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "144": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Có"
+  ],
+  "145": [
+   "Sai dấu thanh",
+   "Có",
+   "Không"
+  ],
+  "146": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "147": [
+   "Gold sai / nhiễu",
+   "Không",
+   "Không"
+  ],
+  "148": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "149": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "150": [
+   "Đọc chữ sai (OCR)",
+   "Có",
+   "Không"
+  ],
+  "151": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "152": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "153": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "154": [
+   "Gold sai / nhiễu",
+   "Không",
+   "Không"
+  ],
+  "155": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "156": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "157": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "158": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "159": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "160": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "161": [
+   "Gold sai / nhiễu",
+   "Không",
+   "Có"
+  ],
+  "162": [
+   "Sai dấu thanh",
+   "Có",
+   "Không"
+  ],
+  "163": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "164": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "165": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "166": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "167": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "168": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "169": [
+   "Sai dấu thanh",
+   "Không",
+   "Không"
+  ],
+  "170": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "171": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "172": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "173": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "174": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "175": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "176": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "177": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "178": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Không"
+  ],
+  "179": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "180": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "181": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "182": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "183": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "184": [
+   "Gold sai / nhiễu",
+   "Không",
+   "Có"
+  ],
+  "185": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "186": [
+   "Gold sai / nhiễu",
+   "Không",
+   "Không"
+  ],
+  "187": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Có"
+  ],
+  "188": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "189": [
+   "Đọc chữ sai (OCR)",
+   "Có",
+   "Không"
+  ],
+  "190": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "191": [
+   "Đọc chữ sai (OCR)",
+   "Có",
+   "Không"
+  ],
+  "192": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "193": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "194": [
+   "Sai vùng / không có trong ảnh (hallucination)",
+   "Không",
+   "Có"
+  ],
+  "195": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "196": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "197": [
+   "Đọc chữ sai (OCR)",
+   "Không",
+   "Không"
+  ],
+  "198": [
+   "Định dạng / độ dài (ý đúng)",
+   "Có",
+   "Không"
+  ],
+  "199": [
+   "Sai dấu thanh",
+   "Không",
+   "Không"
+  ],
+  "200": [
+   "Sai dấu thanh",
+   "Có",
+   "Không"
+  ]
+ },
+ "source": {
+  "1": "Hoàng (independent)",
+  "2": "Hoàng (independent)",
+  "3": "Hoàng (independent)",
+  "4": "Hoàng (independent)",
+  "5": "Hoàng (independent)",
+  "6": "Hoàng (independent)",
+  "7": "Hoàng (independent)",
+  "8": "Hoàng (independent)",
+  "9": "Hoàng (independent)",
+  "10": "Hoàng (independent)",
+  "11": "Trường",
+  "12": "Huân+Trường (independent, shared set)",
+  "13": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "14": "Huân",
+  "15": "Toàn",
+  "16": "Toàn",
+  "17": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "18": "Huân",
+  "19": "Toàn",
+  "20": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "21": "Huân+Trường (independent, shared set)",
+  "22": "Trường",
+  "23": "Trường",
+  "24": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "25": "Trường",
+  "26": "Huân+Trường (independent, shared set)",
+  "27": "Huân",
+  "28": "Huân",
+  "29": "Huân",
+  "30": "Toàn",
+  "31": "Huân",
+  "32": "Trường",
+  "33": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "34": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "35": "Trường",
+  "36": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "37": "Huân+Trường (independent, shared set)",
+  "38": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "39": "Trường",
+  "40": "Toàn",
+  "41": "Trường",
+  "42": "Toàn",
+  "43": "Huân+Trường (independent, shared set)",
+  "44": "Trường",
+  "45": "Trường",
+  "46": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "47": "Toàn",
+  "48": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "49": "Trường",
+  "50": "Trường",
+  "51": "Huân+Trường (independent, shared set)",
+  "52": "Huân",
+  "53": "Huân+Trường (independent, shared set)",
+  "54": "Toàn",
+  "55": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "56": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "57": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "58": "Huân",
+  "59": "Trường",
+  "60": "Trường",
+  "61": "Toàn",
+  "62": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "63": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "64": "Trường",
+  "65": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "66": "Huân",
+  "67": "Huân",
+  "68": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "69": "Huân+Trường (independent, shared set)",
+  "70": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "71": "Huân",
+  "72": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "73": "Trường",
+  "74": "Huân",
+  "75": "Trường",
+  "76": "Trường",
+  "77": "Huân+Trường (independent, shared set)",
+  "78": "Trường",
+  "79": "Toàn",
+  "80": "Toàn",
+  "81": "Toàn",
+  "82": "Huân",
+  "83": "Huân+Trường (independent, shared set)",
+  "84": "Toàn",
+  "85": "Toàn",
+  "86": "Huân",
+  "87": "Huân",
+  "88": "Huân",
+  "89": "Huân",
+  "90": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "91": "Huân",
+  "92": "Toàn",
+  "93": "Toàn",
+  "94": "Huân",
+  "95": "Huân",
+  "96": "Toàn",
+  "97": "Toàn",
+  "98": "Trường",
+  "99": "Toàn",
+  "100": "Toàn",
+  "101": "Toàn",
+  "102": "Toàn",
+  "103": "Huân+Trường (independent, shared set)",
+  "104": "Toàn",
+  "105": "Huân+Trường (independent, shared set)",
+  "106": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "107": "Huân",
+  "108": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "109": "Huân",
+  "110": "Toàn",
+  "111": "Trường",
+  "112": "Trường",
+  "113": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "114": "Huân+Trường (independent, shared set)",
+  "115": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "116": "Huân",
+  "117": "Trường",
+  "118": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "119": "Trường",
+  "120": "Toàn",
+  "121": "Trường",
+  "122": "Trường",
+  "123": "Huân+Trường (independent, shared set)",
+  "124": "Trường",
+  "125": "Trường",
+  "126": "Trường",
+  "127": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "128": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "129": "Trường",
+  "130": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "131": "Trường",
+  "132": "Toàn",
+  "133": "Trường",
+  "134": "Huân",
+  "135": "Trường",
+  "136": "Huân",
+  "137": "Huân",
+  "138": "Trường",
+  "139": "Huân",
+  "140": "Huân",
+  "141": "Huân",
+  "142": "Toàn",
+  "143": "Trường",
+  "144": "Trường",
+  "145": "Huân+Trường (independent, shared set)",
+  "146": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "147": "Toàn",
+  "148": "Trường",
+  "149": "Huân",
+  "150": "Toàn",
+  "151": "Huân",
+  "152": "Toàn",
+  "153": "Huân",
+  "154": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "155": "Trường",
+  "156": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "157": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "158": "Huân+Trường (independent, shared set)",
+  "159": "Toàn",
+  "160": "Toàn",
+  "161": "Huân",
+  "162": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "163": "Huân",
+  "164": "Trường",
+  "165": "Huân+Trường (independent, shared set)",
+  "166": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "167": "Huân+Trường (independent, shared set)",
+  "168": "Trường",
+  "169": "Huân",
+  "170": "Toàn",
+  "171": "Huân",
+  "172": "Trường",
+  "173": "Toàn",
+  "174": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "175": "Toàn",
+  "176": "Huân",
+  "177": "Huân",
+  "178": "Huân+Trường (independent, shared set)",
+  "179": "Huân",
+  "180": "Huân",
+  "181": "Toàn",
+  "182": "Huân+Trường (independent, shared set)",
+  "183": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "184": "Toàn",
+  "185": "Huân",
+  "186": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "187": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "188": "Toàn",
+  "189": "Toàn",
+  "190": "Toàn",
+  "191": "Toàn",
+  "192": "Trường",
+  "193": "Toàn",
+  "194": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "195": "Huân",
+  "196": "Toàn",
+  "197": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "198": "AI-assisted (Claude v1 → Huân → Hoàng)",
+  "199": "Trường",
+  "200": "AI-assisted (Claude v1 → Huân → Hoàng)"
+ }
+}
