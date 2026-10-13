@@ -1,0 +1,72 @@
+{
+  "what": "Chỉ số thay thế chất lượng OCR (không cần nhãn chữ thật): đáp án gold có nằm trong văn bản OCR không",
+  "rule_note": "CHẨN ĐOÁN, không phải luật chọn backend (luật: EM của B1+OCR trên dev300)",
+  "backends": [
+    {
+      "cache_file": "paddleocr.json",
+      "backend": "paddleocr",
+      "engine": {
+        "engine": "PaddleOCR pipeline",
+        "paddleocr": "3.7.0",
+        "paddlepaddle": "3.3.1",
+        "lang": "vi",
+        "device": "gpu",
+        "det_model": "PP-OCRv6_medium_det",
+        "rec_model": "PP-OCRv6_medium_rec",
+        "textline_orientation": false
+      },
+      "n_questions": 300,
+      "n_images": 266,
+      "pct_images_with_text": 99.62,
+      "n_ocr_errors": 0,
+      "mean_lines_per_image": 13.34,
+      "mean_chars_per_image": 152.7,
+      "mean_conf": 0.8891,
+      "answer_in_ocr_pct": 27.0,
+      "answer_in_ocr_capped_pct": 27.0,
+      "answer_in_ocr_nodiac_pct": 57.67,
+      "token_recall_mean": 0.4904,
+      "max_chars": 600,
+      "sec_per_image_cache": 0.343
+    },
+    {
+      "cache_file": "paddledet_vietocr.json",
+      "backend": "paddledet_vietocr",
+      "engine": {
+        "engine": "PaddleOCR TextDetection + VietOCR",
+        "paddleocr": "3.7.0",
+        "paddlepaddle": "3.3.1",
+        "lang": "vi",
+        "device": "gpu",
+        "det_model": "PP-OCRv6_medium_det",
+        "rec_model": "vietocr/vgg_transformer",
+        "vietocr_config": "vgg_transformer, beamsearch=False"
+      },
+      "n_questions": 300,
+      "n_images": 266,
+      "pct_images_with_text": 100.0,
+      "n_ocr_errors": 0,
+      "mean_lines_per_image": 12.87,
+      "mean_chars_per_image": 141.9,
+      "mean_conf": 0.758,
+      "answer_in_ocr_pct": 37.67,
+      "answer_in_ocr_capped_pct": 37.67,
+      "answer_in_ocr_nodiac_pct": 48.67,
+      "token_recall_mean": 0.573,
+      "max_chars": 600,
+      "sec_per_image_cache": 0.949
+    }
+  ],
+  "paired_answer_in_ocr": {
+    "a": "paddleocr",
+    "b": "paddledet_vietocr",
+    "n": 300,
+    "only_a": 28,
+    "only_b": 60,
+    "mcnemar_p": 0.0008464960856166748,
+    "mcnemar_test": "exact binomial, two-sided"
+  },
+  "data_files": [
+    "dev_subset300_seed42.json"
+  ]
+}
