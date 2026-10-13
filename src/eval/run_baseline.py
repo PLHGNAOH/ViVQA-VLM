@@ -18,6 +18,10 @@ Biến thể backbone (W07 R1, chỉ để đối chiếu paper / ablation backb
   --variant qwen2vl7b_paper   Qwen2-VL-7B-Instruct, bf16, không lượng tử, độ phân giải mặc định
   --variant qwen2vl7b_b1cfg   Qwen2-VL-7B-Instruct, đúng cấu hình B1 (4-bit NF4, 512 token)
   Config gốc vẫn phải đúng bản chốt W07; biến thể ghi đè TƯỜNG MINH và nằm trong run_signature.
+OCR-enhanced prompting (W08, ablation "có / không OCR"):
+  --mode ocr --ocr_backend paddleocr [--ocr_template v1 --ocr_max_chars 600 --ocr_min_conf 0.0]
+  -> đọc OCR cache <drive>/data/<dataset>/ocr/<backend>.json (tạo bằng `python -m src.data.ocr`);
+  ảnh thiếu trong cache = lỗi. Thiết lập OCR + dấu vân tay phần cache dùng nằm trong run_signature.
 Few-shot control (W07, ablation "zero-shot vs prompt-optimized vs QLoRA"):
   --few_shot_k 5 [--few_shot_seed 42]  -> mode few_shot, k ví dụ (câu hỏi, đáp án) CHỈ CHỮ lấy từ TRAIN,
   chọn tất định (chia đều theo question_type), ghi nguyên văn vào run_signature.
@@ -39,8 +43,10 @@ from collections import Counter
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional
 
+from src.data.ocr import OCR_DEFAULTS, default_cache_path, setup_ocr_prompting
 from src.data.vivqa_dataset import load_vivqa
 from src.eval.metrics import evaluate_predictions
+from src.prompting.builder import OCR_MODES
 from src.eval.run_eval import run_evaluation, generate_answer
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -451,6 +457,9 @@ def run(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         chunk: int = 500, image_dir: Optional[str] = None, limit: Optional[int] = None,
         adapter: Optional[str] = None, variant: Optional[str] = None,
         few_shot_k: Optional[int] = None, few_shot_seed: int = 42, train_file: Optional[str] = None,
+        ocr_backend: Optional[str] = None, ocr_cache: Optional[str] = None,
+        ocr_template: str = OCR_DEFAULTS["template"], ocr_max_chars: Optional[int] = OCR_DEFAULTS["max_chars"],
+        ocr_min_conf: float = OCR_DEFAULTS["min_conf"],
         model=None, processor=None, generate_fn: Callable = generate_answer,
         check_config: bool = True) -> Dict[str, Any]:
     """Toàn bộ quy trình. model/processor/generate_fn truyền vào được để kiểm thử offline."""
@@ -462,6 +471,13 @@ def run(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     out_dir = os.path.join(out_root or os.path.join(drive_root, "experiments"), run_name)
     cfg = copy.deepcopy(load_config(config, mode=mode, check=check_config))   # config gốc phải đúng bản chốt
     cfg = apply_variant(cfg, variant)                                            # rồi mới ghi đè tường minh
+    use_ocr = cfg["prompting"]["mode"] in OCR_MODES
+    if (ocr_backend or ocr_cache) and not use_ocr:
+        raise ValueError("--ocr_backend/--ocr_cache chỉ dùng với --mode ocr (tránh tưởng đã bật OCR mà không)")
+    if use_ocr and not (ocr_backend or ocr_cache):
+        raise ValueError("--mode ocr cần --ocr_backend (vd paddleocr) hoặc --ocr_cache")
+    if use_ocr and few_shot_k:
+        raise ValueError("--few_shot_k và --mode ocr là hai ablation riêng, không chạy chung")
     if few_shot_k:
         # ví dụ nằm trong cfg["prompting"] -> tự vào run_signature; zero-shot không có khoá này -> chữ ký B1/B2 không đổi
         train_file = train_file or os.path.join(drive_root, DATASETS[dataset]["train_rel"])
@@ -489,6 +505,16 @@ def run(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     if missing:
         raise FileNotFoundError(f"{len(missing)} ảnh thiếu, vd {missing[0]}")
     _log(f"   {len(samples)} mẫu, ảnh đủ")
+    ocr_stats = None
+    if use_ocr:
+        # Gắn OCR TRƯỚC khi tính chữ ký: thiết lập OCR nằm trong cfg["prompting"]["ocr"] -> vào chữ ký
+        ocr_path = ocr_cache or default_cache_path(drive_root, dataset, ocr_backend)
+        ocr_stats = setup_ocr_prompting(cfg, samples, ocr_path, template=ocr_template,
+                                        max_chars=ocr_max_chars, min_conf=ocr_min_conf)
+        _log(f"   OCR: {ocr_path} | {cfg['prompting']['ocr']['backend']} | template {ocr_template} | "
+             f"max_chars {ocr_max_chars} | min_conf {ocr_min_conf}")
+        _log(f"        {ocr_stats['pct_samples_with_text']}% mẫu có chữ | TB {ocr_stats['mean_chars']} ký tự | "
+             f"{ocr_stats['pct_samples_truncated']}% bị cắt")
     data_sha = _sha256(data_file)
     ad_info = None
     if adapter:
@@ -532,6 +558,7 @@ def run(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         "adapter": ad_info,
         "few_shot": ({**cfg["prompting"]["few_shot"], "examples": cfg["prompting"]["few_shot_examples"]}
                      if few_shot_k else None),
+        "ocr": ({**cfg["prompting"]["ocr"], "stats": ocr_stats} if use_ocr else None),
     })
     mt = result["metrics"]
     f1_txt = f" | token-F1 (phụ)={mt['token_f1']:.4f}" if "token_f1" in mt else ""
@@ -603,7 +630,7 @@ def _selftest() -> None:
         recs[0]["question_id"] = "test_0"
         _write_json(data, recs)
         try:
-            run(**{**common, "mode": "ocr"})
+            run(**{**common, "mode": "prompt_optimized"})
             raise AssertionError("không phát hiện chạy tiếp với cấu hình khác")
         except ValueError as exc:
             assert "chữ ký" in str(exc) or "khác cấu hình" in str(exc), exc
@@ -675,7 +702,83 @@ def _selftest() -> None:
     _log("sync_images OK")
     _selftest_variants()
     _selftest_few_shot()
+    _selftest_ocr()
     _log("SELFTEST OK")
+
+
+def _selftest_ocr() -> None:
+    """W08 OCR: prompt khác zero-shot đúng 1 dòng; chữ ký riêng và đổi theo thiết lập; ảnh thiếu OCR = lỗi."""
+    import tempfile
+    from src.data.ocr import MockOCREngine, build_ocr_cache, images_of, load_ocr_cache, save_ocr_cache
+    with tempfile.TemporaryDirectory() as td:
+        img = os.path.join(td, "img")
+        os.makedirs(img)
+        recs = []
+        for i in range(4):
+            open(os.path.join(img, f"{i}.jpg"), "wb").close()
+            recs.append({"question_id": f"t{i}", "question": f"hỏi {i}?", "answers": ["ok"],
+                         "image": f"{i}.jpg", "question_type": "unknown"})
+        data = os.path.join(td, "test.json")
+        _write_json(data, recs)
+        cache = os.path.join(td, "data/vitextvqa_official/ocr/mock.json")
+        build_ocr_cache(images_of([data], img), MockOCREngine(), cache)
+        cfgp = os.path.join(td, "cfg.yaml")
+        with open(cfgp, "w", encoding="utf-8") as fp:
+            fp.write("run: {name: x, seed: 42}\n"
+                     "model: {model_id: fake, torch_dtype: bfloat16, min_pixels: 200704, max_pixels: 401408}\n"
+                     "quantization: {enabled: true, load_in_4bit: true, bnb_4bit_quant_type: nf4, "
+                     "bnb_4bit_use_double_quant: true, bnb_4bit_compute_dtype: bfloat16}\n"
+                     "prompting: {mode: zero_shot, max_new_tokens: 32}\n"
+                     "eval: {primary_metrics: [exact_match, vqa_accuracy, anls], secondary_metrics: [token_f1], anls_threshold: 0.5}\n")
+        prompts = []
+
+        def fake_gen(model, processor, image_path, prompt_text, max_new_tokens=32):
+            prompts.append(prompt_text)
+            return "ok"
+
+        common = dict(dataset="vitextvqa_official", drive_root=td, data_file=data, out_root=os.path.join(td, "exp"),
+                      config=cfgp, chunk=3, image_dir=img, model="fake", processor="fake", generate_fn=fake_gen)
+        r0 = run(**common, run_name="zs")
+        zs_prompt = prompts[0]
+        assert zs_prompt == "Câu hỏi: hỏi 0?" and r0["meta"]["ocr"] is None
+        prompts.clear()
+        r = run(**common, run_name="ocr", mode="ocr", ocr_backend="mock")     # đường dẫn cache mặc định
+        assert prompts[0] == "Văn bản đọc được trong ảnh: MOCK 0.jpg | dòng hai\n" + zs_prompt, prompts[0]
+        assert r["meta"]["prompting_mode"] == "ocr" and r["meta"]["ocr"]["backend"] == "mock"
+        assert r["meta"]["ocr"]["stats"]["n_images"] == 4 and r["meta"]["ocr"]["template"] == "v1"
+        sig = lambda n: json.load(open(os.path.join(td, "exp", n, SIGNATURE_FILE), encoding="utf-8"))
+        assert sig("zs")["sha256"] != sig("ocr")["sha256"] and "ocr" not in sig("zs")["prompting"]
+        # đổi ngưỡng tin cậy, giữ run_name -> chữ ký lệch -> chặn; run mới thì dòng conf thấp bị lọc
+        try:
+            run(**common, run_name="ocr", mode="ocr", ocr_backend="mock", ocr_min_conf=0.5)
+            raise AssertionError("không chặn đổi thiết lập OCR")
+        except ValueError:
+            pass
+        prompts.clear()
+        run(**common, run_name="ocr_c05", mode="ocr", ocr_backend="mock", ocr_min_conf=0.5)
+        assert prompts[0] == "Văn bản đọc được trong ảnh: MOCK 0.jpg\n" + zs_prompt, prompts[0]
+        # resume run OCR: không gọi model lại; cache thêm ảnh khác KHÔNG làm lệch chữ ký
+        c = load_ocr_cache(cache)
+        c["images"]["99.jpg"] = {"lines": [{"text": "z", "conf": 1.0}]}
+        save_ocr_cache(c, cache)
+        prompts.clear()
+        run(**common, run_name="ocr", mode="ocr", ocr_backend="mock")
+        assert prompts == []
+        # sai cách dùng -> lỗi rõ ràng
+        for bad in [dict(mode="ocr"), dict(ocr_backend="mock"), dict(mode="ocr", ocr_backend="mock", few_shot_k=2)]:
+            try:
+                run(**common, run_name="bad", **bad)
+                raise AssertionError(f"không chặn {bad}")
+            except ValueError:
+                pass
+        c["images"].pop("2.jpg")
+        save_ocr_cache(c, cache)
+        try:
+            run(**common, run_name="ocr_missing", mode="ocr", ocr_backend="mock")
+            raise AssertionError("không chặn ảnh thiếu OCR")
+        except KeyError:
+            pass
+    _log("ocr OK")
 
 
 def _selftest_few_shot() -> None:
@@ -861,6 +964,11 @@ def main() -> None:
     ap.add_argument("--few_shot_k", type=int, default=None,
                     help="Few-shot control: số ví dụ (chỉ chữ) lấy từ train; bỏ trống = zero-shot")
     ap.add_argument("--few_shot_seed", type=int, default=42)
+    ap.add_argument("--ocr_backend", default=None, help="Backend của OCR cache (paddleocr | paddledet_vietocr); cần --mode ocr")
+    ap.add_argument("--ocr_cache", default=None, help="Ghi đè đường dẫn OCR cache")
+    ap.add_argument("--ocr_template", default=OCR_DEFAULTS["template"], help="Mẫu dòng OCR trong prompt (v1 | v2)")
+    ap.add_argument("--ocr_max_chars", type=int, default=OCR_DEFAULTS["max_chars"], help="Cắt văn bản OCR quá N ký tự")
+    ap.add_argument("--ocr_min_conf", type=float, default=OCR_DEFAULTS["min_conf"], help="Bỏ dòng OCR có độ tin cậy < ngưỡng")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
     if a.selftest:
@@ -870,7 +978,9 @@ def main() -> None:
         ap.error("cần --dataset và --run_name (trừ khi --selftest)")
     run(a.dataset, a.run_name, drive_root=a.drive_root, data_file=a.data_file, out_root=a.out_root,
         config=a.config, mode=a.mode, chunk=a.chunk, limit=a.limit, adapter=a.adapter, variant=a.variant,
-        few_shot_k=a.few_shot_k, few_shot_seed=a.few_shot_seed)
+        few_shot_k=a.few_shot_k, few_shot_seed=a.few_shot_seed,
+        ocr_backend=a.ocr_backend, ocr_cache=a.ocr_cache, ocr_template=a.ocr_template,
+        ocr_max_chars=a.ocr_max_chars, ocr_min_conf=a.ocr_min_conf)
 
 
 if __name__ == "__main__":

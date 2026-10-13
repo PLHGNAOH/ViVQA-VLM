@@ -19,7 +19,7 @@ import platform
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 
-from src.prompting.builder import build_prompt, to_chat_messages
+from src.prompting.builder import prompt_for_sample, to_chat_messages
 from src.eval.metrics import evaluate_predictions
 
 
@@ -102,14 +102,13 @@ def run_evaluation(
 
     t0 = time.time()
     for i, s in enumerate(samples):
-        # Lấy OCR cho mẫu này (nếu chế độ cần và có cache)
-        ocr_texts = None
-        if ocr_lookup is not None:
-            ocr_texts = ocr_lookup.get(s["question_id"]) or ocr_lookup.get(
-                os.path.basename(s["image_path"]))
+        # OCR: W08 gắn sẵn s["ocr_texts"] (src.data.ocr.attach_ocr); ocr_lookup cũ vẫn dùng được.
+        if ocr_lookup is not None and "ocr_texts" not in s:
+            s = {**s, "ocr_texts": ocr_lookup.get(s["question_id"]) or ocr_lookup.get(
+                os.path.basename(s["image_path"])) or []}
 
-        prompt_text = build_prompt(s["question"], mode=mode, ocr_texts=ocr_texts,
-                                   examples=cfg["prompting"].get("few_shot_examples"))
+        # Cùng một hàm dựng prompt với train_qlora -> prompt eval trùng hệt prompt train.
+        prompt_text = prompt_for_sample(s, cfg["prompting"])
         pred = generate_fn(model, processor, s["image_path"], prompt_text,
                            max_new_tokens=max_new_tokens)
 

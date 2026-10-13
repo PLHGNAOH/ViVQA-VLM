@@ -26,6 +26,11 @@ Cách chạy (Colab, GPU):
       --run_name W06_smoke_qlora_qwen25vl_vivqa_mp1280_seed42 \
       --limit 200 --max_steps 30 --max_pixels 1003520
 
+  # W08: QLoRA + OCR-enhanced prompting (B3) trên tập con cố định; B2-sub = cùng lệnh, bỏ --mode/--ocr_*
+  !python -u -m src.adaptation.train_qlora --dataset vitextvqa_official \
+      --data_file <drive>/data/vitextvqa_official/train_subset8000_byimage_seed42.json \
+      --run_name W08_B3_qlora_ocr_... --epochs 1 --mode ocr --ocr_backend paddleocr
+
 Chạy tiếp sau khi Colab ngắt: chạy lại ĐÚNG lệnh cũ (cùng --run_name) -> tự resume.
 
 Kiểm thử offline (không GPU, không mạng, không cần torch):
@@ -52,6 +57,7 @@ DATASETS = {
     "vivqa": {"train_rel": "data/vivqa/train.json"},
     "vitextvqa_official": {"train_rel": "data/vitextvqa_official/train.json"},
 }
+OCR_MODES = {"ocr", "ocr_rag"}   # khớp src.prompting.builder.OCR_MODES (giữ module này import được không cần gì)
 
 IGNORE_INDEX = -100          # quy ước của PyTorch: vị trí có nhãn -100 bị BỎ QUA khi tính loss
 QWEN_TURN_END = "<|im_end|>"  # token kết thúc lượt nói của Qwen2.5; phải có để model biết dừng
@@ -314,6 +320,30 @@ def check_or_write_signature(out_dir: str, sig: Dict[str, Any]) -> bool:
     return False
 
 
+def attach_ocr_for_training(cfg: Dict[str, Any], samples: List[Dict[str, Any]], drive_root: str, dataset: str,
+                            ocr_backend: Optional[str], ocr_cache: Optional[str], ocr_template: Optional[str],
+                            ocr_max_chars: Optional[int], ocr_min_conf: Optional[float]) -> Optional[Dict[str, Any]]:
+    """
+    W08: mode OCR -> gắn OCR vào mẫu + ghi thiết lập vào cfg["prompting"]["ocr"] (nằm trong chữ ký run).
+    Phải gọi TRƯỚC run_signature. Không phải mode OCR -> cfg giữ nguyên (chữ ký run cũ không đổi).
+    """
+    from src.data.ocr import OCR_DEFAULTS, default_cache_path, setup_ocr_prompting
+    use_ocr = cfg["prompting"]["mode"] in OCR_MODES
+    extra = [ocr_template, ocr_max_chars, ocr_min_conf]
+    if (ocr_backend or ocr_cache or any(v is not None for v in extra)) and not use_ocr:
+        raise ValueError("--ocr_* chỉ dùng với --mode ocr")
+    if not use_ocr:
+        return None
+    if not (ocr_backend or ocr_cache):
+        raise ValueError("--mode ocr cần --ocr_backend (vd paddleocr) hoặc --ocr_cache")
+    path = ocr_cache or default_cache_path(drive_root, dataset, ocr_backend)
+    return setup_ocr_prompting(
+        cfg, samples, path,
+        template=ocr_template if ocr_template is not None else OCR_DEFAULTS["template"],
+        max_chars=ocr_max_chars if ocr_max_chars is not None else OCR_DEFAULTS["max_chars"],
+        min_conf=ocr_min_conf if ocr_min_conf is not None else OCR_DEFAULTS["min_conf"])
+
+
 # --------------------------------------------------------------------------- #
 # 4) Dataset + Collator (cần torch/transformers -> import trễ bên trong)
 # --------------------------------------------------------------------------- #
@@ -328,9 +358,9 @@ def make_collate_fn(processor, cfg: Dict[str, Any]):
     import torch
     from PIL import Image
     from qwen_vl_utils import process_vision_info
-    from src.prompting.builder import build_prompt, to_chat_messages
+    from src.prompting.builder import prompt_for_sample, to_chat_messages
 
-    mode = cfg["prompting"]["mode"]
+    prompting = cfg["prompting"]
     # Padding bên PHẢI: build_labels giả định prompt nằm ở đầu chuỗi.
     processor.tokenizer.padding_side = "right"
 
@@ -338,7 +368,8 @@ def make_collate_fn(processor, cfg: Dict[str, Any]):
         texts, prompt_texts, images_per_sample = [], [], []
         for s in batch:
             image = Image.open(s["image_path"]).convert("RGB")
-            messages = to_chat_messages(image, build_prompt(s["question"], mode=mode))
+            # Cùng hàm dựng prompt với lúc eval (run_eval) -> train/eval không lệch prompt (kể cả dòng OCR)
+            messages = to_chat_messages(image, prompt_for_sample(s, prompting))
             prompt_only = processor.apply_chat_template(
                 messages, tokenize=False, add_generation_prompt=True)
             prompt_texts.append(prompt_only)
@@ -376,7 +407,10 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
           batch_size: Optional[int] = None, grad_accum: Optional[int] = None,
           grad_checkpointing: Optional[bool] = None, save_steps: Optional[int] = None,
           debug_crash_at_step: Optional[int] = None,
-          epochs: Optional[float] = None) -> Dict[str, Any]:
+          epochs: Optional[float] = None,
+          ocr_backend: Optional[str] = None, ocr_cache: Optional[str] = None,
+          ocr_template: Optional[str] = None, ocr_max_chars: Optional[int] = None,
+          ocr_min_conf: Optional[float] = None) -> Dict[str, Any]:
     """
     Nạp data -> nạp model + LoRA -> train -> lưu adapter + train_log.json.
 
@@ -419,6 +453,12 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         raise ValueError("Không còn mẫu nào train được sau khi lọc")
     check_drop_ratio(len(samples), len(dropped), image_dir)
     _log(f"   {len(samples)} mẫu train (loại {len(dropped)} mẫu thiếu ảnh/đáp án)")
+    ocr_stats = attach_ocr_for_training(cfg, samples, drive_root, dataset, ocr_backend, ocr_cache,
+                                        ocr_template, ocr_max_chars, ocr_min_conf)
+    if ocr_stats:
+        o = cfg["prompting"]["ocr"]
+        _log(f"   OCR: {o['cache_file']} ({o['backend']}) | template {o['template']} | max_chars {o['max_chars']} | "
+             f"min_conf {o['min_conf']} | {ocr_stats['pct_samples_with_text']}% mẫu có chữ")
 
     # --- Chạy tiếp hay chạy mới? (kiểm tra TRƯỚC khi nạp model 4 phút) ---
     t = cfg["training"]
@@ -531,6 +571,7 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         "num_dropped": len(dropped),
         "answer_policy": "đáp án đầu tiên trong trường answers",
         "prompting_mode": cfg["prompting"]["mode"],
+        "ocr": ({**cfg["prompting"]["ocr"], "stats": ocr_stats} if ocr_stats else None),
         "model_id": cfg["model"]["model_id"],
         "max_pixels": cfg["model"]["max_pixels"],
         "min_pixels": cfg["model"]["min_pixels"],
@@ -711,7 +752,57 @@ def _selftest() -> None:
     assert session_losses(1.2, 30, 30, [])["final_loss"] == 1.2   # không resume -> giữ nguyên
     _log("session_losses OK")
 
+    _selftest_ocr()
+
     _log("SELFTEST OK")
+
+
+def _selftest_ocr() -> None:
+    """W08: B3 (OCR) và B2-sub (không OCR) khác chữ ký; prompt train == prompt eval; dùng sai -> lỗi."""
+    import tempfile
+    from src.data.ocr import MockOCREngine, build_ocr_cache, images_of
+    from src.data.vivqa_dataset import load_vivqa
+    from src.prompting.builder import prompt_for_sample
+    from src.eval.run_eval import run_evaluation
+    with tempfile.TemporaryDirectory() as td:
+        img = os.path.join(td, "img")
+        os.makedirs(img)
+        recs = [{"question_id": f"q{i}", "question": f"hỏi {i}?", "answers": ["đáp"], "image": f"{i}.jpg"}
+                for i in range(3)]
+        for r in recs:
+            open(os.path.join(img, r["image"]), "wb").close()
+        data = os.path.join(td, "train.json")
+        _write_json(data, recs)
+        build_ocr_cache(images_of([data], img), MockOCREngine(),
+                        os.path.join(td, "data/vitextvqa_official/ocr/mock.json"))
+        cfg_path = os.path.join(REPO_ROOT, "configs/qwen_lora.yaml")
+        base = load_config(cfg_path, epochs=1)
+        s_plain = load_vivqa(data, image_dir=img)
+        assert attach_ocr_for_training(copy.deepcopy(base), s_plain, td, "vitextvqa_official",
+                                       None, None, None, None, None) is None
+        sig_plain = run_signature(base, "sha", 3, None, None)["sha256"]
+        assert sig_plain == run_signature(load_config(cfg_path, epochs=1), "sha", 3, None, None)["sha256"]
+        cfg_ocr = load_config(cfg_path, epochs=1, mode="ocr")
+        s_ocr = load_vivqa(data, image_dir=img)
+        st = attach_ocr_for_training(cfg_ocr, s_ocr, td, "vitextvqa_official", "mock", None, None, None, None)
+        assert st["n_samples"] == 3 and cfg_ocr["prompting"]["ocr"]["template"] == "v1"
+        assert run_signature(cfg_ocr, "sha", 3, None, None)["sha256"] != sig_plain
+        # prompt lúc train (collate) == prompt lúc eval (run_evaluation) cho cùng mẫu
+        p_train = prompt_for_sample(s_ocr[0], cfg_ocr["prompting"])
+        assert p_train.startswith("Văn bản đọc được trong ảnh: MOCK 0.jpg") and p_train.endswith("Câu hỏi: hỏi 0?")
+        seen = []
+        ecfg = {**cfg_ocr, "data": {"dataset_name": "x"}, "eval": {"primary_metrics": ["exact_match"]}}
+        run_evaluation(None, None, s_ocr[:1], ecfg, verbose_every=0,
+                       generate_fn=lambda m, p, i, t, max_new_tokens=32: seen.append(t) or "đáp")
+        assert seen == [p_train], (seen, p_train)
+        for bad in [dict(mode=None, backend="mock"), dict(mode="ocr", backend=None)]:
+            try:
+                attach_ocr_for_training(load_config(cfg_path, mode=bad["mode"]), load_vivqa(data, image_dir=img),
+                                        td, "vitextvqa_official", bad["backend"], None, None, None, None)
+                raise AssertionError(f"không chặn {bad}")
+            except ValueError:
+                pass
+    _log("ocr (train) OK")
 
 
 def main() -> None:
@@ -738,6 +829,11 @@ def main() -> None:
                     help="CHỈ để kiểm thử resume: giả lập Colab đứt tại step N")
     ap.add_argument("--epochs", type=float, default=None,
                     help="Ghi đè training.epochs (vd 1 cho B2 sơ bộ); đổi cả lịch learning rate")
+    ap.add_argument("--ocr_backend", default=None, help="Backend OCR cache (paddleocr | paddledet_vietocr); cần --mode ocr")
+    ap.add_argument("--ocr_cache", default=None, help="Ghi đè đường dẫn OCR cache")
+    ap.add_argument("--ocr_template", default=None, help="Mẫu dòng OCR (v1 | v2); mặc định v1")
+    ap.add_argument("--ocr_max_chars", type=int, default=None, help="Cắt văn bản OCR quá N ký tự; mặc định 600")
+    ap.add_argument("--ocr_min_conf", type=float, default=None, help="Bỏ dòng OCR có độ tin cậy < ngưỡng; mặc định 0")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
 
@@ -751,7 +847,9 @@ def main() -> None:
           limit=a.limit, max_steps=a.max_steps, max_pixels=a.max_pixels,
           dtype=a.dtype, mode=a.mode, batch_size=a.batch_size, grad_accum=a.grad_accum,
           grad_checkpointing=None if a.grad_checkpointing is None else (a.grad_checkpointing == "on"),
-          save_steps=a.save_steps, debug_crash_at_step=a.debug_crash_at_step, epochs=a.epochs)
+          save_steps=a.save_steps, debug_crash_at_step=a.debug_crash_at_step, epochs=a.epochs,
+          ocr_backend=a.ocr_backend, ocr_cache=a.ocr_cache, ocr_template=a.ocr_template,
+          ocr_max_chars=a.ocr_max_chars, ocr_min_conf=a.ocr_min_conf)
 
 
 if __name__ == "__main__":

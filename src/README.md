@@ -43,22 +43,27 @@ Nhờ tách vậy, một dòng trong bảng ablation = đổi `mode` trong confi
 - [ ] `train/train_lora.py` — vòng huấn luyện PEFT (LoRA/QLoRA)
 - [ ] `app/gradio_app.py` — web prototype (tuần 14–15)
 
-## Chạy ablation OCR (Bước 3)
+## Chạy ablation OCR (W08)
+
+OCR chạy ở **phiên Colab riêng**, một lần, ra cache `<drive>/data/<dataset>/ocr/<backend>.json`.
+Mọi run (eval lẫn train) chỉ tra cache -> cùng đầu vào OCR cho baseline và cải tiến.
 
 ```bash
-# 1) Cài (trên Colab/Kaggle GPU):  pip install paddlepaddle-gpu paddleocr vietocr
-# 2) OCR toàn bộ ảnh -> ghi data/vivqa/ocr_cache.json (chỉ chạy 1 lần)
-python -m src.data.ocr --config configs/qwen_lora.yaml --split test
-# (test logic offline không cần cài gì:  --backend mock)
+# 1) Phiên OCR riêng: pip install paddlepaddle(-gpu) paddleocr   (PaddleOCR 3.x)
+#    VietOCR (backend paddledet_vietocr): pip install --no-deps vietocr && pip install gdown einops
+python -m src.data.ocr --dataset vitextvqa_official --backend paddleocr --device gpu \
+    --files dev_subset300_seed42.json --limit_images 100     # đo tốc độ trước, rồi bỏ --limit_images
+# 2) Eval có OCR (phiên VLM bình thường, không cần thư viện OCR):
+python -m src.eval.run_baseline --dataset vitextvqa_official --run_name <run> --mode ocr --ocr_backend paddleocr
+# 3) Train có OCR (B3):
+python -m src.adaptation.train_qlora --dataset vitextvqa_official --data_file <tập con> --run_name <run> \
+    --epochs 1 --mode ocr --ocr_backend paddleocr
 ```
 
-Trong notebook, để có dòng ablation **+OCR**, chỉ cần:
-```python
-from src.data.ocr import load_ocr_cache
-ocr_lookup = load_ocr_cache(cfg['data']['ocr_cache'])
-cfg['prompting']['mode'] = 'ocr'
-result = run_evaluation(model, processor, samples, cfg, ocr_lookup=ocr_lookup)
-```
+Prompt chế độ `ocr` = prompt zero-shot + đúng **một** dòng OCR đặt trước câu hỏi (ảnh không có chữ -> trùng
+hệt zero-shot). Train và eval dựng prompt bằng cùng một hàm `src.prompting.builder.prompt_for_sample`.
+Thiết lập OCR (backend, model OCR, template, `max_chars`, `min_conf`, sha256 phần cache dùng) nằm trong
+`run_signature.json` -> đổi bất kỳ thứ gì cũng là run mới.
 
 ## Chạy thử offline (không cần GPU)
 
