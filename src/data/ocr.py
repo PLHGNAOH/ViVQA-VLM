@@ -253,6 +253,14 @@ def _require_paddleocr3():
     return paddleocr
 
 
+def _paddle_version() -> Optional[str]:
+    try:
+        import paddle
+        return paddle.__version__
+    except Exception:
+        return None
+
+
 def _image_size(image_path: str) -> Tuple[int, int]:
     from PIL import Image
     with Image.open(image_path) as im:
@@ -268,7 +276,8 @@ class PaddleOCREngine(BaseOCREngine):
         self._ocr = po.PaddleOCR(lang=lang, device=device, use_doc_orientation_classify=False,
                                  use_doc_unwarping=False, use_textline_orientation=False)
         params = getattr(self._ocr, "_params", {}) or {}
-        self.info = {"engine": "PaddleOCR pipeline", "paddleocr": po.__version__, "lang": lang, "device": device,
+        self.info = {"engine": "PaddleOCR pipeline", "paddleocr": po.__version__, "paddlepaddle": _paddle_version(),
+                     "lang": lang, "device": device,
                      "det_model": params.get("text_detection_model_name"),
                      "rec_model": params.get("text_recognition_model_name"),
                      "textline_orientation": False}
@@ -298,7 +307,8 @@ class PaddleDetVietOCREngine(BaseOCREngine):
         vcfg["device"] = "cuda:0" if device.startswith("gpu") else "cpu"
         vcfg["predictor"]["beamsearch"] = False
         self._rec = Predictor(vcfg)
-        self.info = {"engine": "PaddleOCR TextDetection + VietOCR", "paddleocr": po.__version__, "lang": lang,
+        self.info = {"engine": "PaddleOCR TextDetection + VietOCR", "paddleocr": po.__version__,
+                     "paddlepaddle": _paddle_version(), "lang": lang,
                      "device": device, "det_model": det_model, "rec_model": "vietocr/vgg_transformer",
                      "vietocr_config": "vgg_transformer, beamsearch=False"}
 
