@@ -19,7 +19,7 @@ Rủi ro đã biết: Qwen2.5-VL vốn tự đọc chữ tốt (R0 TextVQA val V
 | 3 | Nối OCR vào `src/eval/run_baseline.py` và `src/adaptation/train_qlora.py` (`--mode ocr` đọc OCR cache) + selftest; script tập con train | ✅ |
 | 4 | Tạo OCR cache ViTextVQA: notebook `10_ocr_cache_vitextvqa.ipynb` — Phần A: pilot 100 ảnh + dev300 × 2 backend + chỉ số answer-in-OCR; Phần B (sau bước 5): test2000 + tập con train | ✅ 13/10 — Phần A (dev300, 2 backend) + Phần B (VietOCR: test2000 1.486 ảnh + train 2.670 ảnh, 0 lỗi, 0,97 s/ảnh) |
 | 5 | Chọn backend OCR (`paddleocr` vs `paddledet_vietocr`) + mẫu prompt trên dev300: notebook `11_ocr_select_dev300_qwen25vl.ipynb` + `src/eval/select_ocr_config.py` (áp luật tự động) | ✅ 13/10 — chốt **VietOCR · v1** |
-| 6 | Ablation OCR chỉ ở inference trên test2000: B1+OCR, B2+OCR — notebook `12_ocr_ablation_test2000_qwen25vl.ipynb` | ⏳ code xong, chờ chạy Colab L4 |
+| 6 | Ablation OCR chỉ ở inference trên test2000: B1+OCR, B2+OCR — notebook `12_ocr_ablation_test2000_qwen25vl.ipynb` | ✅ 13/10 — không khác biệt có ý nghĩa (cả B1 lẫn B2) |
 | 7 | QLoRA ViVQA 2 epoch, eval val sau mỗi epoch để chọn epoch | ⏳ |
 | 8 | Đóng tuần: tổng kết + bàn giao W08 | ⏳ |
 
@@ -86,6 +86,27 @@ Cấu hình OCR dùng cho mọi run dưới đây = cấu hình đóng băng ở
 | B3 vs B2 (full train) | Chỉ báo cáo: tập con 8.000 câu + OCR có bù được 77% dữ liệu train bị bỏ không | — (không kết luận cải tiến) |
 
 ANLS luôn báo cáo kèm CI95 bootstrap ghép cặp (10.000 lần, seed 42). Kết quả âm (p ≥ 0,05) vẫn được báo cáo đầy đủ trong bảng ablation.
+
+## Kết quả bước 6 — ablation "có / không OCR" trên test2000 (L4, bf16, 4-bit, seed 42)
+
+Nguồn: `../../experiments/W08_ocr_ablation_test2000_L4_seed42/` (`ocr_ablation_summary.json`, 2 file `paired_*.json`) + 2 run `W08_B1ocr_…_test2000_…`, `W08_B2ocr_…_test2000_…`. Cấu hình OCR đóng băng từ bước 5 (VietOCR · v1 · 600 · 0); 99,85% câu có chữ OCR, trung bình 144 ký tự, 3,55% bị cắt.
+
+| Run | EM | ANLS | token-F1 (phụ) | s/câu |
+|---|---|---|---|---|
+| B1 zero-shot (W07) | 0,2880 | 0,4753 | 0,5377 | 0,862 |
+| B1 + OCR | 0,2935 | 0,4802 | 0,5462 | 0,906 |
+| B2 QLoRA 1 epoch (W07) | 0,4970 | 0,7191 | 0,7101 | 1,011 |
+| B2 + OCR (chỉ lúc suy luận) | 0,5070 | 0,7214 | 0,7124 | 0,997 |
+
+| So sánh | Chỉ base đúng / chỉ +OCR đúng | McNemar p | ΔANLS (CI95) | Kết luận theo luật |
+|---|---|---|---|---|
+| B1 → B1 + OCR | 132 / 143 | 0,547 | +0,0050 [−0,0097; +0,0203] | Không khác biệt có ý nghĩa |
+| B2 → B2 + OCR | 121 / 141 | 0,24 | +0,0023 [−0,0102; +0,0148] | Không khác biệt có ý nghĩa |
+
+**Diễn giải:**
+- Ablation bắt buộc "with / without OCR-enhanced prompting" ở **suy luận** cho **kết quả âm**, nhất quán với dev300. Báo cáo đầy đủ như một dòng ablation.
+- Tín hiệu (chưa có ý nghĩa thống kê, **không** dùng làm kết luận): B2 — dù chưa từng thấy dòng OCR khi train — nhích nhiều hơn B1 (+1,00 so với +0,55 điểm EM). Gợi ý mô hình đã fine-tune khai thác OCR tốt hơn zero-shot → củng cố lý do kiểm định B3 (train cùng OCR) so với B2-sub.
+- **Độ nhạy (tính bằng McNemar exact, giả định ~260 câu lật như bước 6):** ngưỡng để đạt p < 0,05 là chênh ≈ 34 câu = **1,7 điểm EM**; xác suất phát hiện (mô phỏng 2.000 lần) khi chênh thật là 1,5 / 2,0 / 2,3 / 2,5 điểm lần lượt ≈ 42% / 67% / 79% / 85%. → B3 vs B2-sub chỉ phát hiện ổn định nếu lợi ích thật ≳ 2,3 điểm; kết quả âm khi lợi ích nhỏ hơn không có nghĩa là "OCR vô dụng".
 
 ## Số liệu ngân sách (đo từ log W07, L4, bf16, 4-bit NF4)
 
