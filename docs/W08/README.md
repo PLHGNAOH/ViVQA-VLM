@@ -17,9 +17,9 @@ Rủi ro đã biết: Qwen2.5-VL vốn tự đọc chữ tốt (R0 TextVQA val V
 | 1 | Dọn tồn W07: commit `thuHoiNhanh` v2, `compute_error_audit.py` ghi JSON với `newline="\n"`, tạo `docs/W08/` | ✅ `5d161c4` |
 | 2 | Hồ sơ Review 2: `docs/W07/W07_Team_Report.md` + `docs/W07/README.md` (bản TV); checklist Review2 điền SAU buổi review | ✅ `3f736eb` |
 | 3 | Nối OCR vào `src/eval/run_baseline.py` và `src/adaptation/train_qlora.py` (`--mode ocr` đọc OCR cache) + selftest; script tập con train | ✅ |
-| 4 | Tạo OCR cache ViTextVQA: notebook `10_ocr_cache_vitextvqa.ipynb` — Phần A: pilot 100 ảnh + dev300 × 2 backend + chỉ số answer-in-OCR; Phần B (sau bước 5): test2000 + tập con train | ✅ Phần A (13/10, T4, Paddle GPU) · ⏳ Phần B |
+| 4 | Tạo OCR cache ViTextVQA: notebook `10_ocr_cache_vitextvqa.ipynb` — Phần A: pilot 100 ảnh + dev300 × 2 backend + chỉ số answer-in-OCR; Phần B (sau bước 5): test2000 + tập con train | ✅ 13/10 — Phần A (dev300, 2 backend) + Phần B (VietOCR: test2000 1.486 ảnh + train 2.670 ảnh, 0 lỗi, 0,97 s/ảnh) |
 | 5 | Chọn backend OCR (`paddleocr` vs `paddledet_vietocr`) + mẫu prompt trên dev300: notebook `11_ocr_select_dev300_qwen25vl.ipynb` + `src/eval/select_ocr_config.py` (áp luật tự động) | ✅ 13/10 — chốt **VietOCR · v1** |
-| 6 | Ablation OCR chỉ ở inference trên test2000: B1+OCR, B2+OCR | ⏳ |
+| 6 | Ablation OCR chỉ ở inference trên test2000: B1+OCR, B2+OCR — notebook `12_ocr_ablation_test2000_qwen25vl.ipynb` | ⏳ code xong, chờ chạy Colab L4 |
 | 7 | QLoRA ViVQA 2 epoch, eval val sau mỗi epoch để chọn epoch | ⏳ |
 | 8 | Đóng tuần: tổng kết + bàn giao W08 | ⏳ |
 
@@ -72,7 +72,20 @@ Nguồn: `../../experiments/W08_ocr_select_dev300_L4_seed42/ocr_selection.json` 
 
 **Áp luật (đúng như ghi trước):** Luật 1: EM v1 hai backend không phân biệt được (p = 0,856) → xét answer-in-OCR: VietOCR 37,67% > PaddleOCR 27,0% → **VietOCR**. Luật 2: v1 = 0,3267 vs v2 = 0,3233, p = 1 → **v1**. Luật 3: cắt 600 ký tự mất 0 điểm → giữ `max_chars 600`, `min_conf 0`. Cấu hình này **đóng băng** cho test2000 và B3.
 
-**Phát hiện:** chèn OCR vào prompt lúc suy luận **không cải thiện B1 zero-shot** (EM giữ nguyên, 16 câu được sửa đúng nhưng 16 câu bị làm sai). Phù hợp rủi ro đã nêu: Qwen2.5-VL vốn tự đọc chữ tốt (R0 TextVQA 79,60). Đây là kết quả âm hợp lệ cho ablation "có / không OCR". Phép thử chính vẫn là **B3 (train cùng OCR) so với B2-sub**: model zero-shot chưa được dạy dùng dòng OCR; train cùng OCR có thể dạy model dùng OCR để sửa dấu. Trước khi train: phân tích (không cần GPU) tách dev300 theo "đáp án có trong OCR hay không".
+**Phát hiện:** chèn OCR vào prompt lúc suy luận **không cải thiện B1 zero-shot** (EM giữ nguyên, 16 câu được sửa đúng nhưng 16 câu bị làm sai). Phù hợp rủi ro đã nêu: Qwen2.5-VL vốn tự đọc chữ tốt (R0 TextVQA 79,60). Đây là kết quả âm hợp lệ cho ablation "có / không OCR". Phép thử chính vẫn là **B3 (train cùng OCR) so với B2-sub**: model zero-shot chưa được dạy dùng dòng OCR; train cùng OCR có thể dạy model dùng OCR để sửa dấu. **Phân tích lật (dev300, VietOCR · v1 so với B1):** 167/300 câu trả lời **đổi** khi thêm OCR → model **có dùng** dòng OCR, không bỏ qua. 16 câu OCR sửa đúng, chủ yếu khi model tự đọc sai: số điện thoại (`0914.414.227` → `0949.002.339`), tên riêng (`Lê Xuân Khanh` → `Lê Xuân Khoa`), dấu (`Dây nổ` → `Dây nịt`). 16 câu OCR làm sai do model **chép nguyên lỗi OCR** (`CHĂN` → `CHÂN`, `Thấm` → `Thắm`, `Số` → `Sô`), **dán nguyên chuỗi OCR** (`Thăng Long | 0919467868 | …`) hoặc trả lời dài hơn. 31 câu chỉ khác nhau ở dấu. → Model zero-shot dùng OCR **không phân biệt** (không biết khi nào tin ảnh, khi nào tin OCR, không biết trả lời ngắn) — đúng thứ train cùng OCR (B3) có thể dạy.
+
+## Luật kết luận bước 6 và B3 (đặt TRƯỚC khi chạy test — 13/10/2026)
+
+Cấu hình OCR dùng cho mọi run dưới đây = cấu hình đóng băng ở bước 5 (VietOCR · v1 · 600 · 0). Tất cả trên **test2000** (seed 42), L4, bf16, 4-bit, cùng prompt zero-shot ± đúng 1 dòng OCR.
+
+| So sánh | Vai trò | "Cải thiện" khi |
+|---|---|---|
+| B1+OCR vs B1 | Ablation bắt buộc "có / không OCR" (zero-shot) | EM tăng **và** McNemar exact p < 0,05 |
+| B2+OCR vs B2 | Chẩn đoán: B2 chưa từng thấy dòng OCR khi train (lệch train/test) | như trên — **không** dùng làm kết quả cải tiến |
+| **B3 vs B2-sub** | **Phép thử chính:** cùng tập con train 8.000 câu (`train_subset8000_byimage_seed42`), cùng siêu tham số QLoRA (r 16, 1 epoch), chỉ khác B3 có dòng OCR khi train **và** khi test | EM tăng **và** McNemar exact p < 0,05 |
+| B3 vs B2 (full train) | Chỉ báo cáo: tập con 8.000 câu + OCR có bù được 77% dữ liệu train bị bỏ không | — (không kết luận cải tiến) |
+
+ANLS luôn báo cáo kèm CI95 bootstrap ghép cặp (10.000 lần, seed 42). Kết quả âm (p ≥ 0,05) vẫn được báo cáo đầy đủ trong bảng ablation.
 
 ## Số liệu ngân sách (đo từ log W07, L4, bf16, 4-bit NF4)
 
