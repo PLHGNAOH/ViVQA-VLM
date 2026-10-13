@@ -18,7 +18,7 @@ Rủi ro đã biết: Qwen2.5-VL vốn tự đọc chữ tốt (R0 TextVQA val V
 | 2 | Hồ sơ Review 2: `docs/W07/W07_Team_Report.md` + `docs/W07/README.md` (bản TV); checklist Review2 điền SAU buổi review | ✅ `3f736eb` |
 | 3 | Nối OCR vào `src/eval/run_baseline.py` và `src/adaptation/train_qlora.py` (`--mode ocr` đọc OCR cache) + selftest; script tập con train | ✅ |
 | 4 | Tạo OCR cache ViTextVQA: notebook `10_ocr_cache_vitextvqa.ipynb` — Phần A: pilot 100 ảnh + dev300 × 2 backend + chỉ số answer-in-OCR; Phần B (sau bước 5): test2000 + tập con train | ✅ Phần A (13/10, T4, Paddle GPU) · ⏳ Phần B |
-| 5 | Chọn backend OCR (`paddleocr` vs `paddledet_vietocr`) + mẫu prompt trên dev300: notebook `11_ocr_select_dev300_qwen25vl.ipynb` + `src/eval/select_ocr_config.py` (áp luật tự động) | ⏳ code xong, chờ chạy Colab L4 |
+| 5 | Chọn backend OCR (`paddleocr` vs `paddledet_vietocr`) + mẫu prompt trên dev300: notebook `11_ocr_select_dev300_qwen25vl.ipynb` + `src/eval/select_ocr_config.py` (áp luật tự động) | ✅ 13/10 — chốt **VietOCR · v1** |
 | 6 | Ablation OCR chỉ ở inference trên test2000: B1+OCR, B2+OCR | ⏳ |
 | 7 | QLoRA ViVQA 2 epoch, eval val sau mỗi epoch để chọn epoch | ⏳ |
 | 8 | Đóng tuần: tổng kết + bàn giao W08 | ⏳ |
@@ -57,6 +57,22 @@ Ghép cặp (đáp án ∈ OCR, giữ dấu): chỉ `paddleocr` có đáp án 28
 **Phát hiện:** mô hình đọc Latin của PaddleOCR **làm rơi ký tự có dấu tiếng Việt** ("Kiểu Thẩm" → "Kiu Thm", "KIẾN THỨC" → "IENTHUC"): chênh giữ dấu / bỏ dấu tới 30,7 điểm. VietOCR giữ dấu tốt hơn (chênh 11,0 điểm) nhưng đọc sót mặt chữ nhiều hơn. Đây là bằng chứng trực tiếp cho gap G2 (OCR có sẵn chưa xử lý tốt dấu thanh tiếng Việt), khớp nhóm lỗi "sai dấu thanh" 8% trong error audit W07. Lựa chọn backend vẫn theo luật EM ở bước 5.
 
 **Sự cố đã xử lý:** `paddlepaddle-gpu` (CUDA 12.6) ghi đè thư viện NCCL của torch (CUDA 13) → `import torch` hỏng (`undefined symbol: ncclCommWindowDeregister`). Notebook 10 mục 2 chụp và khôi phục thư viện `nvidia-*` của torch, kiểm torch + Paddle GPU ở tiến trình riêng, CPU fallback giữ torch nguyên (commit `833abd8`).
+
+## Kết quả bước 5 — chọn cấu hình OCR trên dev300 (L4, bf16, 4-bit, seed 42)
+
+Nguồn: `../../experiments/W08_ocr_select_dev300_L4_seed42/ocr_selection.json` + 5 run `W08_B1*_dev300_*`.
+
+| Run | EM | ANLS | token-F1 (phụ) | Chỉ B1 đúng / chỉ OCR đúng | McNemar p (so B1) | s/câu |
+|---|---|---|---|---|---|---|
+| B1 zero-shot | 0,3267 | 0,4615 | 0,5327 | — | — | 0,859 |
+| B1 + VietOCR · v1 **(chốt)** | 0,3267 | 0,4600 | 0,5385 | 16 / 16 | 1 | 0,878 |
+| B1 + VietOCR · v2 | 0,3233 | 0,4696 | 0,5434 | 17 / 16 | 1 | 0,867 |
+| B1 + PaddleOCR · v1 | 0,3200 | 0,4606 | 0,5384 | 20 / 18 | 0,871 | 0,853 |
+| B1 + PaddleOCR · v2 | 0,3067 | 0,4700 | 0,5410 | 23 / 17 | 0,43 | 0,858 |
+
+**Áp luật (đúng như ghi trước):** Luật 1: EM v1 hai backend không phân biệt được (p = 0,856) → xét answer-in-OCR: VietOCR 37,67% > PaddleOCR 27,0% → **VietOCR**. Luật 2: v1 = 0,3267 vs v2 = 0,3233, p = 1 → **v1**. Luật 3: cắt 600 ký tự mất 0 điểm → giữ `max_chars 600`, `min_conf 0`. Cấu hình này **đóng băng** cho test2000 và B3.
+
+**Phát hiện:** chèn OCR vào prompt lúc suy luận **không cải thiện B1 zero-shot** (EM giữ nguyên, 16 câu được sửa đúng nhưng 16 câu bị làm sai). Phù hợp rủi ro đã nêu: Qwen2.5-VL vốn tự đọc chữ tốt (R0 TextVQA 79,60). Đây là kết quả âm hợp lệ cho ablation "có / không OCR". Phép thử chính vẫn là **B3 (train cùng OCR) so với B2-sub**: model zero-shot chưa được dạy dùng dòng OCR; train cùng OCR có thể dạy model dùng OCR để sửa dấu. Trước khi train: phân tích (không cần GPU) tách dev300 theo "đáp án có trong OCR hay không".
 
 ## Số liệu ngân sách (đo từ log W07, L4, bf16, 4-bit NF4)
 
