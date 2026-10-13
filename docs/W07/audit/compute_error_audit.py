@@ -13,7 +13,7 @@ Quy tắc:
   - Sensitivity: bỏ 42 dòng AI-assisted.
 Chạy: python docs/W07/audit/compute_error_audit.py [--out docs/W07/audit/W07_error_audit_final.json]
 """
-import argparse, json, math, os
+import argparse, json, math, os, sys
 from collections import Counter
 import openpyxl
 
@@ -35,6 +35,7 @@ def wilson(k, n, z=1.959964):
     return [round(100 * (c - h) / d, 1), round(100 * (c + h) / d, 1)]
 
 def main():
+    sys.stdout.reconfigure(encoding='utf-8')  # console Windows mặc định cp1252 không in được tiếng Việt
     ap = argparse.ArgumentParser(); ap.add_argument('--out', default=os.path.join(HERE, 'W07_error_audit_final.json')); a = ap.parse_args()
     ai = json.load(open(os.path.join(LAB, 'ai_prelabels_v2.json'), encoding='utf-8'))
     NAME = ai['code_names']; INV = {v: k for k, v in NAME.items()}
@@ -76,7 +77,8 @@ def main():
     S['human_vs_ai'] = {'n': len(ind), **{f: dict(zip(['agree', 'kappa'], [round(x, 3) for x in cohen([human[s][i] for s in ind], [AI[s][i] for s in ind])])) for i, f in enumerate(F)}}
     S['adjudication'] = {'n': len(ADJ), 'choice': dict(Counter(d['chon'] for d in ADJ.values()))}
     S['provenance'] = dict(Counter(src.values()))
-    json.dump({'stats': S, 'final_labels': {s: list(v) for s, v in final.items()}, 'source': src}, open(a.out, 'w', encoding='utf-8', newline='\n'), ensure_ascii=False, indent=1)
+    with open(a.out, 'w', encoding='utf-8', newline='\n') as fh:
+        json.dump({'stats': S, 'final_labels': {s: list(v) for s, v in final.items()}, 'source': src}, fh, ensure_ascii=False, indent=1)
     for k, v in S.items(): print(k, v)
     print('Ghi ->', a.out)
 
