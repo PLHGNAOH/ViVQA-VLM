@@ -20,7 +20,7 @@ Rủi ro đã biết: Qwen2.5-VL vốn tự đọc chữ tốt (R0 TextVQA val V
 | 4 | Tạo OCR cache ViTextVQA: notebook `10_ocr_cache_vitextvqa.ipynb` — Phần A: pilot 100 ảnh + dev300 × 2 backend + chỉ số answer-in-OCR; Phần B (sau bước 5): test2000 + tập con train | ✅ 13/10 — Phần A (dev300, 2 backend) + Phần B (VietOCR: test2000 1.486 ảnh + train 2.670 ảnh, 0 lỗi, 0,97 s/ảnh) |
 | 5 | Chọn backend OCR (`paddleocr` vs `paddledet_vietocr`) + mẫu prompt trên dev300: notebook `11_ocr_select_dev300_qwen25vl.ipynb` + `src/eval/select_ocr_config.py` (áp luật tự động) | ✅ 13/10 — chốt **VietOCR · v1** |
 | 6 | Ablation OCR chỉ ở inference trên test2000: B1+OCR, B2+OCR — notebook `12_ocr_ablation_test2000_qwen25vl.ipynb` | ✅ 13/10 — không khác biệt có ý nghĩa (cả B1 lẫn B2) |
-| 7 | **B3 (QLoRA + OCR) vs B2-sub (QLoRA, không OCR)** trên tập con 8.000 câu, eval test2000 — notebook `13_qlora_ocr_b3_vs_b2sub_qwen25vl.ipynb` (thay QLoRA ViVQA 2 epoch, dời sang W9) | ⏳ code xong, chờ chạy Colab L4 (~7 h, chia 2 phiên được) |
+| 7 | **B3 (QLoRA + OCR) vs B2-sub (QLoRA, không OCR)** trên tập con 8.000 câu, eval test2000 — notebook `13_qlora_ocr_b3_vs_b2sub_qwen25vl.ipynb` (thay QLoRA ViVQA 2 epoch, dời sang W9) | ✅ 14/10 — **B3 cải thiện có ý nghĩa** (EM +3,70 điểm, p = 1,7 × 10⁻⁶) |
 | 8 | Đóng tuần: tổng kết + bàn giao W08 | ⏳ |
 
 ## Quyết định đã chốt
@@ -108,6 +108,41 @@ Nguồn: `../../experiments/W08_ocr_ablation_test2000_L4_seed42/` (`ocr_ablation
 - Ablation bắt buộc "with / without OCR-enhanced prompting" ở **suy luận** cho **kết quả âm**, nhất quán với dev300. Báo cáo đầy đủ như một dòng ablation.
 - Tín hiệu (chưa có ý nghĩa thống kê, **không** dùng làm kết luận): B2 — dù chưa từng thấy dòng OCR khi train — nhích nhiều hơn B1 (+1,00 so với +0,55 điểm EM). Gợi ý mô hình đã fine-tune khai thác OCR tốt hơn zero-shot → củng cố lý do kiểm định B3 (train cùng OCR) so với B2-sub.
 - **Độ nhạy (tính bằng McNemar exact, giả định ~260 câu lật như bước 6):** ngưỡng để đạt p < 0,05 là chênh ≈ 34 câu = **1,7 điểm EM**; xác suất phát hiện (mô phỏng 2.000 lần) khi chênh thật là 1,5 / 2,0 / 2,3 / 2,5 điểm lần lượt ≈ 42% / 67% / 79% / 85%. → B3 vs B2-sub chỉ phát hiện ổn định nếu lợi ích thật ≳ 2,3 điểm; kết quả âm khi lợi ích nhỏ hơn không có nghĩa là "OCR vô dụng".
+
+## Kết quả B3 vs B2-sub — phép thử chính (test2000, L4, bf16, 4-bit, seed 42)
+
+Nguồn: `../../experiments/W08_B3_vs_B2sub_test2000_L4_seed42/` (`b3_vs_b2sub_summary.json` + 3 file `paired_*.json`), train log `W08_B2sub_qlora_…`, `W08_B3_qlora_ocr_…`, eval `W08_B2sub_eval_…`, `W08_B3_eval_…`. Notebook 13 chạy một mạch 13–14/10 (không resume).
+
+| Run | Train | OCR | EM | ANLS | token-F1 (phụ) | s/câu |
+|---|---|---|---|---|---|---|
+| B1 zero-shot | — | không | 0,2880 | 0,4753 | 0,5377 | 0,862 |
+| B2 (W07) | full 35.159 câu | không | 0,4970 | 0,7191 | 0,7101 | 1,011 |
+| B2-sub | 8.000 câu (2.670 ảnh) | không | 0,4555 | 0,6848 | 0,6692 | 1,021 |
+| **B3** | **cùng 8.000 câu** | **VietOCR · v1 (train + test)** | **0,4925** | **0,7038** | **0,6981** | 1,001 |
+
+| So sánh | Chỉ A đúng / chỉ B đúng | McNemar p | ΔANLS (CI95) | Vai trò |
+|---|---|---|---|---|
+| **B2-sub → B3** | **81 / 155** | **1,67 × 10⁻⁶** | **+0,0191 [+0,0073; +0,0309]** | **Phép thử chính → CẢI THIỆN** (EM +3,70 điểm, vượt ngưỡng độ nhạy ~2,3 điểm) |
+| B2 → B3 | 156 / 147 | 0,646 | −0,0153 [−0,0288; −0,0017] | Chỉ báo cáo: EM không phân biệt được; ANLS B3 thấp hơn chút |
+| B2 → B2-sub | 154 / 71 | 3,24 × 10⁻⁸ | −0,0343 [−0,0470; −0,0224] | Chỉ báo cáo: cắt 77% dữ liệu train làm giảm 4,15 điểm EM |
+
+| Chi phí train | Mẫu | Step | Giờ train | s/step | VRAM đỉnh | Loss cuối | Tham số train |
+|---|---|---|---|---|---|---|---|
+| B2 (W07) | 35.159 | 2.198 | 11,99 | 19,63 | 6,88 GB | 0,618 | 0,196% |
+| B2-sub | 8.000 | 500 | 2,76 | 19,89 | 6,85 GB | 0,716 | 0,196% |
+| B3 | 8.000 | 500 | 2,98 | 21,48 | 8,25 GB | 0,661 | 0,196% |
+
+**Kết luận theo luật đặt trước:** train QLoRA **cùng** OCR (B3) cải thiện có ý nghĩa so với cùng cấu hình **không** OCR (B2-sub): EM 0,4555 → 0,4925, p = 1,7 × 10⁻⁶; ANLS +0,019 (CI95 không chứa 0).
+
+**Diễn giải:**
+- Khác bước 6 (OCR chỉ lúc suy luận: không cải thiện), OCR **có tác dụng khi được train cùng** — khớp phân tích dev300: model zero-shot dùng OCR không phân biệt; train cùng OCR dạy model khi nào tin OCR.
+- **Hiệu quả:** với 23% dữ liệu và 25% thời gian train (2,98 / 11,99 giờ), B3 đạt EM ngang B2 full (0,4925 vs 0,4970, p = 0,65). OCR bù ≈ 89% phần EM mất do cắt dữ liệu: (0,4925 − 0,4555) / (0,4970 − 0,4555) ≈ 0,89. Chi phí thêm: +8% s/step, +1,4 GB VRAM.
+
+**Giới hạn (phải nêu trong báo cáo):**
+1. Một seed (42), một tập con — chưa đo dao động theo seed.
+2. Đánh giá trên test2000, chưa trên full test 10.028 câu.
+3. ANLS B3 vẫn thấp hơn B2 full (−0,015, CI95 không chứa 0) → B3 "ngang" B2 ở EM, không phải mọi metric.
+4. B3 dùng OCR cả train lẫn test (đúng thiết kế); chưa đo B3 khi bỏ OCR lúc test (model có phụ thuộc OCR không).
 
 ## Số liệu ngân sách (đo từ log W07, L4, bf16, 4-bit NF4)
 
