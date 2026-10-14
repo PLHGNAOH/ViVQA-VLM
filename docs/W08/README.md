@@ -21,7 +21,7 @@ Rủi ro đã biết: Qwen2.5-VL vốn tự đọc chữ tốt (R0 TextVQA val V
 | 5 | Chọn backend OCR (`paddleocr` vs `paddledet_vietocr`) + mẫu prompt trên dev300: notebook `11_ocr_select_dev300_qwen25vl.ipynb` + `src/eval/select_ocr_config.py` (áp luật tự động) | ✅ 13/10 — chốt **VietOCR · v1** |
 | 6 | Ablation OCR chỉ ở inference trên test2000: B1+OCR, B2+OCR — notebook `12_ocr_ablation_test2000_qwen25vl.ipynb` | ✅ 13/10 — không khác biệt có ý nghĩa (cả B1 lẫn B2) |
 | 7 | **B3 (QLoRA + OCR) vs B2-sub (QLoRA, không OCR)** trên tập con 8.000 câu, eval test2000 — notebook `13_qlora_ocr_b3_vs_b2sub_qwen25vl.ipynb` (thay QLoRA ViVQA 2 epoch, dời sang W9) | ✅ 14/10 — **B3 cải thiện có ý nghĩa** (EM +3,70 điểm, p = 1,7 × 10⁻⁶) |
-| 8 | Đóng tuần: tổng kết + bàn giao W08 | ⏳ |
+| 8 | Đóng tuần: tổng kết + bàn giao W08 — `W08_Team_Report.md` | ✅ 14/10 |
 
 ## Quyết định đã chốt
 
@@ -153,10 +153,20 @@ Nguồn: `../../experiments/W08_B3_vs_B2sub_test2000_L4_seed42/` (`b3_vs_b2sub_s
 | Eval B2 ViTextVQA | ≈ 1,0 s/mẫu | `experiments/W07_B2_eval_qlora_r16_ep1_vitextvqa_test2000_bf16_L4_seed42/metrics.json` |
 | Eval B1 ViVQA | ≈ 0,51 s/mẫu | `experiments/W07_B1_zeroshot_qwen25vl_vivqa_test_bf16_L4_seed42/metrics.json` |
 
+## Deliverables tuần này
+
+| File | Vai trò |
+|------|---------|
+| [W08_Team_Report.md](W08_Team_Report.md) | Báo cáo tuần: việc đã làm, toàn bộ số liệu, blocker, kế hoạch W9 |
+| README này | Quyết định, luật đặt trước, kết quả từng bước |
+
 ## Artifacts
 
-_(điền khi có)_
+- **Code mới:** `../../src/data/ocr.py` (viết lại, PaddleOCR 3.x, cache v2), `../../src/data/make_train_subset.py`, `../../src/eval/ocr_coverage.py`, `../../src/eval/select_ocr_config.py`; `--mode ocr` trong `../../src/eval/run_baseline.py` và `../../src/adaptation/train_qlora.py`; `prompt_for_sample` trong `../../src/prompting/builder.py`
+- **Notebook:** `../../notebooks/10_ocr_cache_vitextvqa.ipynb` (T4), `11_ocr_select_dev300_qwen25vl.ipynb`, `12_ocr_ablation_test2000_qwen25vl.ipynb`, `13_qlora_ocr_b3_vs_b2sub_qwen25vl.ipynb` (L4)
+- **Kết quả:** xem mục "Link experiment log" trong `W08_Team_Report.md`
+- **Trên Drive (không lên git):** OCR cache `data/vitextvqa_official/ocr/{paddleocr,paddledet_vietocr}.json` (sha256 trong `experiments/W08_ocr_cache/ocr_cache_manifest.json`); tập con `data/vitextvqa_official/train_subset8000_byimage_seed42.json`; adapter B2-sub, B3
 
 ## Trạng thái
 
-⏳ Đang làm.
+✅ **Đóng tuần 14/10/2026.** Kết quả chính: **B3 (QLoRA + OCR) cải thiện có ý nghĩa so với B2-sub** (EM 0,4555 → 0,4925, p = 1,7 × 10⁻⁶) và đạt EM ngang B2 full với 23% dữ liệu. OCR chỉ lúc suy luận không cải thiện. Việc mang sang W9: thêm seed cho B3/B2-sub, B3 trên full test, B3 khi bỏ OCR lúc test, QLoRA ViVQA 2 epoch.
