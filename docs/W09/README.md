@@ -25,7 +25,9 @@ Giới hạn 1 và 3 quyết định độ tin cậy của đóng góp chính �
 | 1 | **Phần A:** B3 seed 42 eval **bỏ OCR** lúc test (test2000) | ≈ 40 phút L4 | ✅ 15/10 — B3 PHỤ THUỘC OCR; bỏ OCR thì NGANG B2-sub (EM) |
 | 2 | **Phần B:** seed 43 — train + eval B2-sub và B3 | ≈ 7 h L4 | ⏳ |
 | 3 | **Phần B':** seed 44 — như trên | ≈ 7 h L4 | ⏳ |
-| 4 | OCR phần ảnh full test còn thiếu (T4) → B3 trên **full test 10.028** | ≈ 0,5 h T4 + ≈ 2,8 h L4 | ⏳ |
+| 4a | **Ô 2×2:** B2-sub seed 42 eval **có OCR** lúc test (test2000) → đủ bảng OCR lúc train × OCR lúc test — notebook `15_ocr_factorial_fulltest_qwen25vl.ipynb` Phần A | ≈ 40 phút L4 | ⏳ |
+| 4b | OCR phần ảnh full test còn thiếu (≈ 1.867 ảnh) — notebook 10 **Phần C** | ≈ 0,5–1 h T4 | ⏳ |
+| 4c | **Full test 10.028 câu:** B3 và B2-sub seed 42 — notebook 15 Phần B | ≈ 5,7 h L4 | ⏳ |
 | 5 | **Review 2:** thêm Part 06 (phương pháp OCR + kết quả B3 + độ ổn định seed) vào slide `docs/W07/ViVQA-VLM_Review2_*.pptx`, sửa slide "Plan", cập nhật script thuyết trình | — | ⏳ trước 19/10 |
 | 6 | QLoRA ViVQA 2 epoch, chọn epoch trên val (dời từ W8) | ≈ 7,5 h L4 | ⏳ (sau Review 2 được) |
 | 7 | Sau buổi Review 2: checklist AI_Capstone_Review123 (sheet Review2), gửi mail, upload Drive | — | ⏳ |
@@ -40,6 +42,8 @@ Giới hạn 1 và 3 quyết định độ tin cậy của đóng góp chính �
 | 15/10/2026 | Seed trong tên run eval (`…_seed43`) = **seed huấn luyện** của adapter | Suy luận greedy (không lấy mẫu) nên seed không ảnh hưởng eval |
 | 15/10/2026 | **Đưa kết quả B3 vào slide Review 2** (Part 06) | Master §9: Review 2 hỏi "proposed method là gì, có preliminary results không". Kết quả có trước ngày review nên thuộc mốc Review 2 |
 | 15/10/2026 | `--seed` không truyền → seed của config (42) → **chữ ký các run W07/W08 không đổi** | Selftest `seed override OK` kiểm điều này; run cũ resume/tái lập được như trước |
+| 15/10/2026 | **Thêm ô 2×2** (B2-sub + OCR lúc test) | Phần A cho thấy B3 phụ thuộc OCR, nhưng chưa tách được "train cùng OCR" khỏi "có OCR lúc test" trên cùng tập con. Chỉ ≈ 1 CU |
+| 15/10/2026 | **Full test chạy cả B3 lẫn B2-sub** (không chỉ B3) | So sánh chính B2-sub → B3 được lặp lại trên 10.028 câu (độ nhạy cao hơn test2000 ≈ 5 lần về số câu), cùng tập paper dùng để so ViTextBLIP-2. Thêm ≈ 2,8 h L4 ≈ 4 CU |
 
 ## Luật Phần A — B3 bỏ OCR lúc test (ghi TRƯỚC khi chạy, 15/10/2026)
 
@@ -66,6 +70,36 @@ Mỗi seed s ∈ {42, 43, 44}: B2-sub(s) và B3(s) cùng tập con, cùng siêu 
 - **Không** chạy thêm seed sau khi thấy kết quả để "câu" kết luận. Kết quả nào cũng báo cáo đầy đủ.
 - Seed 42 tính lại từ predictions W08 phải khớp `../../experiments/W08_B3_vs_B2sub_test2000_L4_seed42/paired_B2sub_vs_B3.json` (notebook 14 tự kiểm).
 
+## Luật ô 2×2 — OCR lúc train × OCR lúc test (ghi TRƯỚC khi chạy ô c01, 15/10/2026)
+
+Cùng test2000, cùng tập con train seed 42, cùng cấu hình OCR đóng băng (VietOCR · v1 · 600 · 0):
+
+| | Test **không** OCR | Test **có** OCR |
+|---|---|---|
+| Train **không** OCR | c00 = B2-sub (W08) | **c01 = B2-sub + OCR (mới)** |
+| Train **có** OCR | c10 = B3 bỏ OCR (W09 Phần A) | c11 = B3 (W08) |
+
+Áp bằng `src/eval/factorial_2x2.py`. So sánh quyết định **K = c01 → c11** (khi lúc test ĐÃ có OCR, train cùng OCR có thêm lợi ích không) và **tương tác** d = (c11 − c10) − (c01 − c00) tính theo từng câu, CI95 bootstrap ghép cặp (10.000, seed 42):
+
+| Kết luận | Điều kiện |
+|---|---|
+| **TƯƠNG TÁC: CẦN OCR Ở CẢ TRAIN LẪN TEST** | K: EM tăng **và** p < 0,05, **và** cận dưới CI95 tương tác EM > 0 |
+| **CỘNG GỘP: TRAIN CÙNG OCR CÓ LỢI RIÊNG** | K: EM tăng và p < 0,05, nhưng CI95 tương tác EM chứa 0 |
+| **OCR LÚC TEST LÀ ĐỦ** | K: p ≥ 0,05 → train cùng OCR không thêm lợi ích có ý nghĩa (phải ghi thật vào báo cáo: đóng góp chính khi đó là OCR lúc test, không phải QLoRA + OCR) |
+| **TRAIN CÙNG OCR KÉM HƠN** | K: EM giảm và p < 0,05 |
+
+Báo cáo đủ 4 hiệu ứng đơn (c00→c01, c10→c11, c00→c10, c01→c11) kèm McNemar p và ΔANLS CI95, cùng tương tác ANLS.
+
+## Luật full test 10.028 câu (ghi TRƯỚC khi chạy, 15/10/2026)
+
+Run: B3 seed 42 (OCR train + test) và B2-sub seed 42 (không OCR) trên `data/vitextvqa_official/test.json` — cùng adapter, cùng cấu hình như test2000. OCR cache phải phủ đủ 3.353 ảnh test.
+
+1. **Tái lập (điều kiện dừng):** trên 2.000 câu chung, dự đoán của run full phải **trùng ≥ 99%** với run test2000 tương ứng (W08). Dưới 99% → không dùng số liệu, báo Claude.
+2. **So sánh chính lặp lại:** B2-sub → B3 trên full test: "TÁI LẬP TRÊN FULL TEST" nếu EM tăng **và** McNemar exact p < 0,05; còn lại báo cáo đúng như kết quả.
+3. **So với ViTextBLIP-2** (Table 6, Nguyen et al., *ESWA* 2025: EM 25,48 · F1 53,95): chỉ viết "cao hơn" khi **cận dưới CI95 bootstrap** (10.000, seed 42) của B3 lớn hơn số công bố, xét riêng EM và F1 — như luật W07 (`notebooks/08_…`). Giới hạn: paper không công bố cách chuẩn hoá khi chấm.
+4. **Chỉ báo cáo:** B2 full train (W07, full test) → B3; B3 dùng 23% dữ liệu train.
+5. **Cache OCR mở rộng không được đổi phần cũ:** dấu vân tay (`cache_fingerprint`) của 4.422 ảnh đã có phải giữ nguyên sau khi OCR thêm (notebook 10 Phần C tự kiểm). Phiên bản `paddlepaddle` của đợt OCR mới được ghi vào biên bản `experiments/W09_ocr_cache_fulltest/`.
+
 ## Thay đổi code
 
 | File | Thay đổi | Kiểm thử |
@@ -73,6 +107,9 @@ Mỗi seed s ∈ {42, 43, 44}: B2-sub(s) và B3(s) cùng tập con, cùng siêu 
 | `src/adaptation/train_qlora.py` | `--seed` ghi đè `run.seed`; seed nằm trong chữ ký run (seed khác = run khác, không resume nhầm); dòng log đầu in `seed=` | selftest `seed override OK`: seed 42 mặc định trùng chữ ký cũ, seed 43 khác chữ ký |
 | `src/eval/seed_stability.py` | Gộp `paired_*.json` qua các seed, mean ± std, áp luật trên | `--selftest` (4 tình huống luật + chặn số câu khác nhau) |
 | `notebooks/14_b3_seed_stability_qwen25vl.ipynb` | Phần A (bỏ OCR) → Phần B seed 43 → B' seed 44 → Phần C gộp; bỏ qua phần đã xong; train lỗi thì dừng, không eval | Mô phỏng offline mục 4 và mục 8 bằng predictions W08 |
+| `src/eval/factorial_2x2.py` | Bảng 2×2 OCR lúc train × OCR lúc test: 4 hiệu ứng đơn + tương tác (difference-in-differences theo câu) + luật trên | `--selftest` (4 tình huống luật + chặn lệch question_id) |
+| `notebooks/10_ocr_cache_vitextvqa.ipynb` | Thêm **Phần C** (mục 11–12): OCR phần ảnh full test còn thiếu, kiểm dấu vân tay phần cache cũ, ghi biên bản W09 | Chạy trên T4 |
+| `notebooks/15_ocr_factorial_fulltest_qwen25vl.ipynb` | Phần A: ô c01 + bảng 2×2. Phần B: B3 + B2-sub full test, kiểm tái lập ≥ 99%, so ViTextBLIP-2, so sánh chính lặp lại | Mô phỏng offline mục kết quả |
 
 ## Ngân sách
 
@@ -80,9 +117,10 @@ Mỗi seed s ∈ {42, 43, 44}: B2-sub(s) và B3(s) cùng tập con, cùng siêu 
 |---|---|---|
 | Phần A | ≈ 0,7 h | ≈ 1 |
 | Seed 43 + 44 | ≈ 14 h | ≈ 22 |
-| Full test B3 (+ OCR T4) | ≈ 3,3 h | ≈ 5 |
+| Ô 2×2 | ≈ 0,7 h | ≈ 1 |
+| Full test B3 + B2-sub (+ OCR T4) | ≈ 6,5 h | ≈ 10 |
 | ViVQA 2 epoch | ≈ 7,5 h | ≈ 12 |
-| **Tổng W9** | **≈ 25 h** | **≈ 40** (còn ≈ 93 CU cho W10–W15) |
+| **Tổng W9** | **≈ 29 h** | **≈ 46** (còn ≈ 87 CU cho W10–W15) |
 
 ## Kết quả
 
