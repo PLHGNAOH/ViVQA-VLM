@@ -22,7 +22,7 @@ Giới hạn 1 và 3 quyết định độ tin cậy của đóng góp chính �
 | # | Việc | GPU | Trạng thái |
 |---|------|-----|-----------|
 | 0 | Code: `--seed` cho `train_qlora.py` (selftest), `src/eval/seed_stability.py`, notebook `14_b3_seed_stability_qwen25vl.ipynb`, luật ghi trước (README này) | — | ✅ 15/10 |
-| 1 | **Phần A:** B3 seed 42 eval **bỏ OCR** lúc test (test2000) | ≈ 40 phút L4 | ⏳ |
+| 1 | **Phần A:** B3 seed 42 eval **bỏ OCR** lúc test (test2000) | ≈ 40 phút L4 | ✅ 15/10 — B3 PHỤ THUỘC OCR; bỏ OCR thì NGANG B2-sub (EM) |
 | 2 | **Phần B:** seed 43 — train + eval B2-sub và B3 | ≈ 7 h L4 | ⏳ |
 | 3 | **Phần B':** seed 44 — như trên | ≈ 7 h L4 | ⏳ |
 | 4 | OCR phần ảnh full test còn thiếu (T4) → B3 trên **full test 10.028** | ≈ 0,5 h T4 + ≈ 2,8 h L4 | ⏳ |
@@ -86,7 +86,27 @@ Mỗi seed s ∈ {42, 43, 44}: B2-sub(s) và B3(s) cùng tập con, cùng siêu 
 
 ## Kết quả
 
-*(điền sau khi chạy)*
+### Phần A — B3 bỏ OCR lúc test (15/10/2026, L4, bf16, 4-bit, seed 42)
+
+Nguồn: `../../experiments/W09_B3_ocr_dependency_test2000_L4_seed42/` + eval `W09_B3noocr_eval_qlora_ocr_vietocr_v1_r16_sub8k_ep1_vitextvqa_test2000_bf16_L4_seed42`.
+
+| Run | OCR lúc train | OCR lúc test | EM | ANLS | token-F1 (phụ) | s/câu |
+|---|---|---|---|---|---|---|
+| B2-sub | không | không | 0,4555 | 0,6848 | 0,6692 | 1,021 |
+| B3 | có | có | 0,4925 | 0,7038 | 0,6981 | 1,001 |
+| B3 bỏ OCR | có | **không** | 0,4500 | 0,6746 | 0,6617 | 0,979 |
+
+| So sánh | Chỉ A đúng / chỉ B đúng | McNemar p | ΔANLS (CI95) | Kết luận theo luật |
+|---|---|---|---|---|
+| B3 → B3 bỏ OCR | 147 / 62 | 3,8 × 10⁻⁹ | −0,0292 [−0,0401; −0,0185] | **B3 PHỤ THUỘC OCR** |
+| B2-sub → B3 bỏ OCR | 63 / 52 | 0,351 | −0,0101 [−0,0194; −0,0007] | **NGANG B2-sub** (theo EM) |
+
+**Diễn giải:**
+- Bỏ OCR lúc test làm B3 mất 4,25 điểm EM — nhiều hơn toàn bộ phần lợi +3,70 điểm so với B2-sub. → Lợi ích của B3 đến từ việc model **thật sự dùng dòng OCR**, không phải do train "khéo hơn" nói chung: bằng chứng cơ chế cho kết quả chính W08.
+- Thiếu OCR, B3 lùi về mức B2-sub (EM ngang, p = 0,35): suy giảm êm, không sụp.
+- **Giới hạn nhỏ:** ANLS của B3 bỏ OCR thấp hơn B2-sub −0,010 (CI95 không chứa 0) → train cùng OCR có thể làm model hơi giảm khả năng tự đọc chữ chính xác từng ký tự. Luật kết luận theo EM nên ghi "NGANG", nhưng phải nêu trong báo cáo.
+- Cùng với W08 bước 6 (chèn OCR chỉ lúc suy luận không giúp B1/B2), kết quả **gợi ý** OCR cần có ở **cả train lẫn test**. Chưa khẳng định được vì thiếu ô "B2-sub train không OCR + test có OCR" trên cùng tập con.
+- Hệ quả prototype: luôn chạy OCR trước khi hỏi model, hiển thị văn bản OCR, cảnh báo khi OCR rỗng/lỗi (chất lượng khi đó ≈ B2-sub).
 
 ## Link experiment log
 
