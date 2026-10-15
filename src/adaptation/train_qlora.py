@@ -31,6 +31,9 @@ Cách chạy (Colab, GPU):
       --data_file <drive>/data/vitextvqa_official/train_subset8000_byimage_seed42.json \
       --run_name W08_B3_qlora_ocr_... --epochs 1 --mode ocr --ocr_backend paddleocr
 
+  # W09: lặp lại B2-sub / B3 với seed huấn luyện khác (tập con train GIỮ NGUYÊN seed 42)
+  !python -u -m src.adaptation.train_qlora ... --seed 43
+
 Chạy tiếp sau khi Colab ngắt: chạy lại ĐÚNG lệnh cũ (cùng --run_name) -> tự resume.
 
 Kiểm thử offline (không GPU, không mạng, không cần torch):
@@ -218,7 +221,8 @@ def load_config(path: str, max_pixels: Optional[int] = None, dtype: Optional[str
                 mode: Optional[str] = None, batch_size: Optional[int] = None,
                 grad_accum: Optional[int] = None,
                 grad_checkpointing: Optional[bool] = None,
-                epochs: Optional[float] = None) -> Dict[str, Any]:
+                epochs: Optional[float] = None,
+                seed: Optional[int] = None) -> Dict[str, Any]:
     """Đọc config + cho phép ghi đè vài tham số qua CLI (phục vụ ablation, không sửa file gốc)."""
     import yaml
     with open(path, encoding="utf-8") as fp:
@@ -241,6 +245,11 @@ def load_config(path: str, max_pixels: Optional[int] = None, dtype: Optional[str
     # nên 1 epoch của lịch 3 epoch KHÁC một run 1 epoch -> ghi đè ở đây, có trong chữ ký.
     if epochs is not None:
         cfg["training"]["epochs"] = float(epochs)
+    # W09: seed huấn luyện (khởi tạo LoRA, thứ tự batch, dropout) để đo độ ổn định theo seed.
+    # cfg["run"]["seed"] nằm trong chữ ký run -> seed khác = run khác (không resume nhầm).
+    # None -> giữ seed của file config (42): chữ ký các run cũ KHÔNG đổi.
+    if seed is not None:
+        cfg["run"]["seed"] = int(seed)
     return cfg
 
 
@@ -407,7 +416,7 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
           batch_size: Optional[int] = None, grad_accum: Optional[int] = None,
           grad_checkpointing: Optional[bool] = None, save_steps: Optional[int] = None,
           debug_crash_at_step: Optional[int] = None,
-          epochs: Optional[float] = None,
+          epochs: Optional[float] = None, seed: Optional[int] = None,
           ocr_backend: Optional[str] = None, ocr_cache: Optional[str] = None,
           ocr_template: Optional[str] = None, ocr_max_chars: Optional[int] = None,
           ocr_min_conf: Optional[float] = None) -> Dict[str, Any]:
@@ -429,7 +438,7 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
 
     cfg = copy.deepcopy(load_config(config, max_pixels=max_pixels, dtype=dtype, mode=mode,
                                     batch_size=batch_size, grad_accum=grad_accum,
-                                    grad_checkpointing=grad_checkpointing, epochs=epochs))
+                                    grad_checkpointing=grad_checkpointing, epochs=epochs, seed=seed))
     cfg["run"]["name"] = run_name
     seed = cfg["run"]["seed"]
     set_seed(seed)
@@ -438,7 +447,7 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     out_dir = os.path.join(out_root or os.path.join(drive_root, "experiments"), run_name)
     adapter_dir = os.path.join(adapter_root or os.path.join(drive_root, "adapters"), run_name)
 
-    _log(f"== {run_name} | dataset={dataset} | mode={cfg['prompting']['mode']}")
+    _log(f"== {run_name} | dataset={dataset} | mode={cfg['prompting']['mode']} | seed={seed}")
     _log(f"   data : {data_file}")
     _log(f"   out  : {out_dir}")
     _log(f"   adapt: {adapter_dir}")
@@ -746,6 +755,16 @@ def _selftest() -> None:
     assert run_signature(cfg1, "sha", 10799, None, None)["sha256"] != run_signature(cfg3, "sha", 10799, None, None)["sha256"]
     _log("epochs override OK")
 
+    # W09 --seed: ghi đè run.seed; seed khác -> chữ ký khác; không truyền -> chữ ký cũ giữ nguyên
+    cfg_s42 = load_config(os.path.join(REPO_ROOT, "configs/qwen_lora.yaml"), epochs=1)
+    cfg_s43 = load_config(os.path.join(REPO_ROOT, "configs/qwen_lora.yaml"), epochs=1, seed=43)
+    assert cfg_s42["run"]["seed"] == 42 and cfg_s43["run"]["seed"] == 43
+    assert run_signature(cfg_s42, "sha", 8000, None, None)["sha256"] == run_signature(cfg1, "sha", 8000, None, None)["sha256"]
+    assert run_signature(cfg_s43, "sha", 8000, None, None)["sha256"] != run_signature(cfg_s42, "sha", 8000, None, None)["sha256"]
+    assert run_signature(load_config(os.path.join(REPO_ROOT, "configs/qwen_lora.yaml"), epochs=1, seed=42),
+                         "sha", 8000, None, None)["sha256"] == run_signature(cfg_s42, "sha", 8000, None, None)["sha256"]
+    _log("seed override OK")
+
     # loss sau resume: transformers chia tổng loss 7 step cho global_step 12 -> phải hiệu chỉnh
     sl = session_losses(0.8226, 12, 7, [{"loss": 1.6}, {"loss": "1.451"}, {"train_loss": 0.8}])
     assert abs(sl["final_loss"] - 1.4102) < 1e-3 and sl["last_logged_loss"] == 1.451, sl
@@ -829,6 +848,8 @@ def main() -> None:
                     help="CHỈ để kiểm thử resume: giả lập Colab đứt tại step N")
     ap.add_argument("--epochs", type=float, default=None,
                     help="Ghi đè training.epochs (vd 1 cho B2 sơ bộ); đổi cả lịch learning rate")
+    ap.add_argument("--seed", type=int, default=None,
+                    help="Ghi đè run.seed (mặc định theo config = 42); W09 đo độ ổn định theo seed")
     ap.add_argument("--ocr_backend", default=None, help="Backend OCR cache (paddleocr | paddledet_vietocr); cần --mode ocr")
     ap.add_argument("--ocr_cache", default=None, help="Ghi đè đường dẫn OCR cache")
     ap.add_argument("--ocr_template", default=None, help="Mẫu dòng OCR (v1 | v2); mặc định v1")
@@ -847,7 +868,7 @@ def main() -> None:
           limit=a.limit, max_steps=a.max_steps, max_pixels=a.max_pixels,
           dtype=a.dtype, mode=a.mode, batch_size=a.batch_size, grad_accum=a.grad_accum,
           grad_checkpointing=None if a.grad_checkpointing is None else (a.grad_checkpointing == "on"),
-          save_steps=a.save_steps, debug_crash_at_step=a.debug_crash_at_step, epochs=a.epochs,
+          save_steps=a.save_steps, debug_crash_at_step=a.debug_crash_at_step, epochs=a.epochs, seed=a.seed,
           ocr_backend=a.ocr_backend, ocr_cache=a.ocr_cache, ocr_template=a.ocr_template,
           ocr_max_chars=a.ocr_max_chars, ocr_min_conf=a.ocr_min_conf)
 

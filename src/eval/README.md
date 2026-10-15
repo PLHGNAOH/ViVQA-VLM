@@ -14,5 +14,6 @@ Mọi số liệu phải gắn run log: split, seed, hardware, time.
 | `answer_format.py` | Chẩn đoán định dạng: số từ, % chứa đáp án gold, % chứa gold nhưng EM sai (post-hoc) | `--selftest` |
 | `stratify_by_overlap.py` | Tách kết quả theo mức trùng train (rò rỉ) | `--selftest` |
 | `run_textvqa_r0.py` | R0: tái lập TextVQA val của Qwen2.5-VL-3B (kiểm chứng pipeline) | `--selftest` |
+| `seed_stability.py` (W09) | Gộp các file `paired_*.json` qua nhiều seed huấn luyện: mean ± std (ddof 1) + kết luận theo luật ghi trước trong `docs/W09/README.md` | `--selftest` |
 
 Duyệt tay (W07): `python -m src.data.make_audit_sheet` tạo `audit/W07/W07_audit_400.xlsx` + ảnh trên Drive (data_audit 200 dòng train, error_audit 200 câu B2 sai).
