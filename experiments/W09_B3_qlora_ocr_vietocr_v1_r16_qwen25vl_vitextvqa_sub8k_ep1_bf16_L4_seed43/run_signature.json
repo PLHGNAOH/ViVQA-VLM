@@ -1,0 +1,93 @@
+{
+  "sha256": "596ef46848cd51ba6a52e710ab878518514ffa4f5db49c3f8adaeadb4b5d8f3b",
+  "cfg": {
+    "run": {
+      "seed": 43,
+      "output_dir": "experiments/runs"
+    },
+    "model": {
+      "backbone": "qwen2_5_vl",
+      "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+      "torch_dtype": "bfloat16",
+      "min_pixels": 200704,
+      "max_pixels": 401408
+    },
+    "quantization": {
+      "enabled": true,
+      "load_in_4bit": true,
+      "bnb_4bit_quant_type": "nf4",
+      "bnb_4bit_use_double_quant": true,
+      "bnb_4bit_compute_dtype": "bfloat16"
+    },
+    "lora": {
+      "r": 16,
+      "lora_alpha": 32,
+      "lora_dropout": 0.05,
+      "bias": "none",
+      "target_modules": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj"
+      ]
+    },
+    "data": {
+      "dataset_name": "vivqa",
+      "train_path": "data/vivqa/train.json",
+      "val_path": "data/vivqa/val.json",
+      "test_path": "data/vivqa/test.json",
+      "image_dir": "data/vivqa/images",
+      "ocr_cache": "data/vivqa/ocr_cache.json",
+      "max_samples": null,
+      "ocr": {
+        "backend": "paddleocr",
+        "image_pattern": null,
+        "field_map": null
+      }
+    },
+    "prompting": {
+      "mode": "ocr",
+      "max_new_tokens": 32,
+      "ocr": {
+        "backend": "paddledet_vietocr",
+        "cache_format": "vivqa-vlm/ocr-cache/v2",
+        "engine": {
+          "paddleocr": "3.7.0",
+          "det_model": "PP-OCRv6_medium_det",
+          "rec_model": "vietocr/vgg_transformer",
+          "lang": "vi",
+          "vietocr_config": "vgg_transformer, beamsearch=False"
+        },
+        "cache_file": "paddledet_vietocr.json",
+        "subset_sha256": "c2d7cb1f75b8236871d0a6e9b2b2ad8429b686cae0256017388c12d70707bba1",
+        "template": "v1",
+        "max_chars": 600,
+        "min_conf": 0.0
+      }
+    },
+    "training": {
+      "epochs": 1.0,
+      "per_device_batch_size": 2,
+      "gradient_accumulation_steps": 8,
+      "learning_rate": 0.0002,
+      "warmup_ratio": 0.03,
+      "weight_decay": 0.0,
+      "gradient_checkpointing": true
+    },
+    "eval": {
+      "primary_metrics": [
+        "exact_match",
+        "vqa_accuracy",
+        "anls"
+      ],
+      "secondary_metrics": [
+        "token_f1"
+      ],
+      "anls_threshold": 0.5
+    }
+  },
+  "data_sha256": "093ab061edbbdcb1eae7abe1f45884eee462cfedb82b7864e6854bf3f0e847d9",
+  "n_samples": 8000,
+  "limit": null,
+  "max_steps": null
+}

@@ -23,8 +23,8 @@ Giới hạn 1 và 3 quyết định độ tin cậy của đóng góp chính �
 |---|------|-----|-----------|
 | 0 | Code: `--seed` cho `train_qlora.py` (selftest), `src/eval/seed_stability.py`, notebook `14_b3_seed_stability_qwen25vl.ipynb`, luật ghi trước (README này) | — | ✅ 15/10 |
 | 1 | **Phần A:** B3 seed 42 eval **bỏ OCR** lúc test (test2000) | ≈ 40 phút L4 | ✅ 15/10 — B3 PHỤ THUỘC OCR; bỏ OCR thì NGANG B2-sub (EM) |
-| 2 | **Phần B:** seed 43 — train + eval B2-sub và B3 | ≈ 7 h L4 | ⏳ |
-| 3 | **Phần B':** seed 44 — như trên | ≈ 7 h L4 | ⏳ |
+| 2 | **Phần B:** seed 43 — train + eval B2-sub và B3 | ≈ 7 h L4 | ✅ 15/10 (B3 chạy tiếp từ checkpoint-100 sau khi runtime bị xoá) |
+| 3 | **Phần B':** seed 44 — như trên | ≈ 7 h L4 | ✅ 16/10 — **CẢI THIỆN ỔN ĐỊNH** (3/3 seed, ΔEM +3,57 ± 0,76 điểm) |
 | 4a | **Ô 2×2:** B2-sub seed 42 eval **có OCR** lúc test (test2000) → đủ bảng OCR lúc train × OCR lúc test — notebook `15_ocr_factorial_fulltest_qwen25vl.ipynb` Phần A | ≈ 40 phút L4 | ⏳ |
 | 4b | OCR phần ảnh full test còn thiếu (≈ 1.867 ảnh) — notebook 10 **Phần C** | ≈ 0,5–1 h T4 | ⏳ |
 | 4c | **Full test 10.028 câu:** B3 và B2-sub seed 42 — notebook 15 Phần B | ≈ 5,7 h L4 | ⏳ |
@@ -43,6 +43,7 @@ Giới hạn 1 và 3 quyết định độ tin cậy của đóng góp chính �
 | 15/10/2026 | **Đưa kết quả B3 vào slide Review 2** (Part 06) | Master §9: Review 2 hỏi "proposed method là gì, có preliminary results không". Kết quả có trước ngày review nên thuộc mốc Review 2 |
 | 15/10/2026 | `--seed` không truyền → seed của config (42) → **chữ ký các run W07/W08 không đổi** | Selftest `seed override OK` kiểm điều này; run cũ resume/tái lập được như trước |
 | 15/10/2026 | **Thêm ô 2×2** (B2-sub + OCR lúc test) | Phần A cho thấy B3 phụ thuộc OCR, nhưng chưa tách được "train cùng OCR" khỏi "có OCR lúc test" trên cùng tập con. Chỉ ≈ 1 CU |
+| 16/10/2026 | Notebook 15 thêm cell **tự trả máy** (`runtime.unassign()`) ở cuối | Notebook 14 xong lúc 1:37 nhưng máy L4 bị giữ tới khi Colab tự ngắt → tốn thêm ≈ 2–3 CU |
 | 15/10/2026 | **Full test chạy cả B3 lẫn B2-sub** (không chỉ B3) | So sánh chính B2-sub → B3 được lặp lại trên 10.028 câu (độ nhạy cao hơn test2000 ≈ 5 lần về số câu), cùng tập paper dùng để so ViTextBLIP-2. Thêm ≈ 2,8 h L4 ≈ 4 CU |
 
 ## Luật Phần A — B3 bỏ OCR lúc test (ghi TRƯỚC khi chạy, 15/10/2026)
@@ -145,6 +146,37 @@ Nguồn: `../../experiments/W09_B3_ocr_dependency_test2000_L4_seed42/` + eval `W
 - **Giới hạn nhỏ:** ANLS của B3 bỏ OCR thấp hơn B2-sub −0,010 (CI95 không chứa 0) → train cùng OCR có thể làm model hơi giảm khả năng tự đọc chữ chính xác từng ký tự. Luật kết luận theo EM nên ghi "NGANG", nhưng phải nêu trong báo cáo.
 - Cùng với W08 bước 6 (chèn OCR chỉ lúc suy luận không giúp B1/B2), kết quả **gợi ý** OCR cần có ở **cả train lẫn test**. Chưa khẳng định được vì thiếu ô "B2-sub train không OCR + test có OCR" trên cùng tập con.
 - Hệ quả prototype: luôn chạy OCR trước khi hỏi model, hiển thị văn bản OCR, cảnh báo khi OCR rỗng/lỗi (chất lượng khi đó ≈ B2-sub).
+
+### Độ ổn định theo seed (16/10/2026, L4, bf16, 4-bit, test2000)
+
+Nguồn: `../../experiments/W09_B3_seed_stability_test2000_L4/` (`seed_stability_summary.json` + 3 file `paired_B2sub_vs_B3_seed{42,43,44}.json`); train `W09_B2sub_qlora_…_seed{43,44}`, `W09_B3_qlora_ocr_…_seed{43,44}`; eval `W09_B2sub_eval_…_seed{43,44}`, `W09_B3_eval_…_seed{43,44}`. Seed 42 = run W08, tính lại từ predictions khớp 81 / 155.
+
+| Seed | EM B2-sub | EM B3 | ΔEM (điểm) | Chỉ B2-sub đúng / chỉ B3 đúng | McNemar p | ΔANLS (CI95) |
+|---|---|---|---|---|---|---|
+| 42 | 0,4555 | 0,4925 | +3,70 | 81 / 155 | 1,7 × 10⁻⁶ | +0,0191 [+0,0073; +0,0309] |
+| 43 | 0,4475 | 0,4900 | +4,25 | 77 / 162 | 4,0 × 10⁻⁸ | +0,0161 [+0,0040; +0,0280] |
+| 44 | 0,4605 | 0,4880 | +2,75 | 74 / 129 | 1,4 × 10⁻⁴ | +0,0112 [+0,0000; +0,0224] |
+| **mean ± std** | 45,45 ± 0,66 | 49,02 ± 0,23 | **+3,57 ± 0,76** | | | +0,0155 ± 0,0040 |
+
+ANLS mean ± std: B2-sub 0,6857 ± 0,0031 · B3 0,7011 ± 0,0024.
+
+**Kết luận theo luật ghi trước: CẢI THIỆN ỔN ĐỊNH** — cả 3 seed EM(B3) > EM(B2-sub) và p ≤ 1,4 × 10⁻⁴.
+
+**Diễn giải:**
+- Lợi ích trung bình +3,57 điểm EM, lớn gấp ≈ 5 lần độ lệch chuẩn của B2-sub giữa các seed (0,66) → không phải do khởi tạo / thứ tự batch "may mắn".
+- ANLS cùng chiều ở cả 3 seed, nhưng seed 44 có cận dưới CI95 = +0,0000 (sát 0) → lợi ích ANLS **yếu hơn** lợi ích EM. Luật kết luận dựa trên EM; ANLS phải báo cáo đúng như vậy.
+- Độ lệch chuẩn EM của B3 (0,23) nhỏ hơn B2-sub (0,66). Chỉ 3 seed nên **không** kết luận B3 ổn định hơn — chỉ ghi nhận.
+
+| Chi phí train | Seed | Giờ train | s/step | VRAM đỉnh (GB) | Loss cuối | Chạy tiếp từ |
+|---|---|---|---|---|---|---|
+| B2-sub | 42 | 2,76 | 19,89 | 6,85 | 0,7161 | — |
+| B3 | 42 | 2,98 | 21,48 | 8,25 | 0,6605 | — |
+| B2-sub | 43 | 2,69 | 19,40 | 6,84 | 0,7105 | — |
+| B3 | 43 | 2,40\* | 21,56 | 8,24 | 0,6044\* | checkpoint-100 |
+| B2-sub | 44 | 2,79 | 20,06 | 6,81 | 0,7162 | — |
+| B3 | 44 | 3,01 | 21,66 | 8,25 | 0,6603 | — |
+
+\* B3 seed 43: runtime bị xoá giữa chừng (15/10 ≈ 15:30), chạy tiếp từ checkpoint-100 (trạng thái optimizer + lịch learning rate + RNG khôi phục theo checkpoint). Giờ train và loss cuối chỉ tính **phiên cuối** (step 101–500) → không so trực tiếp với các run khác. Chi phí một run trọn: B2-sub ≈ 2,7–2,8 h, B3 ≈ 3,0 h (+8% s/step, +1,4 GB VRAM).
 
 ## Link experiment log
 
