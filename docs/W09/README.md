@@ -29,7 +29,7 @@ Giới hạn 1 và 3 quyết định độ tin cậy của đóng góp chính �
 | 4b | OCR phần ảnh full test còn thiếu (≈ 1.867 ảnh) — notebook 10 **Phần C** | ≈ 0,5–1 h T4 | ✅ 16/10 — +1867 ảnh, lỗi 0, device gpu; phần cache cũ giữ nguyên (kiểm lại độc lập từ Drive); biên bản `experiments/W09_ocr_cache_fulltest/` |
 | 4c | **Full test 10.028 câu:** B3 và B2-sub seed 42 — notebook 15 Phần B | ≈ 5,7 h L4 | ⏳ |
 | 5 | **Review 2:** thêm Part 06 (phương pháp OCR + kết quả B3 + độ ổn định seed) vào slide `docs/W07/ViVQA-VLM_Review2_*.pptx`, sửa slide "Plan", cập nhật script thuyết trình | — | ⏳ trước 19/10 |
-| 6 | QLoRA ViVQA 2 epoch, chọn epoch trên val (dời từ W8) | ≈ 7,5 h L4 | ⏳ (sau Review 2 được) |
+| 6 | QLoRA ViVQA lịch 2 epoch, **chọn epoch trên val sạch** (dời từ W8) — notebook `16_qlora_vivqa_2epoch_select_qwen25vl.ipynb` | ≈ 7–7,5 h L4 | ⏳ chạy qua đêm 16→17/10 |
 | 7 | Sau buổi Review 2: checklist AI_Capstone_Review123 (sheet Review2), gửi mail, upload Drive | — | ⏳ |
 | 8 | Đóng tuần: `W09_Team_Report.md` | — | ⏳ |
 
@@ -101,6 +101,23 @@ Run: B3 seed 42 (OCR train + test) và B2-sub seed 42 (không OCR) trên `data/v
 4. **Chỉ báo cáo:** B2 full train (W07, full test) → B3; B3 dùng 23% dữ liệu train.
 5. **Cache OCR mở rộng không được đổi phần cũ:** dấu vân tay (`cache_fingerprint`) của 4.422 ảnh đã có phải giữ nguyên sau khi OCR thêm (notebook 10 Phần C tự kiểm). Phiên bản `paddlepaddle` của đợt OCR mới được ghi vào biên bản `experiments/W09_ocr_cache_fulltest/`.
 
+## Luật chọn epoch QLoRA ViVQA (ghi TRƯỚC khi chạy, 16/10/2026)
+
+**Vấn đề:** B2 ViVQA (W07) mới 1 epoch. Chọn số epoch bằng cách nhìn test là rò rỉ; val ViVQA lại tách từ `train.csv` **theo câu hỏi**, nên nhiều câu val dùng chung ảnh với câu train → train càng lâu càng "nhớ ảnh", val thiên vị epoch nhiều hơn.
+
+**Tập chọn epoch = val sạch:** các câu `val.json` có ảnh **không** nằm trong `train.json` (giữ thứ tự gốc, không ngẫu nhiên) → `data/vivqa/val_imgdisjoint.json`. Nếu < 300 câu → dùng toàn bộ `val.json` và ghi rõ. Biên bản: `experiments/W09_vivqa_epoch_select_L4_seed42/val_split_manifest.json`.
+
+| Ứng viên | Mô hình | Step |
+|---|---|---|
+| C1 | B2 W07 (lịch 1 epoch, adapter đã chấm — kiểm sha256) | 675 |
+| C2 | Run mới lịch 2 epoch (`--epochs 2`, còn lại y hệt B2), adapter sau epoch 1 | 675 |
+| C3 | Cùng run, adapter sau epoch 2 | 1.350 |
+
+1. Chọn ứng viên có **EM cao nhất** trên tập chọn; hoà EM → ít step hơn → C1.
+2. Nếu ứng viên đó ≠ C1 nhưng so với C1 (ghép cặp, McNemar exact) **p ≥ 0,05** → **giữ C1** (rẻ hơn — efficiency là ràng buộc thiết kế).
+3. **Chỉ** ứng viên được chọn (nếu ≠ C1) được chấm trên test 3.001 câu, **một lần**. So ghép cặp với B2 W07 trên test: "CẢI THIỆN" nếu EM tăng **và** p < 0,05; còn lại báo đúng như kết quả. Chọn C1 → không chạm test, B2 W07 (EM 0,7378) giữ nguyên làm B2 ViVQA chính thức.
+4. Lưu ý so sánh: C2 ≠ C1 dù cùng 675 step — lịch learning rate của C2 trải trên 1.350 step nên lúc hết epoch 1 LR còn cao hơn.
+
 ## Thay đổi code
 
 | File | Thay đổi | Kiểm thử |
@@ -111,6 +128,7 @@ Run: B3 seed 42 (OCR train + test) và B2-sub seed 42 (không OCR) trên `data/v
 | `src/eval/factorial_2x2.py` | Bảng 2×2 OCR lúc train × OCR lúc test: 4 hiệu ứng đơn + tương tác (difference-in-differences theo câu) + luật trên | `--selftest` (4 tình huống luật + chặn lệch question_id) |
 | `notebooks/10_ocr_cache_vitextvqa.ipynb` | Thêm **Phần C** (mục 11–12): OCR phần ảnh full test còn thiếu, kiểm dấu vân tay phần cache cũ, ghi biên bản W09 | Chạy trên T4 |
 | `notebooks/15_ocr_factorial_fulltest_qwen25vl.ipynb` | Phần A: ô c01 + bảng 2×2. Phần B: B3 + B2-sub full test, kiểm tái lập ≥ 99%, so ViTextBLIP-2, so sánh chính lặp lại | Mô phỏng offline mục kết quả |
+| `notebooks/16_qlora_vivqa_2epoch_select_qwen25vl.ipynb` | Tạo val sạch (ảnh không trùng train) → eval C1 → train lịch 2 epoch → eval C2, C3 → chọn theo luật → test chỉ khi chọn C2/C3 → tự trả máy | Mô phỏng offline mục chọn epoch (4 tình huống luật) |
 
 ## Ngân sách
 
@@ -120,7 +138,7 @@ Run: B3 seed 42 (OCR train + test) và B2-sub seed 42 (không OCR) trên `data/v
 | Seed 43 + 44 | ≈ 14 h | ≈ 22 |
 | Ô 2×2 | ≈ 0,7 h | ≈ 1 |
 | Full test B3 + B2-sub (+ OCR T4) | ≈ 6,5 h | ≈ 10 |
-| ViVQA 2 epoch | ≈ 7,5 h | ≈ 12 |
+| ViVQA lịch 2 epoch + chọn epoch | ≈ 7–7,5 h | ≈ 11 |
 | **Tổng W9** | **≈ 29 h** | **≈ 46** (còn ≈ 87 CU cho W10–W15) |
 
 ## Kết quả
