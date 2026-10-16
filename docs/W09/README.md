@@ -27,7 +27,7 @@ Giới hạn 1 và 3 quyết định độ tin cậy của đóng góp chính �
 | 3 | **Phần B':** seed 44 — như trên | ≈ 7 h L4 | ✅ 16/10 — **CẢI THIỆN ỔN ĐỊNH** (3/3 seed, ΔEM +3,57 ± 0,76 điểm) |
 | 4a | **Ô 2×2:** B2-sub seed 42 eval **có OCR** lúc test (test2000) → đủ bảng OCR lúc train × OCR lúc test — notebook `15_ocr_factorial_fulltest_qwen25vl.ipynb` Phần A | ≈ 40 phút L4 | ✅ 16/10 — **TƯƠNG TÁC: CẦN OCR Ở CẢ TRAIN LẪN TEST** (K: +4,35 điểm EM, p = 2,2 × 10⁻⁸) |
 | 4b | OCR phần ảnh full test còn thiếu (≈ 1.867 ảnh) — notebook 10 **Phần C** | ≈ 0,5–1 h T4 | ✅ 16/10 — +1867 ảnh, lỗi 0, device gpu; phần cache cũ giữ nguyên (kiểm lại độc lập từ Drive); biên bản `experiments/W09_ocr_cache_fulltest/` |
-| 4c | **Full test 10.028 câu:** B3 và B2-sub seed 42 — notebook 15 Phần B | ≈ 5,7 h L4 | ⏳ |
+| 4c | **Full test 10.028 câu:** B3 và B2-sub seed 42 — notebook 15 Phần B | ≈ 5,7 h L4 | ✅ 16/10 — **TÁI LẬP TRÊN FULL TEST** (B2-sub → B3: +2,54 điểm EM, p = 1,1 × 10⁻¹⁴); B3 vượt ViTextBLIP-2 (EM, F1) |
 | 5 | **Review 2:** thêm Part 06 (phương pháp OCR + kết quả B3 + độ ổn định seed) vào slide `docs/W07/ViVQA-VLM_Review2_*.pptx`, sửa slide "Plan", cập nhật script thuyết trình | — | ⏳ trước 19/10 |
 | 6 | QLoRA ViVQA lịch 2 epoch, **chọn epoch trên val sạch** (dời từ W8) — notebook `16_qlora_vivqa_2epoch_select_qwen25vl.ipynb` | ≈ 7–7,5 h L4 | ⏳ chạy qua đêm 16→17/10 |
 | 7 | Sau buổi Review 2: checklist AI_Capstone_Review123 (sheet Review2), gửi mail, upload Drive | — | ⏳ |
@@ -189,6 +189,30 @@ Tương tác (theo từng câu, CI95 bootstrap ghép cặp): EM +0,0490 [+0,0320
 - Mỗi yếu tố đứng riêng không giúp: chèn OCR lúc test cho model chưa train cùng OCR (−0,65 điểm, p = 0,49 — khớp W08 bước 6), hay train cùng OCR mà test không có OCR (−0,55 điểm, p = 0,35).
 - Chỉ khi có cả hai mới tăng +4,25–4,35 điểm EM. Đóng góp chính là **QLoRA nhận biết OCR (OCR-aware fine-tuning)**: model học cách dùng dòng OCR (khi nào tin OCR, khi nào tin ảnh), không phải "chỉ cần thêm OCR vào prompt".
 - **Đối chiếu H6** (Review 1: OCR-enhanced prompting tăng ANLS ≥ +3 điểm và cộng hưởng với QLoRA; bác bỏ nếu ΔANLS < +1): cộng hưởng với QLoRA **được ủng hộ mạnh**; mức tăng ANLS của B3 so với B2-sub = +1,55 ± 0,40 điểm qua 3 seed — **dưới ngưỡng +3** nhưng trên ngưỡng bác bỏ +1. → **H6 ủng hộ một phần**: lợi ích rõ ở EM (+3,57 ± 0,76 điểm) hơn ở ANLS.
+
+### Full test 10.028 câu — B3 và B2-sub (16/10/2026, L4, bf16, 4-bit, seed 42)
+
+Nguồn: `../../experiments/W09_fulltest_B3_vs_B2sub_L4_seed42/` (`fulltest_summary.json` + 2 file `paired_*`) + eval `W09_B3_eval_…_testfull_…`, `W09_B2sub_eval_…_testfull_…`. **Tái lập:** trên 2.000 câu chung, dự đoán trùng 100% với run test2000 (cả B3 lẫn B2-sub).
+
+| Run | Train | OCR | EM | ANLS | F1 (phụ) |
+|---|---|---|---|---|---|
+| B1 zero-shot (W07) | — | không | 29,12 | 47,60 | 53,89 |
+| B2 (W07) | full 35.159 câu | không | 50,26 | 72,02 | 71,16 |
+| B2-sub | 8.000 câu | không | 46,56 | 68,90 | 67,83 |
+| **B3** | 8.000 câu | VietOCR · v1 | **49,10** | **70,47** | **70,03** |
+| ViTextBLIP-2 (paper, Table 6) | | | 25,48 | — | 53,95 |
+
+| So sánh | Chỉ A đúng / chỉ B đúng | McNemar p | ΔEM (điểm) | ΔANLS (CI95) | Kết luận |
+|---|---|---|---|---|---|
+| **B2-sub → B3** | **417 / 672** | **1,1 × 10⁻¹⁴** | **+2,54** | **+0,0157 [+0,0106; +0,0208]** | **TÁI LẬP TRÊN FULL TEST** |
+| B2 full → B3 (chỉ báo cáo) | 784 / 668 | 0,0025 | −1,16 | −0,0155 [−0,0215; −0,0098] | B3 thấp hơn B2 full có ý nghĩa |
+
+So với ViTextBLIP-2 (luật W07: cận dưới CI95 > số công bố): B3 EM 49,10 [48,11; 50,07], F1 70,03 [69,30; 70,78] → **CAO HƠN** cả EM lẫn F1. Giới hạn: paper không công bố cách chuẩn hoá đáp án.
+
+**Diễn giải:**
+- So sánh chính lặp lại trên tập lớn gấp 5 lần: B3 hơn B2-sub +2,54 điểm EM (p = 1,1 × 10⁻¹⁴), ANLS CI95 không chứa 0. Mức lợi ích nhỏ hơn test2000 seed 42 (+3,70) và nằm ở mép dưới dải 3 seed (+2,75 → +4,25) → báo cáo **số full test** làm số chính.
+- **Đính chính W08:** trên test2000, B3 "ngang B2 full về EM" (p = 0,65). Trên full test, B3 **thấp hơn** B2 full 1,16 điểm EM (p = 0,0025). Phát biểu đúng: với 23% dữ liệu train, OCR-aware QLoRA bù được ≈ **69%** khoảng cách EM do cắt dữ liệu, (49,10 − 46,56) / (50,26 − 46,56); trên test2000 con số này là 89%.
+- Tốc độ suy luận B3 ≈ B2-sub (0,98 s/câu, không tính OCR); OCR chạy trước và cache, ≈ 0,85 s/ảnh trên GPU.
 
 ### Độ ổn định theo seed (16/10/2026, L4, bf16, 4-bit, test2000)
 
