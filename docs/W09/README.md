@@ -25,7 +25,7 @@ Giới hạn 1 và 3 quyết định độ tin cậy của đóng góp chính �
 | 1 | **Phần A:** B3 seed 42 eval **bỏ OCR** lúc test (test2000) | ≈ 40 phút L4 | ✅ 15/10 — B3 PHỤ THUỘC OCR; bỏ OCR thì NGANG B2-sub (EM) |
 | 2 | **Phần B:** seed 43 — train + eval B2-sub và B3 | ≈ 7 h L4 | ✅ 15/10 (B3 chạy tiếp từ checkpoint-100 sau khi runtime bị xoá) |
 | 3 | **Phần B':** seed 44 — như trên | ≈ 7 h L4 | ✅ 16/10 — **CẢI THIỆN ỔN ĐỊNH** (3/3 seed, ΔEM +3,57 ± 0,76 điểm) |
-| 4a | **Ô 2×2:** B2-sub seed 42 eval **có OCR** lúc test (test2000) → đủ bảng OCR lúc train × OCR lúc test — notebook `15_ocr_factorial_fulltest_qwen25vl.ipynb` Phần A | ≈ 40 phút L4 | ⏳ |
+| 4a | **Ô 2×2:** B2-sub seed 42 eval **có OCR** lúc test (test2000) → đủ bảng OCR lúc train × OCR lúc test — notebook `15_ocr_factorial_fulltest_qwen25vl.ipynb` Phần A | ≈ 40 phút L4 | ✅ 16/10 — **TƯƠNG TÁC: CẦN OCR Ở CẢ TRAIN LẪN TEST** (K: +4,35 điểm EM, p = 2,2 × 10⁻⁸) |
 | 4b | OCR phần ảnh full test còn thiếu (≈ 1.867 ảnh) — notebook 10 **Phần C** | ≈ 0,5–1 h T4 | ✅ 16/10 — +1867 ảnh, lỗi 0, device gpu; phần cache cũ giữ nguyên (kiểm lại độc lập từ Drive); biên bản `experiments/W09_ocr_cache_fulltest/` |
 | 4c | **Full test 10.028 câu:** B3 và B2-sub seed 42 — notebook 15 Phần B | ≈ 5,7 h L4 | ⏳ |
 | 5 | **Review 2:** thêm Part 06 (phương pháp OCR + kết quả B3 + độ ổn định seed) vào slide `docs/W07/ViVQA-VLM_Review2_*.pptx`, sửa slide "Plan", cập nhật script thuyết trình | — | ⏳ trước 19/10 |
@@ -164,6 +164,31 @@ Nguồn: `../../experiments/W09_B3_ocr_dependency_test2000_L4_seed42/` + eval `W
 - **Giới hạn nhỏ:** ANLS của B3 bỏ OCR thấp hơn B2-sub −0,010 (CI95 không chứa 0) → train cùng OCR có thể làm model hơi giảm khả năng tự đọc chữ chính xác từng ký tự. Luật kết luận theo EM nên ghi "NGANG", nhưng phải nêu trong báo cáo.
 - Cùng với W08 bước 6 (chèn OCR chỉ lúc suy luận không giúp B1/B2), kết quả **gợi ý** OCR cần có ở **cả train lẫn test**. Chưa khẳng định được vì thiếu ô "B2-sub train không OCR + test có OCR" trên cùng tập con.
 - Hệ quả prototype: luôn chạy OCR trước khi hỏi model, hiển thị văn bản OCR, cảnh báo khi OCR rỗng/lỗi (chất lượng khi đó ≈ B2-sub).
+
+### Ô 2×2 — OCR lúc train × OCR lúc test (16/10/2026, L4, bf16, 4-bit, seed 42, test2000)
+
+Nguồn: `../../experiments/W09_ocr_factorial_2x2_test2000_L4_seed42/factorial_summary.json` + eval `W09_B2subocr_eval_qlora_r16_sub8k_ep1_vitextvqa_test2000_bf16_L4_seed42` (ô c01, mới).
+
+| EM | Test không OCR | Test có OCR |
+|---|---|---|
+| Train không OCR | c00 = 0,4555 | c01 = 0,4490 |
+| Train có OCR | c10 = 0,4500 | c11 = 0,4925 |
+
+| Hiệu ứng | So sánh | Chỉ A đúng / chỉ B đúng | McNemar p | ΔEM (điểm) | ΔANLS (CI95) |
+|---|---|---|---|---|---|
+| OCR lúc test, model train không OCR | c00 → c01 | 160 / 147 | 0,49 | −0,65 | −0,0070 [−0,0202; +0,0063] |
+| OCR lúc test, model train có OCR | c10 → c11 | 62 / 147 | 3,8 × 10⁻⁹ | +4,25 | +0,0292 [+0,0185; +0,0401] |
+| Train cùng OCR, test không OCR | c00 → c10 | 63 / 52 | 0,35 | −0,55 | −0,0101 [−0,0194; −0,0007] |
+| **Train cùng OCR, test có OCR (K)** | **c01 → c11** | **77 / 164** | **2,2 × 10⁻⁸** | **+4,35** | **+0,0261 [+0,0141; +0,0383]** |
+
+Tương tác (theo từng câu, CI95 bootstrap ghép cặp): EM +0,0490 [+0,0320; +0,0660] · ANLS +0,0362 [+0,0225; +0,0503].
+
+**Kết luận theo luật ghi trước: TƯƠNG TÁC — CẦN OCR Ở CẢ TRAIN LẪN TEST.**
+
+**Diễn giải:**
+- Mỗi yếu tố đứng riêng không giúp: chèn OCR lúc test cho model chưa train cùng OCR (−0,65 điểm, p = 0,49 — khớp W08 bước 6), hay train cùng OCR mà test không có OCR (−0,55 điểm, p = 0,35).
+- Chỉ khi có cả hai mới tăng +4,25–4,35 điểm EM. Đóng góp chính là **QLoRA nhận biết OCR (OCR-aware fine-tuning)**: model học cách dùng dòng OCR (khi nào tin OCR, khi nào tin ảnh), không phải "chỉ cần thêm OCR vào prompt".
+- **Đối chiếu H6** (Review 1: OCR-enhanced prompting tăng ANLS ≥ +3 điểm và cộng hưởng với QLoRA; bác bỏ nếu ΔANLS < +1): cộng hưởng với QLoRA **được ủng hộ mạnh**; mức tăng ANLS của B3 so với B2-sub = +1,55 ± 0,40 điểm qua 3 seed — **dưới ngưỡng +3** nhưng trên ngưỡng bác bỏ +1. → **H6 ủng hộ một phần**: lợi ích rõ ở EM (+3,57 ± 0,76 điểm) hơn ở ANLS.
 
 ### Độ ổn định theo seed (16/10/2026, L4, bf16, 4-bit, test2000)
 

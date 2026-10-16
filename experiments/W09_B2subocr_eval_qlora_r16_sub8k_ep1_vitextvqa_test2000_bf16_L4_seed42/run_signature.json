@@ -1,0 +1,55 @@
+{
+  "sha256": "1384a81d67f19e9e293e8b1164831910b99762c7d95f9a9c358d755083e70e00",
+  "model": {
+    "backbone": "qwen2_5_vl",
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "torch_dtype": "bfloat16",
+    "min_pixels": 200704,
+    "max_pixels": 401408
+  },
+  "quantization": {
+    "enabled": true,
+    "load_in_4bit": true,
+    "bnb_4bit_quant_type": "nf4",
+    "bnb_4bit_use_double_quant": true,
+    "bnb_4bit_compute_dtype": "bfloat16"
+  },
+  "prompting": {
+    "mode": "ocr",
+    "max_new_tokens": 32,
+    "ocr": {
+      "backend": "paddledet_vietocr",
+      "cache_format": "vivqa-vlm/ocr-cache/v2",
+      "engine": {
+        "paddleocr": "3.7.0",
+        "det_model": "PP-OCRv6_medium_det",
+        "rec_model": "vietocr/vgg_transformer",
+        "lang": "vi",
+        "vietocr_config": "vgg_transformer, beamsearch=False"
+      },
+      "cache_file": "paddledet_vietocr.json",
+      "subset_sha256": "e9ef758e8492aa98cf15146c584e08595e597e15936f75209162b6123e4fa904",
+      "template": "v1",
+      "max_chars": 600,
+      "min_conf": 0.0
+    }
+  },
+  "eval": {
+    "primary_metrics": [
+      "exact_match",
+      "vqa_accuracy",
+      "anls"
+    ],
+    "secondary_metrics": [
+      "token_f1"
+    ],
+    "anls_threshold": 0.5
+  },
+  "data_sha256": "69a8b35c64fb505147fbd7904b19dce3853d7b63a24bb888359bdff61b30f68e",
+  "limit": null,
+  "chunk": 500,
+  "adapter": {
+    "weights_sha256": "b3411b3786cff0c2d92070d8800ae1a9b785b9f49930d6e4d513d7032c86d8ef",
+    "config_sha256": "f33f51f64a974731a8454b86c4f9abcca84b1106f0263d505ddbdebea34977cf"
+  }
+}
