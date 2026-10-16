@@ -26,7 +26,7 @@ Giới hạn 1 và 3 quyết định độ tin cậy của đóng góp chính �
 | 2 | **Phần B:** seed 43 — train + eval B2-sub và B3 | ≈ 7 h L4 | ✅ 15/10 (B3 chạy tiếp từ checkpoint-100 sau khi runtime bị xoá) |
 | 3 | **Phần B':** seed 44 — như trên | ≈ 7 h L4 | ✅ 16/10 — **CẢI THIỆN ỔN ĐỊNH** (3/3 seed, ΔEM +3,57 ± 0,76 điểm) |
 | 4a | **Ô 2×2:** B2-sub seed 42 eval **có OCR** lúc test (test2000) → đủ bảng OCR lúc train × OCR lúc test — notebook `15_ocr_factorial_fulltest_qwen25vl.ipynb` Phần A | ≈ 40 phút L4 | ⏳ |
-| 4b | OCR phần ảnh full test còn thiếu (≈ 1.867 ảnh) — notebook 10 **Phần C** | ≈ 0,5–1 h T4 | ⏳ |
+| 4b | OCR phần ảnh full test còn thiếu (≈ 1.867 ảnh) — notebook 10 **Phần C** | ≈ 0,5–1 h T4 | ✅ 16/10 — +1867 ảnh, lỗi 0, device gpu; phần cache cũ giữ nguyên (kiểm lại độc lập từ Drive); biên bản `experiments/W09_ocr_cache_fulltest/` |
 | 4c | **Full test 10.028 câu:** B3 và B2-sub seed 42 — notebook 15 Phần B | ≈ 5,7 h L4 | ⏳ |
 | 5 | **Review 2:** thêm Part 06 (phương pháp OCR + kết quả B3 + độ ổn định seed) vào slide `docs/W07/ViVQA-VLM_Review2_*.pptx`, sửa slide "Plan", cập nhật script thuyết trình | — | ⏳ trước 19/10 |
 | 6 | QLoRA ViVQA 2 epoch, chọn epoch trên val (dời từ W8) | ≈ 7,5 h L4 | ⏳ (sau Review 2 được) |

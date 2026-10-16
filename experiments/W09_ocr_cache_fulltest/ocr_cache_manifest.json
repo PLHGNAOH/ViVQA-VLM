@@ -1,0 +1,39 @@
+{
+  "what": "OCR cache VietOCR mở rộng cho ViTextVQA full test (W09) — file cache nằm trên Drive",
+  "created_utc": "2026-10-16T05:31:31",
+  "cache_file": "data/vitextvqa_official/ocr/paddledet_vietocr.json",
+  "sha256_before_w08": "e099b48e9bd8b79fda31fd7305903657d437e263c57dd0b7a11e53c08f599faa",
+  "sha256_after_w09": "c80044a945059ce8c066415c073f85e9f7455291dc51ad7d27e09b58af1b42c2",
+  "n_images_before": 4422,
+  "n_images_after": 6289,
+  "n_images_added": 1867,
+  "n_errors_added": 0,
+  "full_test_images": 3353,
+  "old_part_fingerprint": "9b4a9a38e414ae560d30dae0e125ff8971e98ed0d02e318b0ae50f58c13a1131",
+  "old_part_unchanged": true,
+  "engine_info_w08": {
+    "engine": "PaddleOCR TextDetection + VietOCR",
+    "paddleocr": "3.7.0",
+    "paddlepaddle": "3.3.1",
+    "lang": "vi",
+    "device": "gpu",
+    "det_model": "PP-OCRv6_medium_det",
+    "rec_model": "vietocr/vgg_transformer",
+    "vietocr_config": "vgg_transformer, beamsearch=False"
+  },
+  "engine_info_w09": {
+    "engine": "PaddleOCR TextDetection + VietOCR",
+    "paddleocr": "3.7.0",
+    "paddlepaddle": "3.3.1",
+    "lang": "vi",
+    "device": "gpu",
+    "det_model": "PP-OCRv6_medium_det",
+    "rec_model": "vietocr/vgg_transformer",
+    "vietocr_config": "vgg_transformer, beamsearch=False"
+  },
+  "device_w09": "gpu",
+  "timing_total": {
+    "images": 6289,
+    "sec": 5332.98
+  }
+}
