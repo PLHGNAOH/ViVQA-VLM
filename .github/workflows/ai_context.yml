@@ -1,0 +1,67 @@
+name: Build ai-context branch
+
+# Mỗi lần push lên main: tạo lại nhánh ai-context chỉ chứa file văn bản
+# (md/py/ipynb/yaml + metrics/summary json) để AI (Gemini Import code) đọc trọn vẹn.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ai-context
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Collect text-only files
+        run: |
+          set -euo pipefail
+          SRC_SHA=$(git rev-parse --short HEAD)
+          mkdir -p /tmp/ctx
+          git ls-files \
+            | grep -E '\.(md|py|ipynb|ya?ml)$|^experiments/.*(metrics|summary|train_log|manifest)[^/]*\.json$' \
+            | grep -v '/vendor/' \
+            | grep -v '^\.github/' \
+            > /tmp/files.txt
+          while IFS= read -r f; do
+            mkdir -p "/tmp/ctx/$(dirname "$f")"
+            cp "$f" "/tmp/ctx/$f"
+          done < /tmp/files.txt
+          {
+            echo "# 00_START_HERE — AI context snapshot of ViVQA-VLM"
+            echo
+            echo "- Built automatically from \`main\` @ \`$SRC_SHA\` on $(date -u +%Y-%m-%dT%H:%MZ)."
+            echo "- Text-only copy (no PDF/PPTX/XLSX/images, no predictions). Full repo = branch \`main\`."
+            echo "- Read first: \`docs/00_admin/AI_setup/Gemini_Context_Pack.md\`, then the Team Report of the highest week below."
+            echo
+            echo "## Weekly reports"
+            for d in $(ls -d docs/W[0-9][0-9] 2>/dev/null | sort); do
+              w=$(basename "$d")
+              if [ -f "$d/${w}_Team_Report.md" ]; then echo "- \`$d/${w}_Team_Report.md\`"; fi
+            done
+            echo
+            echo "## Files ($(wc -l < /tmp/files.txt))"
+            sed 's/^/- /' /tmp/files.txt
+          } > /tmp/ctx/00_START_HERE.md
+          echo "SRC_SHA=$SRC_SHA" >> "$GITHUB_ENV"
+          du -sh /tmp/ctx
+
+      - name: Push ai-context branch
+        run: |
+          set -euo pipefail
+          cd /tmp/ctx
+          git init -q -b ai-context
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "ai-context from main@${SRC_SHA}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" ai-context
