@@ -606,7 +606,7 @@ pres.addSection({ title: L("Analysis & plan", "Phân tích & kế hoạch") });
   s.addText([
     { text: L("We welcome your feedback.", "Nhóm rất mong nhận được góp ý."), options: { fontSize: 20, breakLine: true } },
     { text: " ", options: { fontSize: 12, breakLine: true } },
-    { text: L("Code, configs and every run log: github.com/PLHGNAOH/ViVQA-VLM", "Code, config và log mọi run: github.com/PLHGNAOH/ViVQA-VLM"), options: { fontSize: 15, color: "A8C4E0" } },
+    { text: L("Every number in this talk comes from a logged, reproducible run (fixed seed, config and evaluation protocol).", "Mọi con số trong bài đều có log và tái lập được (seed, config và giao thức đánh giá cố định)."), options: { fontSize: 15, color: "A8C4E0" } },
   ], { placeholder: "body" });
   s.addNotes("Cảm ơn hội đồng đã lắng nghe. Nhóm sẵn sàng trả lời câu hỏi.");
 }
