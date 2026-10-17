@@ -1,0 +1,52 @@
+{
+  "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W09_C1_eval_qlora_r16_vivqa_valclean_bf16_L4_seed42",
+  "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W09_C2_eval_qlora_r16_vivqa_valclean_bf16_L4_seed42",
+  "label_a": "C1",
+  "label_b": "C2",
+  "n": 688,
+  "n_both_correct": 473,
+  "n_only_a": 30,
+  "n_only_b": 19,
+  "n_both_wrong": 166,
+  "b": 30,
+  "c": 19,
+  "p_value": 0.15240777196147803,
+  "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+  "em_a": 0.7311046511627907,
+  "em_b": 0.7151162790697675,
+  "em_diff": -0.015988372093023173,
+  "anls_threshold": 0.5,
+  "anls_a": 0.7475899463908184,
+  "anls_b": 0.7316742487163999,
+  "anls_diff": -0.015915697674418604,
+  "anls_ci95": [
+    -0.03582041343669251,
+    0.003161337209302325
+  ],
+  "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 42,
+    "method": "paired percentile"
+  },
+  "only_b_question_ids": [
+    "val_5",
+    "val_36",
+    "val_64",
+    "val_96",
+    "val_146",
+    "val_258",
+    "val_301",
+    "val_309",
+    "val_442",
+    "val_452",
+    "val_491",
+    "val_497",
+    "val_522",
+    "val_748",
+    "val_780",
+    "val_926",
+    "val_1015",
+    "val_1105",
+    "val_1158"
+  ]
+}

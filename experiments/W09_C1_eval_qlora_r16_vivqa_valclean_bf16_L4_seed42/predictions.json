@@ -1,0 +1,6194 @@
+[
+  {
+    "question_id": "val_1",
+    "question": "màu sắc của đôi giày là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_2",
+    "question": "bốn người đang cưỡi trượt ván trượt tuyết ở đâu",
+    "prediction": "cái ghế",
+    "answers": [
+      "núi"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_5",
+    "question": "có bao nhiêu biển báo giao thông được gắn trên cùng một biển báo",
+    "prediction": "bốn",
+    "answers": [
+      "năm"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_6",
+    "question": "hai con mèo nằm ở đâu",
+    "prediction": "cái ghế",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_7",
+    "question": "màu của kính là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_8",
+    "question": "xe buýt, xe hơi và xe máy ở đâu",
+    "prediction": "đường phố",
+    "answers": [
+      "đường phố"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_9",
+    "question": "màu của bên trong là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_10",
+    "question": "màu sắc của đồ đạc là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_12",
+    "question": "pasta và salad rau đã phục vụ ở đâu",
+    "prediction": "bát",
+    "answers": [
+      "bát"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_13",
+    "question": "màu của vòi nước là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_14",
+    "question": "những bông hoa nằm ở đâu",
+    "prediction": "lọ cắm hoa",
+    "answers": [
+      "lọ cắm hoa"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_16",
+    "question": "có bao nhiêu người đang đi trên đường dưới một chiếc ô màu vàng",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_17",
+    "question": "màu của xe tải là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_19",
+    "question": "cô gái đang đứng ở đâu",
+    "prediction": "đường bộ",
+    "answers": [
+      "đường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_20",
+    "question": "màu của cốc là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_21",
+    "question": "người đàn ông đang nấu bữa tối ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_22",
+    "question": "bánh sandwich đang ở đâu",
+    "prediction": "hộp",
+    "answers": [
+      "thùng chứa"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_23",
+    "question": "có bao nhiêu con bò được xếp hàng trong khi",
+    "prediction": "năm",
+    "answers": [
+      "bảy"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_24",
+    "question": "có bao nhiêu phụ nữ cùng nhau tạo dáng với những cây vợt tennis",
+    "prediction": "sáu",
+    "answers": [
+      "sáu"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_25",
+    "question": "có bao nhiêu con hươu cao cổ đang ngóc đầu lên về phía một cái cây",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_26",
+    "question": "có bao nhiêu con cừu trắng ăn rau trên bãi cỏ",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_27",
+    "question": "màu của vỉa hè là gì",
+    "prediction": "màu xám",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_29",
+    "question": "có bao nhiêu con bò đang đi bộ qua một con suối nhỏ với một nhóm người nhỏ phía sau họ",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_31",
+    "question": "có bao nhiêu con chim đang bay trên bầu trời quang đãng",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_32",
+    "question": "có bao nhiêu người đang sử dụng ô trong một ngày mưa",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_34",
+    "question": "người đàn ông có cà vạt ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "văn phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_35",
+    "question": "những gì nép mình dưới gốc cây",
+    "prediction": "băng ghế",
+    "answers": [
+      "băng ghế"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_36",
+    "question": "những gì đỗ bên cạnh nhau trên đường ray",
+    "prediction": "tàu hỏa",
+    "answers": [
+      "xe lửa"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_38",
+    "question": "màu của con mèo là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_39",
+    "question": "giường với một cục văn phòng và một tấm gương được hiển thị",
+    "prediction": "phòng ngủ",
+    "answers": [
+      "phòng ngủ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_40",
+    "question": "có bao nhiêu phụ nữ ăn mặc hở hang với chiếc mô tô",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_44",
+    "question": "màu của con mèo là gì",
+    "prediction": "màu xám",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_46",
+    "question": "toàn cảnh một số nhà vệ sinh thẳng đứng nằm ở đâu",
+    "prediction": "gương",
+    "answers": [
+      "nhà vệ sinh"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_51",
+    "question": "màu của xe tải là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_52",
+    "question": "dụng cụ tắm, nhà vệ sinh và bồn tắm ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_53",
+    "question": "tất cả có bao nhiêu con ngựa vằn cho thấy sự ủng hộ của họ trong khi gặm cỏ",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_54",
+    "question": "một số bánh rán nằm ở đâu",
+    "prediction": "hộp",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_56",
+    "question": "người trẻ đang giữ những gì",
+    "prediction": "gậy",
+    "answers": [
+      "gậy"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_60",
+    "question": "màu của con ngựa là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_61",
+    "question": "có bao nhiêu bồn tiểu nằm trên bức tường lát gạch trắng trong nhà vệ sinh",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_63",
+    "question": "cặp vợ chồng đứng ở đâu",
+    "prediction": "chuồng",
+    "answers": [
+      "chuồng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_64",
+    "question": "màu của chiếc ô là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_65",
+    "question": "hộp chứa bao nhiêu chiếc bánh rán với các loại men và lớp phủ khác nhau",
+    "prediction": "sáu",
+    "answers": [
+      "sáu"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_67",
+    "question": "một số ván lướt sóng ở đâu",
+    "prediction": "sân",
+    "answers": [
+      "sân"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_68",
+    "question": "màu sắc của trang phục là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_69",
+    "question": "những gì ngồi vào container đi",
+    "prediction": "con chó",
+    "answers": [
+      "con chó"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_71",
+    "question": "có bao nhiêu con chim đang đậu trên cành cây trụi lá",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_72",
+    "question": "màu của lá là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_73",
+    "question": "người phụ nữ thưởng thức một ly bia ở đâu",
+    "prediction": "bến du thuyền",
+    "answers": [
+      "bến du thuyền"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_74",
+    "question": "có bao nhiêu người đi bộ trên đồi tuyết trong khuôn viên trường đại học",
+    "prediction": "ba",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_75",
+    "question": "em bé đang chơi ở đâu",
+    "prediction": "giường",
+    "answers": [
+      "giường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_77",
+    "question": "màu của xe máy là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_78",
+    "question": "người phụ nữ với khuôn mặt của cô ấy đang mỉm cười ở đâu",
+    "prediction": "gương",
+    "answers": [
+      "gương"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_79",
+    "question": "xe đẩy nằm ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_80",
+    "question": "người đang giữ gì",
+    "prediction": "điện thoại",
+    "answers": [
+      "điện thoại"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_82",
+    "question": "những gì được đặt màn hình máy tính để bàn",
+    "prediction": "máy vi tính",
+    "answers": [
+      "cái bàn"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_84",
+    "question": "những gì ngồi trên ghế trước máy tính xách tay",
+    "prediction": "gấu",
+    "answers": [
+      "gấu"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_87",
+    "question": "những gì được ngồi trên một con chim trống",
+    "prediction": "thùng chứa",
+    "answers": [
+      "con chim"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_88",
+    "question": "giấy kẹp và khoai tây chiên ở đâu",
+    "prediction": "chảo",
+    "answers": [
+      "cái rổ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_89",
+    "question": "nhà vệ sinh ngồi ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "chậu"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_92",
+    "question": "màu tóc là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_95",
+    "question": "màu của con mèo là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_96",
+    "question": "một người đàn ông lớn tuổi thể hiện những gì",
+    "prediction": "cái nơ",
+    "answers": [
+      "cà vạt"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_99",
+    "question": "cặp đôi đang đứng ở đâu",
+    "prediction": "hẻm",
+    "answers": [
+      "lối đi"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_101",
+    "question": "màu của chiếc ô là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_103",
+    "question": "có vẻ như có bao nhiêu vận động viên trượt ván đang cố gắng kéo ván trượt ra khỏi người khác",
+    "prediction": "hai",
+    "answers": [
+      "một"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_104",
+    "question": "có bao nhiêu con hươu cao cổ đang đi dạo với thảm thực vật thưa thớt xung quanh",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_105",
+    "question": "những gì có thể được nhìn thấy trên tất cả các phía của tháp",
+    "prediction": "đồng hồ",
+    "answers": [
+      "đồng hồ"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_107",
+    "question": "có bao nhiêu đứa trẻ nhỏ mỗi đứa trên một giường của giường tầng ba tầng",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_109",
+    "question": "đứa trẻ đang chải tóc ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "gương"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_110",
+    "question": "con mèo trắng đứng ở đâu",
+    "prediction": "cái nồi",
+    "answers": [
+      "cây"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_112",
+    "question": "những gì trong bát trên bàn",
+    "prediction": "chuối",
+    "answers": [
+      "chuối"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_113",
+    "question": "nhóm người xem có bao nhiêu chân rô bốt",
+    "prediction": "một",
+    "answers": [
+      "sáu"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_114",
+    "question": "người cha đang ngồi trên sàn ở đâu sau một đứa trẻ",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_115",
+    "question": "đây là một đĩa giữ những gì",
+    "prediction": "sandwich",
+    "answers": [
+      "sandwich"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_118",
+    "question": "nhóm người lớn chơi trò chơi wii ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_119",
+    "question": "một chiếc máy bay chiến tranh cũ đang ở đâu",
+    "prediction": "ga-ra",
+    "answers": [
+      "ga-ra"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_120",
+    "question": "có bao nhiêu con ngựa vằn đang đứng trên một cánh đồng lúa mì cao",
+    "prediction": "ba",
+    "answers": [
+      "năm"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_121",
+    "question": "đi bộ ở đâu với một chiếc khăn treo trên bên đó",
+    "prediction": "phòng tắm",
+    "answers": [
+      "vòi hoa sen"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_122",
+    "question": "màu sắc của thiên nga là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_124",
+    "question": "hai cô gái đang chơi trò chơi video đấm bốc ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_125",
+    "question": "cô bé đẻ ở đâu",
+    "prediction": "giường",
+    "answers": [
+      "giường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_126",
+    "question": "màu của con quạ là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_127",
+    "question": "cô gái trẻ đang đứng ở đâu trong khi nhìn vào gương",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_128",
+    "question": "nhóm người trên xe đạp đã làm gì ở đâu",
+    "prediction": "đường phố",
+    "answers": [
+      "đường phố"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_129",
+    "question": "những gì được hiển thị bên cạnh tường",
+    "prediction": "máy vi tính",
+    "answers": [
+      "máy vi tính"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_130",
+    "question": "màu của chiếc tàu là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_135",
+    "question": "những gì được ngồi trên birdfeeder",
+    "prediction": "con chim",
+    "answers": [
+      "con chim"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_136",
+    "question": "cái gì bên cạnh vỏ điện thoại dệt kim",
+    "prediction": "mũ",
+    "answers": [
+      "điện thoại"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_138",
+    "question": "gấu bông nhỏ đang ngồi ở đâu",
+    "prediction": "cái ghế",
+    "answers": [
+      "cái ghế"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_139",
+    "question": "màu của táo là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_140",
+    "question": "có bao nhiêu người đàn ông đang ngồi trên bàn và nhìn vào điện thoại của anh ấy",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_141",
+    "question": "có bao nhiêu hươu cao cổ đang đứng trong cỏ cao tầng",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_142",
+    "question": "người đàn ông nấu ăn gì cho bữa tối",
+    "prediction": "con gà",
+    "answers": [
+      "gà"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_145",
+    "question": "công nhân vá lỗ ở đâu",
+    "prediction": "đường phố",
+    "answers": [
+      "đường phố"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_146",
+    "question": "người đàn ông mặc một chiến thắng và giữ những gì đứng trên nền đêm khói",
+    "prediction": "búa",
+    "answers": [
+      "dao"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_149",
+    "question": "gấu nhồi bông nằm ở đâu",
+    "prediction": "cửa hàng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_151",
+    "question": "những gì mở trên bàn với loa",
+    "prediction": "máy vi tính",
+    "answers": [
+      "laptop"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_152",
+    "question": "cô gái trẻ mỉm cười ở đâu khi cắt một chiếc bánh",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_153",
+    "question": "có bao nhiêu con chim trên một số tảng đá gần đại dương",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_155",
+    "question": "màu của xe là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_157",
+    "question": "người đàn ông đang đánh răng ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "gương"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_158",
+    "question": "có bao nhiêu cái bánh trên cái bàn màu đỏ",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_159",
+    "question": "những gì đang đứng lên bên cạnh một cái cây",
+    "prediction": "gấu",
+    "answers": [
+      "gấu"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_160",
+    "question": "có bao nhiêu con chim đậu trên vỉa hè trong khi những con khác đứng xem",
+    "prediction": "một",
+    "answers": [
+      "một"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_161",
+    "question": "những gì nhét thân cây của mình trên một hàng rào dây",
+    "prediction": "con voi",
+    "answers": [
+      "con voi"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_162",
+    "question": "màu của chiếc ô là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_163",
+    "question": "có bao nhiêu phụ nữ đang lấy một con gà tây bên ngoài lò nướng",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_165",
+    "question": "các loại rau đã sẵn sàng để được chọn ở đâu",
+    "prediction": "giường",
+    "answers": [
+      "sân vườn"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_167",
+    "question": "màu của dĩa nhựa là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_169",
+    "question": "có bao nhiêu con ngựa vằn đứng xung quanh ngoài tự nhiên",
+    "prediction": "ba",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_170",
+    "question": "màu của nước ép là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_171",
+    "question": "có bao nhiêu người mặc đồ đang nhảy trên không trên tuyết",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_172",
+    "question": "có bao nhiêu người trên màn hình có văn bản có chú thích",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_173",
+    "question": "cặp bò nằm ở đâu",
+    "prediction": "chuồng",
+    "answers": [
+      "chuồng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_175",
+    "question": "cái gì đang đứng trên tuyết với hai chiếc đĩa",
+    "prediction": "con chó",
+    "answers": [
+      "con chó"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_176",
+    "question": "có bao nhiêu con ngựa vằn đứng trước một đống cành cây",
+    "prediction": "một",
+    "answers": [
+      "một"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_177",
+    "question": "một số bánh rán sô cô la ở đâu",
+    "prediction": "hộp",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_178",
+    "question": "màu của máy rửa chén là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_179",
+    "question": "người đàn ông đứng cạnh một chiếc máy bay ở đâu",
+    "prediction": "ga-ra",
+    "answers": [
+      "bảo tàng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_180",
+    "question": "màu của động cơ là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_181",
+    "question": "con mèo bên cửa, cố gắng nhìn dưới cửa đang ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "hành lang"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_182",
+    "question": "màu của tường là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_188",
+    "question": "bữa trưa được chứa ở đâ",
+    "prediction": "hộp",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_189",
+    "question": "màu của đĩa là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_192",
+    "question": "em bé màu xanh có bao nhiêu xe đạp tốc độ dựa vào một băng ghế",
+    "prediction": "một",
+    "answers": [
+      "mười"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_193",
+    "question": "cắt và không cắt",
+    "prediction": "chuối",
+    "answers": [
+      "chuối"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_194",
+    "question": "màu sắc của một",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_195",
+    "question": "người phụ nữ đứng ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_196",
+    "question": "người đàn ông cầm ly rượu để ngửi cái gì",
+    "prediction": "nước",
+    "answers": [
+      "rượu"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_202",
+    "question": "có bao nhiêu con hươu cao cổ đang đứng cùng nhau ở sở thú",
+    "prediction": "ba",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_203",
+    "question": "màu của chiếc đĩa là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_206",
+    "question": "những gì đang giữ những cái vòi của nhau",
+    "prediction": "con voi",
+    "answers": [
+      "con voi"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_212",
+    "question": "một chiếc xe cũ đang đậu ở đâu",
+    "prediction": "đường phố",
+    "answers": [
+      "đường phố"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_213",
+    "question": "màu của bên trong là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_214",
+    "question": "tàu cao tốc nhật bản ở đâu",
+    "prediction": "trạm",
+    "answers": [
+      "trạm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_219",
+    "question": "màu của áo là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_220",
+    "question": "người đang đi trên đường là gì",
+    "prediction": "ván trượt",
+    "answers": [
+      "ván trượt"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_221",
+    "question": "có bao nhiêu cảnh sát trên lưng ngựa đứng trên đường phố",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_222",
+    "question": "những gì đang đứng với nhau khi họ uống nước",
+    "prediction": "ngựa vằn",
+    "answers": [
+      "ngựa vằn"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_223",
+    "question": "màu của ván trượt tuyết là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_224",
+    "question": "tay đua trượt tuyết đeo kính bảo hộ cái gì",
+    "prediction": "gậy",
+    "answers": [
+      "mắt"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_228",
+    "question": "hai con chó trắng ngồi ở đâu",
+    "prediction": "xe ô tô",
+    "answers": [
+      "xe ô tô"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_229",
+    "question": "màu sắc của hành lý là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_230",
+    "question": "sự phản chiếu của một người phụ nữ được nhìn thấy ở đâu",
+    "prediction": "gương",
+    "answers": [
+      "gương"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_231",
+    "question": "màu của gấu bông là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_233",
+    "question": "màu của con chó là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_236",
+    "question": "người đàn ông và một đứa bé đang ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_238",
+    "question": "có bao nhiêu người đàn ông đang đội một chiếc mũ ô",
+    "prediction": "một",
+    "answers": [
+      "một"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_239",
+    "question": "có bao nhiêu con cừu nằm trên mặt đất trong khi một con cừu khác đứng gần đó",
+    "prediction": "một",
+    "answers": [
+      "một"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_240",
+    "question": "cô bé đang đứng ở đâu trong khi đánh răng",
+    "prediction": "hộp",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_242",
+    "question": "người đàn ông đang cầm với một vết cắn được lấy ra khỏi nó là gì",
+    "prediction": "donut",
+    "answers": [
+      "donut"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_243",
+    "question": "có bao nhiêu người đang ngồi quanh bàn với một cái bánh",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_244",
+    "question": "hoa lớn đang ngồi trên một số gỗ ở đâu",
+    "prediction": "lọ cắm hoa",
+    "answers": [
+      "lọ cắm hoa"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_245",
+    "question": "người phụ nữ đóng gói quần áo ở đâu",
+    "prediction": "vali",
+    "answers": [
+      "hành lý"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_247",
+    "question": "bánh rán và bánh ngọt để ở đâu",
+    "prediction": "hộp",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_250",
+    "question": "màu của lá là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_251",
+    "question": "hai chiếc giường và tủ quần áo ở đâu",
+    "prediction": "phòng ngủ",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_253",
+    "question": "một số cô gái và một người đang làm món ăn ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_254",
+    "question": "người dân đi xe đạp và ván trượt ở đâu",
+    "prediction": "đường phố",
+    "answers": [
+      "đường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_256",
+    "question": "màu của mặt trước là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_258",
+    "question": "màu sắc của các dấu hiệu là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_259",
+    "question": "đầu bếp mặc tạp dề ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_260",
+    "question": "trận đấu quần vợt đang diễn ra ở đâu",
+    "prediction": "sân vận động",
+    "answers": [
+      "sân vận động"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_262",
+    "question": "có bao nhiêu chiếc ô lơ lửng trên không gần một tòa nhà",
+    "prediction": "năm",
+    "answers": [
+      "sáu"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_264",
+    "question": "pizza mất hai lát ở đâu",
+    "prediction": "hộp",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_265",
+    "question": "có bao nhiêu người trượt tuyết tạo dáng chụp ảnh khi ở trên mặt đất",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_266",
+    "question": "con chim kỳ lạ phản chiếu ở đâu",
+    "prediction": "tường",
+    "answers": [
+      "gương"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_268",
+    "question": "những gì nằm ở trong công viên",
+    "prediction": "vali",
+    "answers": [
+      "vali"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_270",
+    "question": "màu của cửa là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_272",
+    "question": "màu của con mèo là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_273",
+    "question": "nhiều trái cây và rau quả ở đâu",
+    "prediction": "hộp",
+    "answers": [
+      "thùng chứa"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_277",
+    "question": "ngựa vằn đặt mũi ở đâu",
+    "prediction": "cây",
+    "answers": [
+      "cây"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_278",
+    "question": "màu sắc của quần áo là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_280",
+    "question": "xe buýt metro lái qua chi nhánh hồ green của seattle, wa những gì",
+    "prediction": "cây",
+    "answers": [
+      "thư viện"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_287",
+    "question": "màu của các tấm là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_290",
+    "question": "hai con gà tây đang được nấu ở đâu",
+    "prediction": "lò vi sóng",
+    "answers": [
+      "lò vi sóng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_293",
+    "question": "có bao nhiêu con ngựa vằn đang nhìn ra đồng cỏ",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_294",
+    "question": "có bao nhiêu con cừu đang chăn thả cùng nhau",
+    "prediction": "năm",
+    "answers": [
+      "năm"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_295",
+    "question": "màu của ghế là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_296",
+    "question": "có bao nhiêu cô gái nhỏ đang đi bộ bởi một cơ thể nước giữ ô",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_297",
+    "question": "cậu bé đọc sách cho em trai mình ở đâu",
+    "prediction": "giường",
+    "answers": [
+      "giường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_300",
+    "question": "người đàn ông ở đâu trong hồ",
+    "prediction": "con thuyền",
+    "answers": [
+      "con thuyền"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_301",
+    "question": "màu của bàn chải là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_304",
+    "question": "màu của áo khoác là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_305",
+    "question": "màu của bệ là gì",
+    "prediction": "màu tía",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_306",
+    "question": "người đàn ông trong bộ đồ đang ở đâu",
+    "prediction": "cửa sổ",
+    "answers": [
+      "cái ghế"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_307",
+    "question": "màu sắc của tấm là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_308",
+    "question": "màu sắc của bông hoa là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_309",
+    "question": "con mèo đang điều tra trên sàn có bao nhiêu rau xanh",
+    "prediction": "một",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_311",
+    "question": "màu sắc của con vật đang đi bộ là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_313",
+    "question": "những gì đang ngồi cạnh nhau trong hộp",
+    "prediction": "pizza",
+    "answers": [
+      "pizza"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_314",
+    "question": "màu của áo là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_315",
+    "question": "em bé sơ sinh nằm ở đâu",
+    "prediction": "giường",
+    "answers": [
+      "giường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_318",
+    "question": "một nhóm người đang ở đâu",
+    "prediction": "hồ bơi",
+    "answers": [
+      "hồ bơi"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_319",
+    "question": "những gì với chuối xắt nhỏ trên bàn",
+    "prediction": "bát",
+    "answers": [
+      "bát"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_323",
+    "question": "có bao nhiêu bản sao của bức ảnh này về cùng một trụ cứu hỏa",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_324",
+    "question": "những cái bánh donuts nằm ở đâu",
+    "prediction": "hộp",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_326",
+    "question": "người phụ nữ ở đâu với một cái chảo trong tay",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_328",
+    "question": "có bao nhiêu người đàn ông đang dùng cọc để đẩy ván trượt lên đồi",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_329",
+    "question": "màu của ontop là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_331",
+    "question": "người đàn ông đứng ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_333",
+    "question": "có bao nhiêu con ngựa vằn trên cánh đồng cỏ dưới gốc cây",
+    "prediction": "hai",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_336",
+    "question": "cà rốt tươi đang ở đâu",
+    "prediction": "cái rổ",
+    "answers": [
+      "cái rổ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_337",
+    "question": "nơi hai chiếc xe máy đang dừng",
+    "prediction": "đường phố",
+    "answers": [
+      "đường bộ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_340",
+    "question": "có bao nhiêu chiếc ghế dài trong hang có nhiều gối trên chúng",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_341",
+    "question": "màu của bảng là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_346",
+    "question": "nải chuối nằm ở đâu",
+    "prediction": "cái rổ",
+    "answers": [
+      "cái rổ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_347",
+    "question": "ngọn lửa trắng lớn đang ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_349",
+    "question": "có bao nhiêu người đang ở gần ván lướt sóng trên đại dương",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_350",
+    "question": "có bao nhiêu con hươu cao cổ ở sở thú gần bức tường đá và một số cái cây",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_352",
+    "question": "những gì đang nằm trên gối bên cạnh một điều khiển từ xa",
+    "prediction": "con mèo",
+    "answers": [
+      "con mèo"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_353",
+    "question": "nhiều đầu bếp đang ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_354",
+    "question": "có bao nhiêu quả cam được xếp vào vòng tròn với một quả cà chua nhỏ ở trên",
+    "prediction": "sáu",
+    "answers": [
+      "bảy"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_355",
+    "question": "màu của chiếc xe là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_357",
+    "question": "những gì đang đánh nhau bằng ngà của họ",
+    "prediction": "con voi",
+    "answers": [
+      "con voi"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_358",
+    "question": "bồn rửa và gương ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_360",
+    "question": "chips, bông cải xanh và cơm ở đâu",
+    "prediction": "bát",
+    "answers": [
+      "bát"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_362",
+    "question": "màu sắc của vali là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_363",
+    "question": "pizza nhỏ nấu ở đâu",
+    "prediction": "lò vi sóng",
+    "answers": [
+      "lò vi sóng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_365",
+    "question": "những gì một mình gần với rừng",
+    "prediction": "hươu cao cổ",
+    "answers": [
+      "hươu cao cổ"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_366",
+    "question": "màu của tòa nhà là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_368",
+    "question": "hai người đang chơi một trò chơi video ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_369",
+    "question": "có bao nhiêu người đàn ông đang cùng nhau nhảy bắt đĩa bay",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_370",
+    "question": "người đàn ông đang nhìn ra khỏi cửa sổ ở đâu",
+    "prediction": "giường",
+    "answers": [
+      "giường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_371",
+    "question": "màu của gấu là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_374",
+    "question": "màu sắc của bông hoa là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_376",
+    "question": "có bao nhiêu người đàn ông đang ngồi trên bàn với hai chiếc pizza lớn",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_377",
+    "question": "cậu bé mặc gì xách xe đạp lên dốc ở công viên trượt băng",
+    "prediction": "mũ",
+    "answers": [
+      "mũ bảo hiểm"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_378",
+    "question": "người đàn ông mặc bộ đồ chú hề bước ra là gì",
+    "prediction": "xe đẩy",
+    "answers": [
+      "xe đẩy"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_382",
+    "question": "những gì đang nằm trong cỏ xanh với một chiếc dĩa nhựa màu đỏ",
+    "prediction": "con chó",
+    "answers": [
+      "con chó"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_387",
+    "question": "người phụ nữ đang vuốt ve hai con chó ở đâu",
+    "prediction": "xe tải",
+    "answers": [
+      "xe tải"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_390",
+    "question": "bồn tiểu ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_391",
+    "question": "có bao nhiêu người đang thưởng thức bữa ăn cùng nhau tại một nhà hàng",
+    "prediction": "năm",
+    "answers": [
+      "sáu"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_394",
+    "question": "có bao nhiêu con voi với bàn chân trước trên lưng của một con voi khác",
+    "prediction": "một",
+    "answers": [
+      "một"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_395",
+    "question": "màu của vòi nước là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_396",
+    "question": "những gì đang đứng cùng nhau trên bãi cỏ gần một ngọn đồi",
+    "prediction": "hươu cao cổ",
+    "answers": [
+      "hươu cao cổ"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_397",
+    "question": "màu của xe buýt là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_398",
+    "question": "màu của con mèo là gì",
+    "prediction": "màu xám",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_400",
+    "question": "màu của dây buộc là gì",
+    "prediction": "màu tía",
+    "answers": [
+      "màu tía"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_408",
+    "question": "bao nhiêu người đàn ông chơi wii trong một phòng khách chật chội",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_409",
+    "question": "cô gái đang chơi một trò chơi điện tử ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_410",
+    "question": "có bao nhiêu người đang ném đĩa ném cho một người khác ở phía trước của một số cái cây",
+    "prediction": "một",
+    "answers": [
+      "một"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_411",
+    "question": "hai người vẽ màu đỏ ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_415",
+    "question": "hươu cao cổ ăn một số lá là gì",
+    "prediction": "cây",
+    "answers": [
+      "cây"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_416",
+    "question": "có bao nhiêu đứa trẻ đang chụp ảnh chung ở sân sau",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_417",
+    "question": "những bông hoa ở đâu",
+    "prediction": "cái nồi",
+    "answers": [
+      "lọ cắm hoa"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_418",
+    "question": "những gì ở trong thành phố",
+    "prediction": "cây",
+    "answers": [
+      "chiếc ô"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_419",
+    "question": "người trượt ván ở đâu",
+    "prediction": "lò vi sóng",
+    "answers": [
+      "ga-ra"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_420",
+    "question": "con mèo đang nằm ở đâu",
+    "prediction": "giường",
+    "answers": [
+      "giường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_421",
+    "question": "màu của thân cây là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_422",
+    "question": "có bao nhiêu người đang đi trong cơn mưa nhẹ trên con đường rợp bóng cây",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_423",
+    "question": "có bao nhiêu cô gái đang ngồi trên giường cười nói",
+    "prediction": "năm",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_427",
+    "question": "màu của lá là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_428",
+    "question": "có bao nhiêu người trượt tuyết trên địa hình bằng phẳng",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_430",
+    "question": "màu của thiên nga là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_433",
+    "question": "những gì chứa đầy chuối ngồi trên bàn",
+    "prediction": "bát",
+    "answers": [
+      "bát"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_434",
+    "question": "màu của máy bay phản lực là gì",
+    "prediction": "màu xám",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_435",
+    "question": "cái bánh pizza đã ăn dở nằm ở đâu",
+    "prediction": "hộp",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_436",
+    "question": "màu của áo khoác là gì",
+    "prediction": "màu xám",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_441",
+    "question": "màu của con mèo là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_442",
+    "question": "màu của bếp là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_446",
+    "question": "nhóm người chuẩn bị thức ăn ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_447",
+    "question": "điều gì thu hút con mèo tò mò",
+    "prediction": "màn hình",
+    "answers": [
+      "truyền hình"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_449",
+    "question": "màu của kính bảo hộ là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_450",
+    "question": "những gì trong góc với một máy tính xách tay",
+    "prediction": "cái ghế",
+    "answers": [
+      "cái bàn"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_452",
+    "question": "màu sắc của sự phân tán là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_453",
+    "question": "nấu pizza ở đâu",
+    "prediction": "lò vi sóng",
+    "answers": [
+      "lò vi sóng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_455",
+    "question": "màu của xe buýt là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_456",
+    "question": "có bao nhiêu người lái máy trên mặt nước trong khi một người khác bị treo ở phía sau",
+    "prediction": "một",
+    "answers": [
+      "một"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_458",
+    "question": "màu của con mèo là gì",
+    "prediction": "màu xám",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_461",
+    "question": "màu của xe buýt là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_467",
+    "question": "bồn tắm hiện đại được hiển thị ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_470",
+    "question": "con mèo đang ngồi ở đâu",
+    "prediction": "tivi",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_471",
+    "question": "nhà bếp sạch sẽ và ánh sáng đến từ đâu",
+    "prediction": "cửa sổ",
+    "answers": [
+      "cửa sổ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_473",
+    "question": "salad đã được phục vụ ở đâu",
+    "prediction": "bát",
+    "answers": [
+      "bát"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_474",
+    "question": "cái gì một bồn rửa và một nhà vệ sinh",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_477",
+    "question": "xe taxi dừng ở đâu",
+    "prediction": "đường phố",
+    "answers": [
+      "đường phố"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_478",
+    "question": "những gì đang chạy và băng qua con đường đất",
+    "prediction": "hươu cao cổ",
+    "answers": [
+      "hươu cao cổ"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_479",
+    "question": "màu của con chó là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_480",
+    "question": "màu của gấu là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_483",
+    "question": "có bao nhiêu con gấu bông được ghim vào dây phơi bằng ghim quần áo",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_485",
+    "question": "những gì đỗ ở bên đường",
+    "prediction": "xe máy",
+    "answers": [
+      "xe máy"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_488",
+    "question": "màu của băng ghế là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_490",
+    "question": "màu của soda là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_491",
+    "question": "bó hoa loa kèn được cắm ở đâu",
+    "prediction": "cái nồi",
+    "answers": [
+      "lọ cắm hoa"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_493",
+    "question": "màu của ruy băng là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_494",
+    "question": "có bao nhiêu con vẹt đuôi dài đậu trên chùm chuối",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_495",
+    "question": "người phụ nữ nằm ở đâu khi đọc một cuốn sách, và vuốt ve một con mèo",
+    "prediction": "giường",
+    "answers": [
+      "giường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_497",
+    "question": "hươu cao cổ và ngựa vằn ở đâu",
+    "prediction": "vườn bách thú",
+    "answers": [
+      "chuồng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_498",
+    "question": "khách của đám cưới tập trung ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "nhà ở"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_501",
+    "question": "những gì được nhồi với pho mát và các lớp phủ khác",
+    "prediction": "pizza",
+    "answers": [
+      "pizza"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_503",
+    "question": "nước uống chim ở đâu treo ngoài cửa sổ",
+    "prediction": "cái ghế",
+    "answers": [
+      "chai"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_504",
+    "question": "giường lớn được hiển thị ở đâu",
+    "prediction": "phòng ngủ",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_506",
+    "question": "màu của dĩa nhựa là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_508",
+    "question": "màu của hoa tulip là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_509",
+    "question": "nhóm người tập hợp ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_512",
+    "question": "bánh donuts đang được nướng ở đâu",
+    "prediction": "lò vi sóng",
+    "answers": [
+      "cỗ máy"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_514",
+    "question": "cái gì đang ngồi trên vỉa hè",
+    "prediction": "vòi",
+    "answers": [
+      "vòi"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_517",
+    "question": "màu của xe buýt là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_521",
+    "question": "màu của gấu là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_522",
+    "question": "có bao nhiêu người thắp nến trên bánh",
+    "prediction": "một",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_524",
+    "question": "màu của lá là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_526",
+    "question": "màu của chiếc bình là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_528",
+    "question": "màu của ghế là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_530",
+    "question": "hoa hồng được cắm ở đâu",
+    "prediction": "lọ cắm hoa",
+    "answers": [
+      "lọ cắm hoa"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_532",
+    "question": "gấu bắc cực trắng ở đâu",
+    "prediction": "chuồng",
+    "answers": [
+      "vườn bách thú"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_533",
+    "question": "những gì nhìn vào máy ảnh trong khi ngồi trên đi văng",
+    "prediction": "con chó",
+    "answers": [
+      "con chó"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_537",
+    "question": "màu của chiếc tàu là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_538",
+    "question": "màu của gấu là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_539",
+    "question": "cô gái đang cầm thứ gì mà một chàng trai ở phía sau nhìn vào",
+    "prediction": "bút",
+    "answers": [
+      "bàn chải"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_541",
+    "question": "xe đạp của người đàn ông và phụ nữ dừng ở đâu",
+    "prediction": "cái ghế",
+    "answers": [
+      "giá đỡ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_542",
+    "question": "giường làm một phần nằm ở đâu",
+    "prediction": "phòng ngủ",
+    "answers": [
+      "phòng ngủ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_544",
+    "question": "người phụ nữ cắt lát táo ngoài trời mặc gì",
+    "prediction": "áo sọc",
+    "answers": [
+      "tạp dề"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_545",
+    "question": "bó hoa hỗn hợp được cắm ở đâu",
+    "prediction": "lọ cắm hoa",
+    "answers": [
+      "lọ cắm hoa"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_546",
+    "question": "màu của cỏ là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_547",
+    "question": "người đàn ông đang giữ một hộp các tông ở đâu",
+    "prediction": "cái ghế",
+    "answers": [
+      "tòa nhà"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_549",
+    "question": "màu của bầu trời là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_552",
+    "question": "màu của cửa là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_553",
+    "question": "con mèo đang chơi xung quanh đâu",
+    "prediction": "vali",
+    "answers": [
+      "vali"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_554",
+    "question": "có bao nhiêu con cừu trắng đang đi bộ trên một con đường trong thị trấn",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_555",
+    "question": "màu của mỏ là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_557",
+    "question": "người đàn ông ngồi cạnh một chiếc armoire ở đâu với một tấm gương",
+    "prediction": "phòng ngủ",
+    "answers": [
+      "phòng ngủ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_561",
+    "question": "các tủ được mở đặt ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_562",
+    "question": "những gì nằm trên đỉnh đồi cỏ",
+    "prediction": "băng ghế",
+    "answers": [
+      "băng ghế"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_563",
+    "question": "những người đang làm việc trên máy tính ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "thư viện"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_565",
+    "question": "nhà vệ sinh có ghế gỗ ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_566",
+    "question": "màu của đất sét là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_568",
+    "question": "ai đó đang nhìn vào máy tính của mình ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_569",
+    "question": "một số con hươu cao cổ rất dễ thương có bao nhiêu cái đứng hơn con khác",
+    "prediction": "một",
+    "answers": [
+      "một"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_570",
+    "question": "máy bay biên giới ngồi ở đâu",
+    "prediction": "sân bay",
+    "answers": [
+      "ga-ra"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_571",
+    "question": "màu của áo là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_572",
+    "question": "màu của chiếc ô là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_573",
+    "question": "những người mặc những gì đứng trên con đường như một cỗ xe ngựa trong một cuộc diễu hành trôi qua",
+    "prediction": "áo vest",
+    "answers": [
+      "đầm"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_575",
+    "question": "những hành lý cổ nằm ở đâu",
+    "prediction": "cửa sổ",
+    "answers": [
+      "cửa sổ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_578",
+    "question": "những gì, với một chiếc cà vạt và áo khoác",
+    "prediction": "áo sơ mi",
+    "answers": [
+      "áo sơ mi"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_579",
+    "question": "lò vi sóng gắn ở đâu",
+    "prediction": "cái kệ",
+    "answers": [
+      "buồng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_580",
+    "question": "có bao nhiêu người đang cầm ván lướt sóng trên đường đi bộ",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_582",
+    "question": "những gì đỗ bên cạnh nhau trên giá xe đạp",
+    "prediction": "xe đạp",
+    "answers": [
+      "xe đạp"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_586",
+    "question": "màu sắc của loa là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_587",
+    "question": "màu của gạch là gì",
+    "prediction": "màu xám",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_591",
+    "question": "có bao nhiêu con cừu đang chạy trên bãi cỏ bên ngoài",
+    "prediction": "bốn",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_593",
+    "question": "có bao nhiêu người đàn ông đang đi lên cầu thang và một người khác đi xuống cầu thang trên điện thoại",
+    "prediction": "một",
+    "answers": [
+      "một"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_594",
+    "question": "có bao nhiêu đồ uống đang ngồi trên một khay đồ uống lớn",
+    "prediction": "năm",
+    "answers": [
+      "mười"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_597",
+    "question": "người đàn ông đang đi bộ bên ngoài gần xe buýt và tòa nhà ở đâu",
+    "prediction": "đường phố",
+    "answers": [
+      "đường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_598",
+    "question": "có bao nhiêu con hươu cao cổ lớn đứng trên cánh đồng cạnh chuồng",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_599",
+    "question": "con dê nhìn vào đâu trong khi đứng",
+    "prediction": "cái rào",
+    "answers": [
+      "chuồng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_600",
+    "question": "người đàn ông đang đánh răng ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_602",
+    "question": "màu của chiếc tàu là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_604",
+    "question": "có bao nhiêu con dao rất sắc được gắn trên tường",
+    "prediction": "năm",
+    "answers": [
+      "bảy"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_606",
+    "question": "những người đứng tiểu xếp hàng ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "nhà vệ sinh"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_607",
+    "question": "có bao nhiêu người trên bãi biển đang cưỡi ngựa",
+    "prediction": "năm",
+    "answers": [
+      "sáu"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_608",
+    "question": "màu của áo là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_609",
+    "question": "màu của chiếc bình là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_610",
+    "question": "màu của điện thoại là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_613",
+    "question": "người phụ nữ giữ những gì bên cạnh một tách cà phê",
+    "prediction": "donut",
+    "answers": [
+      "donut"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_614",
+    "question": "cầu thủ bóng chày nhỏ ở đâu",
+    "prediction": "sân vận động",
+    "answers": [
+      "lồng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_615",
+    "question": "màu sắc của bông hoa là gì",
+    "prediction": "màu tía",
+    "answers": [
+      "màu tía"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_616",
+    "question": "con gấu nhồi bông ở đâu",
+    "prediction": "cái ghế",
+    "answers": [
+      "cái ghế"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_617",
+    "question": "mọi người đang chơi mario kart ở đâu trên màn hình máy chiếu",
+    "prediction": "lớp học",
+    "answers": [
+      "lớp học"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_619",
+    "question": "có bao nhiêu người đàn ông đang đứng trong phòng khách và giữ điều khiển từ xa wii",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_620",
+    "question": "có bao nhiêu phần tráng miệng trên đĩa với một cái nĩa",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_623",
+    "question": "những gì trên bầu trời của những đám mây xám",
+    "prediction": "máy bay",
+    "answers": [
+      "máy bay"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_624",
+    "question": "có bao nhiêu con hươu cao cổ nằm úp mặt xuống đất ngủ",
+    "prediction": "ba",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_628",
+    "question": "người duy nhất băng qua đường ở đâu",
+    "prediction": "xe ô tô",
+    "answers": [
+      "vạch kẻ đường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_630",
+    "question": "người đàn ông và phụ nữ cưỡi cái gì",
+    "prediction": "xe đạp",
+    "answers": [
+      "xe tay ga"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_632",
+    "question": "đứa trẻ đang cưỡi cái gì",
+    "prediction": "con ngựa",
+    "answers": [
+      "con ngựa"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_633",
+    "question": "màu của chiếc đĩa là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_635",
+    "question": "con chó nhỏ nằm ở đâu",
+    "prediction": "cái lồng",
+    "answers": [
+      "cái rổ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_636",
+    "question": "màu của bề mặt là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_638",
+    "question": "màu của cây là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_639",
+    "question": "con mèo đen trắng nằm ở đâu",
+    "prediction": "cái túi",
+    "answers": [
+      "cái túi"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_640",
+    "question": "màu của đậu là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_642",
+    "question": "gối hoa màu xanh lá cây và hồng nằm ở đâu",
+    "prediction": "giường",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_643",
+    "question": "những gì đang được sử dụng để đọc mã qr trên áo phông",
+    "prediction": "điện thoại",
+    "answers": [
+      "điện thoại"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_644",
+    "question": "màu của gấu là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_645",
+    "question": "màu của chiếc tàu là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_649",
+    "question": "những bông hoa đầy màu sắc ở đâu",
+    "prediction": "lọ cắm hoa",
+    "answers": [
+      "lọ cắm hoa"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_650",
+    "question": "những gì tiếp theo bên cạnh một chiếc macbook pro nguyên sơ",
+    "prediction": "máy vi tính",
+    "answers": [
+      "laptop"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_651",
+    "question": "một con voi ăn một số thực phẩm ở đâu",
+    "prediction": "chuồng",
+    "answers": [
+      "chuồng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_653",
+    "question": "có bao nhiêu phụ nữ đứng quanh chiếc bánh và mỉm cười",
+    "prediction": "năm",
+    "answers": [
+      "năm"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_656",
+    "question": "những gì đi bộ trên bãi cỏ xanh trong khu vườn thú",
+    "prediction": "hươu cao cổ",
+    "answers": [
+      "hươu cao cổ"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_657",
+    "question": "những gì đang tìm kiếm các cửa sổ nhỏ của một tòa nhà",
+    "prediction": "con chó",
+    "answers": [
+      "con chó"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_658",
+    "question": "màu của cái tủ là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_663",
+    "question": "màu của con chó là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_667",
+    "question": "những gì đỗ trong khu vực chờ của một sân bay",
+    "prediction": "máy bay",
+    "answers": [
+      "máy bay"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_669",
+    "question": "có bao nhiêu bát trái cây tươi các loại, salad khoai tây và rau tươi",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_671",
+    "question": "người phụ nữ đang giữ một chiếc ô đỏ mở ở đâu",
+    "prediction": "phòng ngủ",
+    "answers": [
+      "phòng ngủ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_673",
+    "question": "màu của áo là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_674",
+    "question": "có bao nhiêu người mặc đồ đen trên một chiếc xe máy màu xanh",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_675",
+    "question": "người phụ nữ đang chuẩn bị một món ăn ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_676",
+    "question": "hai cô gái nhỏ mặc áo trắng cầm cái gì",
+    "prediction": "chiếc ô",
+    "answers": [
+      "chiếc ô"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_677",
+    "question": "người đàn ông cưỡi những gì xuống dốc tuyết phủ",
+    "prediction": "ván trượt",
+    "answers": [
+      "trượt tuyết"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_683",
+    "question": "những gì đang mang xe đẩy khi một người đàn ông kiểm tra phía trước",
+    "prediction": "tàu hỏa",
+    "answers": [
+      "động cơ"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_687",
+    "question": "màu sắc của bộ trang phục là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_689",
+    "question": "một số bàn gỗ màu nâu xếp hàng ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_690",
+    "question": "con mèo đen trắng ngồi ở đâu",
+    "prediction": "thùng chứa",
+    "answers": [
+      "thùng chứa"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_691",
+    "question": "ô dù đang nằm ở đâu",
+    "prediction": "cái rổ",
+    "answers": [
+      "bồn tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_692",
+    "question": "bàn phím và chuột máy tính có bao nhiêu bảng",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_693",
+    "question": "rèm treo ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_694",
+    "question": "ba con thú nhồi bông ngồi ở đâu trong khi một tay cầm xúc xích với mù tạt",
+    "prediction": "hộp",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_695",
+    "question": "người đàn ông cơ bắp bám vào dây ở đâu",
+    "prediction": "bể",
+    "answers": [
+      "áo vest"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_697",
+    "question": "màu của cái vợt là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_698",
+    "question": "màu của chiếc ghế dài là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_699",
+    "question": "người phụ nữ để một con diều hâu đi đâu",
+    "prediction": "đường phố",
+    "answers": [
+      "găng tay"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_701",
+    "question": "hai nhà vệ sinh và hai bồn cầu ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_704",
+    "question": "có bao nhiêu con ngựa vằn đang chơi trên một số cỏ xanh và nâu",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_706",
+    "question": "bốn người, ba người có ô, đứng ở đâu",
+    "prediction": "sân vườn",
+    "answers": [
+      "sân vườn"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_707",
+    "question": "có bao nhiêu con voi ở một cánh đồng trống với những con chim bay trên đầu",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_709",
+    "question": "cái gì đang đậu trên gỗ",
+    "prediction": "hươu cao cổ",
+    "answers": [
+      "hươu cao cổ"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_713",
+    "question": "màu của cupcake là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_715",
+    "question": "những gì được tổ chức tốt với nguồn cung cấp",
+    "prediction": "cái bàn",
+    "answers": [
+      "cái bàn"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_716",
+    "question": "xe bus được phản chiếu ở đâu",
+    "prediction": "gương",
+    "answers": [
+      "gương"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_717",
+    "question": "người uống một ly rượu ở đâu",
+    "prediction": "quán bar",
+    "answers": [
+      "quán bar"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_722",
+    "question": "con mèo đang ngồi ở đâu",
+    "prediction": "bồn tắm",
+    "answers": [
+      "bồn tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_726",
+    "question": "có bao nhiêu người trượt tuyết bên cạnh một người đang đeo ván trượt",
+    "prediction": "một",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_727",
+    "question": "màu của cái bát là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_728",
+    "question": "bầy hươu cao cổ ở đâu",
+    "prediction": "chuồng",
+    "answers": [
+      "chuồng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_729",
+    "question": "màu của bếp là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_730",
+    "question": "cái gì đầy chuối chín trên bàn",
+    "prediction": "cái rổ",
+    "answers": [
+      "cái rổ"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_731",
+    "question": "có bao nhiêu người đang đánh răng trong phòng tắm",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_733",
+    "question": "những gì nằm dưới mặt bàn đá granit trong bếp",
+    "prediction": "lò vi sóng",
+    "answers": [
+      "bếp"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_734",
+    "question": "các chậu và chảo treo ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_736",
+    "question": "người phụ nữ rửa tay ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "chậu"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_738",
+    "question": "màu của ghế là gì",
+    "prediction": "màu xám",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_740",
+    "question": "màu của bông hoa là gì",
+    "prediction": "màu tía",
+    "answers": [
+      "màu tía"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_741",
+    "question": "màu của cây là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_742",
+    "question": "cậu bé ôm bao nhiêu quả chuối vào mặt",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_744",
+    "question": "những gì đang nằm cạnh một người trên giường",
+    "prediction": "con mèo",
+    "answers": [
+      "con mèo"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_747",
+    "question": "màu của ánh sáng là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_748",
+    "question": "có bao nhiêu đơn vị làm lạnh bằng thép không gỉ đang ngồi dựa vào tường",
+    "prediction": "ba",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_749",
+    "question": "có bao nhiêu bồn tiểu được gắn trên tường gạch",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_754",
+    "question": "màu của xe tải là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_756",
+    "question": "nhóm người già và trẻ đang chơi gì",
+    "prediction": "đĩa nhựa",
+    "answers": [
+      "dĩa nhựa"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_757",
+    "question": "điều gì thu nhận ánh sáng vào phòng khách",
+    "prediction": "cửa sổ",
+    "answers": [
+      "cửa sổ"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_759",
+    "question": "nhà vệ sinh trắng đang ngồi ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_762",
+    "question": "màu của con bò là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_763",
+    "question": "màu của bàn là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_764",
+    "question": "nhiều bánh rán khác nhau nằm ở đâu",
+    "prediction": "hộp",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_765",
+    "question": "người đàn ông với một con chó mặc quần áo và chèo xuồng là gì",
+    "prediction": "ván lướt sóng",
+    "answers": [
+      "áo khoác"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_766",
+    "question": "giường tầng gỗ được đặt ở đâu",
+    "prediction": "phòng ngủ",
+    "answers": [
+      "hành lang"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_767",
+    "question": "màu của cà vạt là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_769",
+    "question": "màu của xe buýt là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_770",
+    "question": "có bao nhiêu người trượt tuyết trong bộ đồ trượt tuyết",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_774",
+    "question": "người đàn ông đang cầm một cây gậy bóng cơ bản và nổi bật trong một trò chơi là gì",
+    "prediction": "bóng",
+    "answers": [
+      "quả bóng"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_776",
+    "question": "người phụ nữ đang chụp ảnh mình ở đâu",
+    "prediction": "gương",
+    "answers": [
+      "gương"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_777",
+    "question": "trạm xe buýt hai tầng đã dừng ở đâu",
+    "prediction": "đường phố",
+    "answers": [
+      "đường phố"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_778",
+    "question": "màu sắc của mũ bảo hiểm là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_780",
+    "question": "vận động viên quần vợt cầm vợt giao bóng là gì",
+    "prediction": "vợt",
+    "answers": [
+      "quả bóng"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_781",
+    "question": "người đàn ông chỉ một máy ảnh kỹ thuật số ở đâu",
+    "prediction": "gương",
+    "answers": [
+      "gương"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_782",
+    "question": "pizza đã sắp xếp ở đâu để làm cho một khuôn mặt cười",
+    "prediction": "hộp",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_783",
+    "question": "người phụ nữ đang ở đâu",
+    "prediction": "đường phố",
+    "answers": [
+      "lối đi"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_784",
+    "question": "có bao nhiêu người đang ngồi trên một chiếc ghế dài cùng nhau",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_785",
+    "question": "những gì được xếp hàng bên cạnh máy tính",
+    "prediction": "chuối",
+    "answers": [
+      "chuối"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_786",
+    "question": "màu của bánh là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_792",
+    "question": "có bao nhiêu cậu bé ở các đội khác nhau chơi một trò chơi bóng đá",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_794",
+    "question": "nhà vệ sinh ngồi ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_795",
+    "question": "có bao nhiêu chiếc ô tô đậu trên bãi cỏ khi một đoàn tàu đi qua",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_797",
+    "question": "rượu vang đỏ được rót vào ly trên bàn là gì",
+    "prediction": "cái ly",
+    "answers": [
+      "nến"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_798",
+    "question": "màu của dĩa nhựa là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_801",
+    "question": "người đàn ông đang dựa lưng ở đâu ăn bánh rán",
+    "prediction": "cái ghế",
+    "answers": [
+      "cái ghế"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_802",
+    "question": "người phụ nữ nằm ở đâu",
+    "prediction": "giường",
+    "answers": [
+      "giường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_803",
+    "question": "gấu teddy đỏ đang ở đâu",
+    "prediction": "cái ghế",
+    "answers": [
+      "cái ghế"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_804",
+    "question": "có bao nhiêu máy tính nối mạng đang ngồi tại một trạm làm việc",
+    "prediction": "ba",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_812",
+    "question": "cậu bé ở đâu",
+    "prediction": "giường",
+    "answers": [
+      "giường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_813",
+    "question": "xe máy đang hoạt động ở đâu",
+    "prediction": "ga-ra",
+    "answers": [
+      "ga-ra"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_817",
+    "question": "có bao nhiêu cậu bé trước cái bánh sinh nhật",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_820",
+    "question": "bánh sandwich thịt và phô mai được phục vụ ở đâu",
+    "prediction": "chảo",
+    "answers": [
+      "cái rổ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_822",
+    "question": "màu của chiếc ô là gì",
+    "prediction": "màu tía",
+    "answers": [
+      "màu tía"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_823",
+    "question": "người đàn ông đang nằm ở đâu",
+    "prediction": "giường",
+    "answers": [
+      "giường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_825",
+    "question": "có bao nhiêu con chim nhỏ đang ngồi trên mỏm đá",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_827",
+    "question": "người đàn ông trong một mặt nạ giữ cái gì",
+    "prediction": "điện thoại",
+    "answers": [
+      "điện thoại"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_828",
+    "question": "có bao nhiêu máy bay chiến đấu đang bay theo đội hình khói",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_829",
+    "question": "màu của điện thoại là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_832",
+    "question": "màu của băng ghế là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_833",
+    "question": "người đàn ông đang xông hơi trong phòng tắm là gì",
+    "prediction": "áo sơ mi",
+    "answers": [
+      "quần áo"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_834",
+    "question": "màu của ghế là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_836",
+    "question": "những gì đang đậu cạnh nhau",
+    "prediction": "xe buýt",
+    "answers": [
+      "xe buýt"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_842",
+    "question": "mèo nằm ở đâu",
+    "prediction": "chậu",
+    "answers": [
+      "chậu"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_844",
+    "question": "màu sắc của ánh sáng là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_845",
+    "question": "màu tóc là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_846",
+    "question": "những bông hoa hướng dương cắm ở đâu",
+    "prediction": "lọ cắm hoa",
+    "answers": [
+      "lọ cắm hoa"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_847",
+    "question": "có bao nhiêu người chơi quần vợt đang tạo dáng trên sân tennis với vợt và bóng",
+    "prediction": "năm",
+    "answers": [
+      "năm"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_848",
+    "question": "màu của con mèo là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_854",
+    "question": "người đó chụp hình ảnh của mình ở đâu",
+    "prediction": "gương",
+    "answers": [
+      "gương"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_857",
+    "question": "cái gì có vẻ làm người chơi quần vợt bị chói mắt",
+    "prediction": "bóng",
+    "answers": [
+      "mặt trời"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_858",
+    "question": "màu của xe tải là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_860",
+    "question": "búp bê được đặt ở đâu",
+    "prediction": "giường",
+    "answers": [
+      "giường"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_861",
+    "question": "người đàn ông đang dùng đòn gì trên một bộ quần áo màu xanh lam kiểm tra",
+    "prediction": "tường",
+    "answers": [
+      "máy sấy khô"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_862",
+    "question": "màu của cây là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_863",
+    "question": "vách kính tắm ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_865",
+    "question": "có bao nhiêu đường có biển báo lỗi đang chỉ về bên trái",
+    "prediction": "một",
+    "answers": [
+      "một"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_867",
+    "question": "màu của áo là gì",
+    "prediction": "màu xám",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_868",
+    "question": "bộ sưu tập đồ nội thất ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_869",
+    "question": "có bao nhiêu phần ăn tối được phục vụ trên đĩa trắng",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_873",
+    "question": "đâu là một miếng pizza nằm ở đâu",
+    "prediction": "hộp",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_875",
+    "question": "cái gì đang bị cắt bởi một con dao",
+    "prediction": "táo",
+    "answers": [
+      "quả táo"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_876",
+    "question": "con mèo đang đẩy đầu ở đâu",
+    "prediction": "cửa sổ",
+    "answers": [
+      "cửa"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_877",
+    "question": "chiếc ô đen bị hỏng ở đâu",
+    "prediction": "đường phố",
+    "answers": [
+      "đường phố"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_878",
+    "question": "những gì ngủ với chân trên điều khiển từ xa",
+    "prediction": "con mèo",
+    "answers": [
+      "con mèo"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_879",
+    "question": "màu của tòa nhà là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_881",
+    "question": "màu của lá là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_883",
+    "question": "người đàn ông đứng ở đâu trong khi chuẩn bị thức ăn",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_884",
+    "question": "màu của núm là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_887",
+    "question": "có bao nhiêu con gấu đen đang đi ngang qua cái cây đổ khổng lồ",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_891",
+    "question": "trẻ nhỏ đứng ở công viên trượt băng làm gì",
+    "prediction": "xe đạp",
+    "answers": [
+      "xe đạp"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_892",
+    "question": "màu của con ngựa là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_894",
+    "question": "màu của chiếc đĩa là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_896",
+    "question": "màu của áo là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_898",
+    "question": "bao nhiêu người đàn ông đang thực hiện các trò chơi trên ván trượt của họ bên cạnh cầu thang",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_899",
+    "question": "có bao nhiêu người đàn ông tạo dáng chụp ảnh khi họ ngồi trên xe máy của họ",
+    "prediction": "năm",
+    "answers": [
+      "năm"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_902",
+    "question": "màu của bảng là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_903",
+    "question": "có bao nhiêu con hươu cao cổ đang đi quanh cây bút của chúng trong bụi bẩn",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_904",
+    "question": "có bao nhiêu con voi đang đi trên một hàng ngang qua đất và nước",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_905",
+    "question": "có bao nhiêu người đi ngang qua một sân bóng chày trống",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_908",
+    "question": "bàn ghế ngồi ở đâu",
+    "prediction": "sân",
+    "answers": [
+      "sân vườn"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_910",
+    "question": "con mèo đang nằm ở đâu",
+    "prediction": "cái hộc",
+    "answers": [
+      "ngăn kéo"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_911",
+    "question": "có bao nhiêu con hươu cao cổ thấp cổ trong một cánh đồng cỏ bao quanh",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_912",
+    "question": "bốn bánh rán còn lại nằm ở đâu",
+    "prediction": "hộp",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_914",
+    "question": "có bao nhiêu đứa trẻ trong bộ quần áo tuyết lướt chậm trên đường trượt tuyết",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_915",
+    "question": "có bao nhiêu phụ nữ đóng gói các hộp bánh rán khác nhau",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_918",
+    "question": "người phụ nữ mang thai đang chụp một bức ảnh bụng của cô ấy ở đâu",
+    "prediction": "gương",
+    "answers": [
+      "gương"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_919",
+    "question": "cậu bé đang đánh răng ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_921",
+    "question": "cái gì ở đây đang lê bước trong sở thú",
+    "prediction": "ngựa vằn",
+    "answers": [
+      "ngựa vằn"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_923",
+    "question": "bàn chân ai đó đang đặt cạnh đâu",
+    "prediction": "cái túi",
+    "answers": [
+      "cái túi"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_924",
+    "question": "có bao nhiêu đối thủ trên sân quần vợt cũng như người lấy bóng và trọng tài biên",
+    "prediction": "một",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_925",
+    "question": "hai người đông người ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_926",
+    "question": "một số con hotdog đang nướng ở đâu",
+    "prediction": "bảo tàng",
+    "answers": [
+      "chảo"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_927",
+    "question": "một số động vật đứng ở đâu",
+    "prediction": "chuồng",
+    "answers": [
+      "chuồng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_930",
+    "question": "cậu bé đang đi đâu",
+    "prediction": "sân vận động",
+    "answers": [
+      "lồng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_931",
+    "question": "màu của bầu trời là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_932",
+    "question": "có bao nhiêu người đàn ông đang làm khuôn mặt buồn cười trong khi một người đàn ông khác cười",
+    "prediction": "một",
+    "answers": [
+      "một"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_934",
+    "question": "người mặc áo khoác xanh và đội mũ cầm gì",
+    "prediction": "gậy",
+    "answers": [
+      "gậy"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_935",
+    "question": "người phụ nữ đang ngồi ở đâu",
+    "prediction": "bồn tắm",
+    "answers": [
+      "bồn tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_936",
+    "question": "cặp vợ chồng ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_937",
+    "question": "những gì đang ăn cỏ trên dốc",
+    "prediction": "con dê",
+    "answers": [
+      "con dê"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_938",
+    "question": "phòng tắm được thấyị ở đâu",
+    "prediction": "gương",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_940",
+    "question": "người duy nhất trên ván trượt, trượt tuyết qua những gì",
+    "prediction": "cây",
+    "answers": [
+      "cây"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_941",
+    "question": "màu của chiếc tàu là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_942",
+    "question": "màu sắc của bức ảnh là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_945",
+    "question": "người phụ nữ đang chuẩn bị thức ăn ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_946",
+    "question": "cái gì đây đang giữ một cái bánh sandwich hai tầng",
+    "prediction": "đĩa ăn",
+    "answers": [
+      "đĩa ăn"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_950",
+    "question": "người đàn ông tự chụp ảnh của mình ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_951",
+    "question": "những ngăn kéo tủ mở ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_952",
+    "question": "màu của bề mặt là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_954",
+    "question": "cái muỗng ở đâu",
+    "prediction": "lọ cắm hoa",
+    "answers": [
+      "cái lọ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_955",
+    "question": "có bao nhiêu đầu bếp đang chuẩn bị bữa tối cho nhà hàng",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_959",
+    "question": "những gì cuộn tròn thân cây của nó trong một bao vây có rào chắn",
+    "prediction": "con voi",
+    "answers": [
+      "con voi"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_967",
+    "question": "zebras có bao nhiêu bức tượng tại một cuộc triển lãm",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_968",
+    "question": "màu của con mèo là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_970",
+    "question": "màu của con chó là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_972",
+    "question": "màu của con mèo là gì",
+    "prediction": "màu xám",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_973",
+    "question": "lối đi trong vách tắm kính ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_974",
+    "question": "một số loại trái cây khác nhau nằm ở đâu",
+    "prediction": "cái nồi",
+    "answers": [
+      "bát"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_975",
+    "question": "màu của lửa là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_976",
+    "question": "màu của chăn là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_980",
+    "question": "cái gì đang ngủ trưa trên giường",
+    "prediction": "con mèo",
+    "answers": [
+      "con mèo"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_982",
+    "question": "những gì chứa đầy bó hoa tulip",
+    "prediction": "lọ cắm hoa",
+    "answers": [
+      "lọ cắm hoa"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_983",
+    "question": "có bao nhiêu người trượt tuyết đang đi xuyên quốc gia theo hướng ngược lại",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_984",
+    "question": "những gì ngồi bên cạnh chiếc bánh pizza lớn đứng đầu với chip tortilla",
+    "prediction": "pizza",
+    "answers": [
+      "pizza"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_985",
+    "question": "màu của lửa là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_986",
+    "question": "màu của bộ đồ là gì",
+    "prediction": "màu tía",
+    "answers": [
+      "màu tía"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_987",
+    "question": "pizza chứa ở đâu",
+    "prediction": "đĩa ăn",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_991",
+    "question": "người đang chụp ảnh con chó ở đâu",
+    "prediction": "xe ô tô",
+    "answers": [
+      "xe ô tô"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_992",
+    "question": "có bao nhiêu chai than vãn giữa máy nướng bánh mì và máy xay sinh tố",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_995",
+    "question": "người đàn ông mặc gì trong khi giữ điện thoại của mình",
+    "prediction": "mặt nạ",
+    "answers": [
+      "mặt nạ"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_997",
+    "question": "màu của vẹt là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_998",
+    "question": "cái gì đang nhìn qua một hàng rào kim loại lớn",
+    "prediction": "hươu cao cổ",
+    "answers": [
+      "hươu cao cổ"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1000",
+    "question": "cô gái nhỏ đang ném một chiếc dĩa nhựa đỏ ở đâu",
+    "prediction": "sân",
+    "answers": [
+      "đường phố"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1002",
+    "question": "những gì đang nằm trên mặt đất",
+    "prediction": "hươu cao cổ",
+    "answers": [
+      "hươu cao cổ"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1005",
+    "question": "những gì rất tối, chuỗi để xả bồn cầu nằm trên tường",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1006",
+    "question": "có bao nhiêu lát bánh pizza phô mai với một cái nĩa và một con dao",
+    "prediction": "năm",
+    "answers": [
+      "tám"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1007",
+    "question": "màu của gấu là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1008",
+    "question": "hai người đàn ông cố định tóc ở đâu",
+    "prediction": "gương",
+    "answers": [
+      "gương"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1009",
+    "question": "các loại thảo mộc đã sắp xếp ở đâu",
+    "prediction": "đĩa ăn",
+    "answers": [
+      "đĩa ăn"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1010",
+    "question": "những gì đang tìm kiếm các cửa sổ đối diện của một khung cửa",
+    "prediction": "con chó",
+    "answers": [
+      "con chó"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1011",
+    "question": "có bao nhiêu con ngựa vằn trong sở thú đang đi dạo trên trái đất chật cứng",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1013",
+    "question": "đoàn tàu dừng ở đâu",
+    "prediction": "trạm",
+    "answers": [
+      "trạm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1014",
+    "question": "người đàn ông và hai phụ nữ ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1015",
+    "question": "có bao nhiêu ngọn nến thắp sáng trên chiếc bánh sinh nhật tự làm",
+    "prediction": "bốn",
+    "answers": [
+      "năm"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1016",
+    "question": "có bao nhiêu chiếc bánh quy đang nguội trên khay bên cạnh chuối",
+    "prediction": "năm",
+    "answers": [
+      "tám"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1020",
+    "question": "màu của bánh là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1021",
+    "question": "có bao nhiêu con hươu cao cổ đang đứng cạnh nhau gần một số cây",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1022",
+    "question": "khung cảnh cho thấy mọi người ở đâu",
+    "prediction": "đường phố",
+    "answers": [
+      "đường phố"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1023",
+    "question": "những gì đang ngồi cạnh nhau",
+    "prediction": "máy vi tính",
+    "answers": [
+      "laptop"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1025",
+    "question": "màu sắc của những thứ",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1026",
+    "question": "máy bay đang ở đâu",
+    "prediction": "sân bay",
+    "answers": [
+      "sân vận động"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1027",
+    "question": "mèo con đang chơi ở đâu",
+    "prediction": "gương",
+    "answers": [
+      "gương"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1028",
+    "question": "con chó và hai người đi xe đạp đi qua một chiếc ghế dài ở đâu",
+    "prediction": "đường phố",
+    "answers": [
+      "đường phố"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1030",
+    "question": "có bao nhiêu con hươu cao cổ đứng trên cây và chải lông khi chúng kiếm ăn",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1035",
+    "question": "có bao nhiêu con ngựa vằn đang đi trên đường",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1036",
+    "question": "màu của con chó là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1040",
+    "question": "màu của chiếc ô là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1043",
+    "question": "màu của sườn đồi là gì",
+    "prediction": "màu xanh lá",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1045",
+    "question": "người phụ nữ và người đàn ông đứng ở đâu khi chơi trò chơi video",
+    "prediction": "phòng",
+    "answers": [
+      "nhà ở"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1046",
+    "question": "có bao nhiêu con hươu cao cổ đang ở trong chuồng của chúng một bức tường cỏ và cây",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1047",
+    "question": "màu của điện thoại là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1048",
+    "question": "mèo con đang ngồi ở đâu",
+    "prediction": "cái ghế",
+    "answers": [
+      "cái ghế"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1050",
+    "question": "những gì chứa đầy những sinh viên buộc trên máy tính",
+    "prediction": "lớp học",
+    "answers": [
+      "lớp học"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1051",
+    "question": "màu của gạo là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1052",
+    "question": "những con mèo đang chơi xung quanh vali ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1053",
+    "question": "bộ hành lý nằm ở đâu",
+    "prediction": "tòa nhà",
+    "answers": [
+      "bánh xe"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1054",
+    "question": "hai người đi xe buýt lớn màu đỏ bao quanh",
+    "prediction": "xe đạp",
+    "answers": [
+      "xe tay ga"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1056",
+    "question": "màu của dấu hiệu là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1059",
+    "question": "hình ảnh của một con chó được phản chiếu ở đâu",
+    "prediction": "gương",
+    "answers": [
+      "gương"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1060",
+    "question": "con vật nhồi bông ở đâu",
+    "prediction": "đĩa ăn",
+    "answers": [
+      "hộp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1063",
+    "question": "có bao nhiêu cậu bé trong một đội bóng nhỏ đang tạo dáng chụp ảnh",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1064",
+    "question": "màu tóc là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1065",
+    "question": "người phụ nữ đứng ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1066",
+    "question": "có bao nhiêu con chó đang ngồi trên các tầng của một khu vườn trống",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1068",
+    "question": "màu của sương mù là gì",
+    "prediction": "màu xám",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1069",
+    "question": "màu của thuyền buồm là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1070",
+    "question": "người phụ nữ đang nhìn ở đâu khi cô ấy đánh răng",
+    "prediction": "gương",
+    "answers": [
+      "gương"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1072",
+    "question": "màu của con mèo là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1074",
+    "question": "người đàn ông đứng ở đâu gần một quầy có thức ăn xếp chồng lên nhau",
+    "prediction": "lò vi sóng",
+    "answers": [
+      "tạp dề"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1075",
+    "question": "người phụ nữ tóc đỏ xinh đẹp chuẩn bị thức ăn ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1076",
+    "question": "có bao nhiêu cô gái mặc áo sơ mi xanh lá chanh đang dựa vào một chiếc máy bay động cơ nhỏ",
+    "prediction": "hai",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1077",
+    "question": "những gì gần đĩa thức ăn và đồ uống",
+    "prediction": "máy vi tính",
+    "answers": [
+      "laptop"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1080",
+    "question": "cái gì đã đậu trong bãi đậu xe với một chiếc mũ bảo hiểm trên ghế",
+    "prediction": "xe máy",
+    "answers": [
+      "xe máy"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1081",
+    "question": "những gì xếp hàng trong hàng bên cạnh máy tính xách tay",
+    "prediction": "chuối",
+    "answers": [
+      "chuối"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1082",
+    "question": "có bao nhiêu con bò đang gặm cỏ trước khách sạn",
+    "prediction": "năm",
+    "answers": [
+      "năm"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1083",
+    "question": "màu của con mèo là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1087",
+    "question": "có bao nhiêu con hươu cao cổ đang ăn lá bị treo ở một khu đất trống",
+    "prediction": "ba",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1090",
+    "question": "màu của con chó là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1091",
+    "question": "màu của áo len là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xám"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1093",
+    "question": "tivi phát ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1094",
+    "question": "người phụ nữ với một chiếc ô đang ngồi ở đâu",
+    "prediction": "cái ghế",
+    "answers": [
+      "cái ghế"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1095",
+    "question": "màu sắc của bông hoa là gì",
+    "prediction": "màu tía",
+    "answers": [
+      "màu tía"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1096",
+    "question": "có bao nhiêu con ngựa bên cạnh vùng nước sau hàng rào",
+    "prediction": "bốn",
+    "answers": [
+      "năm"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1098",
+    "question": "có bao nhiêu người lướt sóng đi bộ xa nhau trên bờ biển",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1101",
+    "question": "màu của chăn là gì",
+    "prediction": "màu tía",
+    "answers": [
+      "màu tía"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1104",
+    "question": "người phụ nữ đánh giá ô dù vẽ tay ở đâu",
+    "prediction": "cửa tiệm",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1105",
+    "question": "màu của khu vực là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu xanh lá"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1106",
+    "question": "màu của cây là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1107",
+    "question": "người cho thấy những gì mang chai của nó",
+    "prediction": "gấu trúc",
+    "answers": [
+      "gấu trúc"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1108",
+    "question": "con thỏ ngồi ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1109",
+    "question": "người đàn ông đang cưỡi gì trên mặt nước của đại dương",
+    "prediction": "ván lướt sóng",
+    "answers": [
+      "ván lướt sóng"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1110",
+    "question": "ghế sofa da màu đen được sắp xếp ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1112",
+    "question": "màu sắc của giày là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1114",
+    "question": "những gì đi bộ ở rìa của nước",
+    "prediction": "con bò",
+    "answers": [
+      "con bò"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1115",
+    "question": "cậu bé bắt bóng khéo léo ở đâu",
+    "prediction": "sân vận động",
+    "answers": [
+      "găng tay"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1116",
+    "question": "màu của áo khoác là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1118",
+    "question": "có bao nhiêu băng ghế được căn chỉnh trong một hàng vào lúc hoàng hôn",
+    "prediction": "ba",
+    "answers": [
+      "năm"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1119",
+    "question": "màu của xe là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1121",
+    "question": "có bao nhiêu con hươu cao cổ trong một cái chuồng có cỏ và hàng rào",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1122",
+    "question": "màu của bông hoa là gì",
+    "prediction": "màu tía",
+    "answers": [
+      "màu tía"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1129",
+    "question": "màu của mũ bảo hiểm là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1130",
+    "question": "có bao nhiêu người đứng bên ngoài bên cạnh một chiếc xe tải lớn",
+    "prediction": "ba",
+    "answers": [
+      "hai"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1131",
+    "question": "hai người đang ở đâu",
+    "prediction": "phòng ngủ",
+    "answers": [
+      "phòng ngủ"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1133",
+    "question": "người đàn ông đang ăn gì trong khi sử dụng máy tính trong áo choàng tắm của mình",
+    "prediction": "donut",
+    "answers": [
+      "donut"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1135",
+    "question": "con mèo đen nhỏ đang ngồi ở đâu",
+    "prediction": "vali",
+    "answers": [
+      "cái túi"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1137",
+    "question": "nhà vệ sinh trắng ở đâu",
+    "prediction": "phòng tắm",
+    "answers": [
+      "phòng tắm"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1139",
+    "question": "trên bàn có bao nhiêu chiếc bánh nướng trên các đĩa riêng biệt",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1140",
+    "question": "con mèo đen đang ngồi ở đâu",
+    "prediction": "vali",
+    "answers": [
+      "vali"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1141",
+    "question": "màu sắc của bông hoa là gì",
+    "prediction": "màu trắng",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1142",
+    "question": "màu của mặt phẳng là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1144",
+    "question": "những gì làm cho tất cả mọi người đói và hung hăng",
+    "prediction": "donut",
+    "answers": [
+      "donut"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1145",
+    "question": "màu của bông hoa là gì",
+    "prediction": "màu tía",
+    "answers": [
+      "màu tía"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1146",
+    "question": "một quả táo một quả quýt đồ uống gì và các mặt hàng thực phẩm khác",
+    "prediction": "cà chua",
+    "answers": [
+      "cà rốt"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1147",
+    "question": "con mèo ngồi ở đâu",
+    "prediction": "bát",
+    "answers": [
+      "tách"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1148",
+    "question": "thủy tinh trong suốt màu xanh như vật thể tròn ở đâu",
+    "prediction": "lọ cắm hoa",
+    "answers": [
+      "kho"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1153",
+    "question": "những gì đỗ trái ngược với một số người khác",
+    "prediction": "xe máy",
+    "answers": [
+      "xe máy"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1154",
+    "question": "người đàn ông đang giữ cái gì ở phía trước hàng rào",
+    "prediction": "gậy",
+    "answers": [
+      "gậy"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1156",
+    "question": "đồng hồ lớn treo ở đâu",
+    "prediction": "tòa tháp",
+    "answers": [
+      "tòa nhà"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1158",
+    "question": "có bao nhiêu người trượt tuyết thu thập nguồn cung cấp bên cạnh một chiếc xe trượt tuyết",
+    "prediction": "bốn",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1159",
+    "question": "những gì đặt trước một tách cà phê",
+    "prediction": "gấu",
+    "answers": [
+      "gấu"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1162",
+    "question": "bông hoa rực rỡ treo ở đâu",
+    "prediction": "lọ cắm hoa",
+    "answers": [
+      "lọ cắm hoa"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1165",
+    "question": "màu của chiếc ô là gì",
+    "prediction": "màu tía",
+    "answers": [
+      "màu tía"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1168",
+    "question": "màu sắc của người đàn ông là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu trắng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1169",
+    "question": "màu của ghế sofa là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1170",
+    "question": "hai con ngựa vằn vây quanh đi dạo ở đâu",
+    "prediction": "chuồng",
+    "answers": [
+      "vườn bách thú"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1171",
+    "question": "các món ăn đang được xem ở đâu",
+    "prediction": "chậu",
+    "answers": [
+      "chậu"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1173",
+    "question": "màu của chiếc tàu là gì",
+    "prediction": "màu đỏ",
+    "answers": [
+      "màu đỏ"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1174",
+    "question": "người đàn ông hói đầu đưa cho đâu",
+    "prediction": "tay",
+    "answers": [
+      "sân bay"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1175",
+    "question": "có bao nhiêu người đang ngồi vào bàn với máy tính xách tay và ly nước giải khát",
+    "prediction": "bốn",
+    "answers": [
+      "bốn"
+    ],
+    "question_type": "number"
+  },
+  {
+    "question_id": "val_1176",
+    "question": "người đàn ông đang chơi đàn ở đâu",
+    "prediction": "phòng bếp",
+    "answers": [
+      "phòng bếp"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1178",
+    "question": "em bé ngồi ở đâu",
+    "prediction": "cái ghế",
+    "answers": [
+      "cái ghế"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1179",
+    "question": "màu của cây là gì",
+    "prediction": "màu tía",
+    "answers": [
+      "màu tía"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1180",
+    "question": "màu của động vật là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1182",
+    "question": "những gì được hiển thị với máy tính và một cái ghế",
+    "prediction": "cái bàn",
+    "answers": [
+      "cái bàn"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1183",
+    "question": "những gì nằm với nhau trong cánh đồng nắng",
+    "prediction": "hươu cao cổ",
+    "answers": [
+      "hươu cao cổ"
+    ],
+    "question_type": "object"
+  },
+  {
+    "question_id": "val_1186",
+    "question": "màu sắc của những con chim là gì",
+    "prediction": "màu đen",
+    "answers": [
+      "màu đen"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1187",
+    "question": "màu của băng là gì",
+    "prediction": "màu vàng",
+    "answers": [
+      "màu vàng"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1189",
+    "question": "màu của màn hình là gì",
+    "prediction": "màu xanh dương",
+    "answers": [
+      "màu xanh dương"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1191",
+    "question": "người đàn ông đang chơi trò chơi video ở đâu",
+    "prediction": "phòng",
+    "answers": [
+      "phòng"
+    ],
+    "question_type": "location"
+  },
+  {
+    "question_id": "val_1193",
+    "question": "màu của con ngựa là gì",
+    "prediction": "màu nâu",
+    "answers": [
+      "màu nâu"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1197",
+    "question": "màu của máy kéo là gì",
+    "prediction": "màu cam",
+    "answers": [
+      "màu cam"
+    ],
+    "question_type": "color"
+  },
+  {
+    "question_id": "val_1199",
+    "question": "có bao nhiêu con voi đi bộ dọc theo con đường lát đá",
+    "prediction": "ba",
+    "answers": [
+      "ba"
+    ],
+    "question_type": "number"
+  }
+]

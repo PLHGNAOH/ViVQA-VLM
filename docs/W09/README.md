@@ -29,7 +29,7 @@ Giới hạn 1 và 3 quyết định độ tin cậy của đóng góp chính �
 | 4b | OCR phần ảnh full test còn thiếu (≈ 1.867 ảnh) — notebook 10 **Phần C** | ≈ 0,5–1 h T4 | ✅ 16/10 — +1867 ảnh, lỗi 0, device gpu; phần cache cũ giữ nguyên (kiểm lại độc lập từ Drive); biên bản `experiments/W09_ocr_cache_fulltest/` |
 | 4c | **Full test 10.028 câu:** B3 và B2-sub seed 42 — notebook 15 Phần B | ≈ 5,7 h L4 | ✅ 16/10 — **TÁI LẬP TRÊN FULL TEST** (B2-sub → B3: +2,54 điểm EM, p = 1,1 × 10⁻¹⁴); B3 vượt ViTextBLIP-2 (EM, F1) |
 | 5 | **Review 2:** thêm Part 06 (phương pháp OCR + kết quả B3 + độ ổn định seed) vào slide `docs/W07/ViVQA-VLM_Review2_*.pptx`, sửa slide "Plan", cập nhật script thuyết trình | — | ⏳ trước 19/10 |
-| 6 | QLoRA ViVQA lịch 2 epoch, **chọn epoch trên val sạch** (dời từ W8) — notebook `16_qlora_vivqa_2epoch_select_qwen25vl.ipynb` | ≈ 7–7,5 h L4 | ⏳ chạy qua đêm 16→17/10 |
+| 6 | QLoRA ViVQA lịch 2 epoch, **chọn epoch trên val sạch** (dời từ W8) — notebook `16_qlora_vivqa_2epoch_select_qwen25vl.ipynb` | ≈ 7–7,5 h L4 | ✅ 17/10 — chọn **C3** (2 epoch) trên val sạch 688 câu; test EM 0,7378 → 0,7664 (+2,86 điểm, p = 4,6 × 10⁻⁹) → **CẢI THIỆN** |
 | 7 | Sau buổi Review 2: checklist AI_Capstone_Review123 (sheet Review2), gửi mail, upload Drive | — | ⏳ |
 | 8 | Đóng tuần: `W09_Team_Report.md` | — | ⏳ |
 
