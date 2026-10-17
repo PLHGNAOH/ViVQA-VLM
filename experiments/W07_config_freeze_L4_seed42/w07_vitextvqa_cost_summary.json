@@ -1,0 +1,48 @@
+{
+  "hardware": {
+    "gpu": "NVIDIA L4",
+    "compute_capability": "sm_89",
+    "bf16_native": true,
+    "bf16_supported_torch": true,
+    "vram_gb": 22.0,
+    "torch": "2.11.0+cu130",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+  },
+  "dtype": "bfloat16",
+  "pixel_stats_train_n500_seed42": [
+    {
+      "dataset": "vivqa",
+      "n": 500,
+      "median_px": 273280,
+      "pct_over_512tok": 1.0,
+      "pct_over_1280tok": 0.0
+    },
+    {
+      "dataset": "vitextvqa_official",
+      "n": 500,
+      "median_px": 480000,
+      "pct_over_512tok": 56.2,
+      "pct_over_1280tok": 27.6
+    }
+  ],
+  "smoke_train_vitextvqa": [
+    {
+      "max_tokens": 512,
+      "sec_per_step": 18.183,
+      "peak_vram_gb": 6.71,
+      "final_loss": 0.8814,
+      "hours_per_epoch": 11.1
+    },
+    {
+      "max_tokens": 1280,
+      "sec_per_step": 34.768,
+      "peak_vram_gb": 10.84,
+      "final_loss": 0.7765,
+      "hours_per_epoch": 21.23
+    }
+  ],
+  "rule": "chọn 1280 nếu sec_per_step(1280)/sec_per_step(512) <= 1.5",
+  "train_ratio_1280_vs_512": 1.912115712478689,
+  "verdict": "CHỌN 512 token: train ViTextVQA chậm 1.91× > 1.5× (1.280 để làm ablation)",
+  "infer_ratio_1280_vs_512_probe73": 1.1581740976645436
+}

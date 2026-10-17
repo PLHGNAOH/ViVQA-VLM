@@ -1,0 +1,87 @@
+{
+  "what": "B1 = baseline chính thức (zero-shot) Qwen2.5-VL-3B-Instruct; mốc so sánh cho B2 và mọi ablation",
+  "conditions": {
+    "torch_dtype": "bfloat16",
+    "quantization": "4-bit NF4 + double quant, compute bf16",
+    "max_pixels": 401408,
+    "decoding": "greedy",
+    "seed": 42,
+    "gpu": "NVIDIA L4",
+    "test_locked_since_commit": "37da80a"
+  },
+  "runs": {
+    "vivqa": "W07_B1_zeroshot_qwen25vl_vivqa_test_bf16_L4_seed42",
+    "vitextvqa2000": "W07_B1_zeroshot_qwen25vl_vitextvqa_test2000_bf16_L4_seed42"
+  },
+  "table1_b1": [
+    {
+      "run": "vivqa",
+      "n": 3001,
+      "EM": 0.22092635788070644,
+      "VQA-Acc": 0.22092635788070644,
+      "ANLS": 0.28605205920218557,
+      "token-F1 (phụ)": 0.3805318993254651,
+      "câu hỏng": 0,
+      "s/câu": 0.51,
+      "phút": 25.5,
+      "GPU": "['NVIDIA L4']",
+      "dtype": "bfloat16",
+      "max_pixels": 401408,
+      "commit": "c96e3f3"
+    },
+    {
+      "run": "vitextvqa2000",
+      "n": 2000,
+      "EM": 0.288,
+      "VQA-Acc": 0.288,
+      "ANLS": 0.47526612806793894,
+      "token-F1 (phụ)": 0.5376551062892471,
+      "câu hỏng": 0,
+      "s/câu": 0.862,
+      "phút": 28.7,
+      "GPU": "['NVIDIA L4']",
+      "dtype": "bfloat16",
+      "max_pixels": 401408,
+      "commit": "c96e3f3"
+    }
+  ],
+  "table2_b0_vs_b1_reference_only": [
+    {
+      "tập": "vivqa",
+      "run": "B0 fp16 T4 (W05)",
+      "n chung": 3001,
+      "EM": 0.22459180273242252,
+      "ANLS": 0.28758412797017574,
+      "token-F1 (tính lại)": 0.3810992229561194,
+      "câu hỏng": 0
+    },
+    {
+      "tập": "vivqa",
+      "run": "B1 bf16 L4 (W07)",
+      "n chung": 3001,
+      "EM": 0.22092635788070644,
+      "ANLS": 0.28605205920218557,
+      "token-F1 (tính lại)": 0.38053189932546727,
+      "câu hỏng": 0
+    },
+    {
+      "tập": "vitextvqa2000",
+      "run": "B0 fp16 T4 (W05)",
+      "n chung": 2000,
+      "EM": 0.285,
+      "ANLS": 0.4675767714937958,
+      "token-F1 (tính lại)": 0.5302856025450131,
+      "câu hỏng": 23
+    },
+    {
+      "tập": "vitextvqa2000",
+      "run": "B1 bf16 L4 (W07)",
+      "n chung": 2000,
+      "EM": 0.288,
+      "ANLS": 0.47526612806793894,
+      "token-F1 (tính lại)": 0.5376551062892484,
+      "câu hỏng": 0
+    }
+  ],
+  "note": "B0 (W05, fp16, T4) không so sánh trực tiếp được: fp16 tràn số; bảng 2 chỉ để giải thích lý do chạy lại."
+}
