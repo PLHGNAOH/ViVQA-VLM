@@ -28,10 +28,10 @@ Giới hạn 1 và 3 quyết định độ tin cậy của đóng góp chính �
 | 4a | **Ô 2×2:** B2-sub seed 42 eval **có OCR** lúc test (test2000) → đủ bảng OCR lúc train × OCR lúc test — notebook `15_ocr_factorial_fulltest_qwen25vl.ipynb` Phần A | ≈ 40 phút L4 | ✅ 16/10 — **TƯƠNG TÁC: CẦN OCR Ở CẢ TRAIN LẪN TEST** (K: +4,35 điểm EM, p = 2,2 × 10⁻⁸) |
 | 4b | OCR phần ảnh full test còn thiếu (≈ 1.867 ảnh) — notebook 10 **Phần C** | ≈ 0,5–1 h T4 | ✅ 16/10 — +1867 ảnh, lỗi 0, device gpu; phần cache cũ giữ nguyên (kiểm lại độc lập từ Drive); biên bản `experiments/W09_ocr_cache_fulltest/` |
 | 4c | **Full test 10.028 câu:** B3 và B2-sub seed 42 — notebook 15 Phần B | ≈ 5,7 h L4 | ✅ 16/10 — **TÁI LẬP TRÊN FULL TEST** (B2-sub → B3: +2,54 điểm EM, p = 1,1 × 10⁻¹⁴); B3 vượt ViTextBLIP-2 (EM, F1) |
-| 5 | **Review 2:** thêm Part 06 (phương pháp OCR + kết quả B3 + độ ổn định seed) vào slide `docs/W07/ViVQA-VLM_Review2_*.pptx`, sửa slide "Plan", cập nhật script thuyết trình | — | ⏳ trước 19/10 |
+| 5 | **Review 2:** thêm Part 06 (phương pháp OCR + kết quả B3 + độ ổn định seed) vào slide `docs/W07/ViVQA-VLM_Review2_*.pptx`, sửa slide "Plan", cập nhật script thuyết trình | — | ✅ 17/10 — 20 slide (thêm 14–17, sửa 1, 2, 3, 13, 18, 19); script sinh từ ghi chú slide |
 | 6 | QLoRA ViVQA lịch 2 epoch, **chọn epoch trên val sạch** (dời từ W8) — notebook `16_qlora_vivqa_2epoch_select_qwen25vl.ipynb` | ≈ 7–7,5 h L4 | ✅ 17/10 — chọn **C3** (2 epoch) trên val sạch 688 câu; test EM 0,7378 → 0,7664 (+2,86 điểm, p = 4,6 × 10⁻⁹) → **CẢI THIỆN** |
 | 7 | Sau buổi Review 2: checklist AI_Capstone_Review123 (sheet Review2), gửi mail, upload Drive | — | ⏳ |
-| 8 | Đóng tuần: `W09_Team_Report.md` | — | ⏳ |
+| 8 | Đóng tuần: `W09_Team_Report.md` | — | ✅ 17/10 |
 
 ## Quyết định đã chốt
 
@@ -44,6 +44,8 @@ Giới hạn 1 và 3 quyết định độ tin cậy của đóng góp chính �
 | 15/10/2026 | `--seed` không truyền → seed của config (42) → **chữ ký các run W07/W08 không đổi** | Selftest `seed override OK` kiểm điều này; run cũ resume/tái lập được như trước |
 | 15/10/2026 | **Thêm ô 2×2** (B2-sub + OCR lúc test) | Phần A cho thấy B3 phụ thuộc OCR, nhưng chưa tách được "train cùng OCR" khỏi "có OCR lúc test" trên cùng tập con. Chỉ ≈ 1 CU |
 | 16/10/2026 | Notebook 15 thêm cell **tự trả máy** (`runtime.unassign()`) ở cuối | Notebook 14 xong lúc 1:37 nhưng máy L4 bị giữ tới khi Colab tự ngắt → tốn thêm ≈ 2–3 CU |
+| 17/10/2026 | **B2 ViVQA chính thức = C3** (QLoRA lịch 2 epoch, adapter sau epoch 2) thay cho B2 W07 (1 epoch) | Thắng theo luật chọn epoch ghi trước (val sạch) và cải thiện có ý nghĩa trên test (+2,86 EM). Số W07 vẫn giữ trong slide Review 2 (mốc W07) và báo cáo như lịch sử |
+| 17/10/2026 | Slide và báo cáo dùng **số full test** làm số chính cho B3; đính chính câu W08 "B3 ngang B2 full" | Full test là tập paper dùng; test2000 có sai số mẫu |
 | 15/10/2026 | **Full test chạy cả B3 lẫn B2-sub** (không chỉ B3) | So sánh chính B2-sub → B3 được lặp lại trên 10.028 câu (độ nhạy cao hơn test2000 ≈ 5 lần về số câu), cùng tập paper dùng để so ViTextBLIP-2. Thêm ≈ 2,8 h L4 ≈ 4 CU |
 
 ## Luật Phần A — B3 bỏ OCR lúc test (ghi TRƯỚC khi chạy, 15/10/2026)
@@ -245,8 +247,53 @@ ANLS mean ± std: B2-sub 0,6857 ± 0,0031 · B3 0,7011 ± 0,0024.
 
 \* B3 seed 43: runtime bị xoá giữa chừng (15/10 ≈ 15:30), chạy tiếp từ checkpoint-100 (trạng thái optimizer + lịch learning rate + RNG khôi phục theo checkpoint). Giờ train và loss cuối chỉ tính **phiên cuối** (step 101–500) → không so trực tiếp với các run khác. Chi phí một run trọn: B2-sub ≈ 2,7–2,8 h, B3 ≈ 3,0 h (+8% s/step, +1,4 GB VRAM).
 
+### QLoRA ViVQA — chọn epoch trên val sạch (17/10/2026, L4, bf16, 4-bit, seed 42)
+
+Nguồn: `../../experiments/W09_vivqa_epoch_select_L4_seed42/` (`epoch_select_summary.json`, `val_split_manifest.json`, 3 file `paired_*`, `stratified_B2W07_vs_C3_vivqa_test.json`) + train `W09_B2_qlora_r16_qwen25vl_vivqa_ep2_bf16_L4_seed42` + eval `W09_C{1,2,3}_eval_…_valclean_…`, `W09_C3_eval_…_test_…`.
+
+**Tập chọn epoch:** val 1.200 câu, trong đó 512 câu (43%) dùng chung ảnh với train → val sạch **688 câu / 660 ảnh** (≥ 300, dùng được).
+
+| Ứng viên | Step | EM val sạch | ANLS val sạch | So với C1 (chỉ C1 đúng / chỉ ứng viên đúng, p) |
+|---|---|---|---|---|
+| C1 · B2 W07 (lịch 1 epoch) | 675 | 0,7311 | 0,7476 | — |
+| C2 · lịch 2 epoch, sau epoch 1 | 675 | 0,7151 | 0,7317 | 30 / 19, p = 0,15 |
+| **C3 · lịch 2 epoch, sau epoch 2** | **1.350** | **0,7703** | **0,7832** | **11 / 38, p = 1,4 × 10⁻⁴** |
+
+**Chọn theo luật: C3** (EM cao nhất và hơn C1 có ý nghĩa). C2 thấp hơn C1 (không có ý nghĩa) — hợp lý vì sau epoch 1 của lịch 2 epoch, learning rate còn cao, chưa giảm hết.
+
+**Test 3.001 câu (chạm một lần):** B2 W07 0,7378 → **C3 0,7664** (+2,86 điểm EM; 65 / 151; p = 4,6 × 10⁻⁹); ANLS 0,7566 → 0,7803 (+0,0238, CI95 [+0,0147; +0,0330]) → **CẢI THIỆN**. Chi phí train 1.350 step × 16,2 s = 6,1 h L4 (gấp đôi), VRAM đỉnh 6,62 GB (không đổi).
+
+**Kiểm tra sau (post-hoc, không phải luật) — có phải do nhớ ảnh không?** `stratify_by_overlap.py`:
+
+| Tập con test | n | EM B2 W07 | EM C3 | ΔEM (CI95) | McNemar p |
+|---|---|---|---|---|---|
+| Tất cả | 3.001 | 0,7378 | 0,7664 | +0,029 [+0,020; +0,038] | 4,6 × 10⁻⁹ |
+| Ảnh đã thấy trong train | 1.356 | 0,7463 | 0,7751 | +0,029 [+0,015; +0,044] | 1,1 × 10⁻⁴ |
+| Ảnh chưa thấy | 1.645 | 0,7307 | 0,7593 | +0,029 [+0,016; +0,041] | 1,7 × 10⁻⁵ |
+| **Sạch** (ảnh và cặp hỏi–đáp chưa thấy) | **1.219** | **0,6907** | **0,7227** | **+0,032 [+0,016; +0,048]** | **1,5 × 10⁻⁴** |
+
+→ Mức tăng **đều** giữa ảnh đã thấy và chưa thấy, giữ nguyên trên tập sạch → **không phải do nhớ ảnh**. B2 ViVQA chính thức từ W09 = C3.
+
 ## Link experiment log
 
 - Phần A: `experiments/W09_B3_ocr_dependency_test2000_L4_seed42/` + eval `W09_B3noocr_eval_…_seed42`
 - Seed: `experiments/W09_B3_seed_stability_test2000_L4/` + train `W09_B2sub_qlora_…_seed{43,44}`, `W09_B3_qlora_ocr_…_seed{43,44}` + eval `W09_B2sub_eval_…`, `W09_B3_eval_…`
-- Adapter (không lên git, trên Drive): `adapters/W09_*_seed{43,44}/epoch_1`
+- Ô 2×2: `experiments/W09_ocr_factorial_2x2_test2000_L4_seed42/` + eval `W09_B2subocr_eval_…_seed42`
+- OCR full test: `experiments/W09_ocr_cache_fulltest/ocr_cache_manifest.json`
+- Full test: `experiments/W09_fulltest_B3_vs_B2sub_L4_seed42/` + eval `W09_B3_eval_…_testfull_…`, `W09_B2sub_eval_…_testfull_…`
+- ViVQA chọn epoch: `experiments/W09_vivqa_epoch_select_L4_seed42/` + train `W09_B2_qlora_r16_qwen25vl_vivqa_ep2_bf16_L4_seed42` + eval `W09_C{1,2,3}_eval_…_valclean_…`, `W09_C3_eval_…_test_…`
+- Adapter (không lên git, trên Drive): `adapters/W09_*_seed{43,44}/epoch_1`, `adapters/W09_B2_qlora_r16_qwen25vl_vivqa_ep2_bf16_L4_seed42/epoch_{1,2}`
+
+## Deliverables tuần này
+
+| File | Vai trò |
+|------|---------|
+| [W09_Team_Report.md](W09_Team_Report.md) | Báo cáo tuần: việc đã làm, số liệu chính, blocker, kế hoạch W10 |
+| README này | Quyết định, luật ghi trước, kết quả từng bước |
+| [../W07/ViVQA-VLM_Review2_EN.pptx](../W07/ViVQA-VLM_Review2_EN.pptx) | **Slide Review 2 cập nhật** (20 slide, thêm Part 06 · OCR-aware QLoRA) |
+| [../W07/ViVQA-VLM_Review2_TV.pptx](../W07/ViVQA-VLM_Review2_TV.pptx) | Bản tiếng Việt để đọc hiểu |
+| [../W07/ViVQA-VLM_Review2_Script.txt](../W07/ViVQA-VLM_Review2_Script.txt) | Kịch bản nói, sinh từ ghi chú slide |
+
+## Trạng thái
+
+✅ **Đóng tuần 17/10/2026** (trừ việc 7: checklist Review 2, làm sau buổi review). Kết quả chính: **QLoRA nhận biết OCR (B3) cải thiện ổn định** — 3/3 seed (+3,57 ± 0,76 EM), tái lập trên full test (+2,54 EM, p = 1,1 × 10⁻¹⁴), và **cần OCR ở cả train lẫn test** (tương tác +4,9 EM). H6 chỉ ủng hộ một phần (ANLS +1,55 < +3). B3 thấp hơn B2 dữ liệu đầy đủ 1,16 EM (đính chính W08). ViVQA: B2 chính thức đổi sang 2 epoch (test +2,86 EM, không do nhớ ảnh).

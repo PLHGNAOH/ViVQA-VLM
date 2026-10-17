@@ -1,11 +1,11 @@
 ViVQA-VLM — Review 2 — Kịch bản thuyết trình (nói tiếng Việt, slide tiếng Anh)
-Mỗi slide khoảng 1–1,5 phút; tổng khoảng 18–22 phút.
+Mỗi slide khoảng 1–1,5 phút; tổng khoảng 22–26 phút (20 slide; phần 06 là phương pháp đề xuất, nên dành nhiều thời gian nhất).
 
 [Slide 1] ViVQA-VLM
-Chào hội đồng. Nhóm trình bày Review 2: tái lập baseline Qwen2.5-VL-3B và kết quả cải tiến đầu tiên bằng QLoRA. Toàn bộ số liệu đều có log và có thể chạy lại.
+Chào hội đồng. Nhóm trình bày Review 2: tái lập baseline Qwen2.5-VL-3B, kết quả QLoRA, và phương pháp đề xuất là QLoRA nhận biết OCR. Toàn bộ số liệu đều có log và có thể chạy lại.
 
-[Slide 2] Three results of this milestone
-Ba con số cần nhớ. Một: pipeline đánh giá của nhóm tái lập đúng số công bố của Qwen2.5-VL-3B trên TextVQA (79,6 so với 79,3), nên các số tiếng Việt phía sau đáng tin. Hai: QLoRA chỉ train 0,2% tham số nhưng tăng EM rất mạnh trên cả hai bộ dữ liệu, có kiểm định thống kê. Ba: trên toàn bộ test ViTextVQA, B2 vượt SOTA của paper ViTextBLIP-2.
+[Slide 2] Four results of this milestone
+Bốn con số cần nhớ. Một: pipeline đánh giá của nhóm tái lập đúng số công bố của Qwen2.5-VL-3B trên TextVQA (79,6 so với 79,3), nên các số tiếng Việt phía sau đáng tin. Hai: QLoRA chỉ train 0,2% tham số nhưng tăng EM rất mạnh trên cả hai bộ dữ liệu, có kiểm định thống kê. Ba: trên toàn bộ test ViTextVQA, B2 vượt SOTA của paper ViTextBLIP-2. Bốn: phương pháp đề xuất, QLoRA nhận biết OCR, tăng thêm 2,5 điểm EM so với cùng QLoRA trên cùng dữ liệu, ổn định qua 3 seed và trên full test.
 
 [Slide 3] Advisor feedback (07/10) and what we did
 Sau buổi họp ngày 07/10, thầy Trí yêu cầu năm việc trước khi bàn cải tiến. Bảng này cho thấy mỗi yêu cầu được xử lý ở slide nào. Các góp ý của reviewer Review 1 đã được sửa trong bản báo cáo Review 1 và ghi trong checklist.
@@ -28,7 +28,7 @@ B1 là baseline zero-shot chính thức. Lỗi lớn nhất là định dạng: 
 [Slide 9] A larger model is not better here
 Table 7 của paper ViTextVQA có dòng QwenVL-7b đạt EM 28 trên 100 câu. Nhóm chạy Qwen2-VL-7B trong đúng điều kiện của baseline. Kết quả 7B kém 3B 12,6 điểm EM, p rất nhỏ, chậm hơn và tốn VRAM hơn. Nguyên nhân chính là 7B trả lời dài, trung bình 8,2 từ. Table 7 chỉ có 100 câu nên sai số khoảng ±9 điểm, không đủ để chọn giữa 3B và 7B. Vì vậy nhóm giữ Qwen2.5-VL-3B.
 
-[Slide 10] PART 05 · QLoRA (B2)
+[Slide 10] QLoRA, one epoch: large and significant gains
 B2 khác B1 đúng một biến: có adapter LoRA. Chỉ một epoch, EM ViVQA tăng từ 22 lên 74, ViTextVQA từ 29 lên 50 trên toàn bộ test. Cả hai đạt luật chốt trước: EM tăng và McNemar p nhỏ hơn 0,05. Chi phí rất thấp: 3 giờ train cho ViVQA, 12 giờ cho ViTextVQA, VRAM dưới 7 GB.
 
 [Slide 11] The gain is real, not leakage and not just format
@@ -37,14 +37,26 @@ Ba phép đối chứng. Một: ở ViVQA, trên phần test sạch chưa từng
 [Slide 12] Full ViTextVQA test: above the published SOTA
 Trên toàn bộ 10.028 câu test, B2 đạt EM 50,3 và F1 71,2, cao hơn ViTextBLIP-2 là SOTA của paper, với cận dưới khoảng tin cậy vẫn cao hơn số công bố. B1 zero-shot chỉ cao hơn về EM, còn F1 thì ngang. Chạy lại trên 2.000 câu chung cho kết quả trùng 100%. Giới hạn: paper không công bố cách chuẩn hoá đáp án.
 
-[Slide 13] What the evidence says so far
-Đối chiếu với các giả thuyết đã nêu ở Review 1. H1 được ủng hộ mạnh. H2 chỉ đạt một nửa: VRAM giảm nhiều nhưng độ chính xác giữ 94,5%, dưới mức 97%. H7 chưa được ủng hộ với dạng few-shot đã thử. H8: duyệt tay 200 lỗi của B2 cho thấy chỉ khoảng 7% là hallucination thật; nhưng H8 so sánh với zero-shot, nên cần đo thêm B1 ở tuần 11 — vì vậy vẫn để Đang chờ. H3 đến H6 thuộc kế hoạch W8 đến W12.
+[Slide 13] Where B2 still fails
+Phân loại tự động 4.988 câu B2 còn sai trên full test ViTextVQA. 9% chỉ sai dấu thanh, ví dụ thủy và thúy — đây là thách thức riêng của tiếng Việt. 17% chỉ lệch một hai ký tự, thường là đọc chữ hoặc số. Khoảng 27% sai về độ dài: thừa hoặc thiếu chữ so với gold. 47% còn lại sai về nội dung hoặc vùng ảnh. Nhóm đã duyệt tay 200 lỗi của B2 có xem ảnh, 4 người cùng nhãn gợi ý của AI, trưởng nhóm phân xử các chỗ lệch. Kết quả: 54% câu bị EM chấm sai thực ra đúng ý — EM quá khắt khe; 12,5% do gold nhiễu; ở ViTextVQA lỗi thật chủ yếu là đọc sai chữ 28% và đọc nhầm vùng chữ 23%; hallucination thật chỉ 7%. Chính các lỗi đọc chữ này dẫn tới phương pháp đề xuất ở phần sau. Độ đồng thuận giữa hai người gán nhãn độc lập kappa 0,62; bỏ 42 dòng có AI hỗ trợ thì kết luận không đổi.
 
-[Slide 14] Where B2 still fails
-Phân loại tự động 4.988 câu B2 còn sai trên full test ViTextVQA. 9% chỉ sai dấu thanh, ví dụ thủy và thúy — đây là thách thức riêng của tiếng Việt. 17% chỉ lệch một hai ký tự, thường là đọc chữ hoặc số. Khoảng 27% sai về độ dài: thừa hoặc thiếu chữ so với gold. 47% còn lại sai về nội dung hoặc vùng ảnh. Nhóm đã duyệt tay 200 lỗi của B2 có xem ảnh, 4 người cùng nhãn gợi ý của AI, trưởng nhóm phân xử các chỗ lệch. Kết quả: 54% câu bị EM chấm sai thực ra đúng ý — EM quá khắt khe; 12,5% do gold nhiễu; ở ViTextVQA lỗi thật chủ yếu là đọc sai chữ 28% và đọc nhầm vùng chữ 23%; hallucination thật chỉ 7%. Độ đồng thuận giữa hai người gán nhãn độc lập kappa 0,62; bỏ 42 dòng có AI hỗ trợ thì kết luận không đổi.
+[Slide 14] OCR-aware QLoRA: train the model to use OCR text
+Từ phân tích lỗi, nhóm đề xuất B3: QLoRA nhận biết OCR. Ảnh được chạy OCR trước — PaddleOCR dò vùng chữ, VietOCR đọc chữ tiếng Việt — rồi đúng một dòng 'Văn bản đọc được trong ảnh' được chèn trước câu hỏi. Điểm mấu chốt: dòng OCR có mặt cả lúc train lẫn lúc test, nên model học khi nào tin OCR, khi nào tin ảnh. Backend OCR được chọn trên dev300 bằng luật chốt trước: PaddleOCR bản Latin làm rơi dấu tiếng Việt, ví dụ 'Kiểu Thẩm' thành 'Kiu Thm'; VietOCR giữ được đáp án trong văn bản OCR ở 37,7% câu so với 27,0%.
 
-[Slide 15] Plan to Review 3 (week 13)
-Từ tuần 8 đến tuần 13: chạy QLoRA chính thức nhiều epoch và chọn epoch trên tập dev, thử làm sạch nhãn nhiễu, OCR-enhanced prompting cho ViTextVQA, ablation cấu hình LoRA, adapter dùng chung cho hai dataset, đo hallucination có hệ thống, rồi dựng prototype web cho Review 3.
+[Slide 15] OCR helps only when the model is trained with it
+Đây là ablation bắt buộc có và không có OCR, làm thành bảng hai nhân hai trên cùng tập con và cùng 2.000 câu test. Chỉ chèn OCR lúc test cho model chưa train cùng OCR: không tăng, kể cả với zero-shot B1 và B2 ở tuần 8. Train cùng OCR mà lúc test bỏ OCR: cũng không tăng. Chỉ khi có cả hai thì EM tăng 4,35 điểm, p cỡ 10 mũ trừ 8. Tương tác là 4,9 điểm, khoảng tin cậy 3,2 đến 6,6. Vậy đóng góp không phải là thêm OCR vào prompt, mà là dạy model cách dùng OCR.
 
-[Slide 16] Thank you
+[Slide 16] The gain holds across seeds and on the full test
+Hai câu hỏi hội đồng hay đặt: một seed có phải may mắn không, và tập con có đại diện không. Ba seed huấn luyện 42, 43, 44, cùng tập con: cả ba seed B3 đều thắng B2-sub có ý nghĩa, trung bình cộng 3,57 điểm EM, độ lệch chuẩn 0,76. Trên toàn bộ 10.028 câu test, B3 thắng B2-sub 2,54 điểm, p cỡ 10 mũ trừ 14, và cao hơn ViTextBLIP-2 ở cả EM lẫn F1. Nhóm cũng đính chính: B3 dùng 23% dữ liệu vẫn thấp hơn B2 train toàn bộ 1,16 điểm; OCR bù được khoảng 69% phần mất do cắt dữ liệu. Về ANLS, mức tăng là 1,55 điểm, dưới ngưỡng 3 điểm của H6.
+
+[Slide 17] ViVQA: a second epoch helps — chosen without touching test
+Với ViVQA, câu hỏi là train một hay hai epoch. Val của ViVQA được tách theo câu hỏi nên 43% câu val dùng chung ảnh với train; train lâu hơn dễ nhớ ảnh và làm val đẹp giả. Vì vậy nhóm chỉ chọn epoch trên 688 câu val có ảnh chưa từng xuất hiện trong train. Lịch hai epoch sau epoch 2 hơn B2 một epoch 3,9 điểm, có ý nghĩa, nên được chọn. Chỉ khi đó mới chấm test, một lần: EM tăng từ 73,8 lên 76,6, p cỡ 10 mũ trừ 9. Kiểm tra thêm sau khi có kết quả: trên phần test sạch, ảnh và cặp hỏi đáp chưa từng thấy, mức tăng vẫn là 3,2 điểm — nên đây không phải do model nhớ ảnh. Chi phí: gấp đôi thời gian train, 6,1 giờ.
+
+[Slide 18] What the evidence says so far
+Đối chiếu với các giả thuyết đã nêu ở Review 1. H1 được ủng hộ mạnh. H2 chỉ đạt một nửa: VRAM giảm nhiều nhưng độ chính xác giữ 94,5%, dưới mức 97%. H7 chưa được ủng hộ với dạng few-shot đã thử. H8: duyệt tay 200 lỗi của B2 cho thấy chỉ khoảng 7% là hallucination thật; nhưng H8 so sánh với zero-shot, nên cần đo thêm B1 ở tuần 11 — vì vậy vẫn để Đang chờ. H6 chỉ ủng hộ một phần: OCR cộng hưởng mạnh với QLoRA, nhưng ANLS chỉ tăng 1,55 điểm, dưới ngưỡng 3 điểm đã đặt — nhóm báo đúng như vậy. H3 đến H5 thuộc kế hoạch tuần 10 đến 12.
+
+[Slide 19] Plan to Review 3 (week 13)
+Từ tuần 10 đến tuần 13: train QLoRA nhận biết OCR trên toàn bộ dữ liệu ViTextVQA để xem có vượt B2 không, ablation rank và module gắn LoRA, adapter dùng chung cho hai dataset, đo hallucination có hệ thống kể cả B3, rồi dựng prototype web: tải ảnh, chạy OCR, hỏi bằng tiếng Việt — cho Review 3.
+
+[Slide 20] Thank you
 Cảm ơn hội đồng đã lắng nghe. Nhóm sẵn sàng trả lời câu hỏi.

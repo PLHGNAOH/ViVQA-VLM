@@ -1,6 +1,6 @@
 // Build ViVQA-VLM Review 2 deck (EN or VI). Usage (needs pptxgenjs + the pptx skill apply_theme.js via SKILL_DIR):
 //   SKILL_DIR=<pptx skill dir> node docs/W07/slides_src/build_review2.js en docs/W07/ViVQA-VLM_Review2_EN.pptx
-// Every number on the slides comes from experiments/ (W07 runs) — see notes per slide.
+// Every number on the slides comes from experiments/ (W07 runs; W09 update adds PART 06 OCR-aware QLoRA from W08–W09 runs) — see notes per slide.
 const pptxgen = require("pptxgenjs");
 const path = require("path");
 const { applyTheme } = require(process.env.SKILL_DIR + "/scripts/apply_theme.js");
@@ -73,8 +73,8 @@ function bullets(s, items, o) {
   const arr = items.map((it, i) => ({ text: it, options: { bullet: { indent: 14 }, breakLine: i < items.length - 1 } }));
   s.addText(arr, { isTextBox: true, margin: 0, fontFace: "Calibri", fontSize: 15, color: C.text1, valign: "top", paraSpaceAfter: 6, objectName: oid("list"), ...o });
 }
-function stat(s, x, y, w, big, label, color = C.text2) {
-  txt(s, big, { x, y, w, h: 0.9, fontFace: "Cambria", fontSize: 40, bold: true, color });
+function stat(s, x, y, w, big, label, color = C.text2, size = 40) {
+  txt(s, big, { x, y, w, h: 0.9, fontFace: "Cambria", fontSize: size, bold: true, color });
   txt(s, label, { x, y: y + 0.95, w, h: 0.9, fontSize: 14, color: C.text1 });
 }
 function fig(s, key, x, y, maxW, maxH) {
@@ -107,7 +107,7 @@ pres.addSection({ title: L("Opening", "Mở đầu") });
   s.addText([
     { text: "Efficient Vietnamese Visual Question Answering using Vision-Language Models", options: { fontSize: 20, breakLine: true } },
     { text: " ", options: { fontSize: 10, breakLine: true } },
-    { text: L("Review 2  ·  Baseline reproduction and first PEFT results", "Review 2  ·  Tái lập baseline và kết quả PEFT đầu tiên"), options: { fontSize: 18, bold: true, color: HEX.amber, breakLine: true } },
+    { text: L("Review 2  ·  Baseline, QLoRA and the proposed OCR-aware QLoRA", "Review 2  ·  Baseline, QLoRA và đề xuất QLoRA nhận biết OCR"), options: { fontSize: 18, bold: true, color: HEX.amber, breakLine: true } },
     { text: " ", options: { fontSize: 18, breakLine: true } },
     { text: L("Supervisors:  ", "GVHD:  "), options: { bold: true, fontSize: 15 } },
     { text: "Đặng Ngọc Minh Đức · Phạm Minh Trí", options: { fontSize: 15, breakLine: true } },
@@ -116,24 +116,25 @@ pres.addSection({ title: L("Opening", "Mở đầu") });
     { text: " ", options: { fontSize: 15, breakLine: true } },
     { text: L("Group GFA26AI35  ·  FPT University  ·  October 2026", "Nhóm GFA26AI35  ·  Đại học FPT  ·  Tháng 10/2026"), options: { fontSize: 13, color: "A8C4E0" } },
   ], { placeholder: "body" });
-  s.addNotes("Chào hội đồng. Nhóm trình bày Review 2: tái lập baseline Qwen2.5-VL-3B và kết quả cải tiến đầu tiên bằng QLoRA. Toàn bộ số liệu đều có log và có thể chạy lại.");
+  s.addNotes("Chào hội đồng. Nhóm trình bày Review 2: tái lập baseline Qwen2.5-VL-3B, kết quả QLoRA, và phương pháp đề xuất là QLoRA nhận biết OCR. Toàn bộ số liệu đều có log và có thể chạy lại.");
 }
 
 // 2. Summary
 pres.addSection({ title: L("Summary", "Tóm tắt") });
 {
-  const s = content(L("Summary", "Tóm tắt"), L("SUMMARY", "TÓM TẮT"), L("Three results of this milestone", "Ba kết quả chính của mốc này"),
-    "Ba con số cần nhớ. Một: pipeline đánh giá của nhóm tái lập đúng số công bố của Qwen2.5-VL-3B trên TextVQA (79,6 so với 79,3), nên các số tiếng Việt phía sau đáng tin. Hai: QLoRA chỉ train 0,2% tham số nhưng tăng EM rất mạnh trên cả hai bộ dữ liệu, có kiểm định thống kê. Ba: trên toàn bộ test ViTextVQA, B2 vượt SOTA của paper ViTextBLIP-2.");
-  const cw = (CW - 2 * 0.4) / 3, y = 1.75, h = 2.9;
+  const s = content(L("Summary", "Tóm tắt"), L("SUMMARY", "TÓM TẮT"), L("Four results of this milestone", "Bốn kết quả chính của mốc này"),
+    "Bốn con số cần nhớ. Một: pipeline đánh giá của nhóm tái lập đúng số công bố của Qwen2.5-VL-3B trên TextVQA (79,6 so với 79,3), nên các số tiếng Việt phía sau đáng tin. Hai: QLoRA chỉ train 0,2% tham số nhưng tăng EM rất mạnh trên cả hai bộ dữ liệu, có kiểm định thống kê. Ba: trên toàn bộ test ViTextVQA, B2 vượt SOTA của paper ViTextBLIP-2. Bốn: phương pháp đề xuất, QLoRA nhận biết OCR, tăng thêm 2,5 điểm EM so với cùng QLoRA trên cùng dữ liệu, ổn định qua 3 seed và trên full test.");
+  const cw = (CW - 3 * 0.35) / 4, y = 1.75, h = 2.9;
   const items = [
     ["79.6", L("Pipeline check — TextVQA val, Qwen2.5-VL-3B; the official report gives 79.3", "Kiểm chứng pipeline — TextVQA val, Qwen2.5-VL-3B; báo cáo chính thức ghi 79,3"), C.accent1],
-    ["+21.1 EM", L("QLoRA over zero-shot on the full ViTextVQA test (+51.7 EM on ViVQA); McNemar p ≈ 0", "QLoRA so với zero-shot trên full test ViTextVQA (+51,7 EM trên ViVQA); McNemar p ≈ 0"), C.accent2],
-    ["50.3 vs 25.5", L("EM on the full ViTextVQA test vs the published SOTA ViTextBLIP-2", "EM trên full test ViTextVQA so với SOTA công bố ViTextBLIP-2"), C.text2],
+    ["+21.1", L("EM from QLoRA over zero-shot, full ViTextVQA test (+51.7 on ViVQA); p ≈ 0", "EM nhờ QLoRA so với zero-shot, full test ViTextVQA (+51,7 ở ViVQA); p ≈ 0"), C.text2],
+    ["50.3", L("EM on the full ViTextVQA test vs 25.5 for the published SOTA ViTextBLIP-2", "EM trên full test ViTextVQA so với 25,5 của SOTA công bố ViTextBLIP-2"), C.text2],
+    ["+2.5", L("EM from OCR-aware QLoRA vs the same QLoRA without OCR (full test, p = 10⁻¹⁴; stable over 3 seeds)", "EM nhờ QLoRA nhận biết OCR so với cùng QLoRA không OCR (full test, p = 10⁻¹⁴; ổn định qua 3 seed)"), C.accent2],
   ];
   items.forEach(([big, label, col], i) => {
-    const x = M + i * (cw + 0.4);
-    card(s, x, y, cw, h);
-    stat(s, x + 0.35, y + 0.5, cw - 0.7, FMT(big), label, col);
+    const x = M + i * (cw + 0.35);
+    card(s, x, y, cw, h, i === 3 ? C.accent5 : C.background2);
+    stat(s, x + 0.3, y + 0.45, cw - 0.6, FMT(big), label, col, 36);
   });
   card(s, M, 5.0, CW, 1.05, C.accent4);
   txt(s, L("Efficient by design: QLoRA trains 7.37 M parameters (0.196%), a 29.5 MB adapter, on a single NVIDIA L4 GPU — no full fine-tuning.",
@@ -149,10 +150,10 @@ pres.addSection({ title: L("Feedback", "Góp ý") });
   const rows = [
     [TH(L("Feedback", "Góp ý")), TH(L("Action", "Việc đã làm")), TH(L("Slide", "Slide"))],
     [L("No baseline architecture diagram", "Chưa có sơ đồ kiến trúc baseline"), L("Component-level diagram of Qwen2.5-VL-3B with LoRA placement (Fig. 7A)", "Sơ đồ từng thành phần của Qwen2.5-VL-3B và vị trí gắn LoRA (Hình 7A)"), "5"],
-    [L("Explain the dataset and its noise", "Giải thích dataset và nhiễu"), L("ViVQA build pipeline + noise points N1–N4 (Fig. 6A); train–test leakage check; 400-sample manual audit", "Quy trình tạo ViVQA + điểm nhiễu N1–N4 (Hình 6A); kiểm tra rò rỉ train–test; duyệt tay 400 mẫu"), "4, 14"],
+    [L("Explain the dataset and its noise", "Giải thích dataset và nhiễu"), L("ViVQA build pipeline + noise points N1–N4 (Fig. 6A); train–test leakage check; 400-sample manual audit", "Quy trình tạo ViVQA + điểm nhiễu N1–N4 (Hình 6A); kiểm tra rò rỉ train–test; duyệt tay 400 mẫu"), "4, 13"],
     [L("Re-run the baseline with a stated evaluation method", "Chạy lại baseline với phương pháp đánh giá rõ ràng"), L("Frozen protocol (Fig. 7B); pipeline validated on a published number (R0); zero-shot B1 on both datasets", "Giao thức cố định (Hình 7B); kiểm chứng pipeline bằng số đã công bố (R0); B1 zero-shot trên 2 dataset"), "6–8"],
     [L("Know the SOTA", "Nắm SOTA"), L("ViTextBLIP-2 compared on the full test; Table 7 LMM row checked with Qwen2-VL-7B (R1)", "So với ViTextBLIP-2 trên full test; kiểm dòng LMM ở Table 7 bằng Qwen2-VL-7B (R1)"), "9, 12"],
-    [L("Run experiments before discussing improvements", "Chạy thí nghiệm rồi mới bàn cải tiến"), L("QLoRA pilot (B2) + three controls: leakage strata, few-shot prompt, backbone", "QLoRA sơ bộ (B2) + ba đối chứng: phân tầng rò rỉ, few-shot prompt, backbone"), "10–11"],
+    [L("Run experiments before discussing improvements", "Chạy thí nghiệm rồi mới bàn cải tiến"), L("QLoRA (B2) + three controls; then the proposed OCR-aware QLoRA (B3) with ablations", "QLoRA (B2) + ba đối chứng; sau đó phương pháp đề xuất QLoRA nhận biết OCR (B3) kèm ablation"), "10–17"],
   ].map((r, i) => i === 0 ? r : r.map((c) => ({ text: c, options: { fontSize: 14 } })));
   table(s, rows, { x: M, y: 1.65, w: CW, colW: [3.6, 7.3, 1.23], rowH: 0.62 });
 }
@@ -368,32 +369,10 @@ pres.addSection({ title: L("Improvement", "Cải tiến") });
     });
 }
 
-// 13. Hypotheses scoreboard
-pres.addSection({ title: L("Analysis & plan", "Phân tích & kế hoạch") });
+// 13. Error analysis (moved before PART 06: it motivates the OCR-aware method)
 {
-  const s = content(L("Analysis & plan", "Phân tích & kế hoạch"), L("PART 06 · HYPOTHESES", "PHẦN 06 · GIẢ THUYẾT"), L("What the evidence says so far", "Bằng chứng đến thời điểm này"),
-    "Đối chiếu với các giả thuyết đã nêu ở Review 1. H1 được ủng hộ mạnh. H2 chỉ đạt một nửa: VRAM giảm nhiều nhưng độ chính xác giữ 94,5%, dưới mức 97%. H7 chưa được ủng hộ với dạng few-shot đã thử. H8: duyệt tay 200 lỗi của B2 cho thấy chỉ khoảng 7% là hallucination thật; nhưng H8 so sánh với zero-shot, nên cần đo thêm B1 ở tuần 11 — vì vậy vẫn để Đang chờ. H3 đến H6 thuộc kế hoạch W8 đến W12.");
-  const OK = L("Supported", "Ủng hộ"), PART = L("Partly", "Một phần"), NO = L("Not supported", "Chưa ủng hộ"), WAIT = L("Pending", "Đang chờ");
-  const col = { [OK]: HEX.teal, [PART]: HEX.amber, [NO]: HEX.red, [WAIT]: HEX.muted };
-  const rows = [
-    [TH(L("Hypothesis (Review 1)", "Giả thuyết (Review 1)")), TH(L("Evidence", "Bằng chứng")), TH(L("Status", "Trạng thái"))],
-    [L("H1  QLoRA ≥ +5 EM over zero-shot", "H1  QLoRA ≥ +5 EM so với zero-shot"), L("+51.7 (ViVQA), +21.1 (ViTextVQA full), p ≈ 0", "+51,7 (ViVQA), +21,1 (ViTextVQA đầy đủ), p ≈ 0"), OK],
-    [L("H2  4-bit keeps ≥ 97% accuracy, VRAM −40%", "H2  4-bit giữ ≥ 97% độ chính xác, VRAM −40%"), L("Keeps 94.5%; VRAM −77% (R0 vs R0b)", "Giữ 94,5%; VRAM −77% (R0 so với R0b)"), PART],
-    [L("H7  Vietnamese format prompt ≥ +3 EM", "H7  Prompt định dạng tiếng Việt ≥ +3 EM"), L("Few-shot variant: −2.1 / −1.2 EM", "Dạng few-shot: −2,1 / −1,2 EM"), NO],
-    [L("H8  PEFT does not increase hallucination", "H8  PEFT không làm tăng hallucination"), L("Audit: 7% of B2 errors are hallucinations (CI 4–11%); B1 comparison in W11", "Duyệt tay: 7% lỗi của B2 là hallucination (CI 4–11%); so với B1 ở W11"), WAIT],
-    [L("H3–H6  LoRA config, shared adapter, OCR prompting", "H3–H6  Cấu hình LoRA, adapter dùng chung, OCR prompting"), L("Planned W8–W12", "Kế hoạch W8–W12"), WAIT],
-  ].map((r, i) => i === 0 ? r : r.map((c, j) => ({ text: c, options: { fontSize: 14, bold: j === 2, color: j === 2 ? col[c] : HEX.text } })));
-  table(s, rows, { x: M, y: 1.55, w: CW, colW: [5.2, 4.93, 2.0], rowH: 0.62 });
-  card(s, M, 5.6, CW, 1.25, C.accent4);
-  txt(s, L("RQ1 answered: zero-shot reaches EM 22.1 (ViVQA) and 29.1 (ViTextVQA).   RQ2 answered: QLoRA adds +51.7 and +21.1 EM.",
-           "RQ1 đã trả lời: zero-shot đạt EM 22,1 (ViVQA) và 29,1 (ViTextVQA).   RQ2 đã trả lời: QLoRA tăng +51,7 và +21,1 EM."),
-      { x: M + 0.35, y: 5.6, w: CW - 0.7, h: 1.25, fontSize: 15, valign: "middle", color: C.text2 });
-}
-
-// 14. Error analysis
-{
-  const s = content(L("Analysis & plan", "Phân tích & kế hoạch"), L("PART 06 · ERROR & HALLUCINATION ANALYSIS", "PHẦN 06 · PHÂN TÍCH LỖI & HALLUCINATION"), L("Where B2 still fails", "B2 còn sai ở đâu"),
-    "Phân loại tự động 4.988 câu B2 còn sai trên full test ViTextVQA. 9% chỉ sai dấu thanh, ví dụ thủy và thúy — đây là thách thức riêng của tiếng Việt. 17% chỉ lệch một hai ký tự, thường là đọc chữ hoặc số. Khoảng 27% sai về độ dài: thừa hoặc thiếu chữ so với gold. 47% còn lại sai về nội dung hoặc vùng ảnh. Nhóm đã duyệt tay 200 lỗi của B2 có xem ảnh, 4 người cùng nhãn gợi ý của AI, trưởng nhóm phân xử các chỗ lệch. Kết quả: 54% câu bị EM chấm sai thực ra đúng ý — EM quá khắt khe; 12,5% do gold nhiễu; ở ViTextVQA lỗi thật chủ yếu là đọc sai chữ 28% và đọc nhầm vùng chữ 23%; hallucination thật chỉ 7%. Độ đồng thuận giữa hai người gán nhãn độc lập kappa 0,62; bỏ 42 dòng có AI hỗ trợ thì kết luận không đổi.");
+  const s = content(L("Improvement", "Cải tiến"), L("PART 05 · ERROR & HALLUCINATION ANALYSIS", "PHẦN 05 · PHÂN TÍCH LỖI & HALLUCINATION"), L("Where B2 still fails", "B2 còn sai ở đâu"),
+    "Phân loại tự động 4.988 câu B2 còn sai trên full test ViTextVQA. 9% chỉ sai dấu thanh, ví dụ thủy và thúy — đây là thách thức riêng của tiếng Việt. 17% chỉ lệch một hai ký tự, thường là đọc chữ hoặc số. Khoảng 27% sai về độ dài: thừa hoặc thiếu chữ so với gold. 47% còn lại sai về nội dung hoặc vùng ảnh. Nhóm đã duyệt tay 200 lỗi của B2 có xem ảnh, 4 người cùng nhãn gợi ý của AI, trưởng nhóm phân xử các chỗ lệch. Kết quả: 54% câu bị EM chấm sai thực ra đúng ý — EM quá khắt khe; 12,5% do gold nhiễu; ở ViTextVQA lỗi thật chủ yếu là đọc sai chữ 28% và đọc nhầm vùng chữ 23%; hallucination thật chỉ 7%. Chính các lỗi đọc chữ này dẫn tới phương pháp đề xuất ở phần sau. Độ đồng thuận giữa hai người gán nhãn độc lập kappa 0,62; bỏ 42 dòng có AI hỗ trợ thì kết luận không đổi.");
   s.addChart(pres.charts.BAR, [{ name: L("% of B2 errors", "% lỗi của B2"),
       labels: [L("other: content / region", "khác: nội dung / vùng ảnh"), L("1–2 characters off", "lệch 1–2 ký tự"), L("answer too long", "trả lời thừa chữ"), L("answer too short", "trả lời thiếu chữ"), L("tone marks only", "chỉ sai dấu thanh")],
       values: [47.4, 16.8, 13.6, 13.2, 9.0] }],
@@ -419,15 +398,194 @@ pres.addSection({ title: L("Analysis & plan", "Phân tích & kế hoạch") });
   ], { x: x + 0.3, y: 2.4, w: w - 0.6, h: 4.35, fontSize: 15 });
 }
 
-// 15. Next steps
+// ================= PART 06 · OCR-aware QLoRA (B3) — added W09 =================
+// Numbers: experiments/W08_ocr_* (OCR choice, inference-only ablation), W09_ocr_factorial_2x2_*, W09_B3_seed_stability_*,
+// W09_fulltest_B3_vs_B2sub_*, W09_vivqa_epoch_select_* (see docs/W08/README.md, docs/W09/README.md).
+pres.addSection({ title: L("OCR-aware QLoRA", "QLoRA nhận biết OCR") });
+
+// 14. Method
+{
+  const s = content(L("OCR-aware QLoRA", "QLoRA nhận biết OCR"), L("PART 06 · PROPOSED METHOD (B3)", "PHẦN 06 · PHƯƠNG PHÁP ĐỀ XUẤT (B3)"),
+    L("OCR-aware QLoRA: train the model to use OCR text", "QLoRA nhận biết OCR: dạy model dùng văn bản OCR"),
+    "Từ phân tích lỗi, nhóm đề xuất B3: QLoRA nhận biết OCR. Ảnh được chạy OCR trước — PaddleOCR dò vùng chữ, VietOCR đọc chữ tiếng Việt — rồi đúng một dòng 'Văn bản đọc được trong ảnh' được chèn trước câu hỏi. Điểm mấu chốt: dòng OCR có mặt cả lúc train lẫn lúc test, nên model học khi nào tin OCR, khi nào tin ảnh. Backend OCR được chọn trên dev300 bằng luật chốt trước: PaddleOCR bản Latin làm rơi dấu tiếng Việt, ví dụ 'Kiểu Thẩm' thành 'Kiu Thm'; VietOCR giữ được đáp án trong văn bản OCR ở 37,7% câu so với 27,0%.");
+  // pipeline row (native shapes)
+  const y = 1.55, h = 1.3, gap = 0.32;
+  const boxes = [
+    [L("Image", "Ảnh"), L("scene text", "chữ trong ảnh"), C.background2, C.text2],
+    [L("PaddleOCR", "PaddleOCR"), L("detects text lines", "dò dòng chữ"), C.background2, C.text2],
+    [L("VietOCR", "VietOCR"), L("reads Vietnamese, keeps tone marks", "đọc tiếng Việt, giữ dấu"), C.background2, C.text2],
+    [L("Prompt", "Prompt"), L("1 OCR line + question", "1 dòng OCR + câu hỏi"), C.accent4, C.text2],
+    [L("Qwen2.5-VL + LoRA", "Qwen2.5-VL + LoRA"), L("LoRA trained with the OCR line", "LoRA train cùng dòng OCR"), C.accent5, C.text2],
+  ];
+  const bw = (CW - gap * (boxes.length - 1)) / boxes.length;
+  boxes.forEach(([t, sub, fill, col], i) => {
+    const x = M + i * (bw + gap);
+    card(s, x, y, bw, h, fill);
+    txt(s, t, { x: x + 0.1, y: y + 0.12, w: bw - 0.2, h: 0.42, fontSize: 15, bold: true, color: col, align: "center" });
+    txt(s, sub, { x: x + 0.15, y: y + 0.62, w: bw - 0.3, h: 0.6, fontSize: 12, color: C.text1, align: "center" });
+    if (i < boxes.length - 1)
+      s.addShape(pres.shapes.RIGHT_ARROW, { x: x + bw + 0.05, y: y + h / 2 - 0.11, w: gap - 0.1, h: 0.22, fill: { color: HEX.muted }, line: { color: HEX.muted, width: 0 }, objectName: oid("arrow") });
+  });
+  // prompt example
+  card(s, M, 3.1, CW, 0.75, C.background2);
+  txt(s, [
+    { text: L("Prompt line:  ", "Dòng prompt:  "), options: { bold: true, color: HEX.ink } },
+    { text: "Văn bản đọc được trong ảnh: NHÀ THUỐC TÂM AN | 0919 467 868 …   Câu hỏi: tên nhà thuốc là gì?", options: { fontFace: "Courier New", fontSize: 13 } },
+  ], { x: M + 0.3, y: 3.1, w: CW - 0.6, h: 0.75, fontSize: 14, valign: "middle" });
+  // three cards
+  const cy = 4.15, ch = 2.7, cw = (CW - 2 * 0.4) / 3;
+  [[L("Why OCR", "Vì sao OCR"), [L("Audit of real B2 errors on ViTextVQA: OCR misreads 28%, wrong text region 23%, tone marks 8%", "Lỗi thật của B2 ở ViTextVQA: đọc sai chữ 28%, nhầm vùng chữ 23%, sai dấu 8%"),
+                                   L("Vietnamese scene text is a stated research gap (G2)", "Chữ tiếng Việt trong ảnh là gap nghiên cứu G2")], C.background2],
+   [L("Which OCR (rule fixed on dev300)", "Chọn OCR (luật chốt, dev300)"), [L("PaddleOCR Latin drops tone marks: “Kiểu Thẩm” → “Kiu Thm”", "PaddleOCR bản Latin làm rơi dấu: “Kiểu Thẩm” → “Kiu Thm”"),
+                                   L("Gold answer inside OCR text: VietOCR 37.7% vs 27.0% (p = 0.0008) → VietOCR", "Đáp án nằm trong văn bản OCR: VietOCR 37,7% so với 27,0% (p = 0,0008) → VietOCR")], C.background2],
+   [L("What is trained", "Train gì"), [L("Same QLoRA as B2 (r = 16, 0.196% params); only the prompt gains the OCR line", "QLoRA y hệt B2 (r = 16, 0,196% tham số); chỉ thêm dòng OCR vào prompt"),
+                                   L("Controlled test: 8,000-question train subset, B3 vs B2-sub (same subset, no OCR)", "Phép thử có kiểm soát: tập con 8.000 câu, B3 so với B2-sub (cùng tập, không OCR)")], C.accent4]]
+    .forEach(([t, items, fill], i) => {
+      const x = M + i * (cw + 0.4);
+      card(s, x, cy, cw, ch, fill);
+      txt(s, t, { x: x + 0.25, y: cy + 0.15, w: cw - 0.5, h: 0.45, fontSize: 16, bold: true, color: C.text2 });
+      bullets(s, items, { x: x + 0.25, y: cy + 0.65, w: cw - 0.5, h: ch - 0.8, fontSize: 14 });
+    });
+}
+
+// 15. 2x2 factorial
+{
+  const s = content(L("OCR-aware QLoRA", "QLoRA nhận biết OCR"), L("PART 06 · ABLATION: OCR AT TRAIN × OCR AT TEST", "PHẦN 06 · ABLATION: OCR LÚC TRAIN × OCR LÚC TEST"),
+    L("OCR helps only when the model is trained with it", "OCR chỉ giúp khi model được train cùng OCR"),
+    "Đây là ablation bắt buộc có và không có OCR, làm thành bảng hai nhân hai trên cùng tập con và cùng 2.000 câu test. Chỉ chèn OCR lúc test cho model chưa train cùng OCR: không tăng, kể cả với zero-shot B1 và B2 ở tuần 8. Train cùng OCR mà lúc test bỏ OCR: cũng không tăng. Chỉ khi có cả hai thì EM tăng 4,35 điểm, p cỡ 10 mũ trừ 8. Tương tác là 4,9 điểm, khoảng tin cậy 3,2 đến 6,6. Vậy đóng góp không phải là thêm OCR vào prompt, mà là dạy model cách dùng OCR.");
+  // 2x2 grid
+  const gx = M + 1.95, gy = 1.95, cw = 2.45, chh = 1.55, g = 0.15;
+  txt(s, L("Test without OCR", "Test không OCR"), { x: gx, y: gy - 0.45, w: cw, h: 0.4, fontSize: 14, bold: true, color: C.text2, align: "center" });
+  txt(s, L("Test with OCR", "Test có OCR"), { x: gx + cw + g, y: gy - 0.45, w: cw, h: 0.4, fontSize: 14, bold: true, color: C.text2, align: "center" });
+  txt(s, L("Train without OCR", "Train không OCR"), { x: M, y: gy, w: 1.85, h: chh, fontSize: 14, bold: true, color: C.text2, valign: "middle" });
+  txt(s, L("Train with OCR", "Train có OCR"), { x: M, y: gy + chh + g, w: 1.85, h: chh, fontSize: 14, bold: true, color: C.text2, valign: "middle" });
+  const cells = [[0, 0, "45.55", L("B2-sub", "B2-sub"), C.background2], [0, 1, "44.90", L("B2-sub + OCR at test", "B2-sub + OCR lúc test"), C.background2],
+                 [1, 0, "45.00", L("B3, OCR removed at test", "B3, bỏ OCR lúc test"), C.background2], [1, 1, "49.25", L("B3 (proposed)", "B3 (đề xuất)"), C.accent5]];
+  cells.forEach(([r, c, v, lab, fill]) => {
+    const x = gx + c * (cw + g), y = gy + r * (chh + g);
+    card(s, x, y, cw, chh, fill);
+    txt(s, FMT(v), { x, y: y + 0.18, w: cw, h: 0.75, fontFace: "Cambria", fontSize: 34, bold: true, color: r && c ? C.accent2 : C.text2, align: "center" });
+    txt(s, lab, { x: x + 0.1, y: y + 0.95, w: cw - 0.2, h: 0.45, fontSize: 13, color: C.text1, align: "center" });
+  });
+  txt(s, L("EM (%), ViTextVQA test subset (2,000 q.), seed 42", "EM (%), ViTextVQA tập con test (2.000 câu), seed 42"),
+      { x: gx, y: gy + 2 * chh + g + 0.12, w: 2 * cw + g, h: 0.35, fontSize: 12, color: C.accent3, align: "center" });
+  // effects
+  const x = M + 7.45, w = CW - 7.45;
+  card(s, x, 1.5, w, 2.3);
+  txt(s, L("Paired tests (McNemar, EM)", "Kiểm định ghép cặp (McNemar, EM)"), { x: x + 0.25, y: 1.62, w: w - 0.5, h: 0.4, fontSize: 16, bold: true, color: C.text2 });
+  bullets(s, [
+    L("OCR at test only: −0.65 (p = 0.49)", "Chỉ OCR lúc test: −0,65 (p = 0,49)"),
+    L("OCR at train only: −0.55 (p = 0.35)", "Chỉ OCR lúc train: −0,55 (p = 0,35)"),
+    L("Both at train and test: +4.35 (p = 2 × 10⁻⁸)", "Cả train lẫn test: +4,35 (p = 2 × 10⁻⁸)"),
+    L("Removing OCR from B3: −4.25 (p = 4 × 10⁻⁹)", "Bỏ OCR khỏi B3: −4,25 (p = 4 × 10⁻⁹)"),
+  ], { x: x + 0.25, y: 2.05, w: w - 0.5, h: 1.7, fontSize: 14 });
+  card(s, x, 4.0, w, 1.4, C.accent4);
+  txt(s, [
+    { text: L("Interaction +4.9 EM ", "Tương tác +4,9 EM "), options: { bold: true, color: HEX.ink } },
+    { text: L("(CI95 +3.2 to +6.6) → OCR is needed at both train and test", "(CI95 +3,2 đến +6,6) → cần OCR ở cả train lẫn test") },
+  ], { x: x + 0.25, y: 4.0, w: w - 0.5, h: 1.4, fontSize: 15, valign: "middle" });
+  card(s, M, 5.85, CW, 1.0, C.accent5);
+  txt(s, [
+    { text: L("Takeaway  ", "Kết luận  "), options: { bold: true, color: HEX.ink } },
+    { text: L("the contribution is not “add OCR to the prompt” — it is teaching the model, with QLoRA, when to trust OCR and when to trust the image.",
+              "đóng góp không phải “thêm OCR vào prompt” — mà là dùng QLoRA dạy model khi nào tin OCR, khi nào tin ảnh.") },
+  ], { x: M + 0.3, y: 5.85, w: CW - 0.6, h: 1.0, fontSize: 15, valign: "middle" });
+}
+
+// 16. Seeds + full test
+{
+  const s = content(L("OCR-aware QLoRA", "QLoRA nhận biết OCR"), L("PART 06 · ROBUSTNESS", "PHẦN 06 · ĐỘ VỮNG"),
+    L("The gain holds across seeds and on the full test", "Mức tăng giữ vững qua các seed và trên full test"),
+    "Hai câu hỏi hội đồng hay đặt: một seed có phải may mắn không, và tập con có đại diện không. Ba seed huấn luyện 42, 43, 44, cùng tập con: cả ba seed B3 đều thắng B2-sub có ý nghĩa, trung bình cộng 3,57 điểm EM, độ lệch chuẩn 0,76. Trên toàn bộ 10.028 câu test, B3 thắng B2-sub 2,54 điểm, p cỡ 10 mũ trừ 14, và cao hơn ViTextBLIP-2 ở cả EM lẫn F1. Nhóm cũng đính chính: B3 dùng 23% dữ liệu vẫn thấp hơn B2 train toàn bộ 1,16 điểm; OCR bù được khoảng 69% phần mất do cắt dữ liệu. Về ANLS, mức tăng là 1,55 điểm, dưới ngưỡng 3 điểm của H6.");
+  s.addChart(pres.charts.BAR, [
+    { name: L("B2-sub (no OCR)", "B2-sub (không OCR)"), labels: ["seed 42", "seed 43", "seed 44"], values: [45.55, 44.75, 46.05] },
+    { name: L("B3 (OCR-aware)", "B3 (nhận biết OCR)"), labels: ["seed 42", "seed 43", "seed 44"], values: [49.25, 49.0, 48.8] },
+  ], chartBase({ x: M, y: 1.5, w: 5.6, h: 4.0, barDir: "col", barGrouping: "clustered", chartColors: [HEX.muted, HEX.amber], showLegend: true, legendPos: "b",
+                 valAxisMinVal: 40, valAxisMaxVal: 52, showTitle: true, title: L("EM (%), test subset 2,000 q., 3 training seeds", "EM (%), tập con 2.000 câu, 3 seed huấn luyện"), dataLabelFormatCode: "0.00", objectName: oid("chart") }));
+  card(s, M, 5.7, 5.6, 1.15, C.accent4);
+  txt(s, [
+    { text: L("+3.57 ± 0.76 EM", "+3,57 ± 0,76 EM"), options: { bold: true, color: HEX.ink } },
+    { text: L(" · all 3 seeds p ≤ 1.4 × 10⁻⁴ → stable (pre-registered rule)", " · cả 3 seed p ≤ 1,4 × 10⁻⁴ → ổn định (luật chốt trước)") },
+  ], { x: M + 0.25, y: 5.7, w: 5.1, h: 1.15, fontSize: 14, valign: "middle" });
+  const x = M + 6.0, w = CW - 6.0;
+  const rows = [
+    [TH(L("Full test (10,028 q.)", "Full test (10.028 câu)")), TH(L("Train data", "Dữ liệu train")), TH("EM"), TH("F1")],
+    ["ViTextBLIP-2 (paper)", L("full", "toàn bộ"), "25.48", "53.95"],
+    ["B2-sub", "23%", "46.56", "67.83"],
+    [L("B3 (OCR-aware)", "B3 (nhận biết OCR)"), "23%", "49.10", "70.03"],
+    [L("B2 (QLoRA, no OCR)", "B2 (QLoRA, không OCR)"), L("100%", "100%"), "50.26", "71.16"],
+  ].map((r, i) => i === 0 ? r : r.map((c, j) => ({ text: FMT(c), options: { fontSize: 14, align: j ? "center" : "left", bold: i === 3,
+      color: i === 3 ? HEX.ink : HEX.text, fill: i === 3 ? { color: HEX.ambert } : undefined } })));
+  table(s, rows, { x, y: 1.5, w, colW: [2.55, 1.45, 1.1, 1.03], rowH: 0.5 });
+  card(s, x, 4.25, w, 2.6);
+  bullets(s, [
+    L("B3 vs B2-sub: +2.54 EM (672 vs 417 questions only one model gets right, p = 10⁻¹⁴)", "B3 so với B2-sub: +2,54 EM (672 so với 417 câu chỉ một model đúng, p = 10⁻¹⁴)"),
+    L("Above ViTextBLIP-2 on EM and F1 (CI95 lower bounds 48.1 / 69.3)", "Cao hơn ViTextBLIP-2 cả EM và F1 (cận dưới CI95 48,1 / 69,3)"),
+    L("Correction: still 1.16 EM below full-data B2 (p = 0.003); OCR recovers ≈ 69% of the data-cut gap with 25% of the training time", "Đính chính: vẫn thấp hơn B2 dữ liệu đầy đủ 1,16 EM (p = 0,003); OCR bù ≈ 69% phần mất do cắt dữ liệu với 25% thời gian train"),
+  ], { x: x + 0.25, y: 4.4, w: w - 0.5, h: 2.35, fontSize: 14 });
+}
+
+// 17. ViVQA epoch selection
+{
+  const s = content(L("OCR-aware QLoRA", "QLoRA nhận biết OCR"), L("PART 06 · ViVQA: TRAINING LENGTH", "PHẦN 06 · ViVQA: ĐỘ DÀI HUẤN LUYỆN"),
+    L("ViVQA: a second epoch helps — chosen without touching test", "ViVQA: epoch thứ hai có ích — chọn mà không chạm test"),
+    "Với ViVQA, câu hỏi là train một hay hai epoch. Val của ViVQA được tách theo câu hỏi nên 43% câu val dùng chung ảnh với train; train lâu hơn dễ nhớ ảnh và làm val đẹp giả. Vì vậy nhóm chỉ chọn epoch trên 688 câu val có ảnh chưa từng xuất hiện trong train. Lịch hai epoch sau epoch 2 hơn B2 một epoch 3,9 điểm, có ý nghĩa, nên được chọn. Chỉ khi đó mới chấm test, một lần: EM tăng từ 73,8 lên 76,6, p cỡ 10 mũ trừ 9. Kiểm tra thêm sau khi có kết quả: trên phần test sạch, ảnh và cặp hỏi đáp chưa từng thấy, mức tăng vẫn là 3,2 điểm — nên đây không phải do model nhớ ảnh. Chi phí: gấp đôi thời gian train, 6,1 giờ.");
+  s.addChart(pres.charts.BAR, [
+    { name: "EM", labels: [L("C1 · B2, 1-epoch schedule", "C1 · B2, lịch 1 epoch"), L("C2 · 2-epoch schedule, after epoch 1", "C2 · lịch 2 epoch, sau epoch 1"), L("C3 · 2-epoch schedule, after epoch 2", "C3 · lịch 2 epoch, sau epoch 2")], values: [73.11, 71.51, 77.03] },
+  ], chartBase({ x: M, y: 1.5, w: 7.0, h: 3.6, barDir: "bar", chartColors: [HEX.muted, HEX.muted, HEX.amber], showLegend: false, valAxisMinVal: 60, valAxisMaxVal: 80,
+                 valAxisHidden: true, valGridLine: { style: "none" }, catAxisOrientation: "maxMin", showTitle: true,
+                 title: L("EM (%) on image-disjoint val (688 q.)", "EM (%) trên val sạch, ảnh không trùng train (688 câu)"), dataLabelFormatCode: "0.0", objectName: oid("chart") }));
+  card(s, M, 5.3, 7.0, 1.55, C.accent4);
+  txt(s, L("Rule fixed before the run: highest EM on image-disjoint val; keep C1 unless significantly better → C3 (+3.9 EM, p = 1.4 × 10⁻⁴)",
+           "Luật chốt trước: EM cao nhất trên val sạch; giữ C1 trừ khi hơn có ý nghĩa → C3 (+3,9 EM, p = 1,4 × 10⁻⁴)"),
+      { x: M + 0.25, y: 5.3, w: 6.5, h: 1.55, fontSize: 14, valign: "middle", color: C.text2 });
+  const x = M + 7.4, w = CW - 7.4;
+  card(s, x, 1.5, w, 2.6, C.accent5);
+  stat(s, x + 0.3, 1.65, w - 0.6, FMT("73.8 → 76.6"), L("ViVQA test EM (3,001 q.), touched once: +2.9, p = 4.6 × 10⁻⁹", "EM test ViVQA (3.001 câu), chạm một lần: +2,9, p = 4,6 × 10⁻⁹"), C.text2);
+  txt(s, L("Not image memorisation (post-hoc): on the clean test subset — unseen images and unseen QA, n = 1,219 — +3.2 EM (69.1 → 72.3, p = 1.5 × 10⁻⁴)",
+           "Không phải nhớ ảnh (kiểm sau): trên phần test sạch — ảnh và cặp hỏi–đáp chưa thấy, n = 1.219 — +3,2 EM (69,1 → 72,3, p = 1,5 × 10⁻⁴)"),
+      { x: x + 0.3, y: 3.2, w: w - 0.6, h: 0.85, fontSize: 13, italic: true, color: C.text1 });
+  card(s, x, 4.3, w, 2.55);
+  txt(s, L("Why image-disjoint val", "Vì sao dùng val sạch"), { x: x + 0.3, y: 4.42, w: w - 0.6, h: 0.4, fontSize: 16, bold: true, color: C.text2 });
+  bullets(s, [
+    L("512 of 1,200 val questions share an image with train", "512 / 1.200 câu val dùng chung ảnh với train"),
+    L("Longer training memorises images → plain val would favour it", "Train lâu hơn nhớ ảnh → val thường thiên vị"),
+    L("Cost: 6.1 h instead of 3.0 h on one L4", "Chi phí: 6,1 giờ thay vì 3,0 giờ trên một L4"),
+  ], { x: x + 0.3, y: 4.85, w: w - 0.6, h: 1.95, fontSize: 14 });
+}
+
+// 18. Hypotheses scoreboard
+pres.addSection({ title: L("Analysis & plan", "Phân tích & kế hoạch") });
+{
+  const s = content(L("Analysis & plan", "Phân tích & kế hoạch"), L("PART 07 · HYPOTHESES", "PHẦN 07 · GIẢ THUYẾT"), L("What the evidence says so far", "Bằng chứng đến thời điểm này"),
+    "Đối chiếu với các giả thuyết đã nêu ở Review 1. H1 được ủng hộ mạnh. H2 chỉ đạt một nửa: VRAM giảm nhiều nhưng độ chính xác giữ 94,5%, dưới mức 97%. H7 chưa được ủng hộ với dạng few-shot đã thử. H8: duyệt tay 200 lỗi của B2 cho thấy chỉ khoảng 7% là hallucination thật; nhưng H8 so sánh với zero-shot, nên cần đo thêm B1 ở tuần 11 — vì vậy vẫn để Đang chờ. H6 chỉ ủng hộ một phần: OCR cộng hưởng mạnh với QLoRA, nhưng ANLS chỉ tăng 1,55 điểm, dưới ngưỡng 3 điểm đã đặt — nhóm báo đúng như vậy. H3 đến H5 thuộc kế hoạch tuần 10 đến 12.");
+  const OK = L("Supported", "Ủng hộ"), PART = L("Partly", "Một phần"), NO = L("Not supported", "Chưa ủng hộ"), WAIT = L("Pending", "Đang chờ");
+  const col = { [OK]: HEX.teal, [PART]: HEX.amber, [NO]: HEX.red, [WAIT]: HEX.muted };
+  const rows = [
+    [TH(L("Hypothesis (Review 1)", "Giả thuyết (Review 1)")), TH(L("Evidence", "Bằng chứng")), TH(L("Status", "Trạng thái"))],
+    [L("H1  QLoRA ≥ +5 EM over zero-shot", "H1  QLoRA ≥ +5 EM so với zero-shot"), L("+51.7 (ViVQA), +21.1 (ViTextVQA full), p ≈ 0", "+51,7 (ViVQA), +21,1 (ViTextVQA đầy đủ), p ≈ 0"), OK],
+    [L("H2  4-bit keeps ≥ 97% accuracy, VRAM −40%", "H2  4-bit giữ ≥ 97% độ chính xác, VRAM −40%"), L("Keeps 94.5%; VRAM −77% (R0 vs R0b)", "Giữ 94,5%; VRAM −77% (R0 so với R0b)"), PART],
+    [L("H6  OCR prompting ≥ +3 ANLS, synergy with QLoRA", "H6  OCR prompting ≥ +3 ANLS, cộng hưởng với QLoRA"), L("Synergy: interaction +4.9 EM; but ANLS +1.55 ± 0.40 (< +3)", "Cộng hưởng: tương tác +4,9 EM; nhưng ANLS +1,55 ± 0,40 (< +3)"), PART],
+    [L("H7  Vietnamese format prompt ≥ +3 EM", "H7  Prompt định dạng tiếng Việt ≥ +3 EM"), L("Few-shot variant: −2.1 / −1.2 EM", "Dạng few-shot: −2,1 / −1,2 EM"), NO],
+    [L("H8  PEFT does not increase hallucination", "H8  PEFT không làm tăng hallucination"), L("Audit: 7% of B2 errors are hallucinations (CI 4–11%); B1 comparison in W11", "Duyệt tay: 7% lỗi của B2 là hallucination (CI 4–11%); so với B1 ở W11"), WAIT],
+    [L("H3–H5  LoRA config, shared adapter", "H3–H5  Cấu hình LoRA, adapter dùng chung"), L("Planned W10–W12", "Kế hoạch W10–W12"), WAIT],
+  ].map((r, i) => i === 0 ? r : r.map((c, j) => ({ text: c, options: { fontSize: 14, bold: j === 2, color: j === 2 ? col[c] : HEX.text } })));
+  table(s, rows, { x: M, y: 1.5, w: CW, colW: [5.2, 4.93, 2.0], rowH: 0.54 });
+  card(s, M, 5.6, CW, 1.25, C.accent4);
+  txt(s, L("RQ1: zero-shot EM 22.1 (ViVQA), 29.1 (ViTextVQA).  RQ2: QLoRA +51.7 / +21.1 EM.  RQ3: OCR-aware QLoRA +2.5 EM over the same QLoRA (full test).",
+           "RQ1: zero-shot EM 22,1 (ViVQA), 29,1 (ViTextVQA).  RQ2: QLoRA +51,7 / +21,1 EM.  RQ3: QLoRA nhận biết OCR +2,5 EM so với cùng QLoRA (full test)."),
+      { x: M + 0.35, y: 5.6, w: CW - 0.7, h: 1.25, fontSize: 15, valign: "middle", color: C.text2 });
+}
+
+// 19. Next steps
 {
   const s = content(L("Analysis & plan", "Phân tích & kế hoạch"), L("PART 07 · NEXT STEPS", "PHẦN 07 · BƯỚC TIẾP THEO"), L("Plan to Review 3 (week 13)", "Kế hoạch đến Review 3 (tuần 13)"),
-    "Từ tuần 8 đến tuần 13: chạy QLoRA chính thức nhiều epoch và chọn epoch trên tập dev, thử làm sạch nhãn nhiễu, OCR-enhanced prompting cho ViTextVQA, ablation cấu hình LoRA, adapter dùng chung cho hai dataset, đo hallucination có hệ thống, rồi dựng prototype web cho Review 3.");
+    "Từ tuần 10 đến tuần 13: train QLoRA nhận biết OCR trên toàn bộ dữ liệu ViTextVQA để xem có vượt B2 không, ablation rank và module gắn LoRA, adapter dùng chung cho hai dataset, đo hallucination có hệ thống kể cả B3, rồi dựng prototype web: tải ảnh, chạy OCR, hỏi bằng tiếng Việt — cho Review 3.");
   const steps = [
-    ["W8", L("Main QLoRA run: 3 epochs, epoch chosen on dev; label-noise cleaning ablation", "QLoRA chính thức: 3 epoch, chọn epoch trên dev; ablation làm sạch nhãn nhiễu")],
-    ["W9–10", L("OCR-enhanced prompting (H6); LoRA rank and target-module ablations (H3, H4)", "OCR-enhanced prompting (H6); ablation rank và module gắn LoRA (H3, H4)")],
-    ["W11", L("Shared adapter for both datasets (H5); systematic hallucination evaluation (H8)", "Adapter dùng chung cho 2 dataset (H5); đo hallucination có hệ thống (H8)")],
-    ["W12–13", L("Web prototype (upload image, ask in Vietnamese); Review 3", "Prototype web (tải ảnh, hỏi tiếng Việt); Review 3")],
+    ["W10", L("OCR-aware QLoRA on the full ViTextVQA train set; LoRA rank and target-module ablations (H3, H4)", "QLoRA nhận biết OCR trên toàn bộ train ViTextVQA; ablation rank và module gắn LoRA (H3, H4)")],
+    ["W11", L("Shared adapter for both datasets (H5); systematic hallucination evaluation incl. B3 (H8)", "Adapter dùng chung cho 2 dataset (H5); đo hallucination có hệ thống, kể cả B3 (H8)")],
+    ["W12", L("Web prototype: upload image → OCR → answer in Vietnamese", "Prototype web: tải ảnh → OCR → trả lời tiếng Việt")],
+    ["W13", L("Review 3: final results, ablations, error analysis, live demo", "Review 3: kết quả cuối, ablation, phân tích lỗi, demo trực tiếp")],
   ];
   const cw = (CW - 3 * 0.35) / 4, y = 1.75, h = 3.4;
   steps.forEach(([wk, t], i) => {
@@ -441,7 +599,7 @@ pres.addSection({ title: L("Analysis & plan", "Phân tích & kế hoạch") });
       { x: M, y: 5.5, w: CW, h: 0.45, fontSize: 14, color: C.accent3 });
 }
 
-// 16. Thank you
+// 20. Thank you
 {
   const s = pres.addSlide({ masterName: "TITLE_DARK", sectionTitle: L("Analysis & plan", "Phân tích & kế hoạch") });
   s.addText(L("Thank you", "Cảm ơn hội đồng"), { placeholder: "title" });
