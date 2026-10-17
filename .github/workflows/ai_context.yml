@@ -41,7 +41,7 @@ jobs:
             echo
             echo "- Built automatically from \`main\` @ \`$SRC_SHA\` on $(date -u +%Y-%m-%dT%H:%MZ)."
             echo "- Text-only copy (no PDF/PPTX/XLSX/images, no predictions). Full repo = branch \`main\`."
-            echo "- Read first: \`docs/00_admin/AI_setup/Gemini_Context_Pack.md\`, then the Team Report of the highest week below."
+            echo "- Read first: \`00_ALL_REPORTS.md\` (Context Pack + every weekly README/Team Report + R1–R7 in one file)."
             echo
             echo "## Weekly reports"
             for d in $(ls -d docs/W[0-9][0-9] 2>/dev/null | sort); do
@@ -52,6 +52,22 @@ jobs:
             echo "## Files ($(wc -l < /tmp/files.txt))"
             sed 's/^/- /' /tmp/files.txt
           } > /tmp/ctx/00_START_HERE.md
+          # Gộp toàn bộ tài liệu tiến độ thành MỘT file để AI đọc chắc chắn (upload trực tiếp được)
+          {
+            echo "# 00_ALL_REPORTS — ViVQA-VLM progress dossier (auto-generated)"
+            echo
+            echo "Built from \`main\` @ \`$SRC_SHA\` on $(date -u +%Y-%m-%dT%H:%MZ). Each section starts with its source path."
+            for f in docs/00_admin/AI_setup/Gemini_Context_Pack.md \
+                     $(ls -d docs/W[0-9][0-9] 2>/dev/null | sort | while read -r d; do w=$(basename "$d"); for g in "$d/README.md" "$d/${w}_Team_Report.md"; do [ -f "$g" ] && echo "$g"; done; done) \
+                     $(ls docs/03_report/R*.md 2>/dev/null | sort); do
+              echo
+              echo "---"
+              echo
+              echo "# FILE: $f"
+              echo
+              cat "$f"
+            done
+          } > /tmp/ctx/00_ALL_REPORTS.md
           echo "SRC_SHA=$SRC_SHA" >> "$GITHUB_ENV"
           du -sh /tmp/ctx
 
