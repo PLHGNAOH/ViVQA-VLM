@@ -85,6 +85,9 @@ function fig(s, key, x, y, maxW, maxH) {
                altText: key });
   return { w, h };
 }
+function footnote(s, text, y = 6.5, h = 0.48) {
+  txt(s, text, { x: M, y, w: CW, h, fontSize: 10, color: C.accent3, valign: "bottom" });
+}
 const TH = (t) => ({ text: t, options: { bold: true, color: HEX.white, fill: { color: HEX.ink }, fontSize: 13 } });
 function table(s, rows, o) {
   s.addTable(rows, { fontFace: "Calibri", fontSize: 13, color: HEX.text, border: { type: "solid", pt: 0.75, color: HEX.line },
@@ -150,10 +153,10 @@ pres.addSection({ title: L("Feedback", "Góp ý") });
   const rows = [
     [TH(L("Feedback", "Góp ý")), TH(L("Action", "Việc đã làm")), TH(L("Slide", "Slide"))],
     [L("No baseline architecture diagram", "Chưa có sơ đồ kiến trúc baseline"), L("Component-level diagram of Qwen2.5-VL-3B with LoRA placement (Fig. 7A)", "Sơ đồ từng thành phần của Qwen2.5-VL-3B và vị trí gắn LoRA (Hình 7A)"), "5"],
-    [L("Explain the dataset and its noise", "Giải thích dataset và nhiễu"), L("ViVQA build pipeline + noise points N1–N4 (Fig. 6A); train–test leakage check; 400-sample manual audit", "Quy trình tạo ViVQA + điểm nhiễu N1–N4 (Hình 6A); kiểm tra rò rỉ train–test; duyệt tay 400 mẫu"), "4, 13"],
+    [L("Explain the dataset and its noise", "Giải thích dataset và nhiễu"), L("ViVQA build pipeline + noise points N1–N4 (Fig. 6A); train–test leakage check; 400-sample manual audit", "Quy trình tạo ViVQA + điểm nhiễu N1–N4 (Hình 6A); kiểm tra rò rỉ train–test; duyệt tay 400 mẫu"), "4, 14"],
     [L("Re-run the baseline with a stated evaluation method", "Chạy lại baseline với phương pháp đánh giá rõ ràng"), L("Frozen protocol (Fig. 7B); pipeline validated on a published number (R0); zero-shot B1 on both datasets", "Giao thức cố định (Hình 7B); kiểm chứng pipeline bằng số đã công bố (R0); B1 zero-shot trên 2 dataset"), "6–8"],
-    [L("Know the SOTA", "Nắm SOTA"), L("ViTextBLIP-2 compared on the full test; Table 7 LMM row checked with Qwen2-VL-7B (R1)", "So với ViTextBLIP-2 trên full test; kiểm dòng LMM ở Table 7 bằng Qwen2-VL-7B (R1)"), "9, 12"],
-    [L("Run experiments before discussing improvements", "Chạy thí nghiệm rồi mới bàn cải tiến"), L("QLoRA (B2) + three controls; then the proposed OCR-aware QLoRA (B3) with ablations", "QLoRA (B2) + ba đối chứng; sau đó phương pháp đề xuất QLoRA nhận biết OCR (B3) kèm ablation"), "10–17"],
+    [L("Know the SOTA", "Nắm SOTA"), L("ViTextBLIP-2 compared on the full test; Table 7 LMM row checked with Qwen2-VL-7B (R1)", "So với ViTextBLIP-2 trên full test; kiểm dòng LMM ở Table 7 bằng Qwen2-VL-7B (R1)"), "9, 12–13"],
+    [L("Run experiments before discussing improvements", "Chạy thí nghiệm rồi mới bàn cải tiến"), L("QLoRA (B2) + three controls; then the proposed OCR-aware QLoRA (B3) with ablations", "QLoRA (B2) + ba đối chứng; sau đó phương pháp đề xuất QLoRA nhận biết OCR (B3) kèm ablation"), "10–18"],
   ].map((r, i) => i === 0 ? r : r.map((c) => ({ text: c, options: { fontSize: 14 } })));
   table(s, rows, { x: M, y: 1.65, w: CW, colW: [3.6, 7.3, 1.23], rowH: 0.62 });
 }
@@ -182,27 +185,39 @@ pres.addSection({ title: L("Data & baseline", "Dữ liệu & baseline") });
 // 5. Architecture
 {
   const s = content(L("Data & baseline", "Dữ liệu & baseline"), L("PART 03 · BASELINE ARCHITECTURE", "PHẦN 03 · KIẾN TRÚC BASELINE"), "Qwen2.5-VL-3B-Instruct",
-    "Đây là sơ đồ baseline mà thầy yêu cầu. Ảnh đi qua vision encoder 32 khối, được gộp còn 256 đến 512 token, rồi ghép với câu hỏi đưa vào decoder 36 lớp. Toàn bộ trọng số gốc đóng băng và lượng tử 4-bit. Phần duy nhất được train là LoRA ở 4 phép chiếu q, k, v, o của self-attention — ô màu cam.");
-  const f = fig(s, "a7", M, 1.45, 8.9, 5.45);
+    "Đây là sơ đồ baseline mà thầy yêu cầu. Ảnh đi qua vision encoder 32 khối, được gộp còn 256 đến 512 token, rồi ghép với câu hỏi đưa vào decoder 36 lớp. Toàn bộ trọng số gốc đóng băng và lượng tử 4-bit. Phần duy nhất được train là LoRA ở 4 phép chiếu q, k, v, o của self-attention — ô màu cam. Khung bên phải tóm tắt đầu vào và đầu ra của từng khối: ảnh được resize tối đa 401.408 điểm ảnh rồi cắt thành patch 14 nhân 14; patch merger gộp 2 nhân 2 patch thành 1 token 2048 chiều, ra 256 đến 512 token ảnh; prompt P0 ghép token ảnh với câu hỏi theo chat template; decoder sinh đáp án tham lam, tối đa 32 token. Lưu ý: baseline KHÔNG dùng OCR — OCR là phần cải tiến B3 ở phần 06.");
+  const f = fig(s, "a7", M, 1.45, 8.3, 5.45);
   const x = M + f.w + 0.4, w = CW - f.w - 0.4;
-  card(s, x, 1.45, w, 2.45, C.accent5);
-  txt(s, L("Trained (QLoRA)", "Được train (QLoRA)"), { x: x + 0.25, y: 1.6, w: w - 0.5, h: 0.4, fontSize: 16, bold: true, color: C.text2 });
+  card(s, x, 1.45, w, 1.85, C.accent5);
+  txt(s, L("Trained (QLoRA)", "Được train (QLoRA)"), { x: x + 0.25, y: 1.55, w: w - 0.5, h: 0.4, fontSize: 16, bold: true, color: C.text2 });
   bullets(s, [L("LoRA r = 16, α = 32 on q, k, v, o", "LoRA r = 16, α = 32 trên q, k, v, o"),
-              L("7,372,800 params = 0.196%", "7.372.800 tham số = 0,196%"),
-              L("Adapter 29.5 MB", "Adapter 29,5 MB")], { x: x + 0.25, y: 2.05, w: w - 0.5, h: 1.75, fontSize: 14 });
-  card(s, x, 4.1, w, 2.75);
-  txt(s, L("Frozen", "Đóng băng"), { x: x + 0.25, y: 4.25, w: w - 0.5, h: 0.4, fontSize: 16, bold: true, color: C.text2 });
-  bullets(s, [L("ViT (32 blocks) + patch merger", "ViT (32 khối) + patch merger"),
-              L("LLM decoder, 36 layers, 4-bit NF4", "LLM decoder 36 lớp, 4-bit NF4"),
-              L("256–512 visual tokens per image", "256–512 token ảnh mỗi ảnh")], { x: x + 0.25, y: 4.7, w: w - 0.5, h: 2.0, fontSize: 14 });
+              L("7,372,800 params = 0.196% · 29.5 MB", "7.372.800 tham số = 0,196% · 29,5 MB"),
+              L("Everything else frozen, LLM in 4-bit NF4", "Còn lại đóng băng, LLM 4-bit NF4")], { x: x + 0.25, y: 1.95, w: w - 0.5, h: 1.3, fontSize: 12, paraSpaceAfter: 2 });
+  card(s, x, 3.45, w, 3.4);
+  txt(s, L("Data flow (in → out)", "Luồng dữ liệu (vào → ra)"), { x: x + 0.25, y: 3.55, w: w - 0.5, h: 0.4, fontSize: 16, bold: true, color: C.text2 });
+  const flow = [
+    [L("1 · Image → ViT: ", "1 · Ảnh → ViT: "), L("≤ 401,408 px → 14×14 patches → 32 blocks", "≤ 401.408 px → patch 14×14 → 32 khối")],
+    [L("2 · Patch merger: ", "2 · Patch merger: "), L("2×2 patches → 1 token (2048-d) → 256–512 visual tokens", "2×2 patch → 1 token (2048 chiều) → 256–512 token ảnh")],
+    [L("3 · Prompt P0: ", "3 · Prompt P0: "), L("chat template + visual tokens + Vietnamese question", "chat template + token ảnh + câu hỏi tiếng Việt")],
+    [L("4 · Decoder (+LoRA): ", "4 · Decoder (+LoRA): "), L("greedy, ≤ 32 new tokens → normalize → EM / ANLS", "sinh tham lam, ≤ 32 token → chuẩn hoá → EM / ANLS")],
+  ];
+  const runs = [];
+  flow.forEach(([a, b], i) => {
+    runs.push({ text: a, options: { bold: true, color: HEX.ink } });
+    runs.push({ text: b, options: { breakLine: true } });
+    if (i < flow.length - 1) runs.push({ text: " ", options: { fontSize: 3, breakLine: true } });
+  });
+  txt(s, runs, { x: x + 0.25, y: 3.98, w: w - 0.5, h: 2.3, fontSize: 11.5 });
+  txt(s, L("No OCR in the baseline — OCR is the B3 improvement (Part 06).", "Baseline không dùng OCR — OCR là cải tiến B3 (Phần 06)."),
+      { x: x + 0.25, y: 6.3, w: w - 0.5, h: 0.45, fontSize: 11, italic: true, color: HEX.teal });
 }
 
 // 6. Evaluation protocol
 {
   const s = content(L("Data & baseline", "Dữ liệu & baseline"), L("PART 03 · EVALUATION PROTOCOL", "PHẦN 03 · GIAO THỨC ĐÁNH GIÁ"), L("Every run follows one frozen protocol", "Mọi run theo một giao thức cố định"),
-    "Mọi run dùng chung một giao thức: split và seed cố định, cùng prompt, cấu hình khoá trong file config, cùng hàm chuẩn hoá và metric, và log đầy đủ commit, GPU, thời gian. So sánh hai run luôn dùng kiểm định ghép cặp McNemar cho EM và bootstrap cho ANLS. Luật kết luận được chốt trước khi chạy để tránh chọn kết quả có lợi.");
+    "Mọi run dùng chung một giao thức: split và seed cố định, cùng prompt, cấu hình khoá trong file config, cùng hàm chuẩn hoá và metric, và log đầy đủ commit, GPU, thời gian. So sánh hai run luôn dùng kiểm định ghép cặp McNemar cho EM và bootstrap cho ANLS. Luật kết luận được chốt trước khi chạy để tránh chọn kết quả có lợi. Dòng chân trang giải thích các từ viết tắt.");
   const f = fig(s, "b7", M, 1.45, CW, 2.4);
-  const y = 1.45 + f.h + 0.35, cw = (CW - 2 * 0.4) / 3, h = 6.85 - y;
+  const y = 1.45 + f.h + 0.3, cw = (CW - 2 * 0.4) / 3, h = 6.3 - y;
   const cards = [
     [L("Frozen configuration", "Cấu hình cố định"), [L("bf16 compute, 4-bit NF4 + double quant", "Tính bf16, 4-bit NF4 + double quant"), L("512 visual tokens max", "Tối đa 512 token ảnh"), L("Greedy decoding, 32 new tokens", "Greedy, 32 token sinh"), L("Seed 42 · NVIDIA L4", "Seed 42 · NVIDIA L4")]],
     [L("Metrics", "Metric"), [L("Primary: EM, VQA-Acc, ANLS", "Chính: EM, VQA-Acc, ANLS"), L("Secondary: token-F1 (to compare with the paper)", "Phụ: token-F1 (để so với paper)"), L("Symmetric Vietnamese normalization, tone marks kept", "Chuẩn hoá tiếng Việt đối xứng, giữ dấu thanh")]],
@@ -214,6 +229,10 @@ pres.addSection({ title: L("Data & baseline", "Dữ liệu & baseline") });
     txt(s, t, { x: x + 0.25, y: y + 0.15, w: cw - 0.5, h: 0.4, fontSize: 16, bold: true, color: C.text2 });
     bullets(s, items, { x: x + 0.25, y: y + 0.6, w: cw - 0.5, h: h - 0.7, fontSize: 14 });
   });
+  footnote(s, L("EM = Exact Match · VQA-Acc = VQA Accuracy (min(#matching gold / 3, 1); = EM with one gold answer) · ANLS = Average Normalized Levenshtein Similarity (threshold 0.5) · "
+              + "F1 = token-level F1 · bf16 = bfloat16 · NF4 = 4-bit NormalFloat (QLoRA) · CI95 = 95% confidence interval · McNemar = paired test on questions where exactly one run is correct",
+                "EM = Exact Match (khớp tuyệt đối) · VQA-Acc = VQA Accuracy (min(số gold khớp / 3, 1); = EM khi chỉ có 1 gold) · ANLS = Average Normalized Levenshtein Similarity (ngưỡng 0,5) · "
+              + "F1 = F1 theo token · bf16 = bfloat16 · NF4 = 4-bit NormalFloat (QLoRA) · CI95 = khoảng tin cậy 95% · McNemar = kiểm định ghép cặp trên các câu chỉ một run đúng"), 6.38, 0.6);
 }
 
 // 7. Pipeline validation
@@ -264,17 +283,17 @@ pres.addSection({ title: L("Results", "Kết quả") });
 // 9. Backbone ablation R1
 {
   const s = content(L("Results", "Kết quả"), L("PART 04 · BACKBONE ABLATION (R1)", "PHẦN 04 · ABLATION BACKBONE (R1)"), L("A larger model is not better here", "Model lớn hơn không tốt hơn ở bài này"),
-    "Table 7 của paper ViTextVQA có dòng QwenVL-7b đạt EM 28 trên 100 câu. Nhóm chạy Qwen2-VL-7B trong đúng điều kiện của baseline. Kết quả 7B kém 3B 12,6 điểm EM, p rất nhỏ, chậm hơn và tốn VRAM hơn. Nguyên nhân chính là 7B trả lời dài, trung bình 8,2 từ. Table 7 chỉ có 100 câu nên sai số khoảng ±9 điểm, không đủ để chọn giữa 3B và 7B. Vì vậy nhóm giữ Qwen2.5-VL-3B.");
+    "Table 7 của paper ViTextVQA có dòng QwenVL-7b đạt EM 28 trên 100 câu. Nhóm chạy Qwen2-VL-7B trong đúng điều kiện của baseline. Kết quả 7B kém 3B 12,6 điểm EM, p rất nhỏ, chậm hơn và tốn VRAM hơn. Nguyên nhân chính là 7B trả lời dài, trung bình 8,2 từ. Table 7 chỉ có 100 câu nên sai số khoảng ±9 điểm, không đủ để chọn giữa 3B và 7B. Vì vậy nhóm giữ Qwen2.5-VL-3B. Nguồn của từng model và paper ghi ở chân trang, kèm thư mục run trong repo.");
   const fmt = FMT;
   const rows = [
     [TH(L("Run (ViTextVQA, 2,000 q.)", "Run (ViTextVQA, 2.000 câu)")), TH("EM"), TH("F1"), TH(L("words", "số từ")), TH(L("s / q", "s / câu")), TH("VRAM GB")],
-    [L("B1 · Qwen2.5-VL-3B · 4-bit · 512 tok.", "B1 · Qwen2.5-VL-3B · 4-bit · 512 token"), "28.8", "53.8", "5.5", "0.86", "≈ 2.5"],
-    [L("R1b · Qwen2-VL-7B · 4-bit · 512 tok.", "R1b · Qwen2-VL-7B · 4-bit · 512 token"), "16.2", "41.3", "8.0", "1.02", "6.2"],
-    [L("R1 · Qwen2-VL-7B · bf16 · full res.", "R1 · Qwen2-VL-7B · bf16 · đủ độ phân giải"), "16.7", "43.5", "8.2", "2.85", "20.3"],
-    [L("Paper Table 7 · “QwenVL-7b” (100 q.)", "Paper Table 7 · “QwenVL-7b” (100 câu)"), "28.0", "53.8", "–", "–", "–"],
+    [L("B1 · Qwen2.5-VL-3B [1] · 4-bit · 512 tok.", "B1 · Qwen2.5-VL-3B [1] · 4-bit · 512 token"), "28.8", "53.8", "5.5", "0.86", "≈ 2.5"],
+    [L("R1b · Qwen2-VL-7B [2] · 4-bit · 512 tok.", "R1b · Qwen2-VL-7B [2] · 4-bit · 512 token"), "16.2", "41.3", "8.0", "1.02", "6.2"],
+    [L("R1 · Qwen2-VL-7B [2] · bf16 · full res.", "R1 · Qwen2-VL-7B [2] · bf16 · đủ độ phân giải"), "16.7", "43.5", "8.2", "2.85", "20.3"],
+    [L("ViTextVQA paper [3] Table 7 · “QwenVL-7b” (100 q.)", "Paper ViTextVQA [3] Table 7 · “QwenVL-7b” (100 câu)"), "28.0", "53.8", "–", "–", "–"],
   ].map((r, i) => i === 0 ? r : r.map((c, j) => ({ text: fmt(c), options: { fontSize: 14, align: j ? "center" : "left", bold: i === 1 } })));
   table(s, rows, { x: M, y: 1.55, w: CW, colW: [5.03, 1.2, 1.2, 1.4, 1.4, 1.9], rowH: 0.52 });
-  const y = 4.5, cw = (CW - 2 * 0.4) / 3, h = 1.95;
+  const y = 4.4, cw = (CW - 2 * 0.4) / 3, h = 1.85;
   [[L("7B < 3B under identical conditions", "7B < 3B trong cùng điều kiện"), L("−12.6 EM, McNemar p ≈ 10⁻³³; higher resolution does not help (R1 = R1b, p = 0.45)", "−12,6 EM, McNemar p ≈ 10⁻³³; tăng độ phân giải không giúp (R1 = R1b, p = 0,45)")],
    [L("Why: instruction following", "Vì sao: tuân thủ chỉ dẫn"), L("7B writes 8.2 words per answer vs gold 3.7 — EM fails even when the text is read correctly", "7B trả lời 8,2 từ so với gold 3,7 — EM trượt dù đọc đúng chữ")],
    [L("Table 7 cannot decide", "Table 7 không đủ để quyết định"), L("n = 100 → ±9 EM; B1 is already consistent with it. Decision: keep Qwen2.5-VL-3B", "n = 100 → ±9 EM; B1 đã nhất quán với nó. Quyết định: giữ Qwen2.5-VL-3B")]]
@@ -284,6 +303,12 @@ pres.addSection({ title: L("Results", "Kết quả") });
       txt(s, t, { x: x + 0.25, y: y + 0.15, w: cw - 0.5, h: 0.45, fontSize: 16, bold: true, color: C.text2 });
       txt(s, b, { x: x + 0.25, y: y + 0.65, w: cw - 0.5, h: h - 0.8, fontSize: 14 });
     });
+  footnote(s, L("[1] Bai et al., Qwen2.5-VL Technical Report, arXiv:2502.13923, 2025 · [2] Wang et al., Qwen2-VL, arXiv:2409.12191, 2024 · "
+              + "[3] Nguyen et al., ViTextVQA, arXiv:2404.10652, 2024 (ext. in Expert Systems with Applications, 2025). "
+              + "Our runs: experiments/W07_B1_zeroshot_…_test2000, W07_R1_…, W07_R1b_… (same 2,000 questions, seed 42).",
+                "[1] Bai và cs., Qwen2.5-VL Technical Report, arXiv:2502.13923, 2025 · [2] Wang và cs., Qwen2-VL, arXiv:2409.12191, 2024 · "
+              + "[3] Nguyen và cs., ViTextVQA, arXiv:2404.10652, 2024 (bản mở rộng: Expert Systems with Applications, 2025). "
+              + "Run của nhóm: experiments/W07_B1_zeroshot_…_test2000, W07_R1_…, W07_R1b_… (cùng 2.000 câu, seed 42)."), 6.35, 0.62);
 }
 
 // 10. QLoRA B2
@@ -352,12 +377,12 @@ pres.addSection({ title: L("Improvement", "Cải tiến") });
   const fmt = FMT;
   const rows = [
     [TH(L("Model (full test, 10,028 q.)", "Model (full test, 10.028 câu)")), TH(L("EM [CI95]", "EM [CI95]")), TH(L("F1 [CI95]", "F1 [CI95]")), TH(L("vs SOTA (rule: CI95 lower bound > published)", "so với SOTA (luật: cận dưới CI95 > số công bố)"))],
-    [L("ViTextBLIP-2 · paper Table 6 (trained)", "ViTextBLIP-2 · paper Table 6 (có train)"), "25.48", "53.95", "–"],
+    [L("ViTextBLIP-2 · Nguyen et al. [3], Table 6 (trained)", "ViTextBLIP-2 · Nguyen và cs. [3], Table 6 (có train)"), "25.48", "53.95", "–"],
     [L("B1 · Qwen2.5-VL-3B zero-shot", "B1 · Qwen2.5-VL-3B zero-shot"), "29.12 [28.23, 29.99]", "53.89 [53.11, 54.66]", L("higher on EM; F1 indistinguishable", "cao hơn về EM; F1 ngang")],
     [L("B2 · + QLoRA, 1 epoch", "B2 · + QLoRA, 1 epoch"), "50.26 [49.27, 51.23]", "71.16 [70.42, 71.89]", L("higher on EM and F1", "cao hơn cả EM và F1")],
   ].map((r, i) => i === 0 ? r : r.map((c, j) => ({ text: fmt(c).replace(/\[(\d+,\d+), (\d)/, "[$1; $2"), options: { fontSize: 14, align: j && j < 3 ? "center" : "left", bold: i === 3, color: i === 3 ? HEX.ink : HEX.text, fill: i === 3 ? { color: HEX.tealt } : undefined } })));
   table(s, rows, { x: M, y: 1.55, w: CW, colW: [4.0, 2.55, 2.55, 3.03], rowH: 0.62 });
-  const y = 4.3, cw = (CW - 2 * 0.4) / 3, h = 1.95;
+  const y = 4.25, cw = (CW - 2 * 0.4) / 3, h = 1.85;
   [[L("Reproducible", "Tái lập được"), L("Full-test predictions match the earlier subset runs on all 2,000 shared questions (100%).", "Dự đoán full test trùng 100% với các run tập con trên 2.000 câu chung.")],
    [L("Fair in kind", "Công bằng về loại"), L("Both B2 and ViTextBLIP-2 are trained on the ViTextVQA train split.", "Cả B2 và ViTextBLIP-2 đều được train trên tập train ViTextVQA.")],
    [L("Limitation", "Giới hạn"), L("The paper does not publish its answer normalization; the comparison assumes equivalent scoring.", "Paper không công bố cách chuẩn hoá đáp án; phép so giả định cách chấm tương đương.")]]
@@ -367,12 +392,42 @@ pres.addSection({ title: L("Improvement", "Cải tiến") });
       txt(s, t, { x: x + 0.25, y: y + 0.15, w: cw - 0.5, h: 0.45, fontSize: 16, bold: true, color: C.text2 });
       txt(s, b, { x: x + 0.25, y: y + 0.65, w: cw - 0.5, h: h - 0.8, fontSize: 14 });
     });
+  footnote(s, L("[3] Nguyen et al., ViTextVQA, arXiv:2404.10652, 2024. CI95 = paired bootstrap, 10,000 resamples, seed 42. "
+              + "Our numbers: experiments/W07_B1_zeroshot_…_testfull, W07_B2_eval_…_testfull, W07_fulltest_summary_L4_seed42.",
+                "[3] Nguyen và cs., ViTextVQA, arXiv:2404.10652, 2024. CI95 = bootstrap ghép cặp, 10.000 lần lấy mẫu, seed 42. "
+              + "Số của nhóm: experiments/W07_B1_zeroshot_…_testfull, W07_B2_eval_…_testfull, W07_fulltest_summary_L4_seed42."), 6.3, 0.5);
+}
+
+// 12b. How the SOTA works vs. our approach (added after internal review 18/10)
+{
+  const s = content(L("Improvement", "Cải tiến"), L("PART 05 · SOTA APPROACH VS OURS", "PHẦN 05 · CÁCH LÀM CỦA SOTA SO VỚI NHÓM"),
+    L("How ViTextBLIP-2 works — and how we differ", "ViTextBLIP-2 làm thế nào — và nhóm khác ở đâu"),
+    "Đây là quy trình của SOTA. ViTextBLIP-2 giữ đóng băng một Vision Transformer, một hệ OCR là SwinTextSpotter dùng nguyên không fine-tune, và mô hình ngôn ngữ tiếng Việt ViT5; phần duy nhất được train là Q-Former khởi tạo từ BLIP-2, có nhiệm vụ trộn đặc trưng ảnh, câu hỏi và chữ OCR. Paper cũng chỉ ra sắp xếp chữ OCR từ trái-trên xuống phải-dưới giúp hầu hết các model. Nhóm khác ở ba điểm. Một: dùng một VLM đã được pretrain sẵn khả năng đọc chữ, Qwen2.5-VL-3B, lượng tử 4-bit. Hai: chỉ gắn LoRA, 0,2% tham số. Ba: B2 không dùng OCR ngoài — model tự đọc chữ từ ảnh; OCR được đưa vào ở B3, phần 06, dưới dạng một dòng văn bản trong prompt. Về đánh giá, paper báo EM và F1 nhưng không công bố cách chuẩn hoá; nhóm báo thêm ANLS và công khai hàm chuẩn hoá. Một lưu ý khi đọc paper: con số 25,48 / 53,95 nằm ở cột sắp xếp theo độ tin cậy OCR của Table 10, còn bảng ablation lại báo 24,83 / 52,51 cho model đầy đủ — paper không giải thích chênh lệch này.");
+  const hd = [TH(L("Aspect", "Khía cạnh")), TH(L("ViTextBLIP-2 (SOTA, paper [3])", "ViTextBLIP-2 (SOTA, paper [3])")), TH(L("Ours: B2 = Qwen2.5-VL-3B + QLoRA", "Nhóm: B2 = Qwen2.5-VL-3B + QLoRA"))];
+  const body = [
+    [L("Vision", "Thị giác"), L("Frozen pre-trained ViT", "ViT pretrained, đóng băng"), L("Qwen2.5-VL ViT (32 blocks), frozen", "ViT của Qwen2.5-VL (32 khối), đóng băng")],
+    [L("Scene text (OCR)", "Chữ trong ảnh (OCR)"), L("SwinTextSpotter [4], not fine-tuned, Vietnamese charset; OCR tokens fused as features", "SwinTextSpotter [4], không fine-tune, bộ ký tự tiếng Việt; token OCR trộn như đặc trưng"),
+                                                L("No external OCR — the VLM reads text from pixels (OCR added in B3, Part 06)", "Không dùng OCR ngoài — VLM tự đọc chữ từ ảnh (OCR thêm ở B3, Phần 06)")],
+    [L("Language model", "Mô hình ngôn ngữ"), L("ViT5 [5] (Vietnamese T5), frozen", "ViT5 [5] (T5 tiếng Việt), đóng băng"), L("Qwen2.5-3B decoder, 36 layers, 4-bit NF4", "Decoder Qwen2.5-3B, 36 lớp, 4-bit NF4")],
+    [L("What is trained", "Phần được train"), L("Q-Former (initialized from BLIP-2) fusing image, question and OCR", "Q-Former (khởi tạo từ BLIP-2) trộn ảnh, câu hỏi và OCR"), L("LoRA on q, k, v, o: 7.37 M params (0.196%)", "LoRA trên q, k, v, o: 7,37 triệu tham số (0,196%)")],
+    [L("Data handling", "Xử lý dữ liệu"), L("OCR tokens ordered top-left → bottom-right (helps most models)", "Sắp chữ OCR trái-trên → phải-dưới (giúp hầu hết model)"), L("Official split; Vietnamese normalization (NFC, lowercase, tone marks kept)", "Split chính thức; chuẩn hoá tiếng Việt (NFC, chữ thường, giữ dấu thanh)")],
+    [L("Training data", "Dữ liệu train"), L("Full ViTextVQA train", "Toàn bộ train ViTextVQA"), L("Full ViTextVQA train, 1 epoch (3.03 h on one L4)", "Toàn bộ train ViTextVQA, 1 epoch (3,03 h trên 1 L4)")],
+    [L("Metrics", "Metric"), L("EM, F1; answer normalization not published", "EM, F1; không công bố cách chuẩn hoá"), L("EM, ANLS (+ F1 to compare); normalization published in code", "EM, ANLS (+ F1 để so); hàm chuẩn hoá công khai trong code")],
+    [L("Full test (EM / F1)", "Full test (EM / F1)"), "25.48 / 53.95", "50.26 / 71.16"],
+  ];
+  const rows = [hd].concat(body.map((r, i) => r.map((c, j) => ({ text: FMT(c), options: { fontSize: 12, bold: j === 0 || i === body.length - 1,
+      color: j === 0 ? HEX.ink : HEX.text, fill: i === body.length - 1 ? { color: HEX.tealt } : undefined } }))));
+  table(s, rows, { x: M, y: 1.45, w: CW, colW: [2.2, 5.0, 4.93], rowH: 0.5 });
+  footnote(s, L("[3] Nguyen et al., ViTextVQA, arXiv:2404.10652, 2024 (ext. ESWA 2025) · [4] Huang et al., SwinTextSpotter, CVPR 2022 · [5] Phan et al., ViT5, NAACL SRW 2022. "
+              + "Note: the paper's 25.48 / 53.95 is the “OCR confidence” column of its Table 10; its ablation reports 24.83 / 52.51 for the full model.",
+                "[3] Nguyen và cs., ViTextVQA, arXiv:2404.10652, 2024 (bản mở rộng ESWA 2025) · [4] Huang và cs., SwinTextSpotter, CVPR 2022 · [5] Phan và cs., ViT5, NAACL SRW 2022. "
+              + "Lưu ý: số 25,48 / 53,95 của paper nằm ở cột “OCR confidence” trong Table 10; bảng ablation báo 24,83 / 52,51 cho model đầy đủ."), 6.3, 0.62);
 }
 
 // 13. Error analysis (moved before PART 06: it motivates the OCR-aware method)
 {
   const s = content(L("Improvement", "Cải tiến"), L("PART 05 · ERROR & HALLUCINATION ANALYSIS", "PHẦN 05 · PHÂN TÍCH LỖI & HALLUCINATION"), L("Where B2 still fails", "B2 còn sai ở đâu"),
-    "Phân loại tự động 4.988 câu B2 còn sai trên full test ViTextVQA. 9% chỉ sai dấu thanh, ví dụ thủy và thúy — đây là thách thức riêng của tiếng Việt. 17% chỉ lệch một hai ký tự, thường là đọc chữ hoặc số. Khoảng 27% sai về độ dài: thừa hoặc thiếu chữ so với gold. 47% còn lại sai về nội dung hoặc vùng ảnh. Nhóm đã duyệt tay 200 lỗi của B2 có xem ảnh, 4 người cùng nhãn gợi ý của AI, trưởng nhóm phân xử các chỗ lệch. Kết quả: 54% câu bị EM chấm sai thực ra đúng ý — EM quá khắt khe; 12,5% do gold nhiễu; ở ViTextVQA lỗi thật chủ yếu là đọc sai chữ 28% và đọc nhầm vùng chữ 23%; hallucination thật chỉ 7%. Chính các lỗi đọc chữ này dẫn tới phương pháp đề xuất ở phần sau. Độ đồng thuận giữa hai người gán nhãn độc lập kappa 0,62; bỏ 42 dòng có AI hỗ trợ thì kết luận không đổi.");
+    "Phân loại tự động 4.988 câu B2 còn sai trên full test ViTextVQA. 9% chỉ sai dấu thanh, ví dụ thủy và thúy — đây là thách thức riêng của tiếng Việt. 17% chỉ lệch một hai ký tự, thường là đọc chữ hoặc số. Khoảng 27% sai về độ dài: thừa hoặc thiếu chữ so với gold. 47% còn lại sai về nội dung hoặc vùng ảnh. Nhóm đã duyệt tay 200 lỗi của B2 có xem ảnh, 4 người cùng nhãn gợi ý của AI, trưởng nhóm phân xử các chỗ lệch. Kết quả: 54% câu bị EM chấm sai thực ra đúng ý — EM quá khắt khe; 12,5% do gold nhiễu; ở ViTextVQA lỗi thật chủ yếu là đọc sai chữ 28% và đọc nhầm vùng chữ 23%; hallucination thật chỉ 7%. Chính các lỗi đọc chữ này dẫn tới phương pháp đề xuất ở phần sau. Độ đồng thuận giữa hai người gán nhãn độc lập kappa 0,62; bỏ 42 dòng có AI hỗ trợ thì kết luận không đổi. Nguồn từng con số ghi ở chân trang: lệnh tái tạo phân loại tự động và file kết quả duyệt tay trong repo.");
   s.addChart(pres.charts.BAR, [{ name: L("% of B2 errors", "% lỗi của B2"),
       labels: [L("other: content / region", "khác: nội dung / vùng ảnh"), L("1–2 characters off", "lệch 1–2 ký tự"), L("answer too long", "trả lời thừa chữ"), L("answer too short", "trả lời thiếu chữ"), L("tone marks only", "chỉ sai dấu thanh")],
       values: [47.4, 16.8, 13.6, 13.2, 9.0] }],
@@ -385,9 +440,9 @@ pres.addSection({ title: L("Improvement", "Cải tiến") });
   ];
   const rows = [[TH(L("Bucket", "Nhóm")), TH(L("B2 answer", "B2 trả lời")), TH("Gold")]]
     .concat(ex.map((r) => r.map((c) => ({ text: c, options: { fontSize: 14 } }))));
-  table(s, rows, { x: M, y: 4.75, w: 7.0, colW: [1.8, 2.45, 2.75], rowH: 0.5 });
+  table(s, rows, { x: M, y: 4.62, w: 7.0, colW: [1.8, 2.45, 2.75], rowH: 0.44 });
   const x = M + 7.4, w = CW - 7.4;
-  card(s, x, 1.5, w, 5.35);
+  card(s, x, 1.5, w, 4.95);
   txt(s, L("Manual audit: 200 B2 errors (adjudicated)", "Duyệt tay 200 lỗi B2 (đã phân xử)"), { x: x + 0.3, y: 1.65, w: w - 0.6, h: 0.75, fontSize: 16, bold: true, color: C.text2 });
   bullets(s, [
     L("54% are correct in meaning: EM is too strict (ViVQA 62%, ViTextVQA 46%)", "54% thực ra đúng ý: EM quá khắt khe (ViVQA 62%, ViTextVQA 46%)"),
@@ -395,7 +450,11 @@ pres.addSection({ title: L("Improvement", "Cải tiến") });
     L("ViTextVQA real errors: OCR 28%, wrong text region 23%, tone marks 8%", "Lỗi thật ở ViTextVQA: đọc sai chữ 28%, nhầm vùng chữ 23%, dấu thanh 8%"),
     L("Hallucination (not in the image): 7% of errors (95% CI 4–11%)", "Hallucination (không có trong ảnh): 7% số lỗi (CI95 4–11%)"),
     L("4 annotators + AI pre-labels; κ = 0.62 (2 independent annotators); same conclusions without the 42 AI-assisted rows", "4 người + nhãn gợi ý của AI; κ = 0,62 (2 người độc lập); bỏ 42 dòng có AI hỗ trợ, kết luận không đổi"),
-  ], { x: x + 0.3, y: 2.4, w: w - 0.6, h: 4.35, fontSize: 15 });
+  ], { x: x + 0.3, y: 2.4, w: w - 0.6, h: 3.95, fontSize: 14 });
+  footnote(s, L("Sources — buckets: python -m src.eval.answer_format --buckets on experiments/W07_B2_eval_qlora_r16_ep1_vitextvqa_testfull_… (4,988 = 10,028 − 5,040 correct). "
+              + "Manual audit: docs/W07/audit/W07_error_audit_final.json (labels in docs/W07/audit/labels/, computed by compute_error_audit.py).",
+                "Nguồn — phân loại tự động: python -m src.eval.answer_format --buckets trên experiments/W07_B2_eval_qlora_r16_ep1_vitextvqa_testfull_… (4.988 = 10.028 − 5.040 câu đúng). "
+              + "Duyệt tay: docs/W07/audit/W07_error_audit_final.json (nhãn ở docs/W07/audit/labels/, tính bằng compute_error_audit.py)."), 6.4, 0.55);
 }
 
 // ================= PART 06 · OCR-aware QLoRA (B3) — added W09 =================
