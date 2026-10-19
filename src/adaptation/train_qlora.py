@@ -34,6 +34,10 @@ Cách chạy (Colab, GPU):
   # W09: lặp lại B2-sub / B3 với seed huấn luyện khác (tập con train GIỮ NGUYÊN seed 42)
   !python -u -m src.adaptation.train_qlora ... --seed 43
 
+  # W10: ablation cấu hình LoRA trên công thức B3 (H3: vị trí gắn, H4: rank)
+  !python -u -m src.adaptation.train_qlora ... --lora_targets all_linear_llm --lora_r 4   # A2, cùng ngân sách
+  !python -u -m src.adaptation.train_qlora ... --lora_r 64                                # A3, alpha = 128
+
 Chạy tiếp sau khi Colab ngắt: chạy lại ĐÚNG lệnh cũ (cùng --run_name) -> tự resume.
 
 Kiểm thử offline (không GPU, không mạng, không cần torch):
@@ -222,7 +226,10 @@ def load_config(path: str, max_pixels: Optional[int] = None, dtype: Optional[str
                 grad_accum: Optional[int] = None,
                 grad_checkpointing: Optional[bool] = None,
                 epochs: Optional[float] = None,
-                seed: Optional[int] = None) -> Dict[str, Any]:
+                seed: Optional[int] = None,
+                lora_r: Optional[int] = None,
+                lora_alpha: Optional[int] = None,
+                lora_targets: Optional[str] = None) -> Dict[str, Any]:
     """Đọc config + cho phép ghi đè vài tham số qua CLI (phục vụ ablation, không sửa file gốc)."""
     import yaml
     with open(path, encoding="utf-8") as fp:
@@ -250,6 +257,19 @@ def load_config(path: str, max_pixels: Optional[int] = None, dtype: Optional[str
     # None -> giữ seed của file config (42): chữ ký các run cũ KHÔNG đổi.
     if seed is not None:
         cfg["run"]["seed"] = int(seed)
+    # W10: ablation cấu hình LoRA (H3: vị trí gắn, H4: rank). Ba khoá đều nằm trong cfg["lora"]
+    # -> có trong chữ ký run. None -> giữ file config: chữ ký các run W07–W09 KHÔNG đổi.
+    # Đổi r mà không truyền alpha -> alpha = 2·r (giữ hệ số scale alpha/r = 2 như cấu hình gốc r16/α32),
+    # để so sánh rank không bị lẫn với thay đổi độ lớn bước cập nhật.
+    if lora_targets is not None:
+        from src.adaptation.lora_targets import preset_target_modules
+        cfg["lora"]["target_modules"] = preset_target_modules(lora_targets)
+    if lora_r is not None:
+        cfg["lora"]["r"] = int(lora_r)
+        if lora_alpha is None:
+            cfg["lora"]["lora_alpha"] = 2 * int(lora_r)
+    if lora_alpha is not None:
+        cfg["lora"]["lora_alpha"] = int(lora_alpha)
     return cfg
 
 
@@ -419,7 +439,9 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
           epochs: Optional[float] = None, seed: Optional[int] = None,
           ocr_backend: Optional[str] = None, ocr_cache: Optional[str] = None,
           ocr_template: Optional[str] = None, ocr_max_chars: Optional[int] = None,
-          ocr_min_conf: Optional[float] = None) -> Dict[str, Any]:
+          ocr_min_conf: Optional[float] = None,
+          lora_r: Optional[int] = None, lora_alpha: Optional[int] = None,
+          lora_targets: Optional[str] = None) -> Dict[str, Any]:
     """
     Nạp data -> nạp model + LoRA -> train -> lưu adapter + train_log.json.
 
@@ -438,10 +460,13 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
 
     cfg = copy.deepcopy(load_config(config, max_pixels=max_pixels, dtype=dtype, mode=mode,
                                     batch_size=batch_size, grad_accum=grad_accum,
-                                    grad_checkpointing=grad_checkpointing, epochs=epochs, seed=seed))
+                                    grad_checkpointing=grad_checkpointing, epochs=epochs, seed=seed,
+                                    lora_r=lora_r, lora_alpha=lora_alpha, lora_targets=lora_targets))
     cfg["run"]["name"] = run_name
     seed = cfg["run"]["seed"]
     set_seed(seed)
+    _log(f"   LoRA: r={cfg['lora']['r']} alpha={cfg['lora']['lora_alpha']} "
+         f"target_modules={cfg['lora']['target_modules']}")
 
     data_file = data_file or os.path.join(drive_root, DATASETS[dataset]["train_rel"])
     out_dir = os.path.join(out_root or os.path.join(drive_root, "experiments"), run_name)
@@ -487,6 +512,12 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     _log("   nạp model + gắn LoRA...")
     model, processor = load_vlm_for_training(cfg)
     model.config.use_cache = False                  # bắt buộc khi bật gradient checkpointing
+    # W10: kiểm LoRA gắn đúng chỗ (không lọt vision tower, đủ lớp mỗi hậu tố, số tham số = tính tay)
+    # -> lỗi ở đây chỉ mất ≈ 4 phút nạp model, không phải 3 giờ train sai cấu hình.
+    from src.adaptation.lora_targets import audit_lora_modules
+    lora_audit = audit_lora_modules(model, cfg)
+    _log(f"   LoRA audit: {lora_audit['n_modules']} lớp {lora_audit['by_tower']} | {lora_audit['by_suffix']} | "
+         f"tham số LoRA {lora_audit['lora_params_counted']:,} (tính tay {lora_audit['lora_params_expected']})")
     # Đếm tham số: với model 4-bit, p.numel() đếm THIẾU vì 2 giá trị được đóng gói
     # trong 1 byte. PEFT có hàm riêng xử lý đúng -> ưu tiên dùng, chỉ tự đếm khi không có.
     if hasattr(model, "get_nb_trainable_parameters"):
@@ -587,6 +618,7 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         "torch_dtype": compute_dtype,
         "quantization": cfg["quantization"],
         "lora": cfg["lora"],
+        "lora_audit": lora_audit,
         "training": {**t, "max_steps": max_steps, "limit": limit, **sched,
                      "unsupported_training_args": unsupported},
         "run_signature_sha256": sig["sha256"],
@@ -765,6 +797,23 @@ def _selftest() -> None:
                          "sha", 8000, None, None)["sha256"] == run_signature(cfg_s42, "sha", 8000, None, None)["sha256"]
     _log("seed override OK")
 
+    # W10 --lora_r / --lora_alpha / --lora_targets: không truyền -> chữ ký cũ giữ nguyên;
+    # đổi r -> alpha = 2r; preset all_linear_llm -> regex; preset attn r16 == cấu hình cũ (cùng phép tính)
+    from src.adaptation.lora_targets import ALL_LINEAR_LLM_REGEX
+    cp = os.path.join(REPO_ROOT, "configs/qwen_lora.yaml")
+    sig = lambda c: run_signature(c, "sha", 8000, None, None)["sha256"]
+    c_old = load_config(cp, epochs=1)
+    assert c_old["lora"]["r"] == 16 and c_old["lora"]["lora_alpha"] == 32
+    assert sig(load_config(cp, epochs=1, lora_targets="attn", lora_r=16)) == sig(c_old)
+    c_r64 = load_config(cp, epochs=1, lora_r=64)
+    assert (c_r64["lora"]["r"], c_r64["lora"]["lora_alpha"]) == (64, 128) and sig(c_r64) != sig(c_old)
+    c_al4 = load_config(cp, epochs=1, lora_targets="all_linear_llm", lora_r=4)
+    assert c_al4["lora"]["target_modules"] == ALL_LINEAR_LLM_REGEX and c_al4["lora"]["lora_alpha"] == 8
+    assert len({sig(c_old), sig(c_r64), sig(c_al4)}) == 3
+    assert load_config(cp, lora_r=8, lora_alpha=32)["lora"]["lora_alpha"] == 32
+    assert load_config(cp)["lora"]["target_modules"] == ["q_proj", "k_proj", "v_proj", "o_proj"]
+    _log("lora override OK")
+
     # loss sau resume: transformers chia tổng loss 7 step cho global_step 12 -> phải hiệu chỉnh
     sl = session_losses(0.8226, 12, 7, [{"loss": 1.6}, {"loss": "1.451"}, {"train_loss": 0.8}])
     assert abs(sl["final_loss"] - 1.4102) < 1e-3 and sl["last_logged_loss"] == 1.451, sl
@@ -855,6 +904,12 @@ def main() -> None:
     ap.add_argument("--ocr_template", default=None, help="Mẫu dòng OCR (v1 | v2); mặc định v1")
     ap.add_argument("--ocr_max_chars", type=int, default=None, help="Cắt văn bản OCR quá N ký tự; mặc định 600")
     ap.add_argument("--ocr_min_conf", type=float, default=None, help="Bỏ dòng OCR có độ tin cậy < ngưỡng; mặc định 0")
+    ap.add_argument("--lora_r", type=int, default=None,
+                    help="W10 ablation H4: ghi đè lora.r; không truyền --lora_alpha thì alpha = 2·r")
+    ap.add_argument("--lora_alpha", type=int, default=None, help="Ghi đè lora.lora_alpha")
+    ap.add_argument("--lora_targets", default=None, choices=["attn", "all_linear_llm"],
+                    help="W10 ablation H3: attn = q,k,v,o (mặc định cũ); all_linear_llm = thêm gate,up,down "
+                         "CHỈ ở LLM (regex, không lọt vision)")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
 
@@ -870,7 +925,8 @@ def main() -> None:
           grad_checkpointing=None if a.grad_checkpointing is None else (a.grad_checkpointing == "on"),
           save_steps=a.save_steps, debug_crash_at_step=a.debug_crash_at_step, epochs=a.epochs, seed=a.seed,
           ocr_backend=a.ocr_backend, ocr_cache=a.ocr_cache, ocr_template=a.ocr_template,
-          ocr_max_chars=a.ocr_max_chars, ocr_min_conf=a.ocr_min_conf)
+          ocr_max_chars=a.ocr_max_chars, ocr_min_conf=a.ocr_min_conf,
+          lora_r=a.lora_r, lora_alpha=a.lora_alpha, lora_targets=a.lora_targets)
 
 
 if __name__ == "__main__":
