@@ -9,6 +9,14 @@ Mục tiêu W10: trả lời **hai câu hỏi còn mở** về công thức B3 (
 
 > Ngôn ngữ: bản **tiếng Việt** (bản làm việc). Bản tiếng Anh cho thesis chuyển từ bản này sau khi nội dung chốt.
 
+> **Đánh số giả thuyết.** Luật ghi trước của tuần này (19/10) dùng đánh số **cũ** trong `docs/W02/Hypotheses.md`: H3 = vị trí gắn LoRA, H4 = rank. Ngày 20/10, deck cộng dồn Review 2 (`docs/04_slides/cumulative/`, commit `6359085`) chốt đánh số **chính thức mới** H1–H4 và chuyển cấu hình LoRA thành **ablation A1 (module gắn LoRA) và A2 (rank)**. Luật đã commit trước khi có số nên **giữ nguyên chữ**; bảng ánh xạ dùng cho báo cáo:
+>
+> | Luật tuần này (số cũ) | Tên chính thức (số mới) | Run (tên thư mục, không đổi) |
+> |---|---|---|
+> | H3 · all-linear so với attention-only, cùng ngân sách | **Ablation A1** · module gắn LoRA | `W10_A2_*` (all-linear r4) |
+> | H4 · rank 64 so với 16 | **Ablation A2** · rank | `W10_A3_*` (attention r64) |
+> | — | **H2** · OCR (≥ +3 ANLS, cộng hưởng với QLoRA) | `W10_B3full_*` |
+
 ## Kế hoạch tuần
 
 | # | Việc | GPU | Trạng thái |
@@ -16,10 +24,10 @@ Mục tiêu W10: trả lời **hai câu hỏi còn mở** về công thức B3 (
 | 0 | Code: `src/adaptation/lora_targets.py` (preset + chặn LoRA lọt vision), `--lora_r / --lora_alpha / --lora_targets` cho `train_qlora.py`, LoRA audit trong `train_log.json`, `src/eval/lora_ablation.py`, notebook `17_lora_ablation_rank_modules_qwen25vl.ipynb`, luật ghi trước (README này) | — | ✅ 19/10 (`8be932e`) |
 | 1 | **A2** — all-linear r = 4 (cùng ngân sách tham số với B3), train + eval test2000 | ≈ 3,9 h L4 | ✅ 20/10 — **H3 KHÔNG ĐƯỢC ỦNG HỘ** (−0,55 EM, p = 0,34), chậm hơn 17,5% |
 | 2 | **A3** — attention r = 64, train + eval test2000 | ≈ 3,7 h L4 | ✅ 20/10 — **ỦNG HỘ H4 (yếu)** (+1,05 EM, p = 0,071, CI95 [−0,05; +2,15]), adapter ×4 |
-| 3 | OCR cho phần ảnh train còn thiếu (≈ 9.063 ảnh) — notebook 10 **Phần D** (mục 13–14) | ≈ 2–2,5 h T4 | ⏳ |
-| 4 | **B3-full** — QLoRA + OCR trên toàn bộ train (35.159 câu), eval full test 10.028 câu — notebook `18_qlora_ocr_b3full_vs_b2_qwen25vl.ipynb`, kết luận bằng `src/eval/b3full.py` | ≈ 13 h + 2,8 h L4 | ⏳ |
-| 5 | Results (R6) bản tiếng Việt — phần OCR-aware QLoRA (số liệu W08–W09) | — | ⏳ |
-| 6 | Đóng tuần: `W10_Team_Report.md`, dọn Downloads + Drive, handoff | — | ⏳ |
+| 3 | OCR cho phần ảnh train còn thiếu (≈ 9.063 ảnh) — notebook 10 **Phần D** (mục 13–14) | ≈ 2–2,5 h T4 | ✅ 20/10 — +9.063 ảnh, 0 lỗi, 0,72 s/ảnh (≈ 1,9 h T4); 6.289 ảnh cũ giữ nguyên; cache 15.352 ảnh |
+| 4 | **B3-full** — QLoRA + OCR trên toàn bộ train (35.159 câu), eval full test 10.028 câu — notebook `18_qlora_ocr_b3full_vs_b2_qwen25vl.ipynb`, kết luận bằng `src/eval/b3full.py` | ≈ 13 h + 2,8 h L4 | ✅ 21/10 — **OCR-AWARE VƯỢT B2 KHI ĐỦ DỮ LIỆU** (+3,09 EM, p = 6,7 × 10⁻²¹) |
+| 5 | Results (R6) bản tiếng Việt — phần QLoRA nhận biết OCR (số liệu W08–W10) | — | ✅ 21/10 — `docs/03_report/R6_Results.md` mục 2–4 (bản nháp) |
+| 6 | Đóng tuần: `W10_Team_Report.md`, dọn Downloads + Drive, handoff | — | ✅ 21/10 |
 
 ## Quyết định đã chốt
 
@@ -32,6 +40,9 @@ Mục tiêu W10: trả lời **hai câu hỏi còn mở** về công thức B3 (
 | 19/10/2026 | Preset `all_linear_llm` dùng **regex** chỉ khớp `layers.<i>.(self_attn\|mlp)…` và loại tên chứa `visual` | Vision tower của Qwen2.5-VL cũng có `gate_proj/up_proj/down_proj` (`modeling_qwen2_5_vl.py`, transformers 5.17.0). List hậu tố sẽ gắn LoRA vào 32 × 3 lớp vision. `train_qlora` dừng nếu audit thấy lớp vision |
 | 19/10/2026 | **1 seed (42)** cho ablation | Std EM của B3 qua 3 seed = 0,23 điểm (W09), nhỏ hơn nhiều mức test2000 phát hiện được (≈ 1,7 điểm). Thêm seed tốn ≈ 7 h L4 / seed / biến thể. Ghi là giới hạn |
 | 19/10/2026 | **B3-full dùng nguyên công thức B3** (attention r = 16) bất kể kết quả ablation | B3-full so với B2 W07 (cũng attention r = 16). Đổi cấu hình LoRA theo kết quả ablation là chọn cấu hình bằng test → rò rỉ. Nếu A2/A3 thắng, ghi là hướng cải tiến tiếp |
+| 20/10/2026 | **Review 2 dời sang thứ Năm 29/10/2026** (tuần thực 8), theo thông báo của bộ môn | Kết quả W10 có trước ngày review → theo quy ước W09 thuộc mốc Review 2; việc đưa vào deck cộng dồn làm trong tuần thực 8, trước buổi review |
+| 21/10/2026 | **Mô hình ViTextVQA chính thức = B3-full** (thay B2 W07) cho bảng kết quả chính và prototype | Thắng B2 W07 theo luật ghi trước (cùng dữ liệu, cùng siêu tham số, chỉ khác OCR). Số B2, B2-sub, B3 vẫn báo cáo đủ trong bảng ablation. ViVQA giữ C3 (W09) |
+| 21/10/2026 | **Adapter dùng chung 2 dataset: làm bản rẻ ở W11** (ViVQA đầy đủ + ViTextVQA tập con, 1 epoch); thiết kế + luật ghi trước chốt đầu W11 | Đã hứa trên slide Review 2 (kế hoạch tới Review 3); trả lời câu hỏi chuyển giao giữa hai loại câu hỏi; demo dùng 1 adapter nếu không kém. Nếu kém → demo chuyển adapter theo ảnh (PEFT hỗ trợ sẵn) |
 
 ## Luật ablation LoRA — H3 (vị trí gắn) và H4 (rank) (ghi TRƯỚC khi chạy, 19/10/2026)
 
@@ -92,7 +103,8 @@ Run cũ không bị ảnh hưởng: audit chỉ chạy khi train mới; với c�
 | A2 + A3 | ≈ 7,6 h | — | ≈ 12 |
 | OCR train còn thiếu | — | ≈ 2,5 h | ≈ 3 |
 | B3-full train + eval full test | ≈ 16 h | — | ≈ 25 |
-| **Tổng W10** | ≈ 23,6 h | ≈ 2,5 h | **≈ 40** (còn ≈ 84 trước W10 → ≈ 44 cho W11–W15) |
+| **Tổng W10 (ước tính trước)** | ≈ 23,6 h | ≈ 2,5 h | **≈ 40** (còn ≈ 84 trước W10 → ≈ 44 cho W11–W15) |
+| **Thực tế** | ≈ 23,8 h (A2 3,51 + A3 2,90 train, 2 eval ≈ 1,2 h; B3-full 12,75 train + 2,78 eval; nạp/kiểm ≈ 0,7 h) | ≈ 2,1 h | số CU thật: đọc ở Colab → Resources khi đóng tuần (trước W10: 86,52 CU lúc 19/10 23:49) |
 
 ## Kết quả
 
@@ -122,12 +134,73 @@ Nguồn: `../../experiments/W10_lora_ablation_test2000_L4_seed42/` (`lora_ablati
 - 1 seed huấn luyện. EM của A3 (0,5030) cao hơn cả 3 seed B3 (0,4880–0,4925, std 0,23 điểm — W09), nhưng đây là quan sát **sau khi thấy số**, không nằm trong luật; theo luật không chạy thêm seed để đổi kết luận. Ghi r = 64 là **hướng cải tiến tiếp** (cần ≥ 3 seed hoặc full test để kết luận).
 - B3-full vẫn dùng attention r = 16 (quyết định 19/10, chốt trước khi có kết quả ablation).
 
-### B3-full — OCR-aware QLoRA trên toàn bộ train
+### OCR toàn bộ train — notebook 10 Phần D (20/10/2026, T4, GPU)
 
-*(chưa chạy)*
+Nguồn: `../../experiments/W10_ocr_cache_fulltrain/ocr_cache_manifest.json`. Cache trên Drive trùng sha256 biên bản W09 trước khi mở rộng (6.289 ảnh) → OCR thêm **9.063 ảnh, 0 lỗi**, 99,6% ảnh mới có chữ, 0,72 s/ảnh → **15.352 ảnh** (sha256 `e7ce4f76d98c…`). Dấu vân tay 6.289 ảnh cũ **giữ nguyên**; engine trùng đợt W08/W09 (PaddleOCR 3.7.0 · paddlepaddle 3.3.1 · PP-OCRv6_medium_det + VietOCR vgg_transformer). Phủ đủ train 11.733/11.733 và full test 3.353/3.353 ảnh.
+
+### B3-full — QLoRA nhận biết OCR trên toàn bộ train (21/10/2026, L4, bf16, 4-bit, seed 42, full test 10.028 câu)
+
+Nguồn: `../../experiments/W10_B3full_vs_B2_testfull_L4_seed42/b3full_summary.json`; train `W10_B3full_qlora_ocr_vietocr_v1_r16_qwen25vl_vitextvqa_full_ep1_bf16_L4_seed42`; eval `W10_B3full_eval_qlora_ocr_vietocr_v1_r16_full_ep1_vitextvqa_testfull_bf16_L4_seed42`. Các run so sánh: B2 W07, B2-sub và B3 W09 (full test).
+
+**Kiểm hợp lệ (notebook 18 tự kiểm, đều đạt):** `train.json` trùng sha256 file B2 W07; 35.159 câu, loại 0; r 16 / α 32 / attention, LoRA audit 144 lớp chỉ LLM, 7.372.800 tham số; OCR VietOCR · v1 · 600 · 0 (99,77% mẫu train có chữ); lr, epoch, batch, warmup trùng B2 W07; train chạy liền một phiên (không resume).
+
+| Run | Dữ liệu train | OCR | EM | ANLS | F1 (phụ) | s/câu |
+|---|---|---|---|---|---|---|
+| B2-sub (W09) | 8.000 câu (23%) | không | 46,56 | 68,90 | 67,83 | 0,983 |
+| B3 (W09) | 8.000 câu (23%) | có | 49,10 | 70,47 | 70,03 | 0,983 |
+| B2 (W07) | 35.159 câu (100%) | không | 50,26 | 72,02 | 71,16 | 1,001 |
+| **B3-full** | 35.159 câu (100%) | có | **53,35** | **73,89** | **73,73** | 0,996 |
+| ViTextBLIP-2 (paper, Table 6) | 100% | SwinTextSpotter | 25,48 | — | 53,95 | — |
+
+| Hiệu ứng (ghép cặp 10.028 câu) | So sánh | Chỉ A đúng / chỉ B đúng | McNemar p | ΔEM (điểm) | ΔANLS (CI95) |
+|---|---|---|---|---|---|
+| OCR-aware, 23% dữ liệu (W09) | B2-sub → B3 | 417 / 672 | 1,1 × 10⁻¹⁴ | +2,54 | +0,0157 [+0,0106; +0,0208] |
+| **OCR-aware, 100% dữ liệu — SO SÁNH CHÍNH** | **B2 → B3-full** | **395 / 705** | **6,7 × 10⁻²¹** | **+3,09** | **+0,0187 [+0,0138; +0,0236]** |
+| Thêm dữ liệu, không OCR | B2-sub → B2 | 355 / 726 | 6,1 × 10⁻³⁰ | +3,70 | +0,0312 [+0,0260; +0,0365] |
+| Thêm dữ liệu, có OCR | B3 → B3-full | 341 / 767 | 3,0 × 10⁻³⁸ | +4,25 | +0,0343 [+0,0289; +0,0397] |
+
+Tương tác dữ liệu × OCR (theo câu, chỉ báo cáo): EM +0,0055 [−0,0020; +0,0129] · ANLS +0,0031 [−0,0030; +0,0092].
+
+So với ViTextBLIP-2 (cận dưới CI95 bootstrap > số công bố): EM 53,35 [52,39; 54,33] > 25,48 · F1 73,73 [73,02; 74,45] > 53,95 → **CAO HƠN** cả EM lẫn F1.
+
+| Chi phí | Giờ train | s/step | VRAM đỉnh | Loss cuối | Adapter |
+|---|---|---|---|---|---|
+| B2 (W07) | 11,99 | 19,63 | 6,88 GB | 0,6179 | cùng cỡ (cùng r16 · attention) |
+| B3-full | 12,75 (+6,3%) | 20,89 | 8,38 GB (+1,5) | 0,5598 | 29,53 MB |
+
+Suy luận full test: 9.991 s (0,996 s/câu, chưa tính OCR; OCR chạy trước một lần và cache, 0,72–0,85 s/ảnh trên GPU).
+
+**Kết luận theo luật ghi trước: OCR-AWARE VƯỢT B2 KHI ĐỦ DỮ LIỆU.**
+
+**Diễn giải:**
+- **Đính chính W09.** W09 chỉ nói được "hiệu quả dữ liệu" (với 23% dữ liệu, OCR bù ≈ 69% khoảng cách). Nay: **cùng dữ liệu, cùng siêu tham số, chỉ khác OCR**, QLoRA nhận biết OCR hơn QLoRA thường +3,09 EM (p = 6,7 × 10⁻²¹) — cải tiến thật so với baseline đã reproduce.
+- **Lợi ích của OCR không mất đi khi thêm dữ liệu** (+2,54 ở 23% → +3,09 ở 100%; tương tác +0,55, CI95 chứa 0 → cộng gộp). Lo ngại "đủ dữ liệu thì model tự đọc chữ tốt, OCR thành thừa" không xảy ra trong phạm vi đo.
+- Hai yếu tố cộng dồn: B2-sub → B3-full = +6,79 EM (46,56 → 53,35).
+- **Đối chiếu H2** (số mới: OCR tăng ANLS ≥ +3 điểm và cộng hưởng với QLoRA): EM tăng mạnh, nhưng ΔANLS = +1,87 điểm, **vẫn dưới ngưỡng +3** (trên ngưỡng bác bỏ +1) → **H2 vẫn ủng hộ một phần**, như kết luận Review 2. Lợi ích chủ yếu ở việc trả lời **đúng nguyên chuỗi** (EM) hơn là gần đúng ký tự (ANLS).
+- **Chi phí của cải tiến nhỏ:** +6% thời gian train, +1,5 GB VRAM (prompt dài hơn ≈ 140 ký tự OCR), tốc độ suy luận như cũ; cộng bước OCR chạy trước.
+
+**Giới hạn:**
+- B3-full 1 seed (42). Ở tập con 8k, độ lệch chuẩn EM của B3 qua 3 seed là 0,23 điểm và lợi ích của OCR ổn định 3/3 seed (W09) — nhưng chưa đo lại ở 100% dữ liệu.
+- B2 W07 train bằng code commit `22b44a3`, B3-full bằng code W10. Giữa hai commit: `configs/qwen_lora.yaml` không đổi; `src/prompting/builder.py` chỉ thêm nhánh OCR; `train_qlora.py` thêm seed / OCR / resume / LoRA audit (không đổi phép tính khi không bật). B2-sub (code W08) và B2 W07 cùng prompt zero-shot.
+- ViTextBLIP-2: paper không công bố cách chuẩn hoá đáp án → so sánh tuyệt đối mang tính tham khảo; khoảng cách (+27,9 EM) lớn hơn nhiều mọi khác biệt chuẩn hoá hợp lý.
 
 ## Link experiment log
 
-- Ablation LoRA: `../../experiments/W10_lora_ablation_test2000_L4_seed42/`, `../../experiments/W10_A2_*`, `../../experiments/W10_A3_*`
-- OCR cache toàn bộ train: `../../experiments/W10_ocr_cache_fulltrain/` (sau khi chạy notebook 10 Phần D)
-- B3-full: `../../experiments/W10_B3full_vs_B2_testfull_L4_seed42/` (sau khi chạy notebook 18)
+- Ablation LoRA (A1, A2): `../../experiments/W10_lora_ablation_test2000_L4_seed42/`, `../../experiments/W10_A2_*`, `../../experiments/W10_A3_*`
+- OCR cache toàn bộ train: `../../experiments/W10_ocr_cache_fulltrain/ocr_cache_manifest.json`
+- B3-full: `../../experiments/W10_B3full_vs_B2_testfull_L4_seed42/` + train `W10_B3full_qlora_…` + eval `W10_B3full_eval_…`
+- Adapter (không lên git, trên Drive): `adapters/W10_A2_*`, `adapters/W10_A3_*`, `adapters/W10_B3full_*` (`epoch_1`)
+
+## Deliverables tuần này
+
+| File | Vai trò |
+|------|---------|
+| [W10_Team_Report.md](W10_Team_Report.md) | Báo cáo tuần: việc đã làm, số liệu chính, blocker, kế hoạch W11 |
+| README này | Quyết định, luật ghi trước, kết quả từng bước |
+| [../03_report/R6_Results.md](../03_report/R6_Results.md) | R6 bản nháp tiếng Việt: kết quả chính + ablation QLoRA nhận biết OCR |
+| `src/adaptation/lora_targets.py`, `src/eval/lora_ablation.py`, `src/eval/b3full.py` | Code mới, có selftest |
+| Notebook 17, 18; notebook 10 Phần D | Chạy lại được toàn bộ W10 |
+
+## Trạng thái
+
+✅ **Đóng tuần 21/10/2026.** Kết quả chính: **QLoRA nhận biết OCR vượt QLoRA thường khi đủ dữ liệu** (B3-full 53,35 so với B2 50,26 EM, +3,09, p = 6,7 × 10⁻²¹; ANLS +1,87) — từ "hiệu quả dữ liệu" (W09) thành cải tiến thật; lợi ích OCR không giảm khi thêm dữ liệu. Ablation cấu hình LoRA: A1 (module) — all-linear không tốt hơn attention-only ở cùng ngân sách nhưng chậm hơn 17,5%; A2 (rank) — r = 64 không khác biệt có ý nghĩa (yếu: CI95 chạm +2,15). H2 vẫn ủng hộ một phần (ANLS +1,87 < +3).
