@@ -21,11 +21,12 @@ ViVQA-VLM/
 │   ├── 01_proposal/          # capstone proposal (docx/pdf)
 │   ├── 02_references/        # PDF paper + Reading_Notes + báo cáo tham chiếu
 │   ├── 03_report/            # thesis LaTeX (đồng bộ Overleaf) + R1..R7
-│   ├── 04_slides/            # slide theo milestone (review1/review2/faculty_review/final_defense)
+│   ├── 04_slides/            # slide theo milestone; cumulative/ = bộ slide cộng dồn (R1 → bảo vệ)
 │   ├── notes/ · templates/   # ghi chú & template nhóm
-│   ├── W01/ · W02/           # deliverable theo tuần (W02: literature + dataset)
-│   ├── master_instruction.md
-│   └── MIGRATION_REPORT.md
+│   ├── W01/ … W10/           # deliverable theo tuần
+│   ├── Glossary.md           # sổ tay thuật ngữ (ôn bảo vệ)
+│   ├── Review_W01-W04_and_Defense_Prep.md
+│   └── master_instruction.md
 ├── src/
 │   ├── data/                 # dataset loaders, OCR (vivqa_dataset.py, ocr.py)
 │   ├── models/               # VLM loader
