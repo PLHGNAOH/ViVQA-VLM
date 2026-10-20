@@ -140,7 +140,7 @@ const contentsSlide = content(L("Contents", "Nội dung"), L("CONTENTS", "NỘI 
 pres.addSection({ title: L("A · Review 1 (revised)", "A · Review 1 (đã sửa)") });
 
 // A0. Response to Review 1 feedback — table filled at the end of Part A (needs slide numbers)
-const fbSlide = content(L("A · Review 1 (revised)", "A · Review 1 (đã sửa)"), L("REVIEW 1 · RESPONSE TO REVIEWER FEEDBACK (24/09)", "REVIEW 1 · TIẾP THU GÓP Ý PHẢN BIỆN (24/09)"),
+const fbSlide = content(L("A · Review 1 (revised)", "A · Review 1 (đã sửa)"), L("REVIEW 1 · RESPONSE TO REVIEWER FEEDBACK (24/09/2026)", "REVIEW 1 · TIẾP THU GÓP Ý PHẢN BIỆN (24/09/2026)"),
   L("Ten reviewer comments and how Part A addresses them", "Mười góp ý của phản biện và cách Phần A xử lý"),
   "Ngày 24/09, giảng viên phản biện đưa ra mười góp ý. Bảng này ghi lại từng góp ý, việc nhóm đã sửa và slide tương ứng trong Phần A. Ba điểm lớn nhất: phát biểu bài toán với input và output rõ ràng; giả thuyết rút còn H1 đến H4, mỗi giả thuyết gắn với một vấn đề riêng của tiếng Việt; và chốt một phương pháp đề xuất kèm sơ đồ pipeline.");
 A.fb = here();
