@@ -13,11 +13,11 @@ Mục tiêu W10: trả lời **hai câu hỏi còn mở** về công thức B3 (
 
 | # | Việc | GPU | Trạng thái |
 |---|------|-----|-----------|
-| 0 | Code: `src/adaptation/lora_targets.py` (preset + chặn LoRA lọt vision), `--lora_r / --lora_alpha / --lora_targets` cho `train_qlora.py`, LoRA audit trong `train_log.json`, `src/eval/lora_ablation.py`, notebook `17_lora_ablation_rank_modules_qwen25vl.ipynb`, luật ghi trước (README này) | — | ⏳ |
-| 1 | **A2** — all-linear r = 4 (cùng ngân sách tham số với B3), train + eval test2000 | ≈ 3,9 h L4 | ⏳ |
-| 2 | **A3** — attention r = 64, train + eval test2000 | ≈ 3,7 h L4 | ⏳ |
-| 3 | OCR cho phần ảnh train còn thiếu (9.063 ảnh) — notebook 10 phần mới | ≈ 2,5 h T4 | ⏳ |
-| 4 | **B3-full** — QLoRA + OCR trên toàn bộ train (35.159 câu), eval full test 10.028 câu | ≈ 13 h + 2,8 h L4 | ⏳ |
+| 0 | Code: `src/adaptation/lora_targets.py` (preset + chặn LoRA lọt vision), `--lora_r / --lora_alpha / --lora_targets` cho `train_qlora.py`, LoRA audit trong `train_log.json`, `src/eval/lora_ablation.py`, notebook `17_lora_ablation_rank_modules_qwen25vl.ipynb`, luật ghi trước (README này) | — | ✅ 19/10 (`8be932e`) |
+| 1 | **A2** — all-linear r = 4 (cùng ngân sách tham số với B3), train + eval test2000 | ≈ 3,9 h L4 | ✅ 20/10 — **H3 KHÔNG ĐƯỢC ỦNG HỘ** (−0,55 EM, p = 0,34), chậm hơn 17,5% |
+| 2 | **A3** — attention r = 64, train + eval test2000 | ≈ 3,7 h L4 | ✅ 20/10 — **ỦNG HỘ H4 (yếu)** (+1,05 EM, p = 0,071, CI95 [−0,05; +2,15]), adapter ×4 |
+| 3 | OCR cho phần ảnh train còn thiếu (≈ 9.063 ảnh) — notebook 10 **Phần D** (mục 13–14) | ≈ 2–2,5 h T4 | ⏳ |
+| 4 | **B3-full** — QLoRA + OCR trên toàn bộ train (35.159 câu), eval full test 10.028 câu — notebook `18_qlora_ocr_b3full_vs_b2_qwen25vl.ipynb`, kết luận bằng `src/eval/b3full.py` | ≈ 13 h + 2,8 h L4 | ⏳ |
 | 5 | Results (R6) bản tiếng Việt — phần OCR-aware QLoRA (số liệu W08–W09) | — | ⏳ |
 | 6 | Đóng tuần: `W10_Team_Report.md`, dọn Downloads + Drive, handoff | — | ⏳ |
 
@@ -79,6 +79,9 @@ Run **B3-full**: công thức B3 (attention r = 16, α = 32, OCR VietOCR · v1 �
 | `src/adaptation/train_qlora.py` | `--lora_r`, `--lora_alpha`, `--lora_targets`; gọi `audit_lora_modules` ngay sau khi nạp model (dừng nếu sai); ghi `lora_audit` vào `train_log.json` | `--selftest` thêm `lora override OK`: không truyền → chữ ký W07–W09 giữ nguyên; `attn` r16 trùng chữ ký cũ; r64 → α128; all-linear r4 → regex + α8 |
 | `src/eval/lora_ablation.py` (mới) | Luật H3/H4, CI95 ΔEM, kiểm "chỉ khác LoRA" | `--selftest` |
 | `notebooks/17_lora_ablation_rank_modules_qwen25vl.ipynb` (mới) | A2 → A3 → kết luận; bỏ qua phần đã xong; tự trả máy L4 | — |
+| `notebooks/10_ocr_cache_vitextvqa.ipynb` | Thêm **Phần D** (mục 13–14): OCR phần ảnh còn thiếu của `train.json`; cache phải trùng sha256 biên bản W09 trước khi mở rộng, dấu vân tay 6.289 ảnh cũ phải giữ nguyên; biên bản `experiments/W10_ocr_cache_fulltrain/` | — |
+| `src/eval/b3full.py` (mới) | Luật B3-full (B2 → B3-full) + bảng 2×2 dữ liệu × OCR, 4 hiệu ứng đơn, tương tác theo câu (chỉ báo cáo); ghép cặp theo `question_id` | `--selftest`; chạy thử trên predictions thật W07/W09 (B3-full tạm thay bằng B2): B2-sub → B3 = 417 / 672, p = 1,06 × 10⁻¹⁴, ΔANLS CI95 [+0,0106; +0,0208] — **khớp** `W09_fulltest_B3_vs_B2sub_L4_seed42`; B3 → B2 = +1,16 EM, p = 0,0025 — **khớp** đính chính W09; ≈ 3 phút CPU |
+| `notebooks/18_qlora_ocr_b3full_vs_b2_qwen25vl.ipynb` (mới) | Kiểm trước: `train.json` trùng sha256 file B2 W07, OCR cache trùng biên bản Phần D và phủ đủ train + test; train → kiểm `train_log` (35.159 câu, r16/α32/attention, LoRA chỉ LLM, OCR khớp, siêu tham số = B2 W07) → eval full test → kết luận; tự trả máy L4 | — |
 
 Run cũ không bị ảnh hưởng: audit chỉ chạy khi train mới; với cấu hình attention r16, audit kỳ vọng đúng 144 lớp LLM và 7.372.800 tham số (như mọi run W07–W09).
 
@@ -93,8 +96,38 @@ Run cũ không bị ảnh hưởng: audit chỉ chạy khi train mới; với c�
 
 ## Kết quả
 
+### Ablation LoRA — H3 và H4 (20/10/2026, L4, bf16, 4-bit, seed 42, test2000)
+
+Nguồn: `../../experiments/W10_lora_ablation_test2000_L4_seed42/` (`lora_ablation_summary.json`, `paired_B3_vs_A2.json`, `paired_B3_vs_A3.json`); train `W10_A2_qlora_ocr_vietocr_v1_alllinear_r4_…`, `W10_A3_qlora_ocr_vietocr_v1_r64_…`; eval `W10_A2_eval_…`, `W10_A3_eval_…`. Mốc B3 = run W08 seed 42. `lora_ablation.py` đã kiểm A2, A3 chỉ khác B3 ở mục LoRA.
+
+| Run | Lớp gắn LoRA | r / α | Tham số train | EM | ΔEM so với B3 (CI95) | Chỉ B3 đúng / chỉ biến thể đúng | McNemar p | ΔANLS (CI95) |
+|---|---|---|---|---|---|---|---|---|
+| B3 (mốc) | q, k, v, o | 16 / 32 | 7.372.800 (0,196%) | 0,4925 | — | — | — | — |
+| A2 | q, k, v, o, gate, up, down (252 lớp, chỉ LLM) | 4 / 8 | 7.483.392 (0,199%) | 0,4870 | −0,55 [−1,60; +0,45] | 60 / 49 | 0,34 | −0,0025 [−0,0116; +0,0068] |
+| A3 | q, k, v, o (144 lớp, chỉ LLM) | 64 / 128 | 29.491.200 (0,779%) | 0,5030 | +1,05 [−0,05; +2,15] | 51 / 72 | 0,071 | +0,0049 [−0,0040; +0,0140] |
+
+**Chi phí** (cùng L4, cùng 500 step):
+
+| Run | Giờ train | s/step | VRAM đỉnh | Loss cuối | Adapter |
+|---|---|---|---|---|---|
+| B3 | 2,98 | 21,48 | 8,25 GB | 0,6605 | 28,2 MB |
+| A2 | 3,51 | 25,24 (+17,5%) | 8,26 GB | 0,6495 | 28,6 MB |
+| A3 | 2,90 | 20,85 | 8,58 GB | 0,6380 | 112,5 MB (×4) |
+
+**Kết luận theo luật ghi trước:**
+- **H3 — KHÔNG ĐƯỢC ỦNG HỘ** (không khác biệt có ý nghĩa). Ở cùng ngân sách tham số, gắn LoRA vào cả MLP không tốt hơn attention-only (ΔEM −0,55, CI95 [−1,60; +0,45]) nhưng train chậm hơn 17,5%. → Lựa chọn attention-only của B3 được giữ: **rẻ hơn, chất lượng không kém**. QLoRA paper (Dettmers et al., NeurIPS 2023) khuyên gắn LoRA vào mọi lớp tuyến tính, nhưng chính paper cũng nêu yếu tố quan trọng nhất là **tổng số tham số LoRA** — ở đây tổng đó được giữ bằng nhau (lệch 1,5%), và paper đo trên LLM thuần văn bản, không phải VLM tiếng Việt.
+- **H4 — ỦNG HỘ (yếu)**: r = 64 không khác biệt có ý nghĩa so với r = 16 (p = 0,071). *Yếu* vì cận trên CI95 ΔEM (+2,15) còn vượt +1 điểm: test2000 chưa đủ nhạy để loại trừ mức tăng 1–2 điểm. r = 64 tốn adapter ×4 và VRAM +0,33 GB.
+
+**Giới hạn và ghi chú trung thực:**
+- 1 seed huấn luyện. EM của A3 (0,5030) cao hơn cả 3 seed B3 (0,4880–0,4925, std 0,23 điểm — W09), nhưng đây là quan sát **sau khi thấy số**, không nằm trong luật; theo luật không chạy thêm seed để đổi kết luận. Ghi r = 64 là **hướng cải tiến tiếp** (cần ≥ 3 seed hoặc full test để kết luận).
+- B3-full vẫn dùng attention r = 16 (quyết định 19/10, chốt trước khi có kết quả ablation).
+
+### B3-full — OCR-aware QLoRA trên toàn bộ train
+
 *(chưa chạy)*
 
 ## Link experiment log
 
-- Ablation LoRA: `../../experiments/W10_lora_ablation_test2000_L4_seed42/` (sau khi chạy)
+- Ablation LoRA: `../../experiments/W10_lora_ablation_test2000_L4_seed42/`, `../../experiments/W10_A2_*`, `../../experiments/W10_A3_*`
+- OCR cache toàn bộ train: `../../experiments/W10_ocr_cache_fulltrain/` (sau khi chạy notebook 10 Phần D)
+- B3-full: `../../experiments/W10_B3full_vs_B2_testfull_L4_seed42/` (sau khi chạy notebook 18)
