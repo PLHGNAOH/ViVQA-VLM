@@ -1,0 +1,88 @@
+{
+  "qt_version": "qt-v1 (W11, 21/10/2026, thiết kế trên dev300)",
+  "rules_sha256": "92c21a7a8e23653ee46e32c670099a10be79ffe66ba59849b82e97c6b0bc6bcb",
+  "n": 150,
+  "accuracy": 0.8066666666666666,
+  "per_type": {
+    "source": {
+      "n_auto": 16,
+      "n_human": 15,
+      "precision": 0.9375,
+      "recall": 1.0,
+      "flag": "ok"
+    },
+    "contact": {
+      "n_auto": 11,
+      "n_human": 11,
+      "precision": 1.0,
+      "recall": 1.0,
+      "flag": "ok"
+    },
+    "number_time": {
+      "n_auto": 12,
+      "n_human": 12,
+      "precision": 1.0,
+      "recall": 1.0,
+      "flag": "ok"
+    },
+    "person": {
+      "n_auto": 10,
+      "n_human": 13,
+      "precision": 1.0,
+      "recall": 0.7692307692307693,
+      "flag": "ok"
+    },
+    "location": {
+      "n_auto": 18,
+      "n_human": 23,
+      "precision": 1.0,
+      "recall": 0.782608695652174,
+      "flag": "ok"
+    },
+    "name": {
+      "n_auto": 23,
+      "n_human": 26,
+      "precision": 0.6956521739130435,
+      "recall": 0.6153846153846154,
+      "flag": "NHÃN KÉM TIN CẬY"
+    },
+    "text_content": {
+      "n_auto": 11,
+      "n_human": 6,
+      "precision": 0.45454545454545453,
+      "recall": 0.8333333333333334,
+      "flag": "NHÃN KÉM TIN CẬY"
+    },
+    "product_service": {
+      "n_auto": 15,
+      "n_human": 16,
+      "precision": 0.8666666666666667,
+      "recall": 0.8125,
+      "flag": "ok"
+    },
+    "other": {
+      "n_auto": 34,
+      "n_human": 28,
+      "precision": 0.6176470588235294,
+      "recall": 0.75,
+      "flag": "NHÃN KÉM TIN CẬY"
+    }
+  },
+  "confusion_human_to_auto": {
+    "name -> other": 8,
+    "other -> text_content": 4,
+    "location -> other": 3,
+    "product_service -> name": 2,
+    "person -> name": 2,
+    "text_content -> name": 1,
+    "name -> text_content": 1,
+    "location -> text_content": 1,
+    "location -> name": 1,
+    "other -> source": 1,
+    "name -> product_service": 1,
+    "other -> name": 1,
+    "other -> product_service": 1,
+    "product_service -> other": 1,
+    "person -> other": 1
+  }
+}

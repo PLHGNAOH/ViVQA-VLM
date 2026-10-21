@@ -19,7 +19,7 @@ Mục tiêu W11 gồm ba phần:
 | 3 | OCR cho ảnh ViVQA train + test (notebook `19_ocr_cache_vivqa.ipynb`) | ≈ 20 phút T4 | ✅ 21/10 (lần 3; lần 1–2 hỏng do cài Paddle, xem mục Sự cố) |
 | 4 | Code train **trộn 2 dataset** (`train_qlora.py --mix`) + notebook `20_qlora_shared_adapter_qwen25vl.ipynb` + script kết luận `src/eval/shared_adapter.py` | — | ✅ 21/10 |
 | 5 | **SH**: train adapter dùng chung + eval ViVQA test và ViTextVQA test2000 + kết luận theo luật (notebook 20) | ≈ 6,1 h + 1,3 h L4 | ⏳ đang chạy (21/10) |
-| 6 | Bộ phân loại câu hỏi ViTextVQA (theo luật) + bảng EM/ANLS theo loại | — | ⏳ luật `qt-v1` đóng băng 21/10; chờ 150 nhãn tay → bảng |
+| 6 | Bộ phân loại câu hỏi ViTextVQA (theo luật) + bảng EM/ANLS theo loại | — | ✅ 21/10 (luật `qt-v1` đóng băng 15:17 `9b441f1`; 150 nhãn tay; bảng tính sau commit) |
 | 7 | Đưa kết quả W10 (và SH nếu kịp) vào deck cộng dồn Part B qua builder | — | ⏳ |
 | 8 | Tập nói Review 2 | — | ⏳ |
 | 9 | Đóng tuần: README, `W11_Team_Report.md`, dọn Downloads + Drive, handoff | — | ⏳ |
@@ -124,6 +124,7 @@ ViTextVQA không có nhãn loại câu hỏi (`question_type` = `unknown` ở m�
 | `src/data/ocr.py` | **Dừng ngay** khi 20 ảnh đầu của một lần chạy đều lỗi (không lưu ảnh lỗi nào). Chạy CPU thì **tắt oneDNN**; chạy GPU giữ nguyên như W08–W10 | `--selftest` thêm `ocr fail-fast OK` |
 | `notebooks/19_ocr_cache_vivqa.ipynb` | Cách ly cache lỗi (đổi tên `.bad_<giờ>.json`). Mục 4 bắt buộc 0 ảnh lỗi và tự dừng nếu ước tính > 4 h. Tải Paddle GPU thử lại 3 lần, ghim `paddlepaddle-gpu==3.3.1` | Lần 3 chạy đúng (GPU, 0 lỗi) |
 | `src/eval/question_types.py` (mới) | Bộ phân loại `qt-v1` (9 loại, luật từ khoá, dấu vân tay bộ luật `rules_sha256`). `--make_sheet` tạo phiếu 150 câu test2000 (seed 42, chỉ có câu hỏi). `--score` so nhãn tay với nhãn máy (accuracy, precision/recall theo loại, cờ). `--table` cho bảng EM/ANLS theo loại cho các run ViTextVQA trong `full_eval_table.RUNS` (test2000 + full test), gộp loại < 50 câu | `--selftest`: 16 câu mẫu (gồm bẫy "giảm giá", "đánh giá", "chữ … tên"), phiếu tái lập, nhãn lạ hoặc phiếu sai câu thì báo lỗi, bảng trên dữ liệu giả |
+| `docs/W11/qt_labels_150.csv` (mới, 21/10 tối) | 150 nhãn tay (chuyển từ Excel; giữ nguyên câu hỏi gốc, kể cả câu stt 97 người gán đã sửa chữ trong phiếu); `experiments/W11_question_types/` = kết quả `--score` + `--table` | Kiểm: đủ 150 câu, đúng `question_id` và thứ tự của phiếu, nhãn hợp lệ, 26 câu có ghi chú |
 | `docs/W11/question_types_guide.md`, `docs/W11/qt_label_sheet_150.csv` (mới) | Hướng dẫn gán nhãn và phiếu trống 150 câu (bản Excel có danh sách thả xuống được gửi riêng để gán) | Phiếu sinh lại từ script thì trùng byte |
 
 ## Ngân sách
@@ -171,6 +172,53 @@ Biên bản `../../experiments/W11_ocr_cache_vivqa/` (trên Drive; chép vào gi
 | Đáp án gold nằm trong OCR | — | **0,0%** |
 
 Với ViVQA, dòng OCR **chỉ là nhiễu**. Ảnh COCO chủ yếu có chữ tiếng Anh, VietOCR đọc thành chuỗi vô nghĩa, conf trung bình 0,648. Vì vậy SH còn là phép thử độ bền với nhiễu OCR (xem phần tách nhóm và chép chữ OCR trong luật SH).
+
+### Loại câu hỏi ViTextVQA (bước 6, 21/10/2026, chỉ mô tả)
+
+Nguồn: `../../experiments/W11_question_types/` (`question_types_table.md` / `.json`, `qt_label_check.json`), nhãn tay `qt_labels_150.csv`. Thứ tự đúng như luật:
+- bộ luật `qt-v1` được commit (`9b441f1`, 21/10 15:17) **trước** khi chạy trên câu test nào;
+- 150 câu được gán nhãn mù (chỉ thấy câu hỏi), người gán nhãn: **Phạm Lê Huy Hoàng** (đúng luật ghi trước);
+- sau đó mới chấm và tính bảng.
+
+**Kiểm nhãn (150 câu test2000):** accuracy **80,7%**.
+
+| Loại | Máy gán | Người gán | Precision | Recall | Cờ |
+|---|---|---|---|---|---|
+| source | 16 | 15 | 94% | 100% | ok |
+| contact | 11 | 11 | 100% | 100% | ok |
+| number_time | 12 | 12 | 100% | 100% | ok |
+| person | 10 | 13 | 100% | 77% | ok |
+| location | 18 | 23 | 100% | 78% | ok |
+| name | 23 | 26 | 70% | 62% | ⚠ nhãn kém tin cậy |
+| text_content | 11 | 6 | 45% | 83% | ⚠ nhãn kém tin cậy |
+| product_service | 15 | 16 | 87% | 81% | ok |
+| other | 34 | 28 | 62% | 75% | ⚠ nhãn kém tin cậy |
+
+Lỗi chính là nhầm giữa ba loại "mềm":
+- người gán `name` nhưng máy gán `other` (8 câu), chủ yếu câu hỏi tên tổ chức kiểu "đơn vị nào / bộ nào / sở nào", mà luật không có từ khoá;
+- người gán `other` nhưng máy gán `text_content` (4 câu): câu có "nói / nội dung" nhưng hỏi ý nghĩa, không đòi đọc lại chữ.
+
+Theo luật, **không sửa `qt-v1` sau khi thấy test**. Ba loại bị gắn ⚠ chỉ dùng để mô tả, và ghi là giới hạn. Muốn có `qt-v2` thì phải có bộ nhãn mới, nằm ngoài kế hoạch.
+
+**Sai lệch so với luật ghi trước:**
+- câu stt 97 (`test_41608`, "cửa hàng bên trái **bên** gì ?") bị người gán sửa chữ thành "tên gì" trong phiếu. Bộ phân loại vẫn chạy trên câu gốc, nên không ảnh hưởng nhãn máy.
+
+**EM % theo loại trên full test (10.028 câu)** — mọi loại ≥ 50 câu trên test2000 nên không gộp (đủ số kèm ANLS: `question_types_table.md`):
+
+| Run | source (661) | contact (641) | number_time (1.041) | person (420) | location (969) | name ⚠ (1.971) | text_content ⚠ (777) | product_service (1.144) | other ⚠ (2.404) | Tất cả |
+|---|---|---|---|---|---|---|---|---|---|---|
+| B1 | 24,5 | 47,9 | 41,2 | 40,7 | 25,3 | 34,9 | 27,4 | 16,5 | 21,5 | 29,1 |
+| B2-sub | 49,8 | 52,0 | 54,7 | 49,8 | 38,5 | 51,4 | 45,2 | 39,5 | 43,2 | 46,6 |
+| B3 | 50,2 | 59,0 | 56,3 | 57,1 | 42,9 | 52,3 | 47,6 | 40,9 | 45,9 | 49,1 |
+| B2 | 57,2 | 55,5 | 55,7 | 54,8 | 44,0 | 55,7 | 48,6 | 42,5 | 46,1 | 50,3 |
+| **B3-full** | **58,1** | **64,1** | **58,8** | **61,2** | **47,0** | **57,6** | **51,1** | **44,1** | **49,6** | **53,4** |
+| Δ B2 → B3-full | +0,9 | **+8,6** | +3,1 | +6,4 | +3,0 | +1,9 | +2,5 | +1,6 | +3,5 | +3,1 |
+
+Nhận xét **chỉ mô tả** (chưa kiểm định theo loại, không có luật; giải thích đầy đủ để dành cho error analysis W12):
+1. OCR giúp nhiều nhất ở **`contact`** (+8,6 EM): số điện thoại, website, tức chuỗi phải chép đúng từng ký tự. Trên test2000, bỏ OCR lúc suy luận khỏi B3 làm `contact` giảm 64,4 → 53,0, mức giảm lớn nhất trong các loại.
+2. OCR giúp ít ở **`source`** (+0,9): watermark nguồn ảnh thường nhỏ, mờ hoặc nằm ở góc. Riêng QLoRA đã tăng mạnh loại này (B1 24,5 → B2 57,2), có thể vì nguồn ảnh lặp lại giữa train và test.
+3. Loại **khó nhất** sau B3-full là **`product_service`** (44,1), **`location`** (47,0) và **`other`** (49,6). Đây là các câu cần suy ra từ chữ ("cửa hàng bán gì", "ở tỉnh nào"), không chỉ chép lại chữ.
+4. Mô hình 7B tham chiếu R1b yếu nhất ở `product_service` (3,0) và `name` (9,8) trên test2000. Nhiều khả năng do định dạng trả lời dài, cần kiểm ở W12.
 
 ### Adapter dùng chung — SH
 
