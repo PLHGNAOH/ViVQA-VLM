@@ -16,10 +16,10 @@ Mục tiêu W11 gồm ba phần:
 |---|------|-----|-----------|
 | 1 | Luật ghi trước (README này): adapter dùng chung S2, quy ước VQA-Acc, luật bộ phân loại câu hỏi | — | ✅ 21/10 |
 | 2 | `src/eval/full_eval_table.py`: bảng đầy đủ 21 dòng × 3 bảng + chi phí + ổn định theo seed + loại câu hỏi ViVQA; tự kiểm metrics.json bằng cách tính lại từ predictions.json | — | ✅ 21/10 (`experiments/W11_full_eval_table/`) |
-| 3 | OCR cho ảnh ViVQA train + test (notebook `19_ocr_cache_vivqa.ipynb`) | ≈ 2 h T4 | ⏳ đang chạy (21/10) |
+| 3 | OCR cho ảnh ViVQA train + test (notebook `19_ocr_cache_vivqa.ipynb`) | ≈ 20 phút T4 | ✅ 21/10 (lần 3; lần 1–2 hỏng do cài Paddle, xem mục Sự cố) |
 | 4 | Code train **trộn 2 dataset** (`train_qlora.py --mix`) + notebook `20_qlora_shared_adapter_qwen25vl.ipynb` + script kết luận `src/eval/shared_adapter.py` | — | ✅ 21/10 |
-| 5 | **SH**: train adapter dùng chung + eval ViVQA test và ViTextVQA test2000 + kết luận theo luật (notebook 20) | ≈ 6,1 h + 1,3 h L4 | ⏳ |
-| 6 | Bộ phân loại câu hỏi ViTextVQA (theo luật) + bảng EM/ANLS theo loại | — | ⏳ |
+| 5 | **SH**: train adapter dùng chung + eval ViVQA test và ViTextVQA test2000 + kết luận theo luật (notebook 20) | ≈ 6,1 h + 1,3 h L4 | ⏳ đang chạy (21/10) |
+| 6 | Bộ phân loại câu hỏi ViTextVQA (theo luật) + bảng EM/ANLS theo loại | — | ⏳ luật `qt-v1` đóng băng 21/10; chờ 150 nhãn tay → bảng |
 | 7 | Đưa kết quả W10 (và SH nếu kịp) vào deck cộng dồn Part B qua builder | — | ⏳ |
 | 8 | Tập nói Review 2 | — | ⏳ |
 | 9 | Đóng tuần: README, `W11_Team_Report.md`, dọn Downloads + Drive, handoff | — | ⏳ |
@@ -105,6 +105,12 @@ ViTextVQA không có nhãn loại câu hỏi (`question_type` = `unknown` ở m�
 3. Kiểm độ chính xác: Hoàng tự gán nhãn tay **150 câu** test2000 (chọn ngẫu nhiên, seed 42) mà **không xem** dự đoán. Báo độ chính xác tổng và theo loại. Loại nào có độ chính xác < 80% thì gắn cờ "nhãn kém tin cậy" trong bảng.
 4. Loại có < 50 câu trên test2000 thì gộp vào "khác".
 5. Bảng theo loại chỉ để **mô tả / error analysis**, không dùng để chọn mô hình.
+6. *(Làm rõ ngày 21/10, trước khi có nhãn tay và trước khi tính số theo loại trên test.)*
+   - "Độ chính xác theo loại" = **precision**: trong các câu máy gán loại T, bao nhiêu % Hoàng cũng gán T. Đây là thứ ảnh hưởng tới bảng, vì bảng nhóm câu theo nhãn máy. Recall chỉ báo kèm để tham khảo.
+   - Loại có < 5 câu máy gán trong mẫu 150 thì ghi "n quá nhỏ", không gắn cờ.
+   - Hướng dẫn gán nhãn: `question_types_guide.md`.
+
+**Bộ phân loại `qt-v1` (đóng băng 21/10/2026):** 9 loại, xếp theo thứ tự ưu tiên: `source` · `contact` · `number_time` · `person` · `location` · `name` · `text_content` · `product_service` · `other`. Luật từ khoá được viết **chỉ** từ 300 câu hỏi dev (dev300). Chưa chạy bộ phân loại trên câu test nào trước khi commit. Phân bố trên dev300: name 83 · product_service 42 · other 31 · text_content 30 · location 30 · number_time 30 · source 23 · contact 20 · person 11. ViTextVQA gần như **không có câu có/không**, nên loại "yes/no" của master không áp dụng cho dataset này.
 
 ## Thay đổi code
 
@@ -115,6 +121,10 @@ ViTextVQA không có nhãn loại câu hỏi (`question_type` = `unknown` ở m�
 | `src/adaptation/train_qlora.py` | `--mix DATASET=FILE` (lặp lại, ≥ 2 dataset) thay `--dataset/--data_file`. Mỗi phần nạp, lọc và gắn OCR **bằng đúng hàm của run đơn**, với OCR cache mặc định của dataset đó. Thiết lập OCR (engine, template, ngưỡng) **phải trùng** giữa các phần, nếu không thì dừng. Ghép rồi xáo bằng `random.Random(seed)` (Trainer xáo thêm lần nữa). Chữ ký run gồm sha256 từng file + dấu vân tay OCR từng phần. `train_log.json` có thêm `data_parts`, `ocr.stats_by_dataset`, `mix_order`. Run đơn **không đổi** chữ ký | `--selftest` thêm `mix (W11) OK`: phần ViTextVQA trong run trộn có **cùng dấu vân tay OCR** như run đơn (B3); ảnh không chữ cho prompt **trùng zero-shot**; chạy lại cùng lệnh thì cùng chữ ký (resume được); engine OCR lệch thì dừng; xáo tái lập được, trộn đều. Các selftest cũ vẫn qua |
 | `src/eval/shared_adapter.py` (mới) | Luật SH: kiểm hợp lệ train_log (file = C1 + B3, siêu tham số = C1 = B3, LoRA 144 lớp LLM, 7.372.800 tham số, OCR ViTextVQA = dấu vân tay B3) và 2 run eval (cùng file test, cùng OCR với B3 trên test2000, adapter đúng run SH). Sau đó so sánh C1 → SH, B3 → SH (ΔEM + CI95, McNemar, ΔANLS) và kết luận theo δ = 1,5. Chỉ báo cáo: tách ViVQA theo dòng OCR, tỉ lệ chép chữ OCR, so với C3 / B3-full trên cùng câu, chi phí | `--selftest`. Chạy thử trên predictions thật (SH tạm thay bằng run có sẵn): B3 → A3 = +1,05 [−0,05; +2,15], p = 0,071, **khớp** README W10; C1 → C3 = +2,87, **khớp** W09 |
 | `notebooks/20_qlora_shared_adapter_qwen25vl.ipynb` (mới) | Kiểm trước (sha256 2 file train = C1 / B3, 2 OCR cache = biên bản W11 / W10, phủ đủ ảnh, run mốc, selftest 5 script) → train SH → kiểm hợp lệ → eval ViVQA test → eval test2000 → kết luận. Bỏ qua phần đã xong, tự trả máy L4 | Cú pháp các cell đã kiểm |
+| `src/data/ocr.py` | **Dừng ngay** khi 20 ảnh đầu của một lần chạy đều lỗi (không lưu ảnh lỗi nào). Chạy CPU thì **tắt oneDNN**; chạy GPU giữ nguyên như W08–W10 | `--selftest` thêm `ocr fail-fast OK` |
+| `notebooks/19_ocr_cache_vivqa.ipynb` | Cách ly cache lỗi (đổi tên `.bad_<giờ>.json`). Mục 4 bắt buộc 0 ảnh lỗi và tự dừng nếu ước tính > 4 h. Tải Paddle GPU thử lại 3 lần, ghim `paddlepaddle-gpu==3.3.1` | Lần 3 chạy đúng (GPU, 0 lỗi) |
+| `src/eval/question_types.py` (mới) | Bộ phân loại `qt-v1` (9 loại, luật từ khoá, dấu vân tay bộ luật `rules_sha256`). `--make_sheet` tạo phiếu 150 câu test2000 (seed 42, chỉ có câu hỏi). `--score` so nhãn tay với nhãn máy (accuracy, precision/recall theo loại, cờ). `--table` cho bảng EM/ANLS theo loại cho các run ViTextVQA trong `full_eval_table.RUNS` (test2000 + full test), gộp loại < 50 câu | `--selftest`: 16 câu mẫu (gồm bẫy "giảm giá", "đánh giá", "chữ … tên"), phiếu tái lập, nhãn lạ hoặc phiếu sai câu thì báo lỗi, bảng trên dữ liệu giả |
+| `docs/W11/question_types_guide.md`, `docs/W11/qt_label_sheet_150.csv` (mới) | Hướng dẫn gán nhãn và phiếu trống 150 câu (bản Excel có danh sách thả xuống được gửi riêng để gán) | Phiếu sinh lại từ script thì trùng byte |
 
 ## Ngân sách
 
@@ -124,6 +134,12 @@ ViTextVQA không có nhãn loại câu hỏi (`question_type` = `unknown` ở m�
 | SH train (≈ C1 3,03 h + B3 2,98 h) | ≈ 6,1 h | — | ≈ 9,4 |
 | SH eval ViVQA test + ViTextVQA test2000 (+ nạp model) | ≈ 1,3 h | — | ≈ 2 |
 | **Tổng W11** | ≈ 7,4 h | ≈ 2 h | **≈ 14** (≈ 49 CU lúc 21/10 04:10 → còn ≈ 35 cho W12–W15) |
+
+## Sự cố
+
+| Ngày | Sự cố | Xử lý |
+|---|---|---|
+| 21/10/2026 | Notebook 19 lần 1–2: tải wheel Paddle GPU bị timeout nên cell tự chuyển sang CPU. Paddle 3.3 CPU + oneDNN lỗi PIR với **mọi** ảnh, cache ghi 9.770 ảnh lỗi. Mục 6 chặn được (lỗi > 1%), chưa run nào dùng cache này | Cache lỗi được đổi tên thành `paddledet_vietocr.bad_….json` (giữ làm bằng chứng, xoá khi dọn Drive cuối tuần). Thêm fail-fast, 0 lỗi ở mục 4, tải lại Paddle GPU, tắt oneDNN trên CPU. Lần 3: GPU, 9.770 ảnh, 0 lỗi, 0,11 s/ảnh |
 
 ## Kết quả
 
@@ -143,6 +159,18 @@ EM ViVQA theo loại câu hỏi (nhãn có sẵn của dataset). Đây là số 
 | B1 | 5,69 | 69,14 | 44,80 | 0,73 |
 | C1 | 73,54 | 77,03 | 83,04 | 63,65 |
 | C3 | 76,66 | 77,03 | 84,32 | 69,34 |
+
+### OCR ViVQA (notebook 19, lần 3, 21/10/2026, T4 GPU)
+
+Biên bản `../../experiments/W11_ocr_cache_vivqa/` (trên Drive; chép vào git khi đóng tuần): 9.770 ảnh (train 8.255 + test 2.789, có ảnh dùng chung), 0 lỗi, 0,11 s/ảnh, sha256 `3f2605808c38…`. Engine **trùng** cache ViTextVQA (PaddleOCR 3.7.0, Paddle 3.3.1, PP-OCRv6_medium_det + VietOCR vgg_transformer, GPU).
+
+| | ViVQA train | ViVQA test |
+|---|---|---|
+| % câu có dòng OCR trong prompt S2 | 44,8 | 44,2 |
+| Trung bình ký tự OCR / câu | 8 | 8 |
+| Đáp án gold nằm trong OCR | — | **0,0%** |
+
+Với ViVQA, dòng OCR **chỉ là nhiễu**. Ảnh COCO chủ yếu có chữ tiếng Anh, VietOCR đọc thành chuỗi vô nghĩa, conf trung bình 0,648. Vì vậy SH còn là phép thử độ bền với nhiễu OCR (xem phần tách nhóm và chép chữ OCR trong luật SH).
 
 ### Adapter dùng chung — SH
 
