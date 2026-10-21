@@ -41,6 +41,7 @@ OCR_SUBDIR = "ocr"
 # Mặc định cho prompt (chọn lại trên dev ở W08 bước 5; giá trị dùng thật ghi vào run_signature)
 OCR_DEFAULTS = {"template": "v1", "max_chars": 600, "min_conf": 0.0}
 MAX_ERROR_FRAC = 0.01        # > 1% ảnh OCR lỗi -> dừng (giống ngưỡng loại mẫu khi train)
+FAIL_FAST_N = 20             # W11: N ảnh ĐẦU của một lần chạy đều lỗi -> lỗi cài đặt -> dừng, KHÔNG lưu ảnh lỗi
 
 
 def default_cache_path(drive_root: str, dataset: str, backend: str) -> str:
@@ -261,6 +262,20 @@ def _paddle_version() -> Optional[str]:
         return None
 
 
+def _make_text_detection(po: Any, det_model: str, device: str) -> Any:
+    """
+    Model dò chữ. W11: trên CPU, Paddle 3.3 + oneDNN (MKL-DNN) lỗi với mọi ảnh
+    ("ConvertPirAttribute2RuntimeAttribute not support", notebook 19 lần 1) -> CPU thì TẮT oneDNN.
+    GPU: giữ nguyên lời gọi cũ (cùng cấu hình với cache ViTextVQA W08–W10).
+    """
+    if device.startswith("gpu"):
+        return po.TextDetection(model_name=det_model, device=device)
+    try:
+        return po.TextDetection(model_name=det_model, device=device, enable_mkldnn=False)
+    except TypeError as e:
+        raise RuntimeError(f"paddleocr {po.__version__} không nhận enable_mkldnn -> không chạy CPU an toàn được: {e}")
+
+
 def _image_size(image_path: str) -> Tuple[int, int]:
     from PIL import Image
     with Image.open(image_path) as im:
@@ -302,7 +317,7 @@ class PaddleDetVietOCREngine(BaseOCREngine):
         from vietocr.tool.predictor import Predictor
         if det_model is None:                           # lấy đúng model dò mà pipeline lang='vi' dùng
             det_model, _ = po.PaddleOCR._get_ocr_model_names(None, lang, None)
-        self._det = po.TextDetection(model_name=det_model, device=device)
+        self._det = _make_text_detection(po, det_model, device)
         vcfg = Cfg.load_config_from_name("vgg_transformer")
         vcfg["device"] = "cuda:0" if device.startswith("gpu") else "cpu"
         vcfg["predictor"]["beamsearch"] = False
@@ -311,6 +326,8 @@ class PaddleDetVietOCREngine(BaseOCREngine):
                      "paddlepaddle": _paddle_version(), "lang": lang,
                      "device": device, "det_model": det_model, "rec_model": "vietocr/vgg_transformer",
                      "vietocr_config": "vgg_transformer, beamsearch=False"}
+        if not device.startswith("gpu"):                # chỉ ghi khi chạy CPU -> info bản GPU giữ nguyên như W08–W10
+            self.info["det_mkldnn"] = False
 
     def read(self, image_path: str) -> Dict[str, Any]:
         from PIL import Image
@@ -367,6 +384,7 @@ def build_ocr_cache(images: Dict[str, str], engine: BaseOCREngine, cache_path: s
           f"| sẽ OCR {len(todo)}", flush=True)
     timing = cache.setdefault("timing", {})
     t_run = time.time()
+    n_err_run = 0
     for i, (key, path) in enumerate(todo, 1):
         t0 = time.time()
         try:
@@ -374,6 +392,9 @@ def build_ocr_cache(images: Dict[str, str], engine: BaseOCREngine, cache_path: s
         except Exception as e:                       # ghi lỗi để không OCR lại vô hạn; attach_ocr chặn nếu > 1%
             cache["images"][key] = {"lines": [], "error": f"{type(e).__name__}: {e}"[:300]}
             print(f"[OCR] lỗi {key}: {e}", flush=True)
+            n_err_run += 1
+            if n_err_run == i == min(FAIL_FAST_N, len(todo)):
+                raise RuntimeError(f"{i} ảnh đầu đều lỗi -> lỗi cài đặt OCR, KHÔNG lưu vào cache. Lỗi cuối: {e}")
         timing["images"] = timing.get("images", 0) + 1
         timing["sec"] = round(timing.get("sec", 0.0) + time.time() - t0, 2)
         if i % save_every == 0:
@@ -484,6 +505,26 @@ def _selftest() -> None:
             raise AssertionError("không chặn template lạ")
         except ValueError:
             pass
+    # W11: engine hỏng (mọi ảnh lỗi) -> dừng sau FAIL_FAST_N ảnh, cache trên đĩa KHÔNG có ảnh lỗi nào
+    class _Broken(MockOCREngine):
+        def read(self, image_path):
+            raise RuntimeError("ConvertPirAttribute2RuntimeAttribute not support")
+    with tempfile.TemporaryDirectory() as td:
+        ims = {}
+        for i in range(30):
+            p = os.path.join(td, f"{i}.jpg")
+            open(p, "wb").close()
+            ims[f"{i}.jpg"] = p
+        cp = os.path.join(td, "ocr", "x.json")
+        try:
+            build_ocr_cache(ims, _Broken(), cp, save_every=50)
+            raise AssertionError("không dừng khi engine hỏng")
+        except RuntimeError:
+            pass
+        assert not load_ocr_cache(cp)["images"], "ảnh lỗi bị ghi vào cache"
+        build_ocr_cache(dict(list(ims.items())[:3]), MockOCREngine(), cp)      # ít ảnh hơn N, engine tốt -> chạy bình thường
+        assert len(load_ocr_cache(cp)["images"]) == 3
+    print("ocr fail-fast OK", flush=True)
     assert sorted(ENGINES) == ["mock", "paddledet_vietocr", "paddleocr"]
     print("ocr SELFTEST OK", flush=True)
 
