@@ -42,7 +42,7 @@ METRICS = ("exact_match", "vqa_accuracy", "anls", "token_f1")
 TOL = 1e-9                     # metrics.json phải khớp tính lại tới sai số làm tròn float
 
 # --------------------------------------------------------------------------- #
-# DANH SÁCH RUN CHÍNH (sửa ở ĐÂY khi có run mới — vd adapter chung W11)
+# DANH SÁCH RUN CHÍNH (sửa ở ĐÂY khi có run mới). W11: thêm SH (adapter dùng chung) vào 2 bảng.
 #   id      : tên dùng trong thesis/slide (đánh số chính thức sau Review 2)
 #   section : bảng nào trong file .md
 #   eval    : thư mục run eval trong experiments/
@@ -59,6 +59,7 @@ T = {  # thư mục train (viết tắt cho gọn)
     "A1": "W10_A2_qlora_ocr_vietocr_v1_alllinear_r4_qwen25vl_vitextvqa_sub8k_ep1_bf16_L4_seed42",
     "A2": "W10_A3_qlora_ocr_vietocr_v1_r64_qwen25vl_vitextvqa_sub8k_ep1_bf16_L4_seed42",
     "B3full": "W10_B3full_qlora_ocr_vietocr_v1_r16_qwen25vl_vitextvqa_full_ep1_bf16_L4_seed42",
+    "SH": "W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42",
 }
 
 SECTIONS = {
@@ -121,6 +122,9 @@ RUNS: List[Dict[str, Any]] = [
     dict(id="A2 (r64)", section="vitextvqa_test2000", ref="B1", train=T["A2"],
          method="Ablation A2: attention LoRA, r64",
          eval="W10_A3_eval_qlora_ocr_vietocr_v1_r64_sub8k_ep1_vitextvqa_test2000_bf16_L4_seed42"),
+    dict(id="SH", section="vitextvqa_test2000", ref="B1", train=T["SH"],
+         method="Shared adapter (ViVQA + ViTextVQA 8k, OCR prompt for all), 1 epoch",
+         eval="W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vitextvqa_test2000_bf16_L4_seed42"),
     # ---- ViVQA test ----
     dict(id="B1", section="vivqa_test", ref=None, train=None,
          method="Zero-shot",
@@ -134,6 +138,9 @@ RUNS: List[Dict[str, Any]] = [
     dict(id="C3", section="vivqa_test", ref="B1", train=T["C3_vv"],
          method="QLoRA, 2 epochs (selected on val-clean)",
          eval="W09_C3_eval_qlora_r16_vivqa_test_bf16_L4_seed42"),
+    dict(id="SH", section="vivqa_test", ref="B1", train=T["SH"],
+         method="Shared adapter (ViVQA + ViTextVQA 8k, OCR prompt for all), 1 epoch",
+         eval="W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vivqa_test_bf16_L4_seed42"),
 ]
 
 # Độ ổn định theo seed (test2000): id -> các thư mục eval seed 42/43/44

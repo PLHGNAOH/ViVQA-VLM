@@ -550,6 +550,42 @@
       "d_anls_vs_ref": 23.350775620260794
     },
     {
+      "section": "vitextvqa_test2000",
+      "id": "SH",
+      "method": "Shared adapter (ViVQA + ViTextVQA 8k, OCR prompt for all), 1 epoch",
+      "eval_dir": "W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vitextvqa_test2000_bf16_L4_seed42",
+      "train_dir": "W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42",
+      "ref": "B1",
+      "n": 2000,
+      "exact_match": 0.495,
+      "vqa_accuracy": 0.495,
+      "anls": 0.7111513236730269,
+      "token_f1": 0.7009144951238446,
+      "by_type": {},
+      "sec_per_q": 1.002,
+      "infer_h": 0.5568333333333333,
+      "gpu": "NVIDIA L4",
+      "prompting_mode": "ocr",
+      "adapter_mb": 29.53,
+      "adapter_path": "/content/drive/MyDrive/ViVQA-VLM/adapters/W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42/epoch_1",
+      "n_multi_gold": 0,
+      "vqa_acc_equals_em": true,
+      "train_n": 18799,
+      "epochs": 1.0,
+      "steps": 1175,
+      "train_h": 6.065027777777777,
+      "sec_per_step": 18.582,
+      "train_vram_gb": 8.15,
+      "trainable_params": 7372800,
+      "trainable_pct": 0.196,
+      "lora_r": 16,
+      "lora_targets": "q+k+v+o",
+      "train_prompting": "ocr",
+      "train_gpu": "NVIDIA L4",
+      "d_em_vs_ref": 20.700000000000003,
+      "d_anls_vs_ref": 23.588519560508797
+    },
+    {
       "section": "vivqa_test",
       "id": "B1",
       "method": "Zero-shot",
@@ -750,6 +786,63 @@
       "train_gpu": "NVIDIA L4",
       "d_em_vs_ref": 54.548483838720415,
       "d_anls_vs_ref": 49.428080908469816
+    },
+    {
+      "section": "vivqa_test",
+      "id": "SH",
+      "method": "Shared adapter (ViVQA + ViTextVQA 8k, OCR prompt for all), 1 epoch",
+      "eval_dir": "W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vivqa_test_bf16_L4_seed42",
+      "train_dir": "W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42",
+      "ref": "B1",
+      "n": 3001,
+      "exact_match": 0.7350883038987004,
+      "vqa_accuracy": 0.7350883038987004,
+      "anls": 0.7544793048041967,
+      "token_f1": 0.7608765332190859,
+      "by_type": {
+        "color": {
+          "n": 625,
+          "exact_match": 0.824,
+          "anls": 0.8264
+        },
+        "location": {
+          "n": 685,
+          "exact_match": 0.6306569343065693,
+          "anls": 0.664371188422283
+        },
+        "number": {
+          "n": 444,
+          "exact_match": 0.7747747747747747,
+          "anls": 0.7747747747747747
+        },
+        "object": {
+          "n": 1247,
+          "exact_match": 0.7337610264635124,
+          "anls": 0.7607041937835842
+        }
+      },
+      "sec_per_q": 0.574,
+      "infer_h": 0.47863888888888884,
+      "gpu": "NVIDIA L4",
+      "prompting_mode": "ocr",
+      "adapter_mb": 29.53,
+      "adapter_path": "/content/drive/MyDrive/ViVQA-VLM/adapters/W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42/epoch_1",
+      "n_multi_gold": 0,
+      "vqa_acc_equals_em": true,
+      "train_n": 18799,
+      "epochs": 1.0,
+      "steps": 1175,
+      "train_h": 6.065027777777777,
+      "sec_per_step": 18.582,
+      "train_vram_gb": 8.15,
+      "trainable_params": 7372800,
+      "trainable_pct": 0.196,
+      "lora_r": 16,
+      "lora_targets": "q+k+v+o",
+      "train_prompting": "ocr",
+      "train_gpu": "NVIDIA L4",
+      "d_em_vs_ref": 51.41619460179939,
+      "d_anls_vs_ref": 46.84272456020111
     }
   ],
   "seed_stability": {

@@ -18,7 +18,7 @@ Mục tiêu W11 gồm ba phần:
 | 2 | `src/eval/full_eval_table.py`: bảng đầy đủ 21 dòng × 3 bảng + chi phí + ổn định theo seed + loại câu hỏi ViVQA; tự kiểm metrics.json bằng cách tính lại từ predictions.json | — | ✅ 21/10 (`experiments/W11_full_eval_table/`) |
 | 3 | OCR cho ảnh ViVQA train + test (notebook `19_ocr_cache_vivqa.ipynb`) | ≈ 20 phút T4 | ✅ 21/10 (lần 3; lần 1–2 hỏng do cài Paddle, xem mục Sự cố) |
 | 4 | Code train **trộn 2 dataset** (`train_qlora.py --mix`) + notebook `20_qlora_shared_adapter_qwen25vl.ipynb` + script kết luận `src/eval/shared_adapter.py` | — | ✅ 21/10 |
-| 5 | **SH**: train adapter dùng chung + eval ViVQA test và ViTextVQA test2000 + kết luận theo luật (notebook 20) | ≈ 6,1 h + 1,3 h L4 | ⏳ đang chạy (21/10) |
+| 5 | **SH**: train adapter dùng chung + eval ViVQA test và ViTextVQA test2000 + kết luận theo luật (notebook 20) | 6,07 h + ≈ 1,1 h L4 | ✅ 21/10 — **ADAPTER DÙNG CHUNG ĐẠT** |
 | 6 | Bộ phân loại câu hỏi ViTextVQA (theo luật) + bảng EM/ANLS theo loại | — | ✅ 21/10 (luật `qt-v1` đóng băng 15:17 `9b441f1`; 150 nhãn tay; bảng tính sau commit) |
 | 7 | Đưa kết quả W10 (và SH nếu kịp) vào deck cộng dồn Part B qua builder | — | ⏳ |
 | 8 | Tập nói Review 2 | — | ⏳ |
@@ -134,6 +134,7 @@ ViTextVQA không có nhãn loại câu hỏi (`question_type` = `unknown` ở m�
 | OCR ViVQA (≈ 9–10 nghìn ảnh × ≈ 0,75 s) | — | ≈ 2 h | ≈ 2,5 |
 | SH train (≈ C1 3,03 h + B3 2,98 h) | ≈ 6,1 h | — | ≈ 9,4 |
 | SH eval ViVQA test + ViTextVQA test2000 (+ nạp model) | ≈ 1,3 h | — | ≈ 2 |
+| **Thực tế** | ≈ 7,3 h (train 6,07 + eval ≈ 1,1 + kiểm/nạp) | ≈ 0,6 h (3 lần chạy notebook 19, lần 3 ≈ 20 phút) | đọc ở Colab → Resources khi đóng tuần |
 | **Tổng W11** | ≈ 7,4 h | ≈ 2 h | **≈ 14** (≈ 49 CU lúc 21/10 04:10 → còn ≈ 35 cho W12–W15) |
 
 ## Sự cố
@@ -152,6 +153,7 @@ Nguồn: `../../experiments/W11_full_eval_table/` (`full_eval_table.md` / `.csv`
 |---|---|---|---|---|
 | ViTextVQA · full test (10.028) | EM 29,12 · ANLS 47,60 | B2: 50,26 · 72,02 | **B3-full: 53,35 · 73,89** | +24,23 |
 | ViVQA · test (3.001) | EM 22,09 · ANLS 28,61 | C1: 73,78 · 75,66 | **C3: 76,64 · 78,03** | +54,55 |
+| *Adapter dùng chung SH* | | | ViVQA 73,51 · 75,45 · test2000 49,50 · 71,12 | (W11, cho prototype) |
 
 EM ViVQA theo loại câu hỏi (nhãn có sẵn của dataset). Đây là số mô tả, phần giải thích để dành cho error analysis W12:
 
@@ -220,8 +222,35 @@ Nhận xét **chỉ mô tả** (chưa kiểm định theo loại, không có lu�
 3. Loại **khó nhất** sau B3-full là **`product_service`** (44,1), **`location`** (47,0) và **`other`** (49,6). Đây là các câu cần suy ra từ chữ ("cửa hàng bán gì", "ở tỉnh nào"), không chỉ chép lại chữ.
 4. Mô hình 7B tham chiếu R1b yếu nhất ở `product_service` (3,0) và `name` (9,8) trên test2000. Nhiều khả năng do định dạng trả lời dài, cần kiểm ở W12.
 
-### Adapter dùng chung — SH
+### Adapter dùng chung — SH (21/10/2026, L4, bf16, 4-bit, seed 42)
 
-Run: `W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42` (train), `W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_{vivqa_test,vitextvqa_test2000}_bf16_L4_seed42` (eval), `W11_shared_adapter_L4_seed42/` (kết luận).
+Run: `W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42` (train), `W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_{vivqa_test,vitextvqa_test2000}_bf16_L4_seed42` (eval), `../../experiments/W11_shared_adapter_L4_seed42/shared_adapter_summary.json` (kết luận).
 
-*(chưa chạy)*
+**Điều kiện hợp lệ: đạt hết** (`✔ kiểm hợp lệ`):
+- 18.799 câu (ViVQA 10.799 = file C1, ViTextVQA 8.000 = file B3), không loại câu nào;
+- LoRA 144 lớp, chỉ ở LLM, 7.372.800 tham số; siêu tham số = C1 = B3;
+- OCR phần ViTextVQA trùng dấu vân tay B3; OCR test2000 trùng B3;
+- 1.175 step, không chạy tiếp từ checkpoint nào; train bằng code `72286c4`.
+
+| Dataset | Mốc → SH (EM) | ΔEM (CI95) | Chỉ mốc đúng / chỉ SH đúng | McNemar p | ΔANLS (CI95) | Kết luận |
+|---|---|---|---|---|---|---|
+| ViVQA test (3.001) | C1 73,78 → **73,51** | −0,27 [−1,13; +0,60] | 91 / 83 | 0,60 | −0,21 [−0,99; +0,60] | **KHÔNG KÉM** |
+| ViTextVQA test2000 | B3 49,25 → **49,50** | +0,25 [−0,95; +1,45] | 75 / 80 | 0,75 | +0,73 [−0,33; +1,76] | **KHÔNG KÉM** |
+
+➜ **KẾT LUẬN THEO LUẬT (δ = 1,5 điểm EM): ADAPTER DÙNG CHUNG ĐẠT.** Prototype dùng **1 adapter (SH)**. Không có bằng chứng chuyển giao dương: cả hai p đều ≥ 0,05.
+
+**Chỉ báo cáo:**
+
+| Mục | Kết quả |
+|---|---|
+| ViVQA · câu **không có** dòng OCR (1.673 câu, đầu vào SH = C1) | C1 73,58 → SH 72,98, ΔEM −0,60 [−1,79; +0,60]. Chênh lệch chỉ do trộn dữ liệu và nằm trong nhiễu |
+| ViVQA · câu **có** dòng OCR vô nghĩa (1.328 câu) | C1 74,02 → SH 74,17, ΔEM +0,15 [−1,05; +1,36]. **Dòng OCR nhiễu không làm hại** |
+| Chép chữ OCR vào đáp án sai (ViVQA, câu có dòng OCR) | C1 3/1.328 = 0,23% · SH 4/1.328 = 0,30%. Gần như không có (đầu vào cho phân tích hallucination W12) |
+| So với mô hình chính thức (khác điều kiện, chỉ mô tả) | C3 76,64 → SH 73,51 (−3,13 [−4,13; −2,13]); B3-full trên cùng 2.000 câu 53,85 → SH 49,50 (−4,35 [−5,80; −2,90]). Lý do: SH chỉ có 1 epoch ViVQA và 23% dữ liệu ViTextVQA (bản rẻ, đã ghi trước) |
+| Chi phí | Train 6,07 h (C1 + B3 = 6,01 h); 18,58 s/step; VRAM đỉnh 8,15 GB; **1 adapter 29,5 MB thay vì 2**; suy luận 0,57 s/câu (ViVQA), 1,00 s/câu (ViTextVQA), như các adapter chuyên biệt |
+
+**Ý nghĩa cho thesis:** chia sẻ một adapter cho hai loại câu hỏi **không làm mất độ chính xác** so với adapter chuyên biệt cùng ngân sách. Model cũng học được cách bỏ qua dòng OCR vô nghĩa trên ảnh thường. Bảng kết quả chính vẫn dùng C3 (ViVQA) và B3-full (ViTextVQA).
+
+**Hướng tiếp (chưa quyết, không chạy trong W11):** SH-full, tức SH trên ViVQA 2 epoch + ViTextVQA toàn bộ, để prototype đạt mức C3 / B3-full. Ước tính khoảng 19 h L4 ≈ 29 CU, gần hết ngân sách còn lại; cân nhắc sau Review 2.
+
+`full_eval_table` (23 dòng) và bảng theo loại câu hỏi (test2000) đã có thêm dòng SH.
