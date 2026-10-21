@@ -16,9 +16,9 @@ Mục tiêu W11 gồm ba phần:
 |---|------|-----|-----------|
 | 1 | Luật ghi trước (README này): adapter dùng chung S2, quy ước VQA-Acc, luật bộ phân loại câu hỏi | — | ✅ 21/10 |
 | 2 | `src/eval/full_eval_table.py`: bảng đầy đủ 21 dòng × 3 bảng + chi phí + ổn định theo seed + loại câu hỏi ViVQA; tự kiểm metrics.json bằng cách tính lại từ predictions.json | — | ✅ 21/10 (`experiments/W11_full_eval_table/`) |
-| 3 | OCR cho ảnh ViVQA train + test (notebook `19_ocr_cache_vivqa.ipynb`) | ≈ 2 h T4 | ⏳ |
-| 4 | Code train **trộn 2 dataset** (`train_qlora.py`) + notebook adapter dùng chung + script kết luận | — | ⏳ |
-| 5 | **SH**: train adapter dùng chung + eval ViVQA test và ViTextVQA test2000 + kết luận theo luật | ≈ 6,1 h + 1,3 h L4 | ⏳ |
+| 3 | OCR cho ảnh ViVQA train + test (notebook `19_ocr_cache_vivqa.ipynb`) | ≈ 2 h T4 | ⏳ đang chạy (21/10) |
+| 4 | Code train **trộn 2 dataset** (`train_qlora.py --mix`) + notebook `20_qlora_shared_adapter_qwen25vl.ipynb` + script kết luận `src/eval/shared_adapter.py` | — | ✅ 21/10 |
+| 5 | **SH**: train adapter dùng chung + eval ViVQA test và ViTextVQA test2000 + kết luận theo luật (notebook 20) | ≈ 6,1 h + 1,3 h L4 | ⏳ |
 | 6 | Bộ phân loại câu hỏi ViTextVQA (theo luật) + bảng EM/ANLS theo loại | — | ⏳ |
 | 7 | Đưa kết quả W10 (và SH nếu kịp) vào deck cộng dồn Part B qua builder | — | ⏳ |
 | 8 | Tập nói Review 2 | — | ⏳ |
@@ -112,6 +112,9 @@ ViTextVQA không có nhãn loại câu hỏi (`question_type` = `unknown` ở m�
 |------|----------|------|
 | `src/eval/full_eval_table.py` (mới) | Danh sách 21 run chính (3 bảng: ViTextVQA full test, test2000, ViVQA test) → EM / VQA-Acc / ANLS / F1, ΔEM so với B1, chi phí lần ngược từ adapter → `train_log.json`, ổn định theo seed (B2-sub, B3), EM theo loại câu hỏi (ViVQA), kiểm quy ước VQA-Acc. **Tính lại mọi metric từ predictions.json**, dừng nếu lệch metrics.json (> 1e-9), nếu adapter không thuộc run train khai báo, hoặc nếu các run trong cùng bảng khác tập câu hỏi | `--selftest` (bắt được metrics.json bị sửa và adapter sai run). Chạy thật: 21/21 run khớp metrics.json; số khớp README W07–W10 (vd B3-full 53,35 / 73,89; B3 test2000 49,25; C3 76,64) |
 | `notebooks/19_ocr_cache_vivqa.ipynb` (mới) | OCR VietOCR cho ảnh ViVQA train + test (T4). Bắt buộc engine trùng cache ViTextVQA W10. Thống kê % câu có dòng OCR, đáp án∈OCR; biên bản `experiments/W11_ocr_cache_vivqa/` | Cú pháp các cell đã kiểm; dùng lại `src/data/ocr.py` (đã hỗ trợ `--dataset vivqa`) |
+| `src/adaptation/train_qlora.py` | `--mix DATASET=FILE` (lặp lại, ≥ 2 dataset) thay `--dataset/--data_file`. Mỗi phần nạp, lọc và gắn OCR **bằng đúng hàm của run đơn**, với OCR cache mặc định của dataset đó. Thiết lập OCR (engine, template, ngưỡng) **phải trùng** giữa các phần, nếu không thì dừng. Ghép rồi xáo bằng `random.Random(seed)` (Trainer xáo thêm lần nữa). Chữ ký run gồm sha256 từng file + dấu vân tay OCR từng phần. `train_log.json` có thêm `data_parts`, `ocr.stats_by_dataset`, `mix_order`. Run đơn **không đổi** chữ ký | `--selftest` thêm `mix (W11) OK`: phần ViTextVQA trong run trộn có **cùng dấu vân tay OCR** như run đơn (B3); ảnh không chữ cho prompt **trùng zero-shot**; chạy lại cùng lệnh thì cùng chữ ký (resume được); engine OCR lệch thì dừng; xáo tái lập được, trộn đều. Các selftest cũ vẫn qua |
+| `src/eval/shared_adapter.py` (mới) | Luật SH: kiểm hợp lệ train_log (file = C1 + B3, siêu tham số = C1 = B3, LoRA 144 lớp LLM, 7.372.800 tham số, OCR ViTextVQA = dấu vân tay B3) và 2 run eval (cùng file test, cùng OCR với B3 trên test2000, adapter đúng run SH). Sau đó so sánh C1 → SH, B3 → SH (ΔEM + CI95, McNemar, ΔANLS) và kết luận theo δ = 1,5. Chỉ báo cáo: tách ViVQA theo dòng OCR, tỉ lệ chép chữ OCR, so với C3 / B3-full trên cùng câu, chi phí | `--selftest`. Chạy thử trên predictions thật (SH tạm thay bằng run có sẵn): B3 → A3 = +1,05 [−0,05; +2,15], p = 0,071, **khớp** README W10; C1 → C3 = +2,87, **khớp** W09 |
+| `notebooks/20_qlora_shared_adapter_qwen25vl.ipynb` (mới) | Kiểm trước (sha256 2 file train = C1 / B3, 2 OCR cache = biên bản W11 / W10, phủ đủ ảnh, run mốc, selftest 5 script) → train SH → kiểm hợp lệ → eval ViVQA test → eval test2000 → kết luận. Bỏ qua phần đã xong, tự trả máy L4 | Cú pháp các cell đã kiểm |
 
 ## Ngân sách
 
@@ -142,5 +145,7 @@ EM ViVQA theo loại câu hỏi (nhãn có sẵn của dataset). Đây là số 
 | C3 | 76,66 | 77,03 | 84,32 | 69,34 |
 
 ### Adapter dùng chung — SH
+
+Run: `W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42` (train), `W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_{vivqa_test,vitextvqa_test2000}_bf16_L4_seed42` (eval), `W11_shared_adapter_L4_seed42/` (kết luận).
 
 *(chưa chạy)*

@@ -38,6 +38,13 @@ Cách chạy (Colab, GPU):
   !python -u -m src.adaptation.train_qlora ... --lora_targets all_linear_llm --lora_r 4   # A2, cùng ngân sách
   !python -u -m src.adaptation.train_qlora ... --lora_r 64                                # A3, alpha = 128
 
+  # W11: adapter DÙNG CHUNG — train trộn nhiều dataset (thay --dataset/--data_file bằng --mix, lặp lại được)
+  !python -u -m src.adaptation.train_qlora --run_name W11_SH_qlora_... --epochs 1 \
+      --mix vivqa=data/vivqa/train.json \
+      --mix vitextvqa_official=data/vitextvqa_official/train_subset8000_byimage_seed42.json \
+      --mode ocr --ocr_backend paddledet_vietocr
+  (mỗi dataset tự dùng OCR cache mặc định của nó; thiết lập OCR phải trùng nhau, nếu không -> dừng)
+
 Chạy tiếp sau khi Colab ngắt: chạy lại ĐÚNG lệnh cũ (cùng --run_name) -> tự resume.
 
 Kiểm thử offline (không GPU, không mạng, không cần torch):
@@ -374,6 +381,104 @@ def attach_ocr_for_training(cfg: Dict[str, Any], samples: List[Dict[str, Any]], 
 
 
 # --------------------------------------------------------------------------- #
+# 3c) W11 — train TRỘN nhiều dataset (adapter dùng chung). Thuần Python, kiểm thử offline được.
+# --------------------------------------------------------------------------- #
+# Thiết lập OCR phải TRÙNG giữa các dataset (cùng engine, cùng template/ngưỡng) — chỉ phần ảnh (subset) khác nhau.
+MIX_COMMON_OCR_KEYS = ("backend", "cache_format", "engine", "cache_file", "template", "max_chars", "min_conf")
+MIX_ORDER_NOTE = "ghép các phần theo thứ tự --mix, xáo bằng random.Random(seed), rồi RandomSampler(seed) của Trainer"
+
+
+def parse_mix(items: Optional[List[str]]) -> List[Tuple[str, str]]:
+    """['vivqa=data/vivqa/train.json', ...] -> [('vivqa', 'data/vivqa/train.json'), ...]. Cần >= 2 dataset khác nhau."""
+    parts: List[Tuple[str, str]] = []
+    for it in items or []:
+        if "=" not in it:
+            raise ValueError(f"--mix '{it}' sai dạng, cần DATASET=FILE (vd vivqa=data/vivqa/train.json)")
+        ds, path = (x.strip() for x in it.split("=", 1))
+        if ds not in DATASETS:
+            raise ValueError(f"--mix: dataset '{ds}' không hợp lệ (có: {list(DATASETS)})")
+        if not path:
+            raise ValueError(f"--mix: thiếu file cho {ds}")
+        parts.append((ds, path))
+    if len(parts) < 2:
+        raise ValueError("--mix cần ít nhất 2 phần (2 dataset)")
+    if len({d for d, _ in parts}) != len(parts):
+        raise ValueError("--mix: mỗi dataset chỉ được xuất hiện một lần")
+    return parts
+
+
+def merge_ocr_settings(by_ds: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+    """Gộp cfg['prompting']['ocr'] của từng phần thành MỘT mục (vào chữ ký run). Khác thiết lập -> lỗi."""
+    first_ds, first = next(iter(by_ds.items()))
+    for ds, o in by_ds.items():
+        diff = {k: (first.get(k), o.get(k)) for k in MIX_COMMON_OCR_KEYS if first.get(k) != o.get(k)}
+        if diff:
+            raise ValueError(f"OCR của '{ds}' khác '{first_ds}' ở {diff} -> các dataset phải dùng CÙNG engine "
+                             f"và thiết lập OCR (adapter dùng chung = một luật prompt cho mọi câu)")
+    merged = {k: copy.deepcopy(first.get(k)) for k in MIX_COMMON_OCR_KEYS}
+    merged["subset_sha256_by_dataset"] = {ds: o["subset_sha256"] for ds, o in by_ds.items()}
+    return merged
+
+
+def mixed_data_sha(parts: List[Tuple[str, str]]) -> str:
+    """Dấu vân tay dữ liệu của run trộn: sha256 của [(dataset, sha256 file), ...] theo thứ tự --mix."""
+    return hashlib.sha256(json.dumps([list(p) for p in parts], ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+def shuffle_mixed(samples: List[Dict[str, Any]], seed: int) -> List[Dict[str, Any]]:
+    """Xáo đều các dataset với nhau (tái lập được). Trainer cũng xáo lại -> đây là lớp bảo đảm thứ hai."""
+    import random
+    out = list(samples)
+    random.Random(seed).shuffle(out)
+    return out
+
+
+def prepare_mixed(cfg: Dict[str, Any], mix: List[Tuple[str, str]], drive_root: str, limit: Optional[int],
+                  ocr_backend: Optional[str], ocr_template: Optional[str], ocr_max_chars: Optional[int],
+                  ocr_min_conf: Optional[float], image_dirs: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    """
+    Nạp + lọc + gắn OCR cho TỪNG phần như một run đơn (cùng hàm, cùng ngưỡng loại mẫu), rồi ghép + xáo.
+    Ghi cfg['prompting']['ocr'] (đã gộp) TRƯỚC khi tính chữ ký run. image_dirs: chỉ dùng khi kiểm thử offline.
+    """
+    from src.data.vivqa_dataset import load_vivqa
+    samples: List[Dict[str, Any]] = []
+    dropped: List[str] = []
+    parts_meta: List[Dict[str, Any]] = []
+    ocr_by_ds: Dict[str, Dict[str, Any]] = {}
+    stats_by_ds: Dict[str, Dict[str, Any]] = {}
+    for ds, rel in mix:
+        f = rel if os.path.isabs(rel) else os.path.join(drive_root, rel)
+        if image_dirs is not None:
+            idir = image_dirs[ds]
+        else:
+            from src.eval.run_baseline import prepare_images
+            idir = prepare_images(ds, drive_root)
+        part = load_vivqa(f, image_dir=idir, max_samples=limit)
+        part, drop = filter_trainable(part)
+        if not part:
+            raise ValueError(f"{ds}: không còn mẫu nào train được sau khi lọc")
+        check_drop_ratio(len(part), len(drop), idir)
+        for s in part:
+            s["source_dataset"] = ds
+        st = attach_ocr_for_training(cfg, part, drive_root, ds, ocr_backend, None,
+                                     ocr_template, ocr_max_chars, ocr_min_conf)
+        if st:
+            ocr_by_ds[ds] = copy.deepcopy(cfg["prompting"]["ocr"])
+            stats_by_ds[ds] = st
+        parts_meta.append({"dataset": ds,
+                           "data_file": os.path.relpath(f, drive_root) if f.startswith(drive_root) else f,
+                           "data_file_sha256": _sha256(f), "num_samples": len(part), "num_dropped": len(drop)})
+        samples += part
+        dropped += drop
+    if ocr_by_ds:
+        cfg["prompting"]["ocr"] = merge_ocr_settings(ocr_by_ds)
+    seed = int(cfg["run"]["seed"])
+    return {"samples": shuffle_mixed(samples, seed), "dropped": dropped, "parts": parts_meta,
+            "ocr_stats": stats_by_ds or None,
+            "data_sha": mixed_data_sha([(p["dataset"], p["data_file_sha256"]) for p in parts_meta])}
+
+
+# --------------------------------------------------------------------------- #
 # 4) Dataset + Collator (cần torch/transformers -> import trễ bên trong)
 # --------------------------------------------------------------------------- #
 def make_collate_fn(processor, cfg: Dict[str, Any]):
@@ -441,7 +546,8 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
           ocr_template: Optional[str] = None, ocr_max_chars: Optional[int] = None,
           ocr_min_conf: Optional[float] = None,
           lora_r: Optional[int] = None, lora_alpha: Optional[int] = None,
-          lora_targets: Optional[str] = None) -> Dict[str, Any]:
+          lora_targets: Optional[str] = None,
+          mix: Optional[List[Tuple[str, str]]] = None) -> Dict[str, Any]:
     """
     Nạp data -> nạp model + LoRA -> train -> lưu adapter + train_log.json.
 
@@ -455,8 +561,15 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     from src.data.vivqa_dataset import load_vivqa
     from src.models.vlm_loader import load_vlm_for_training
 
-    if dataset not in DATASETS:
+    if mix:
+        # W11: run trộn — mỗi phần tự khai file + dùng OCR cache mặc định của dataset đó
+        if dataset or data_file or image_dir or ocr_cache:
+            raise ValueError("--mix không dùng cùng --dataset / --data_file / image_dir / --ocr_cache")
+        dataset_label = "mixed:" + "+".join(d for d, _ in mix)
+    elif dataset not in DATASETS:
         raise ValueError(f"--dataset phải là một trong {list(DATASETS)}")
+    else:
+        dataset_label = dataset
 
     cfg = copy.deepcopy(load_config(config, max_pixels=max_pixels, dtype=dtype, mode=mode,
                                     batch_size=batch_size, grad_accum=grad_accum,
@@ -468,38 +581,54 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     _log(f"   LoRA: r={cfg['lora']['r']} alpha={cfg['lora']['lora_alpha']} "
          f"target_modules={cfg['lora']['target_modules']}")
 
-    data_file = data_file or os.path.join(drive_root, DATASETS[dataset]["train_rel"])
+    if not mix:
+        data_file = data_file or os.path.join(drive_root, DATASETS[dataset]["train_rel"])
     out_dir = os.path.join(out_root or os.path.join(drive_root, "experiments"), run_name)
     adapter_dir = os.path.join(adapter_root or os.path.join(drive_root, "adapters"), run_name)
 
-    _log(f"== {run_name} | dataset={dataset} | mode={cfg['prompting']['mode']} | seed={seed}")
-    _log(f"   data : {data_file}")
+    _log(f"== {run_name} | dataset={dataset_label} | mode={cfg['prompting']['mode']} | seed={seed}")
+    for ds_, f_ in (mix or [(dataset, data_file)]):
+        _log(f"   data : {ds_}: {f_}")
     _log(f"   out  : {out_dir}")
     _log(f"   adapt: {adapter_dir}")
 
     # --- Dữ liệu ---
-    if image_dir is None:
-        from src.eval.run_baseline import prepare_images
-        image_dir = prepare_images(dataset, drive_root)
-    samples = load_vivqa(data_file, image_dir=image_dir, max_samples=limit)
-    samples, dropped = filter_trainable(samples)
-    if not samples:
-        raise ValueError("Không còn mẫu nào train được sau khi lọc")
-    check_drop_ratio(len(samples), len(dropped), image_dir)
-    _log(f"   {len(samples)} mẫu train (loại {len(dropped)} mẫu thiếu ảnh/đáp án)")
-    ocr_stats = attach_ocr_for_training(cfg, samples, drive_root, dataset, ocr_backend, ocr_cache,
-                                        ocr_template, ocr_max_chars, ocr_min_conf)
-    if ocr_stats:
-        o = cfg["prompting"]["ocr"]
-        _log(f"   OCR: {o['cache_file']} ({o['backend']}) | template {o['template']} | max_chars {o['max_chars']} | "
-             f"min_conf {o['min_conf']} | {ocr_stats['pct_samples_with_text']}% mẫu có chữ")
+    parts_meta = None
+    if mix:
+        mixed = prepare_mixed(cfg, mix, drive_root, limit, ocr_backend, ocr_template, ocr_max_chars, ocr_min_conf)
+        samples, dropped, parts_meta = mixed["samples"], mixed["dropped"], mixed["parts"]
+        ocr_stats, data_sha = mixed["ocr_stats"], mixed["data_sha"]
+        for p in parts_meta:
+            _log(f"   {p['dataset']}: {p['num_samples']} mẫu (loại {p['num_dropped']}) | sha256 {p['data_file_sha256'][:12]}")
+        _log(f"   TỔNG {len(samples)} mẫu train, đã xáo lẫn ({MIX_ORDER_NOTE})")
+        if ocr_stats:
+            o = cfg["prompting"]["ocr"]
+            _log(f"   OCR: {o['cache_file']} ({o['backend']}) | template {o['template']} | max_chars {o['max_chars']} | "
+                 f"min_conf {o['min_conf']} | % mẫu có dòng OCR: "
+                 + ", ".join(f"{d} {s['pct_samples_with_text']}%" for d, s in ocr_stats.items()))
+    else:
+        if image_dir is None:
+            from src.eval.run_baseline import prepare_images
+            image_dir = prepare_images(dataset, drive_root)
+        samples = load_vivqa(data_file, image_dir=image_dir, max_samples=limit)
+        samples, dropped = filter_trainable(samples)
+        if not samples:
+            raise ValueError("Không còn mẫu nào train được sau khi lọc")
+        check_drop_ratio(len(samples), len(dropped), image_dir)
+        _log(f"   {len(samples)} mẫu train (loại {len(dropped)} mẫu thiếu ảnh/đáp án)")
+        ocr_stats = attach_ocr_for_training(cfg, samples, drive_root, dataset, ocr_backend, ocr_cache,
+                                            ocr_template, ocr_max_chars, ocr_min_conf)
+        if ocr_stats:
+            o = cfg["prompting"]["ocr"]
+            _log(f"   OCR: {o['cache_file']} ({o['backend']}) | template {o['template']} | max_chars {o['max_chars']} | "
+                 f"min_conf {o['min_conf']} | {ocr_stats['pct_samples_with_text']}% mẫu có chữ")
+        data_sha = _sha256(data_file)
 
     # --- Chạy tiếp hay chạy mới? (kiểm tra TRƯỚC khi nạp model 4 phút) ---
     t = cfg["training"]
     if save_steps is not None:
         t["save_steps"] = int(save_steps)
     ckpt_dir = os.path.join(out_dir, "checkpoints")
-    data_sha = _sha256(data_file)
     sig = run_signature(cfg, data_sha, len(samples), limit, max_steps)
     sig_existed = check_or_write_signature(out_dir, sig)
     resume_from = find_resume_checkpoint(ckpt_dir)
@@ -604,14 +733,17 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
     meta = {
         "run_name": run_name,
         "finished_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "dataset": dataset,
-        "data_file": os.path.relpath(data_file, drive_root) if data_file.startswith(drive_root) else data_file,
+        "dataset": dataset_label,
+        "data_file": (None if mix else
+                      os.path.relpath(data_file, drive_root) if data_file.startswith(drive_root) else data_file),
         "data_file_sha256": data_sha,
         "num_samples": len(samples),
         "num_dropped": len(dropped),
         "answer_policy": "đáp án đầu tiên trong trường answers",
         "prompting_mode": cfg["prompting"]["mode"],
-        "ocr": ({**cfg["prompting"]["ocr"], "stats": ocr_stats} if ocr_stats else None),
+        "ocr": (None if not ocr_stats else
+                {**cfg["prompting"]["ocr"], "stats_by_dataset": ocr_stats} if mix else
+                {**cfg["prompting"]["ocr"], "stats": ocr_stats}),
         "model_id": cfg["model"]["model_id"],
         "max_pixels": cfg["model"]["max_pixels"],
         "min_pixels": cfg["model"]["min_pixels"],
@@ -622,6 +754,7 @@ def train(dataset: str, run_name: str, drive_root: str = DEFAULT_DRIVE_ROOT,
         "training": {**t, "max_steps": max_steps, "limit": limit, **sched,
                      "unsupported_training_args": unsupported},
         "run_signature_sha256": sig["sha256"],
+        **({"data_parts": parts_meta, "mix_order": MIX_ORDER_NOTE} if mix else {}),
         "resumed_from": os.path.basename(resume_from) if resume_from else None,
         "cost_note": ("cost chỉ tính PHIÊN CUỐI (đã chạy tiếp từ checkpoint)" if resume_from
                       else "cost tính trọn run"),
@@ -821,6 +954,7 @@ def _selftest() -> None:
     _log("session_losses OK")
 
     _selftest_ocr()
+    _selftest_mix()
 
     _log("SELFTEST OK")
 
@@ -873,6 +1007,95 @@ def _selftest_ocr() -> None:
     _log("ocr (train) OK")
 
 
+def _selftest_mix() -> None:
+    """W11: run trộn — mỗi phần nhận ĐÚNG OCR như khi train riêng; ảnh không chữ -> prompt = zero-shot;
+    thiết lập OCR lệch giữa các dataset -> dừng; xáo lẫn tái lập được; chữ ký khác run đơn."""
+    import tempfile
+    from src.data.ocr import MockOCREngine, build_ocr_cache, images_of, load_ocr_cache, save_ocr_cache
+    from src.data.vivqa_dataset import load_vivqa
+    from src.prompting.builder import build_prompt, prompt_for_sample
+
+    # (a) parse_mix
+    assert parse_mix(["vivqa=a.json", "vitextvqa_official=b.json"]) == [("vivqa", "a.json"), ("vitextvqa_official", "b.json")]
+    for bad in (["vivqa=a.json"], ["vivqa=a.json", "vivqa=b.json"], ["xyz=a.json", "vivqa=b.json"],
+                ["vivqa", "vitextvqa_official=b.json"], ["vivqa=", "vitextvqa_official=b.json"]):
+        try:
+            parse_mix(bad)
+            raise AssertionError(f"không chặn --mix {bad}")
+        except ValueError:
+            pass
+
+    # (b) xáo: tái lập được, trộn đều, không mất/thừa mẫu
+    a = [{"question_id": f"a{i}", "source_dataset": "A"} for i in range(100)]
+    b = [{"question_id": f"b{i}", "source_dataset": "B"} for i in range(100)]
+    s1, s2 = shuffle_mixed(a + b, 42), shuffle_mixed(a + b, 42)
+    assert [x["question_id"] for x in s1] == [x["question_id"] for x in s2]
+    assert sorted(x["question_id"] for x in s1) == sorted(x["question_id"] for x in a + b)
+    assert 20 <= sum(x["source_dataset"] == "A" for x in s1[:64]) <= 44, "64 mẫu đầu không trộn đều"
+    assert [x["question_id"] for x in shuffle_mixed(a + b, 43)] != [x["question_id"] for x in s1]
+
+    with tempfile.TemporaryDirectory() as td:
+        img = {}
+        files = {}
+        for ds, n in (("vivqa", 4), ("vitextvqa_official", 3)):
+            img[ds] = os.path.join(td, f"img_{ds}")
+            os.makedirs(img[ds])
+            recs = [{"question_id": f"{ds}_{i}", "question": f"{ds} hỏi {i}?", "answers": ["đáp"],
+                     "image": f"{ds}_{i}.jpg"} for i in range(n)]
+            for r in recs:
+                open(os.path.join(img[ds], r["image"]), "wb").close()
+            files[ds] = os.path.join(td, "data", ds, "train.json")
+            _write_json(files[ds], recs)
+            cache_path = os.path.join(td, "data", ds, "ocr", "mock.json")
+            build_ocr_cache(images_of([files[ds]], img[ds]), MockOCREngine(), cache_path)
+            if ds == "vivqa":               # ảnh vivqa_0 KHÔNG có chữ (như ảnh COCO thường)
+                c = load_ocr_cache(cache_path)
+                c["images"]["vivqa_0.jpg"]["lines"] = []
+                save_ocr_cache(c, cache_path)
+        cp = os.path.join(REPO_ROOT, "configs/qwen_lora.yaml")
+        mix = [("vivqa", "data/vivqa/train.json"), ("vitextvqa_official", "data/vitextvqa_official/train.json")]
+
+        cfg_mix = load_config(cp, epochs=1, mode="ocr")
+        r = prepare_mixed(cfg_mix, mix, td, None, "mock", None, None, None, image_dirs=img)
+        assert len(r["samples"]) == 7 and not r["dropped"]
+        assert [(p["dataset"], p["num_samples"]) for p in r["parts"]] == [("vivqa", 4), ("vitextvqa_official", 3)]
+        assert {s["source_dataset"] for s in r["samples"]} == {"vivqa", "vitextvqa_official"}
+        o = cfg_mix["prompting"]["ocr"]
+        assert set(o["subset_sha256_by_dataset"]) == {"vivqa", "vitextvqa_official"} and o["template"] == "v1"
+
+        # (c) phần ViTextVQA nhận ĐÚNG OCR như run đơn (B3) -> cùng dấu vân tay; dữ liệu đơn khác chữ ký
+        for ds in ("vivqa", "vitextvqa_official"):
+            cfg_one = load_config(cp, epochs=1, mode="ocr")
+            st = attach_ocr_for_training(cfg_one, load_vivqa(files[ds], image_dir=img[ds]), td, ds,
+                                         "mock", None, None, None, None)
+            assert o["subset_sha256_by_dataset"][ds] == st["subset_sha256"], ds
+            assert r["ocr_stats"][ds]["subset_sha256"] == st["subset_sha256"]
+            assert run_signature(cfg_mix, r["data_sha"], 7, None, None)["sha256"] != \
+                   run_signature(cfg_one, _sha256(files[ds]), 7, None, None)["sha256"]
+        assert r["data_sha"] == mixed_data_sha([("vivqa", _sha256(files["vivqa"])),
+                                                ("vitextvqa_official", _sha256(files["vitextvqa_official"]))])
+
+        # (d) luật S2: ảnh không chữ -> prompt TRÙNG zero-shot (= đầu vào của C1); ảnh có chữ -> thêm dòng OCR
+        by_id = {s["question_id"]: s for s in r["samples"]}
+        assert prompt_for_sample(by_id["vivqa_0"], cfg_mix["prompting"]) == build_prompt("vivqa hỏi 0?", mode="zero_shot")
+        assert prompt_for_sample(by_id["vivqa_1"], cfg_mix["prompting"]).startswith("Văn bản đọc được trong ảnh: MOCK vivqa_1.jpg")
+
+        # (e) chạy lại cùng lệnh -> cùng chữ ký (resume được); OCR lệch giữa 2 dataset -> dừng
+        cfg_again = load_config(cp, epochs=1, mode="ocr")
+        r2 = prepare_mixed(cfg_again, mix, td, None, "mock", None, None, None, image_dirs=img)
+        assert run_signature(cfg_again, r2["data_sha"], 7, None, None)["sha256"] == \
+               run_signature(cfg_mix, r["data_sha"], 7, None, None)["sha256"]
+        c = load_ocr_cache(os.path.join(td, "data", "vivqa", "ocr", "mock.json"))
+        c["engine_info"] = {**c.get("engine_info", {}), "det_model": "KHAC"}
+        save_ocr_cache(c, os.path.join(td, "data", "vivqa", "ocr", "mock.json"))
+        try:
+            prepare_mixed(load_config(cp, epochs=1, mode="ocr"), mix, td, None, "mock", None, None, None, image_dirs=img)
+            raise AssertionError("không chặn engine OCR lệch giữa 2 dataset")
+        except ValueError:
+            pass
+    _log("mix (W11) OK")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Train LoRA/QLoRA cho Qwen2.5-VL (PEFT-only).")
     ap.add_argument("--dataset", choices=list(DATASETS))
@@ -910,15 +1133,22 @@ def main() -> None:
     ap.add_argument("--lora_targets", default=None, choices=["attn", "all_linear_llm"],
                     help="W10 ablation H3: attn = q,k,v,o (mặc định cũ); all_linear_llm = thêm gate,up,down "
                          "CHỈ ở LLM (regex, không lọt vision)")
+    ap.add_argument("--mix", action="append", default=None, metavar="DATASET=FILE",
+                    help="W11 adapter dùng chung: lặp lại cho từng dataset, vd --mix vivqa=data/vivqa/train.json "
+                         "--mix vitextvqa_official=data/vitextvqa_official/train_subset8000_byimage_seed42.json "
+                         "(FILE tương đối so với --drive_root). Thay cho --dataset/--data_file")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
 
     if a.selftest:
         _selftest()
         return
-    if not a.dataset or not a.run_name:
-        ap.error("cần --dataset và --run_name (trừ khi --selftest)")
-    train(a.dataset, a.run_name, drive_root=a.drive_root, data_file=a.data_file,
+    mix = parse_mix(a.mix) if a.mix else None
+    if not a.run_name or not (a.dataset or mix):
+        ap.error("cần --run_name và (--dataset hoặc --mix) (trừ khi --selftest)")
+    if mix and (a.dataset or a.data_file):
+        ap.error("--mix không dùng cùng --dataset / --data_file")
+    train(a.dataset, a.run_name, mix=mix, drive_root=a.drive_root, data_file=a.data_file,
           out_root=a.out_root, adapter_root=a.adapter_root, config=a.config,
           limit=a.limit, max_steps=a.max_steps, max_pixels=a.max_pixels,
           dtype=a.dtype, mode=a.mode, batch_size=a.batch_size, grad_accum=a.grad_accum,
