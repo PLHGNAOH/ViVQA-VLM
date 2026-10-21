@@ -1,0 +1,36 @@
+{
+  "what": "Chỉ số thay thế chất lượng OCR (không cần nhãn chữ thật): đáp án gold có nằm trong văn bản OCR không",
+  "rule_note": "CHẨN ĐOÁN, không phải luật chọn backend (luật: EM của B1+OCR trên dev300)",
+  "backends": [
+    {
+      "cache_file": "paddledet_vietocr.json",
+      "backend": "paddledet_vietocr",
+      "engine": {
+        "engine": "PaddleOCR TextDetection + VietOCR",
+        "paddleocr": "3.7.0",
+        "paddlepaddle": "3.3.1",
+        "lang": "vi",
+        "device": "gpu",
+        "det_model": "PP-OCRv6_medium_det",
+        "rec_model": "vietocr/vgg_transformer",
+        "vietocr_config": "vgg_transformer, beamsearch=False"
+      },
+      "n_questions": 3001,
+      "n_images": 2789,
+      "pct_images_with_text": 44.46,
+      "n_ocr_errors": 0,
+      "mean_lines_per_image": 1.3,
+      "mean_chars_per_image": 8.2,
+      "mean_conf": 0.648,
+      "answer_in_ocr_pct": 0.0,
+      "answer_in_ocr_capped_pct": 0.0,
+      "answer_in_ocr_nodiac_pct": 0.0,
+      "token_recall_mean": 0.0,
+      "max_chars": 600,
+      "sec_per_image_cache": 0.107
+    }
+  ],
+  "data_files": [
+    "test.json"
+  ]
+}
