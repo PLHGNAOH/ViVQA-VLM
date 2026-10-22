@@ -1,10 +1,10 @@
 # R6 — Results (bản nháp tiếng Việt)
 
-> Bản nháp **tiếng Việt** (W10, 21/10/2026). Bản tiếng Anh viết từ bản này sau khi nội dung chốt; bản chính thức nằm trên Overleaf. Mục 2 và 4 dùng số đã chốt (W07–W10). Mục 3, 5, 6, 7 chờ W11–W12.
+> Bản nháp **tiếng Việt** (W10, 21/10/2026; cập nhật W11, 22/10/2026). Bản tiếng Anh viết từ bản này sau khi nội dung chốt; bản chính thức nằm trên Overleaf. Mục 2, 3, 4 dùng số đã chốt (W07–W11). Mục 5 mới có phần mô tả theo loại câu hỏi (W11); phần còn lại của 5 cùng mục 6, 7 chờ W12.
 >
-> Đánh số giả thuyết theo deck cộng dồn Review 2 (`docs/04_slides/cumulative/`): H1 QLoRA · H2 OCR · H3 prompt định dạng tiếng Việt · H4 hallucination; cấu hình LoRA = ablation A1 (module), A2 (rank).
+> Đánh số giả thuyết theo deck cộng dồn (`docs/04_slides/cumulative/`): H1 QLoRA · H2 OCR · H3 prompt định dạng tiếng Việt · H4 hallucination; cấu hình LoRA = ablation A1 (module), A2 (rank).
 >
-> Mọi số truy được về `experiments/<run>/metrics.json`, `predictions.json` và file tóm tắt ghi ở từng bảng.
+> Mọi số truy được về `experiments/<run>/metrics.json`, `predictions.json` và file tóm tắt ghi ở từng bảng. Từ W11, nguồn tổng hợp duy nhất là `experiments/W11_full_eval_table/` (`full_eval_table.py` tính lại mọi metric từ `predictions.json` và đối chiếu với `metrics.json`).
 
 ## 1. Experimental setup recap
 
@@ -55,12 +55,19 @@ Nguồn: `W07_B1_zeroshot_…_vivqa_test_…`, `W07_B2_eval_…_vivqa_test_…`,
 
 ## 3. Efficiency
 
-*(W11: bảng đầy đủ thời gian train / suy luận / VRAM mọi run.)* Số đã có cho phương pháp đề xuất:
+Nguồn: `experiments/W11_full_eval_table/full_eval_table.md` (mục Cost). Giờ train và VRAM lấy từ `train_log.json`, suy luận từ `metrics.json`. Mọi run: 1 GPU NVIDIA L4 (24 GB), 4-bit NF4, bf16.
 
-| Run | Giờ train (L4) | s/step | VRAM đỉnh | Suy luận (s/câu) | Adapter |
-|---|---|---|---|---|---|
-| B2 · ViTextVQA | 11,99 | 19,63 | 6,88 GB | 1,001 | cùng cỡ (r16 · attention) |
-| B3-full · ViTextVQA | 12,75 | 20,89 | 8,38 GB | 0,996 (+ OCR 0,72–0,85 s/ảnh, chạy một lần) | 29,53 MB |
+| Run | Dataset | Câu train | Epoch | Giờ train | s/step | VRAM train đỉnh | Suy luận (s/câu) | Adapter |
+|---|---|---|---|---|---|---|---|---|
+| B1 · zero-shot | ViTextVQA / ViVQA | — | — | — | — | — | 0,876 / 0,510 | — |
+| C1 · QLoRA | ViVQA | 10.799 | 1 | 3,03 | 16,17 | 6,62 GB | 0,571 | 29,53 MB |
+| **C3 · QLoRA (chính thức)** | ViVQA | 10.799 | 2 | 6,07 | 16,20 | 6,62 GB | 0,571 | 29,53 MB |
+| B2 · QLoRA | ViTextVQA | 35.159 | 1 | 11,99 | 19,63 | 6,88 GB | 1,001 | 29,53 MB |
+| **B3-full · QLoRA + OCR (chính thức)** | ViTextVQA | 35.159 | 1 | 12,75 | 20,89 | 8,38 GB | 0,996 (+ OCR 0,11–0,85 s/ảnh, chạy một lần) | 29,53 MB |
+| SH · adapter dùng chung | cả hai | 18.799 | 1 | 6,07 | 18,58 | 8,15 GB | 0,574 / 1,002 | 29,53 MB (**1 thay vì 2**) |
+
+- Tham số train ở mọi run chính: 7.372.800 (0,196% của 3,76 tỷ tham số). Mọi run đều vừa một GPU 24 GB với VRAM đỉnh ≤ 8,4 GB, tức chạy được trên Colab Pro (L4) — đúng ràng buộc hiệu quả của đề tài.
+- OCR làm VRAM train tăng ≈ 1,5 GB (prompt dài hơn) và s/step tăng ≈ 6–8% (B2 → B3-full, B2-sub → B3); suy luận gần như không đổi. Chi phí OCR (PaddleOCR + VietOCR) chạy một lần cho mỗi ảnh và cache lại: 0,72–0,85 s/ảnh trên T4 ở W08–W10, 0,11 s/ảnh trên T4 cho ảnh ViVQA (ít chữ) ở W11.
 
 ## 4. Ablation
 
@@ -115,13 +122,45 @@ Nguồn: `experiments/W10_lora_ablation_test2000_L4_seed42/lora_ablation_summary
 - **A2:** r 64 không khác biệt có ý nghĩa so với r 16; CI95 còn chứa mức tăng tới +2,15 nên kết luận **yếu**. r 64 tốn adapter ×4.
 - LoRA được kiểm không gắn vào vision encoder (`lora_audit` trong `train_log.json`: 252 / 144 lớp, đều thuộc LLM).
 
-### 4.5 Kết luận cho giả thuyết H2 (OCR)
+### 4.5 Adapter dùng chung cho hai dataset — SH (W11)
+
+Một adapter train trên ViVQA (10.799 câu, file của C1) + ViTextVQA (8.000 câu, file của B3), mọi câu dùng prompt OCR (ảnh không có chữ thì prompt trùng zero-shot), siêu tham số y hệt C1 / B3. Luật ghi trước: **không kém** nếu cận dưới CI95 của ΔEM > −1,5 trên **từng** dataset.
+
+| Dataset | Mốc → SH (EM) | ΔEM (CI95) | McNemar p | ΔANLS (CI95) | Kết luận |
+|---|---|---|---|---|---|
+| ViVQA test (3.001) | C1 73,78 → 73,51 | −0,27 [−1,13; +0,60] | 0,60 | −0,21 [−0,99; +0,60] | không kém |
+| ViTextVQA test2000 | B3 49,25 → 49,50 | +0,25 [−0,95; +1,45] | 0,75 | +0,73 [−0,33; +1,76] | không kém |
+
+Nguồn: `experiments/W11_shared_adapter_L4_seed42/shared_adapter_summary.json`.
+
+- → **Adapter dùng chung đạt**: một adapter (29,5 MB) phục vụ cả hai loại câu hỏi, không mất độ chính xác so với adapter chuyên biệt cùng ngân sách. Không có bằng chứng chuyển giao dương (cả hai p ≥ 0,05).
+- **Nhiễu OCR trên ảnh thường:** 44% câu ViVQA có dòng OCR (chữ tiếng Anh trên ảnh COCO, VietOCR đọc thành chuỗi vô nghĩa, đáp án gold nằm trong OCR 0,0%). Trên nhóm này ΔEM = +0,15 [−1,05; +1,36]; tỉ lệ chép chữ OCR vào đáp án sai 0,30% (C1: 0,23%) → model học được cách **bỏ qua** dòng OCR không liên quan.
+- SH thấp hơn mô hình chính thức (C3: −3,13 EM; B3-full: −4,35 EM trên cùng 2.000 câu) vì chỉ 1 epoch ViVQA và 23% dữ liệu ViTextVQA (bản rẻ, đã ghi trước). Bảng kết quả chính vẫn dùng C3 và B3-full; SH dùng cho prototype.
+
+### 4.6 Kết luận cho giả thuyết H2 (OCR)
 
 Cộng hưởng với QLoRA: **ủng hộ mạnh** (tương tác ở 4.1; vượt B2 cùng dữ liệu ở 4.2; ổn định 3 seed ở 4.3). Ngưỡng ANLS ≥ +3: **chưa đạt** (+1,55 ± 0,40 ở 8.000 câu; +1,87 ở 100% dữ liệu), nhưng trên ngưỡng bác bỏ +1 → **H2 ủng hộ một phần**. Lợi ích chủ yếu ở việc trả lời đúng nguyên chuỗi (EM) hơn là gần đúng ký tự (ANLS).
 
 ## 5. Error analysis
 
-*(W12 — phân tích lỗi B3-full theo loại câu hỏi và kiểu lỗi.)* Đã có: audit 200 lỗi EM của B2 (W07, `docs/W07/W07_Team_Report.md`) — 54% "lỗi" thực ra đúng ý; trên ViTextVQA, nhóm lỗi đọc chữ chiếm 59% (đọc chữ sai 28%, sai vùng 23%, sai dấu thanh 8%) → căn cứ chọn OCR; gold sai / nhiễu 12,5% (ViVQA 19%).
+*(W12 — phân tích lỗi B3-full theo loại câu hỏi và kiểu lỗi.)*
+
+**EM theo loại câu hỏi — ViTextVQA full test (W11, chỉ mô tả).** ViTextVQA không có nhãn loại câu hỏi, nên nhóm dùng bộ phân loại theo luật từ khoá `qt-v1` (9 loại), viết chỉ từ 300 câu dev và đóng băng (commit `9b441f1`) trước khi chạy trên test. Kiểm trên 150 câu test2000 gán nhãn mù: accuracy 80,7%; ba loại `name`, `text_content`, `other` có precision < 80% nên đánh dấu ⚠ (nhãn kém tin cậy).
+
+| Run | source | contact | number_time | person | location | name ⚠ | text_content ⚠ | product_service | other ⚠ | Tất cả |
+|---|---|---|---|---|---|---|---|---|---|---|
+| n | 661 | 641 | 1.041 | 420 | 969 | 1.971 | 777 | 1.144 | 2.404 | 10.028 |
+| B1 | 24,5 | 47,9 | 41,2 | 40,7 | 25,3 | 34,9 | 27,4 | 16,5 | 21,5 | 29,1 |
+| B2 | 57,2 | 55,5 | 55,7 | 54,8 | 44,0 | 55,7 | 48,6 | 42,5 | 46,1 | 50,3 |
+| **B3-full** | **58,1** | **64,1** | **58,8** | **61,2** | **47,0** | **57,6** | **51,1** | **44,1** | **49,6** | **53,4** |
+| Δ B2 → B3-full | +0,9 | **+8,6** | +3,1 | +6,4 | +3,0 | +1,9 | +2,5 | +1,6 | +3,5 | +3,1 |
+
+Nguồn: `experiments/W11_question_types/question_types_table.md`, `qt_label_check.json`.
+
+- OCR giúp nhiều nhất ở loại phải **chép đúng từng ký tự** (`contact`: số điện thoại, website, +8,6 EM; `person` +6,4) và ít nhất ở `source` (+0,9: watermark nhỏ, ở góc ảnh).
+- Loại khó nhất sau B3-full là các câu cần **suy ra** từ chữ (`product_service` 44,1, `location` 47,0), không chỉ chép lại chữ.
+
+Đã có từ trước: audit 200 lỗi EM của B2 (W07, `docs/W07/W07_Team_Report.md`) — 54% "lỗi" thực ra đúng ý; trên ViTextVQA, nhóm lỗi đọc chữ chiếm 59% (đọc chữ sai 28%, sai vùng 23%, sai dấu thanh 8%) → căn cứ chọn OCR; gold sai / nhiễu 12,5% (ViVQA 19%).
 
 ## 6. Hallucination analysis
 

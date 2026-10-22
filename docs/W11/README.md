@@ -20,9 +20,9 @@ Mục tiêu W11 gồm ba phần:
 | 4 | Code train **trộn 2 dataset** (`train_qlora.py --mix`) + notebook `20_qlora_shared_adapter_qwen25vl.ipynb` + script kết luận `src/eval/shared_adapter.py` | — | ✅ 21/10 |
 | 5 | **SH**: train adapter dùng chung + eval ViVQA test và ViTextVQA test2000 + kết luận theo luật (notebook 20) | 6,07 h + ≈ 1,1 h L4 | ✅ 21/10 — **ADAPTER DÙNG CHUNG ĐẠT** |
 | 6 | Bộ phân loại câu hỏi ViTextVQA (theo luật) + bảng EM/ANLS theo loại | — | ✅ 21/10 (luật `qt-v1` đóng băng 15:17 `9b441f1`; 150 nhãn tay; bảng tính sau commit) |
-| 7 | Đưa kết quả W10 (và SH nếu kịp) vào deck cộng dồn Part B qua builder | — | ⏳ |
-| 8 | Tập nói Review 2 | — | ⏳ |
-| 9 | Đóng tuần: README, `W11_Team_Report.md`, dọn Downloads + Drive, handoff | — | ⏳ |
+| 7 | Đưa kết quả W10 + W11 vào deck cộng dồn | — | ✅ 22/10 — **bản nháp** `ViVQA-VLM_Review1-2_KLTN.pptx` (44 slide, có lời nói từng slide). Không làm qua builder: xem Quyết định 22/10 |
+| 8 | Tập nói Review 2 | — | ➜ **chuyển W12** (trước 29/10): Hoàng nắm Phần A trước, rồi đọc và sửa Phần B |
+| 9 | Đóng tuần: README, `W11_Team_Report.md`, R6 (mục 3, 4.5, 5), deck vào repo, dọn Downloads + Drive, handoff | — | ✅ 22/10 |
 
 ## Quyết định đã chốt
 
@@ -30,6 +30,7 @@ Mục tiêu W11 gồm ba phần:
 |------|-----------|-------|
 | 21/10/2026 | **Adapter dùng chung theo phương án S2**: mọi câu hỏi của cả 2 dataset dùng chế độ `ocr` (VietOCR · v1 · 600 · 0). Ảnh không có chữ thì prompt tự trùng hệt zero-shot | (1) **Khớp prototype**: lúc demo, hệ thống không biết câu hỏi "thuộc dataset nào". S1 (ViVQA không OCR) buộc phải có bộ định tuyến, hoặc đưa vào dòng OCR mà adapter chưa từng thấy với câu hỏi thường. Khi đó điểm eval không phản ánh đúng demo. (2) **Tách hiệu ứng vẫn làm được mà không tốn GPU**: với câu ViVQA có ảnh không đọc ra chữ, đầu vào của SH trùng hệt C1, nên chênh lệch ở nhóm này chỉ do trộn dữ liệu. (3) **Trả lời thêm một câu hỏi nghiên cứu**: chữ không liên quan trong ảnh thường có làm hại câu hỏi chung không. Câu này nối sang phân tích hallucination ở W12. (4) Phía ViTextVQA thì S1 = S2, nên so với B3 chỉ khác đúng việc trộn dữ liệu |
 | 21/10/2026 | **VQA-Acc ≡ EM** trên cả hai dataset; vẫn báo cột VQA-Acc (metric bắt buộc) kèm chú thích | `full_eval_table.py` đếm được **0** câu có hơn 1 đáp án gold ở cả ViVQA lẫn ViTextVQA. Công thức min(#khớp/3, 1) khi đó rút về đúng/sai, nên trùng EM ở **từng câu** |
+| 22/10/2026 | **Deck cộng dồn: file pptx là nguồn duy nhất, sửa tay trong PowerPoint**; builder `build_cumulative_deck.js` và hai deck Review2_Cumulative chuyển vào `docs/04_slides/cumulative/archive_W10_builder/` (giữ làm lịch sử, không build lại) | Hoàng soạn lại slide theo cách nói của mình (Inter, bố cục riêng), và deck mới ghép slide của Hoàng với slide cũ. Builder JS không sinh lại được những slide đó. Hai nguồn song song sẽ lệch nhau, nên chỉ giữ một. Lời nói nằm trong speaker notes; bản `_Script_TV.txt` trích từ notes để đọc nhanh |
 | 21/10/2026 | **H4 (QLoRA không làm tăng hallucination) dời sang W12** | Đúng mốc "W12 · Analysis" trong master. W11 dành GPU cho SH. Kết quả SH (dòng OCR trên ảnh COCO) cũng là đầu vào cho phân tích "chép nhầm chữ OCR" ở W12 |
 
 ## Luật adapter dùng chung — SH (ghi TRƯỚC khi chạy, 21/10/2026)
@@ -134,8 +135,8 @@ ViTextVQA không có nhãn loại câu hỏi (`question_type` = `unknown` ở m�
 | OCR ViVQA (≈ 9–10 nghìn ảnh × ≈ 0,75 s) | — | ≈ 2 h | ≈ 2,5 |
 | SH train (≈ C1 3,03 h + B3 2,98 h) | ≈ 6,1 h | — | ≈ 9,4 |
 | SH eval ViVQA test + ViTextVQA test2000 (+ nạp model) | ≈ 1,3 h | — | ≈ 2 |
-| **Thực tế** | ≈ 7,3 h (train 6,07 + eval ≈ 1,1 + kiểm/nạp) | ≈ 0,6 h (3 lần chạy notebook 19, lần 3 ≈ 20 phút) | đọc ở Colab → Resources khi đóng tuần |
-| **Tổng W11** | ≈ 7,4 h | ≈ 2 h | **≈ 14** (≈ 49 CU lúc 21/10 04:10 → còn ≈ 35 cho W12–W15) |
+| **Thực tế W11** | ≈ 7,3 h (train 6,07 + eval ≈ 1,1 + kiểm/nạp) | ≈ 0,6 h (3 lần chạy notebook 19, lần 3 ≈ 20 phút) | **≈ 12** (ước tính từ giờ chạy: 7,3 × 1,54 + 0,6 × 1,2) |
+| **Còn lại** | | | **≈ 37** (49,3 lúc 21/10 04:10 − 12). Số ước tính: Hoàng đọc số thật ở Colab → Resources đầu W12 và ghi vào README W12 |
 
 ## Sự cố
 
@@ -254,3 +255,29 @@ Run: `W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_se
 **Hướng tiếp (chưa quyết, không chạy trong W11):** SH-full, tức SH trên ViVQA 2 epoch + ViTextVQA toàn bộ, để prototype đạt mức C3 / B3-full. Ước tính khoảng 19 h L4 ≈ 29 CU, gần hết ngân sách còn lại; cân nhắc sau Review 2.
 
 `full_eval_table` (23 dòng) và bảng theo loại câu hỏi (test2000) đã có thêm dòng SH.
+
+### Deck cộng dồn Review 1 + Review 2 (bước 7, 22/10/2026 — bản nháp)
+
+File: `../04_slides/cumulative/ViVQA-VLM_Review1-2_KLTN.pptx` (44 slide, 20 × 11,25 in) + `ViVQA-VLM_Review1-2_KLTN_Script_TV.txt` (lời nói trích từ speaker notes). Dựng từ `KLTN.pptx` của Hoàng: giữ nguyên slide 1–8 Hoàng đã soạn, ghép phần còn lại từ deck Review 2 cũ, rồi cập nhật số W10–W11.
+
+| Phần | Slide | Nội dung |
+|---|---|---|
+| Mở đầu | 1–2 | Bìa · nội dung |
+| **A · Review 1 — Phạm vi bài toán** | 3–17 | Bài toán, thách thức tiếng Việt V1–V4, khoảng trống, **trong / ngoài phạm vi** (mới), RQ, giả thuyết, dữ liệu, baseline Qwen2.5-VL-3B và lý do chỉ dùng QLoRA, phương pháp đề xuất (pipeline), token & RAG, sản phẩm, kế hoạch (thêm cột "đầu ra · trạng thái"), rủi ro, góp ý R1 |
+| **B · Review 2 — Existing System** | 18–27 | Tóm tắt số chính (79,6 · +21,1 · 53,4 · +3,1), góp ý GVHD, công trình trước & SOTA, dữ liệu benchmark, **kiến trúc baseline** (slide 3 cũ của Hoàng), giao thức đánh giá, R0 (slide 4 cũ), B1 zero-shot, ablation backbone R1 |
+| **B · Review 2 — Methodology** | 28–41 | Lộ trình (mới), B2, đối chứng, SOTA, so với SOTA, phân tích lỗi, B3, ablation OCR 2×2, độ vững theo seed, **B3-full**, **ablation LoRA**, chọn epoch ViVQA, **adapter dùng chung SH**, **theo loại câu hỏi** (5 slide mới từ W10–W11) |
+| Kết | 42–44 | Đối chiếu giả thuyết, bước tiếp W12–W13, cảm ơn |
+
+Vị trí baseline: slide 3 cũ (kiến trúc Qwen2.5-VL) chuyển xuống **Existing System** ngay trước giao thức đánh giá; slide 4 cũ (R0) theo sau. Lý do: Review 1 chỉ cần nói *chọn* baseline nào và vì sao (slide 11); *cấu tạo* và *kết quả* của baseline là "hệ thống hiện có" mà Methodology cải tiến lên.
+
+Chưa xong (chuyển W12): Hoàng tập nói Phần A, đọc và sửa Phần B theo cách nói của mình; tập nói toàn bộ trước 29/10.
+
+## Đóng tuần (22/10/2026)
+
+| Mục | Kết quả |
+|---|---|
+| Kết luận chính | Bảng đánh giá đầy đủ 23 dòng (tính lại từ predictions, khớp metrics.json) · **adapter dùng chung ĐẠT** (không kém C1 và B3, δ = 1,5) · OCR giúp nhiều nhất ở loại `contact` (+8,6 EM) |
+| Giả thuyết | H1, H2, H3 không đổi so với W10. H4 chuyển W12. SH là mục tuỳ chọn cũ (H5 bản R1) nay **đạt** |
+| Report | `W11_Team_Report.md`; R6 thêm mục 3 (chi phí đầy đủ), 4.5 (SH), 5 (EM theo loại câu hỏi) |
+| Ngân sách | ≈ 12 CU, còn ≈ 37 (ước tính) |
+| Chuyển W12 | Tập nói + sửa Phần B deck (trước 29/10) · H4 kiểu POPE · error analysis theo loại câu hỏi · `docs/W02/Hypotheses.md` đánh số cũ |
