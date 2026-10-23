@@ -113,3 +113,5 @@
 - Ứng viên ví dụ định tính (bước 6): chọn tất định seed 42, tối đa 5 câu / nhóm.
 
 **Audit tay (bước 4b, sau khi có số tự động):** 100 lỗi B3-full (full test) + 50 lỗi C3, chọn ngẫu nhiên seed 42 trong các câu sai EM; gán theo đúng bộ nhãn W07 (F S O T H C N G K + "đúng ý" + "hallucination"); gán **mù** (không xem kiểu lỗi / nguồn lỗi tự động, không xem dự đoán của run khác). So với audit W07 của B2 (chỉ mô tả).
+
+**Người gán (23/10/2026):** Văn Quang Trường (SV4 · Evaluation/Hallucination), một người gán, gán mù (chưa xem kết quả error analysis tự động). Hướng dẫn: `docs/W12/audit/HUONG_DAN_GAN_NHAN_W12.md`. Phiếu gốc: `audit/W12/W12_audit_150.xlsx` trên Drive (danh sách 150 câu đã khoá ở `docs/W12/audit/audit_manifest.json`, commit `e3e6168`). Giới hạn: một người gán nên không tính được κ trong W12; κ của bộ nhãn này đo ở W07 (Huân–Trường 0,62).
