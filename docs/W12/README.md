@@ -41,7 +41,7 @@
   - **adversarial**: các lớp đồng xuất hiện nhiều nhất với các lớp có trong ảnh, lấy theo thứ tự.
 - Mẫu câu: `Trong ảnh có {tên tiếng Việt} không? Trả lời "có" hoặc "không".` Tên lấy từ `configs/pope_vi_objects.json` (`pope-vi-objects-v1`).
 - File câu hỏi sinh một lần, ghi sha256 vào README trước khi chạy model. Thủ tục: notebook 21 Phần A (CPU) sinh file → ⏸ Điểm dừng A → chép file vào `experiments/W12_pope_vi_questions/` + ghi sha256 + commit → Phần B (L4) kiểm sha256 trùng bản commit rồi mới chạy model.
-- sha256 file câu hỏi `pope_vi_questions_v1.json`: _(điền ở Điểm dừng A)_
+- sha256 file câu hỏi `pope_vi_questions_v1.json`: `53d04eb23ad41ecee372d6dee01201578de75d992d33dd2c5b94d4aa328928fd` (sinh 23/10/2026 trên Colab CPU, commit trước khi chạy model)
 
 **Chạy.** Qwen2.5-VL-3B-Instruct 4-bit NF4, bf16, L4, greedy, `max_new_tokens` 32 (giữ đúng config chuẩn `configs/qwen_lora.yaml`, không thêm biến; sửa 23/10 trước khi chạy), seed 42. Chạy bằng `src.eval.run_baseline --dataset vivqa --data_file <file câu hỏi>` (theo lô, resume, chữ ký run). B1-plain và C3: prompt thường. B1-ocr, B3-full, SH: prompt `ocr` (VietOCR · v1 · 600 · 0, cache W11 `experiments/W11_ocr_cache_vivqa`). Adapter kiểm bằng `adapter_fingerprint` (khớp W10/W11).
 
@@ -84,3 +84,15 @@
 |---|---|---|
 | `src/eval/pope_vi.py` | `--build` sinh câu hỏi POPE-vi từ annotation COCO 2014 (ảnh ViVQA test chưa thấy lúc train, ≥ 3 lớp, 500 ảnh, seed 42, loại lớp dễ nhầm, bỏ câu trùng; file có khoá `data` nên `run_baseline --data_file` đọc thẳng) · `--score` kiểm hợp lệ (đủ câu, sha256, mode, adapter trùng run gốc, OCR cùng SH), metric theo cách chọn, bootstrap theo ảnh, phán quyết theo luật | `--selftest`: đọc câu trả lời (14 ca), build tất định, loại ảnh train, loại lớp dễ nhầm, phán quyết 3 nhánh + H4, bắt lỗi adapter / sha256 / mode / OCR, `load_vivqa` đọc được file câu hỏi |
 | `notebooks/21_pope_vi_hallucination_qwen25vl.ipynb` | Phần A (CPU): tải annotation COCO về `/content` (không lên Drive), sinh file câu hỏi, ⏸ Điểm dừng A · Phần B (L4): kiểm OCR cache = biên bản W11, adapter = run gốc, chạy 5 cấu hình, chấm, tự trả máy | Cú pháp mọi cell; mỗi code cell có markdown mô tả + kỳ vọng |
+
+## Điểm dừng A — file câu hỏi đã chốt (23/10/2026)
+
+| Mục | Giá trị |
+|---|---|
+| File | `experiments/W12_pope_vi_questions/pope_vi_questions_v1.json` (bản Drive trùng byte) |
+| Câu duy nhất | **4.985** (500 ảnh; mỗi cách chọn random / popular / adversarial đủ 3.000 lượt chấm; bỏ trùng tiết kiệm 1.015 câu) |
+| Pool ảnh | 2.789 ảnh ViVQA test → 1.413 ảnh **không** có trong train/val → 618 ảnh có ≥ 3 lớp COCO → chọn 500 (seed 42) |
+| popular top 10 | person, chair, dining table, bottle, cup, bowl, car, handbag, book, couch |
+| Thời gian dự kiến Phần B | 5 × 4.985 câu × ≈ 0,57 s ≈ 4,2 h L4 ≈ 6,5 CU |
+
+**Phát hiện về dataset (ghi cho R3/R6 và câu hỏi của thầy Trí về nhiễu dataset):** 1.376 / 2.789 ảnh ViVQA test (**49%**) cũng xuất hiện trong ViVQA train/val (khác câu hỏi, cùng ảnh). Điểm ViVQA test vì vậy có phần ảnh model đã thấy lúc train. POPE-vi chỉ dùng ảnh chưa thấy nên không bị ảnh hưởng. Error analysis W12 nên tách EM ViVQA test theo nhóm ảnh đã thấy / chưa thấy (chỉ mô tả).
