@@ -9,9 +9,9 @@
 | # | Việc | Ước tính | Trạng thái |
 |---|---|---|---|
 | 1 | Khởi động: README W12 + luật H4 ghi trước + từ điển `configs/pope_vi_objects.json` | 0,5 h | ✅ |
-| 2 | Code `src/eval/pope_vi.py` (sinh câu hỏi, chấm, phán quyết) + selftest + notebook 21; commit luật TRƯỚC khi chạy | 1,5 h | ⏳ |
-| 3 | Colab L4: chạy POPE-vi 5 cấu hình | ≈ 4,5 h GPU (≈ 7 CU) | ☐ |
-| 4 | Error analysis C3 (ViVQA, 4 loại có sẵn) + B3-full (ViTextVQA, `qt-v1`), luật phân loại lỗi chốt trước, không cần GPU | 2,5 h | ☐ |
+| 2 | Code `src/eval/pope_vi.py` (sinh câu hỏi, chấm, phán quyết) + selftest + notebook 21; commit luật TRƯỚC khi chạy | 1,5 h | ✅ |
+| 3 | Colab L4: chạy POPE-vi 5 cấu hình | ≈ 4,5 h GPU (≈ 7 CU) | ⏳ (bắt đầu 23/10 11:15) |
+| 4 | Error analysis C3 (ViVQA, 4 loại có sẵn) + B3-full (ViTextVQA, `qt-v1`), luật phân loại lỗi chốt trước, không cần GPU | 2,5 h | ⏳ |
 | 5 | Kết luận H4 theo luật + ghi README | 1 h | ☐ |
 | 6 | Ví dụ định tính 6–8 failure case | 1,5 h | ☐ |
 | 7 | R6 §5–§7 bản tiếng Việt | 2 h | ☐ |
@@ -26,7 +26,7 @@
 | 23/10/2026 | **5 cấu hình**: B1-plain, B1-ocr, C3, B3-full, SH | C3 và B3-full là hai adapter chính thức, SH là adapter của prototype. B1-ocr để so B3-full/SH với zero-shot **cùng prompt**, tách hiệu ứng QLoRA khỏi hiệu ứng dòng OCR |
 | 23/10/2026 | **Quy mô**: 500 ảnh × (3 câu "có" dùng chung + 3 câu "không" cho mỗi cách random/popular/adversarial) = **6.000 câu / cấu hình** | Đúng khuôn POPE (500 ảnh, 50% có / 50% không mỗi cách chọn). Câu "có" dùng chung cho 3 cách nên chênh giữa 3 cách chỉ do câu "không"; tiết kiệm 1/3 GPU so với 9.000 câu. Cặp (ảnh, vật) trùng giữa các cách chọn chỉ hỏi **1 lần** (greedy ⇒ cùng prompt cùng đáp án) nên số câu chạy thật < 6.000; mỗi cách chọn vẫn chấm đủ 3.000 lượt (bổ sung 23/10, trước khi chạy) |
 | 23/10/2026 | Ảnh chỉ lấy từ ViVQA test **không** xuất hiện trong ViVQA train | ViVQA train và test có ảnh dùng chung; C3/SH đã thấy ảnh train lúc huấn luyện |
-| 23/10/2026 | Không train thêm run nào từ W12 trở đi | Ngân sách 34,96 CU chỉ đủ cho đánh giá + prototype + demo (xem mục Ngân sách) |
+| 23/10/2026 | ~~Không train thêm run nào từ W12 trở đi~~ → **bỏ** (cùng ngày): CU được cộng thêm khi gia hạn Google AI Pro (02/11); run mới được phép nếu có lý do khoa học | Ngân sách không còn là ràng buộc; hiệu quả (giờ GPU, VRAM) vẫn báo đầy đủ vì là luận điểm của đề tài |
 
 ## H4 — luật ghi trước (chốt trước khi chạy; commit trước notebook 21)
 
@@ -95,4 +95,21 @@
 | popular top 10 | person, chair, dining table, bottle, cup, bowl, car, handbag, book, couch |
 | Thời gian dự kiến Phần B | 5 × 4.985 câu × ≈ 0,57 s ≈ 4,2 h L4 ≈ 6,5 CU |
 
-**Phát hiện về dataset (ghi cho R3/R6 và câu hỏi của thầy Trí về nhiễu dataset):** 1.376 / 2.789 ảnh ViVQA test (**49%**) cũng xuất hiện trong ViVQA train/val (khác câu hỏi, cùng ảnh). Điểm ViVQA test vì vậy có phần ảnh model đã thấy lúc train. POPE-vi chỉ dùng ảnh chưa thấy nên không bị ảnh hưởng. Error analysis W12 nên tách EM ViVQA test theo nhóm ảnh đã thấy / chưa thấy (chỉ mô tả).
+**Trùng ảnh train–test ViVQA (đối chiếu kiểm tra rò rỉ W07, `src/eval/stratify_by_overlap.py`):** W07 đã đo 1.274 / 2.789 ảnh test (46%) có trong train; tính cả val là 1.376 / 2.789 (**49%**) (khác câu hỏi, cùng ảnh). Không phải phát hiện mới; ghi cho R3/R6 và câu hỏi của thầy Trí về nhiễu dataset. Điểm ViVQA test vì vậy có phần ảnh model đã thấy lúc train. POPE-vi chỉ dùng ảnh chưa thấy nên không bị ảnh hưởng. Error analysis W12 nên tách EM ViVQA test theo nhóm ảnh đã thấy / chưa thấy (chỉ mô tả).
+
+## Error analysis — luật ghi trước (23/10/2026, commit trước khi chạy)
+
+**Mục tiêu:** biết lỗi của hai mô hình chính thức (B3-full, C3) đến từ đâu. **Chỉ mô tả**, không phán quyết, không dùng để chọn mô hình. Script `src/eval/error_analysis.py` (định nghĩa cố định trong code, có selftest). Không tốn GPU: chỉ đọc predictions đã có.
+
+**Đầu vào:** ViTextVQA full test 10.028 câu (B1, B2, B3-full) · ViVQA test 3.001 câu (B1, C1, C3). Script kiểm sha256 file test trùng run gốc và thiết lập OCR của B3-full = VietOCR · v1 · 600 · 0.
+
+**Định nghĩa:**
+- Kiểu lỗi (câu sai EM): dùng nguyên `answer_format.error_bucket` (W07), thứ tự ưu tiên tone → truncated → extended → near_miss → other.
+- Trạng thái OCR của câu ViTextVQA (văn bản OCR đúng phần đã vào prompt, cắt 600 ký tự): `has_answer` (đáp án là một cụm trong OCR) · `wrong_diacritics` (chỉ khớp khi bỏ dấu) · `answer_missing` (OCR có chữ nhưng không có đáp án) · `no_text`.
+- Nguồn lỗi B3-full: `ocr_upstream` (OCR không đưa đáp án vào prompt) · `model_wrong_span` (OCR có đáp án, model chép sai đoạn OCR) · `model_outside_ocr` (OCR có đáp án, câu trả lời không nằm trong OCR).
+- B2 → B3-full ghép cặp: fixed / broken / both_right / both_wrong, tách theo trạng thái OCR; % câu bị làm hỏng mà câu trả lời nằm trong OCR (proxy "OCR làm phân tâm").
+- ViVQA: kiểu lỗi C3 × 4 loại câu hỏi; 10 cặp (gold → dự đoán) sai nhiều nhất theo loại; EM tách theo ảnh đã thấy / chưa thấy (train + val), B1 vs C3.
+- Loại câu hỏi ViTextVQA: `qt-v1` (đóng băng W11), gộp loại như W11.
+- Ứng viên ví dụ định tính (bước 6): chọn tất định seed 42, tối đa 5 câu / nhóm.
+
+**Audit tay (bước 4b, sau khi có số tự động):** 100 lỗi B3-full (full test) + 50 lỗi C3, chọn ngẫu nhiên seed 42 trong các câu sai EM; gán theo đúng bộ nhãn W07 (F S O T H C N G K + "đúng ý" + "hallucination"); gán **mù** (không xem kiểu lỗi / nguồn lỗi tự động, không xem dự đoán của run khác). So với audit W07 của B2 (chỉ mô tả).
