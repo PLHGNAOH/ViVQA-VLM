@@ -10,9 +10,9 @@
 |---|---|---|---|
 | 1 | Khởi động: README W12 + luật H4 ghi trước + từ điển `configs/pope_vi_objects.json` | 0,5 h | ✅ |
 | 2 | Code `src/eval/pope_vi.py` (sinh câu hỏi, chấm, phán quyết) + selftest + notebook 21; commit luật TRƯỚC khi chạy | 1,5 h | ✅ |
-| 3 | Colab L4: chạy POPE-vi 5 cấu hình | ≈ 4,5 h GPU (≈ 7 CU) | ⏳ (bắt đầu 23/10 11:15) |
+| 3 | Colab L4: chạy POPE-vi 5 cấu hình | ≈ 4,5 h GPU (≈ 7 CU) | ✅ (23/10, ≈ 3 h 20 phút L4) |
 | 4 | Error analysis C3 (ViVQA, 4 loại có sẵn) + B3-full (ViTextVQA, `qt-v1`), luật phân loại lỗi chốt trước, không cần GPU | 2,5 h | ⏳ |
-| 5 | Kết luận H4 theo luật + ghi README | 1 h | ☐ |
+| 5 | Kết luận H4 theo luật + ghi README | 1 h | ⏳ |
 | 6 | Ví dụ định tính 6–8 failure case | 1,5 h | ☐ |
 | 7 | R6 §5–§7 bản tiếng Việt | 2 h | ☐ |
 | 8 | Sửa đánh số cũ trong `docs/W02/Hypotheses.md` (H8 cũ = H4 mới) | 0,3 h | ☐ |
@@ -115,3 +115,21 @@
 **Audit tay (bước 4b, sau khi có số tự động):** 100 lỗi B3-full (full test) + 50 lỗi C3, chọn ngẫu nhiên seed 42 trong các câu sai EM; gán theo đúng bộ nhãn W07 (F S O T H C N G K + "đúng ý" + "hallucination"); gán **mù** (không xem kiểu lỗi / nguồn lỗi tự động, không xem dự đoán của run khác). So với audit W07 của B2 (chỉ mô tả).
 
 **Người gán (23/10/2026):** Văn Quang Trường (SV4 · Evaluation/Hallucination), một người gán, gán mù (chưa xem kết quả error analysis tự động). Hướng dẫn: `docs/W12/audit/HUONG_DAN_GAN_NHAN_W12.md`. Phiếu gốc: `audit/W12/W12_audit_150.xlsx` trên Drive (danh sách 150 câu đã khoá ở `docs/W12/audit/audit_manifest.json`, commit `e3e6168`). Giới hạn: một người gán nên không tính được κ trong W12; κ của bộ nhãn này đo ở W07 (Huân–Trường 0,62).
+
+## Kết quả H4 — POPE-vi (23/10/2026)
+
+Nguồn: `experiments/W12_pope_vi_L4_seed42/pope_vi_summary.md` (bảng đầy đủ 5 cấu hình × 3 cách chọn). 5 run: `experiments/W12_POPE_*`.
+
+| So sánh (luật ghi trước) | ΔF1 random | ΔF1 popular | ΔF1 adversarial | Phán quyết |
+|---|---|---|---|---|
+| C3 vs B1-plain | — | — | — | **CHƯA KẾT LUẬN** (91,43% câu không đọc được > 5% → không hợp lệ) |
+| B3-full vs B1-ocr | +5,50 [+4,22; +6,80] | +3,65 [+2,29; +5,02] | +2,47 [+1,08; +3,88] | **KHÔNG TĂNG HALLUCINATION** |
+| SH vs B1-ocr (prototype) | −5,69 [−7,30; −4,06] | −9,16 [−10,73; −7,57] | −9,42 [−10,98; −7,82] | **TĂNG HALLUCINATION** |
+
+**➜ H4 theo luật: MỘT PHẦN.** Không đổi phán quyết sau khi xem số.
+
+**Phân tích sau (KHÔNG thuộc luật, chỉ mô tả):**
+- Tỉ lệ báo sai (câu "không" bị trả lời "có", trên 1.500 câu "không" mỗi cách chọn; tính từ Precision/Recall trong bảng): B1-ocr 2,7 / 5,7 / 8,9% · **B3-full 8,7 / 16,1 / 22,4%** · SH 55,4 / 72,4 / 78,7% (random / popular / adversarial). F1 của B3-full tăng vì recall tăng (73,5 → 86,9%) nhưng precision giảm → **F1 (chọn từ W02 theo LLaVA) không bắt được việc B3-full nói "có" sai nhiều hơn**. Ghi vào Discussion như giới hạn của metric.
+- C3 gần như không trả lời "có/không" (lệch định dạng sau QLoRA 2 epoch trên ViVQA — dataset không có câu có/không). Cần xem C3 trả lời gì thay thế.
+- SH có thiên lệch "có" mạnh (yes-ratio 77–89%) → rủi ro cho prototype W13. Đang kiểm giả thuyết: dữ liệu có/không trong ViTextVQA train lệch về "có".
+- B1-ocr vs B1-plain: dòng OCR làm F1 zero-shot giảm nhẹ (−0,6 đến −1,2 điểm), chủ yếu qua recall.

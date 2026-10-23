@@ -1,0 +1,560 @@
+{
+ "questions_file": "pope_vi_questions_v1.json",
+ "questions_sha256": "53d04eb23ad41ecee372d6dee01201578de75d992d33dd2c5b94d4aa328928fd",
+ "n_images": 500,
+ "n_unique_questions": 4985,
+ "rules": {
+  "margin_pts": 2.0,
+  "max_unparsed": 0.05,
+  "n_boot": 10000,
+  "seed": 42,
+  "comparisons": [
+   [
+    "C3",
+    "B1_plain"
+   ],
+   [
+    "B3full",
+    "B1_ocr"
+   ],
+   [
+    "SH",
+    "B1_ocr"
+   ]
+  ],
+  "h4_adapters": [
+   "C3",
+   "B3full"
+  ]
+ },
+ "configs": {
+  "B1_plain": {
+   "valid": true,
+   "unparsed_rate": 0.0,
+   "unparsed_examples": [],
+   "by_setting": {
+    "random": {
+     "accuracy": 0.862,
+     "precision": 0.9570707070707071,
+     "recall": 0.758,
+     "f1": 0.8459821428571428,
+     "yes_ratio": 0.396,
+     "n": 3000
+    },
+    "popular": {
+     "accuracy": 0.8466666666666667,
+     "precision": 0.9213938411669368,
+     "recall": 0.758,
+     "f1": 0.8317483540599855,
+     "yes_ratio": 0.41133333333333333,
+     "n": 3000
+    },
+    "adversarial": {
+     "accuracy": 0.8243333333333334,
+     "precision": 0.8739431206764028,
+     "recall": 0.758,
+     "f1": 0.811852909675116,
+     "yes_ratio": 0.43366666666666664,
+     "n": 3000
+    }
+   },
+   "top_fp_classes": [
+    [
+     "cup",
+     77
+    ],
+    [
+     "handbag",
+     28
+    ],
+    [
+     "bowl",
+     26
+    ],
+    [
+     "bottle",
+     14
+    ],
+    [
+     "chair",
+     14
+    ],
+    [
+     "dining table",
+     13
+    ],
+    [
+     "fork",
+     8
+    ],
+    [
+     "tie",
+     6
+    ],
+    [
+     "spoon",
+     5
+    ],
+    [
+     "remote",
+     4
+    ]
+   ],
+   "sec_per_sample": 0.315,
+   "gpus": [
+    "NVIDIA L4"
+   ]
+  },
+  "B1_ocr": {
+   "valid": true,
+   "unparsed_rate": 0.0,
+   "unparsed_examples": [],
+   "by_setting": {
+    "random": {
+     "accuracy": 0.8536666666666667,
+     "precision": 0.9641294838145232,
+     "recall": 0.7346666666666667,
+     "f1": 0.8339008702232312,
+     "yes_ratio": 0.381,
+     "n": 3000
+    },
+    "popular": {
+     "accuracy": 0.8386666666666667,
+     "precision": 0.9276094276094277,
+     "recall": 0.7346666666666667,
+     "f1": 0.8199404761904763,
+     "yes_ratio": 0.396,
+     "n": 3000
+    },
+    "adversarial": {
+     "accuracy": 0.823,
+     "precision": 0.8923076923076924,
+     "recall": 0.7346666666666667,
+     "f1": 0.8058500914076784,
+     "yes_ratio": 0.4116666666666667,
+     "n": 3000
+    }
+   },
+   "top_fp_classes": [
+    [
+     "cup",
+     63
+    ],
+    [
+     "handbag",
+     23
+    ],
+    [
+     "bowl",
+     18
+    ],
+    [
+     "bottle",
+     13
+    ],
+    [
+     "dining table",
+     12
+    ],
+    [
+     "chair",
+     11
+    ],
+    [
+     "fork",
+     7
+    ],
+    [
+     "tie",
+     5
+    ],
+    [
+     "remote",
+     4
+    ],
+    [
+     "cake",
+     3
+    ]
+   ],
+   "sec_per_sample": 0.309,
+   "gpus": [
+    "NVIDIA L4"
+   ]
+  },
+  "C3": {
+   "valid": false,
+   "unparsed_rate": 0.9143430290872618,
+   "unparsed_examples": [
+    {
+     "question_id": "pope_1271_bottle",
+     "prediction": "cây"
+    },
+    {
+     "question_id": "pope_1271_oven",
+     "prediction": "cái lò vi sóng"
+    },
+    {
+     "question_id": "pope_1271_refrigerator",
+     "prediction": "cái nồi"
+    },
+    {
+     "question_id": "pope_1271_bowl",
+     "prediction": "bát"
+    },
+    {
+     "question_id": "pope_1271_chair",
+     "prediction": "bàn ăn"
+    },
+    {
+     "question_id": "pope_1271_cup",
+     "prediction": "cây"
+    },
+    {
+     "question_id": "pope_1271_dining_table",
+     "prediction": "bữa ăn"
+    },
+    {
+     "question_id": "pope_1271_hot_dog",
+     "prediction": "bếp"
+    },
+    {
+     "question_id": "pope_1271_laptop",
+     "prediction": "cái lồng"
+    },
+    {
+     "question_id": "pope_1271_remote",
+     "prediction": "cái lò vi sóng"
+    }
+   ],
+   "by_setting": {
+    "random": {
+     "accuracy": 0.07866666666666666,
+     "precision": 0.03935860058309038,
+     "recall": 0.036,
+     "f1": 0.037604456824512536,
+     "yes_ratio": 0.018,
+     "n": 3000
+    },
+    "popular": {
+     "accuracy": 0.074,
+     "precision": 0.03896103896103896,
+     "recall": 0.036,
+     "f1": 0.037422037422037424,
+     "yes_ratio": 0.018,
+     "n": 3000
+    },
+    "adversarial": {
+     "accuracy": 0.058333333333333334,
+     "precision": 0.03768318213538032,
+     "recall": 0.036,
+     "f1": 0.03682236617797477,
+     "yes_ratio": 0.018,
+     "n": 3000
+    }
+   },
+   "top_fp_classes": [],
+   "sec_per_sample": 0.559,
+   "gpus": [
+    "NVIDIA L4"
+   ]
+  },
+  "B3full": {
+   "valid": true,
+   "unparsed_rate": 0.0,
+   "unparsed_examples": [],
+   "by_setting": {
+    "random": {
+     "accuracy": 0.8913333333333333,
+     "precision": 0.9093444909344491,
+     "recall": 0.8693333333333333,
+     "f1": 0.8888888888888888,
+     "yes_ratio": 0.478,
+     "n": 3000
+    },
+    "popular": {
+     "accuracy": 0.8543333333333333,
+     "precision": 0.8440129449838187,
+     "recall": 0.8693333333333333,
+     "f1": 0.8564860426929392,
+     "yes_ratio": 0.515,
+     "n": 3000
+    },
+    "adversarial": {
+     "accuracy": 0.8226666666666667,
+     "precision": 0.7951219512195122,
+     "recall": 0.8693333333333333,
+     "f1": 0.8305732484076432,
+     "yes_ratio": 0.5466666666666666,
+     "n": 3000
+    }
+   },
+   "top_fp_classes": [
+    [
+     "cup",
+     151
+    ],
+    [
+     "chair",
+     54
+    ],
+    [
+     "bowl",
+     53
+    ],
+    [
+     "bottle",
+     49
+    ],
+    [
+     "dining table",
+     33
+    ],
+    [
+     "handbag",
+     26
+    ],
+    [
+     "fork",
+     19
+    ],
+    [
+     "scissors",
+     14
+    ],
+    [
+     "backpack",
+     13
+    ],
+    [
+     "umbrella",
+     10
+    ]
+   ],
+   "sec_per_sample": 0.416,
+   "gpus": [
+    "NVIDIA L4"
+   ]
+  },
+  "SH": {
+   "valid": true,
+   "unparsed_rate": 0.0016048144433299899,
+   "unparsed_examples": [
+    {
+     "question_id": "pope_2007_cup",
+     "prediction": "cây"
+    },
+    {
+     "question_id": "pope_51829_cup",
+     "prediction": "cây"
+    },
+    {
+     "question_id": "pope_58831_cup",
+     "prediction": "cái cốc"
+    },
+    {
+     "question_id": "pope_75299_cup",
+     "prediction": "cây"
+    },
+    {
+     "question_id": "pope_436295_cup",
+     "prediction": "cái cốc"
+    },
+    {
+     "question_id": "pope_544485_cup",
+     "prediction": "cái ghế"
+    },
+    {
+     "question_id": "pope_554333_bottle",
+     "prediction": "cơ thể"
+    },
+    {
+     "question_id": "pope_560437_cup",
+     "prediction": "cây"
+    }
+   ],
+   "by_setting": {
+    "random": {
+     "accuracy": 0.7166666666666667,
+     "precision": 0.6405709342560554,
+     "recall": 0.9873333333333333,
+     "f1": 0.7770199370409233,
+     "yes_ratio": 0.7706666666666667,
+     "n": 3000
+    },
+    "popular": {
+     "accuracy": 0.6316666666666667,
+     "precision": 0.5769380599922088,
+     "recall": 0.9873333333333333,
+     "f1": 0.728300958937792,
+     "yes_ratio": 0.854,
+     "n": 3000
+    },
+    "adversarial": {
+     "accuracy": 0.6,
+     "precision": 0.5563486100676184,
+     "recall": 0.9873333333333333,
+     "f1": 0.7116770783277271,
+     "yes_ratio": 0.8853333333333333,
+     "n": 3000
+    }
+   },
+   "top_fp_classes": [
+    [
+     "bottle",
+     378
+    ],
+    [
+     "chair",
+     304
+    ],
+    [
+     "cup",
+     282
+    ],
+    [
+     "dining table",
+     209
+    ],
+    [
+     "handbag",
+     177
+    ],
+    [
+     "bowl",
+     86
+    ],
+    [
+     "backpack",
+     35
+    ],
+    [
+     "knife",
+     34
+    ],
+    [
+     "car",
+     31
+    ],
+    [
+     "sink",
+     27
+    ]
+   ],
+   "sec_per_sample": 0.403,
+   "gpus": [
+    "NVIDIA L4"
+   ]
+  }
+ },
+ "errors": [],
+ "comparisons": {
+  "C3_vs_B1_plain": {
+   "delta_f1_pts": {
+    "random": -80.83776860326303,
+    "popular": -79.43263166379481,
+    "adversarial": -77.50305434971413
+   },
+   "ci95_pts": {
+    "random": [
+     -82.51769354290732,
+     -79.15934595151697
+    ],
+    "popular": [
+     -81.08170789637983,
+     -77.77958114560684
+    ],
+    "adversarial": [
+     -79.19534065352615,
+     -75.81269719700263
+    ]
+   },
+   "verdict": "CHƯA KẾT LUẬN",
+   "valid": false
+  },
+  "B3full_vs_B1_ocr": {
+   "delta_f1_pts": {
+    "random": 5.498801866565762,
+    "popular": 3.654556650246288,
+    "adversarial": 2.4723156999964857
+   },
+   "ci95_pts": {
+    "random": [
+     4.2168919811701056,
+     6.802552993130825
+    ],
+    "popular": [
+     2.290614500060787,
+     5.023119602207111
+    ],
+    "adversarial": [
+     1.0811158774220773,
+     3.876314117096783
+    ]
+   },
+   "verdict": "KHÔNG TĂNG HALLUCINATION",
+   "valid": true
+  },
+  "SH_vs_B1_ocr": {
+   "delta_f1_pts": {
+    "random": -5.688093318230791,
+    "popular": -9.163951725268426,
+    "adversarial": -9.41730130799513
+   },
+   "ci95_pts": {
+    "random": [
+     -7.2971684382108615,
+     -4.06178135208499
+    ],
+    "popular": [
+     -10.72857303795111,
+     -7.567551565530451
+    ],
+    "adversarial": [
+     -10.979060622434758,
+     -7.818395327257166
+    ]
+   },
+   "verdict": "TĂNG HALLUCINATION",
+   "valid": true
+  }
+ },
+ "descriptive": {
+  "B1_ocr_vs_B1_plain": {
+   "random": {
+    "delta_f1_pts": -1.2081272633911566,
+    "ci95_pts": [
+     -1.8090695073709344,
+     -0.6303912590588407
+    ]
+   },
+   "popular": {
+    "delta_f1_pts": -1.180787786950921,
+    "ci95_pts": [
+     -1.7945528716905617,
+     -0.5766716018307081
+    ]
+   },
+   "adversarial": {
+    "delta_f1_pts": -0.6002818267437648,
+    "ci95_pts": [
+     -1.2011502343261609,
+     -0.00750955781432285
+    ]
+   }
+  }
+ },
+ "verdicts": {
+  "C3": "CHƯA KẾT LUẬN",
+  "B3full": "KHÔNG TĂNG HALLUCINATION",
+  "SH": "TĂNG HALLUCINATION"
+ },
+ "h4": "MỘT PHẦN",
+ "runs": {
+  "B1_plain": "W12_POPE_b1_zeroshot_qwen25vl_popevi_v1_bf16_L4_seed42",
+  "C3": "W12_POPE_c3_qlora_r16_vivqa_ep2_popevi_v1_bf16_L4_seed42",
+  "B1_ocr": "W12_POPE_b1_ocr_vietocr_v1_qwen25vl_popevi_v1_bf16_L4_seed42",
+  "B3full": "W12_POPE_b3full_qlora_ocr_vietocr_v1_r16_popevi_v1_bf16_L4_seed42",
+  "SH": "W12_POPE_sh_qlora_ocr_vietocr_v1_r16_shared_popevi_v1_bf16_L4_seed42"
+ }
+}
