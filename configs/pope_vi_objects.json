@@ -1,0 +1,39 @@
+{
+  "version": "pope-vi-objects-v1",
+  "note": "80 lớp COCO -> tên tiếng Việt dùng trong câu hỏi POPE-vi 'Trong ảnh có {vi} không?'. Chốt TRƯỚC khi sinh câu hỏi; sửa sau khi chạy = phải đổi version và chạy lại.",
+  "objects": {
+    "person": "người", "bicycle": "xe đạp", "car": "xe hơi", "motorcycle": "xe máy",
+    "airplane": "máy bay", "bus": "xe buýt", "train": "tàu hỏa", "truck": "xe tải",
+    "boat": "thuyền", "traffic light": "đèn giao thông", "fire hydrant": "trụ nước cứu hỏa",
+    "stop sign": "biển báo dừng", "parking meter": "đồng hồ tính tiền đỗ xe", "bench": "ghế dài",
+    "bird": "chim", "cat": "mèo", "dog": "chó", "horse": "ngựa", "sheep": "cừu", "cow": "bò",
+    "elephant": "voi", "bear": "gấu", "zebra": "ngựa vằn", "giraffe": "hươu cao cổ",
+    "backpack": "ba lô", "umbrella": "chiếc ô", "handbag": "túi xách", "tie": "cà vạt",
+    "suitcase": "va li", "frisbee": "đĩa ném", "skis": "ván trượt tuyết", "snowboard": "ván trượt tuyết đơn",
+    "sports ball": "quả bóng", "kite": "con diều", "baseball bat": "gậy bóng chày",
+    "baseball glove": "găng tay bóng chày", "skateboard": "ván trượt", "surfboard": "ván lướt sóng",
+    "tennis racket": "vợt tennis", "bottle": "chai", "wine glass": "ly rượu", "cup": "cốc",
+    "fork": "nĩa", "knife": "dao", "spoon": "thìa", "bowl": "bát", "banana": "chuối",
+    "apple": "táo", "sandwich": "bánh mì kẹp", "orange": "quả cam", "broccoli": "bông cải xanh",
+    "carrot": "cà rốt", "hot dog": "bánh mì kẹp xúc xích", "pizza": "bánh pizza", "donut": "bánh donut",
+    "cake": "bánh kem", "chair": "ghế", "couch": "ghế sofa", "potted plant": "chậu cây",
+    "bed": "giường", "dining table": "bàn ăn", "toilet": "bồn cầu", "tv": "ti vi",
+    "laptop": "máy tính xách tay", "mouse": "chuột máy tính", "remote": "điều khiển từ xa",
+    "keyboard": "bàn phím", "cell phone": "điện thoại", "microwave": "lò vi sóng", "oven": "lò nướng",
+    "toaster": "máy nướng bánh mì", "sink": "bồn rửa", "refrigerator": "tủ lạnh", "book": "quyển sách",
+    "clock": "đồng hồ", "vase": "bình hoa", "scissors": "cái kéo", "teddy bear": "gấu bông",
+    "hair drier": "máy sấy tóc", "toothbrush": "bàn chải đánh răng"
+  },
+  "confusable_groups": {
+    "G1_ghe": ["chair", "couch", "bench"],
+    "G2_xe": ["car", "truck", "bus"],
+    "G3_van": ["skis", "snowboard", "skateboard", "surfboard"],
+    "G4_ly_coc": ["cup", "wine glass"],
+    "G5_ngua": ["horse", "zebra"],
+    "G6_gau": ["bear", "teddy bear"],
+    "G7_banh_mi_kep": ["sandwich", "hot dog"],
+    "G8_lo": ["oven", "microwave", "toaster"],
+    "G9_dong_ho": ["clock", "parking meter"]
+  },
+  "confusable_rule": "Một lớp KHÔNG được chọn làm câu 'không' cho một ảnh nếu ảnh có bất kỳ lớp nào cùng nhóm (tên tiếng Việt chồng nghĩa, vd ảnh có ghế sofa thì không hỏi 'có ghế không?')."
+}
