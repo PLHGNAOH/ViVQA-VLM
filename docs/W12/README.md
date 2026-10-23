@@ -11,11 +11,11 @@
 | 1 | Khởi động: README W12 + luật H4 ghi trước + từ điển `configs/pope_vi_objects.json` | 0,5 h | ✅ |
 | 2 | Code `src/eval/pope_vi.py` (sinh câu hỏi, chấm, phán quyết) + selftest + notebook 21; commit luật TRƯỚC khi chạy | 1,5 h | ✅ |
 | 3 | Colab L4: chạy POPE-vi 5 cấu hình | ≈ 4,5 h GPU (≈ 7 CU) | ✅ (23/10, ≈ 3 h 20 phút L4) |
-| 4 | Error analysis C3 (ViVQA, 4 loại có sẵn) + B3-full (ViTextVQA, `qt-v1`), luật phân loại lỗi chốt trước, không cần GPU | 2,5 h | ⏳ |
-| 5 | Kết luận H4 theo luật + ghi README | 1 h | ⏳ |
-| 6 | Ví dụ định tính 6–8 failure case | 1,5 h | ☐ |
-| 7 | R6 §5–§7 bản tiếng Việt | 2 h | ☐ |
-| 8 | Sửa đánh số cũ trong `docs/W02/Hypotheses.md` (H8 cũ = H4 mới) | 0,3 h | ☐ |
+| 4 | Error analysis C3 (ViVQA, 4 loại có sẵn) + B3-full (ViTextVQA, `qt-v1`), luật phân loại lỗi chốt trước, không cần GPU | 2,5 h | ⏳ (4a tự động ✅ · 4b audit tay: chờ SV4) |
+| 5 | Kết luận H4 theo luật + ghi README | 1 h | ✅ |
+| 6 | Ví dụ định tính 6–8 failure case | 1,5 h | ✅ (12 ví dụ, R6 §7) |
+| 7 | R6 §5–§7 bản tiếng Việt | 2 h | ✅ (bản nháp; §5.6 chờ audit) |
+| 8 | Sửa đánh số cũ trong `docs/W02/Hypotheses.md` (H8 cũ = H4 mới) | 0,3 h | ✅ (bảng đối chiếu, không đổi số cũ) |
 | 9 | Đóng tuần: Team Report, dọn Downloads + Drive, commit + push | 1 h | ☐ |
 
 ## Quyết định
@@ -133,3 +133,11 @@ Nguồn: `experiments/W12_pope_vi_L4_seed42/pope_vi_summary.md` (bảng đầy �
 - C3 gần như không trả lời "có/không" (lệch định dạng sau QLoRA 2 epoch trên ViVQA — dataset không có câu có/không). Cần xem C3 trả lời gì thay thế.
 - SH có thiên lệch "có" mạnh (yes-ratio 77–89%) → rủi ro cho prototype W13. Đang kiểm giả thuyết: dữ liệu có/không trong ViTextVQA train lệch về "có".
 - B1-ocr vs B1-plain: dòng OCR làm F1 zero-shot giảm nhẹ (−0,6 đến −1,2 điểm), chủ yếu qua recall.
+
+### H4 — phân tích bổ sung + quyết định (23/10/2026, KHÔNG thuộc luật)
+
+- **C3 trả lời câu có/không bằng danh từ** ("bức ảnh" 525, "cái ghế" 434; chỉ 372 / 4.985 câu là "không") → quên kỹ năng tuân theo chỉ dẫn sau QLoRA 2 epoch trên ViVQA (không có câu có/không).
+- **B3-full code-switching:** trả lời tiếng Anh "no" ở 881 / 4.985 câu (17,7%), gần như luôn đúng (802 ở câu "không").
+- **Giả thuyết "SH thiên lệch 'có' do dữ liệu có/không lệch" bị bác:** đáp án "có" = 0 trong ViTextVQA train (35.159), tập con 8k (8.000) và ViVQA train (10.799); câu hỏi dạng có/không chỉ 18 / 5 / 7. Nguyên nhân thiên lệch của SH chưa rõ.
+- **Quyết định (Hoàng, 23/10):** sửa SH để sang **đầu W13** (chẩn đoán rồi mới sửa, vì sửa SH là việc chuẩn bị prototype). W12 ghi giới hạn này trong R6 §6.
+- Viết đầy đủ ở `docs/03_report/R6_Results.md` §6.

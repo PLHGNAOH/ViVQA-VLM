@@ -6,6 +6,8 @@
 > Mỗi giả thuyết phải **falsifiable**: điều kiện bác bỏ rõ, metric, thí nghiệm kiểm chứng.
 > Owner: cả nhóm (SV3 soạn các giả thuyết PEFT) · Cập nhật: **2026-09-23**
 
+> **Đối chiếu với đánh số mới (deck cộng dồn + report R4/R6; ghi 23/10/2026, W12):** H1 (QLoRA) = **H1** ở đây · H2 (OCR) = **H6** · H3 (prompt định dạng tiếng Việt) = **H7** · H4 (hallucination) = **H8** · ablation A1 (module LoRA) = **H3** · ablation A2 (rank) = **H4** · adapter dùng chung SH (W11) = **H5** · **H2** ở đây (4-bit vs LoRA 16-bit) chưa có run kiểm chứng. Bảng dưới giữ số cũ để truy vết; report và slide dùng số mới.
+
 ## 1. Giả thuyết chính (phạm vi Capstone)
 
 | # | Hypothesis | RQ | Cơ sở từ literature | Cách kiểm chứng | Điều kiện bác bỏ | Owner |
@@ -46,6 +48,7 @@ Nếu sau Faculty Review nhóm muốn thêm giả thuyết mới: đặt **H12+*
 
 | Ngày | Thay đổi |
 |------|----------|
+| 2026-10-23 (W12) | Thêm bảng đối chiếu sang đánh số mới (deck/report). Không đổi nội dung H1–H8. |
 | 2026-09-23 | Hoán nội dung H5 ↔ H8: H5 = shared adapter (RQ2d); H8 = PEFT không tăng hallucination (RQ4). Số H1–H8 giữ nguyên. |
 | 2026-09-17 (W03) | Chốt canonical **H1–H8**. Scaffold H1–H4 khác nghĩa không còn dùng số. Stub H9–H11 → mục "Future / out-of-scope"; **không** kiểm chứng trong Capstone. |
 | 2026-09-16 (W02 closeout) | Hợp nhất weekly H1–H8 vào file này; stub H9–H11 còn treo. |
