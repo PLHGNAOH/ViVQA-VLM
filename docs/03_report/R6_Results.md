@@ -1,6 +1,6 @@
 # R6 — Results (bản nháp tiếng Việt)
 
-> Bản nháp **tiếng Việt** (W10, 21/10/2026; cập nhật W11, 22/10/2026). Bản tiếng Anh viết từ bản này sau khi nội dung chốt; bản chính thức nằm trên Overleaf. Mục 2, 3, 4 dùng số đã chốt (W07–W11). Mục 5, 6, 7 viết ở W12 (23/10/2026) từ error analysis tự động, POPE-vi (H4) và ví dụ định tính; 5.6 (audit tay 150 lỗi) chờ SV4.
+> Bản nháp **tiếng Việt** (W10, 21/10/2026; cập nhật W11, 22/10/2026). Bản tiếng Anh viết từ bản này sau khi nội dung chốt; bản chính thức nằm trên Overleaf. Mục 2, 3, 4 dùng số đã chốt (W07–W11). Mục 5, 6, 7 viết ở W12 (23/10/2026) từ error analysis tự động, POPE-vi (H4) và ví dụ định tính; 5.6 audit tay 150 lỗi (SV4, 24/10/2026).
 >
 > Đánh số giả thuyết theo deck cộng dồn (`docs/04_slides/cumulative/`): H1 QLoRA · H2 OCR · H3 prompt định dạng tiếng Việt · H4 hallucination; cấu hình LoRA = ablation A1 (module), A2 (rank).
 >
@@ -236,7 +236,45 @@ Theo loại câu hỏi, `ocr_upstream` cao nhất ở `contact` (90,9%) và `tex
 
 ### 5.6 Audit tay 150 lỗi (100 B3-full + 50 C3)
 
-*(Đang làm: SV4 gán mù theo bộ nhãn W07. Mẫu đã khoá ở commit `e3e6168`. Sẽ có: % đúng ý, % hallucination, "EM theo người đọc", nhãn tay đối chiếu nguồn lỗi tự động ở 5.3.)*
+**Thiết kế.** 100 lỗi EM của B3-full (ViTextVQA full test) và 50 lỗi EM của C3 (ViVQA test), chọn ngẫu nhiên (seed 42) trong các câu sai EM. Danh sách 150 câu được khoá ở commit `e3e6168` trước khi gán nhãn.
+- Người gán: một người (SV4), gán **mù**. Phiếu chỉ có ảnh, câu hỏi, gold và câu trả lời của mô hình được audit. Phiếu không có kiểu lỗi hay nguồn lỗi tự động, không có dự đoán của run khác, không có văn bản OCR.
+- Bộ nhãn giống audit W07.
+- Nguồn số: `experiments/W12_error_audit/audit_summary.md`. Nhãn: `docs/W12/audit/labels/W12_audit_150_Truong.xlsx`.
+
+| | B3-full (ViTextVQA, 100 lỗi) | C3 (ViVQA, 50 lỗi) | Tham chiếu B2 · W07 (ViTextVQA / ViVQA) |
+|---|---|---|---|
+| % lỗi EM mà thật ra **đúng ý** [CI95 Wilson] | **55,0** [45,2; 64,4] | **64,0** [50,1; 75,9] | 46 / 62 |
+| % lỗi là hallucination | 5,0 [2,2; 11,2] | 16,0 [8,3; 28,5] | 9 / 5 |
+| EM → **EM theo người đọc** [CI95] | 53,35 → **79,01** [74,44; 83,39] | 76,64 → **91,59** [88,34; 94,37] | |
+| Hallucination trên mọi câu trả lời | 2,33% | 3,74% | |
+
+**Kiểu lỗi (nhãn tay, % số lỗi đã duyệt):**
+
+| Kiểu lỗi | B3-full | C3 |
+|---|---|---|
+| Định dạng / độ dài (ý đúng) | **40,0** [30,9; 49,8] | — |
+| Đồng nghĩa / khác từ (ý đúng) | 4,0 | **36,0** [24,1; 49,9] |
+| Đọc chữ sai (OCR) | 29,0 [21,0; 38,5] | — |
+| Sai dấu thanh | 7,0 | — |
+| Sai vùng / không có trong ảnh | 15,0 | 28,0 |
+| Gold sai / nhiễu | 5,0 | **28,0** [17,5; 41,7] |
+| Đếm sai | — | 6,0 |
+| Khác | — | 2,0 |
+
+**Nhãn tay đối chiếu nguồn lỗi tự động (B3-full, 100 câu; nguồn lỗi theo mục 5.3):**
+- `ocr_upstream` (78 câu):
+  - lỗi **đọc chữ thật** (đọc sai 27 + sai dấu 7) = 34 / 78 = **43,6%** [33,1; 54,6];
+  - **đúng ý** (định dạng 26 + đồng nghĩa 2) = 28 / 78 = 35,9% [26,1; 47,0];
+  - sai vùng 11; gold nhiễu 5.
+- `model_wrong_span` (14 câu): 11 là định dạng / độ dài (ý đúng). Đây chính là lỗi cắt sai ranh giới, phần lớn người đọc chấp nhận.
+- `model_outside_ocr` (8 câu): định dạng 3, đọc chữ sai 2, sai vùng 2, đồng nghĩa 1.
+
+**Kết luận (chỉ mô tả):**
+1. **EM đánh giá thấp mô hình rất nhiều**, nhất là trên ViTextVQA. Hơn một nửa số lỗi EM của B3-full là đúng ý, nên **EM theo người đọc ≈ 79%** (EM 53,35%). Kiểu lỗi lớn nhất là **định dạng / độ dài (40%)**: câu trả lời và gold đúng nội dung nhưng khác cách viết (ví dụ "combo 3" so với gold "3"; khoảng trắng quanh dấu chấm trong email). Đây là giới hạn của EM trên ViTextVQA và cần ghi trong Discussion.
+2. **Con số 81% `ocr_upstream` ở mục 5.3 không có nghĩa 81% lỗi do OCR.** Trong nhóm này chỉ 43,6% là lỗi đọc chữ thật; 35,9% là đúng ý. Tính trên cả mẫu, lỗi đọc chữ thật (đọc sai + sai dấu) chiếm **36%** [27,3; 45,8] số lỗi của B3-full, tức khoảng **17 điểm EM**. Đây là ước lượng thô phần mà một OCR tiếng Việt tốt hơn có thể sửa được.
+3. **ViVQA (C3):** 28% lỗi là gold sai / nhiễu, khớp với các câu hỏi dịch máy khó hiểu ở mục 7. Thêm 36% là đồng nghĩa (đúng ý), nên **EM theo người đọc ≈ 92%** (EM 76,64%).
+4. **Hallucination** (nói thứ không có trong ảnh) chiếm 5% lỗi của B3-full và 16% lỗi của C3, tức khoảng **2,3% và 3,7% mọi câu trả lời**. So với W07 (B2: 9% / 5%) chỉ để mô tả: khác người gán, khác mô hình, và CI chồng nhau.
+5. **Giới hạn:** một người gán nên W12 không có κ (κ của bộ nhãn này đo ở W07, Huân–Trường 0,62). 50 câu ViVQA cho CI rộng. "Đúng ý" là đánh giá chủ quan của người gán.
 
 Tham chiếu W07 (audit 200 lỗi EM của **B2**): 54% "lỗi" thực ra đúng ý. Trên ViTextVQA, nhóm lỗi đọc chữ chiếm 59% (đọc chữ sai 28%, sai vùng 23%, sai dấu thanh 8%); gold sai/nhiễu 12,5% (ViVQA 19%).
 
@@ -271,7 +309,7 @@ Tham chiếu W07 (audit 200 lỗi EM của **B2**): 54% "lỗi" thực ra đúng
 5. Vật bị báo sai nhiều nhất ở mọi cấu hình là "cốc" (cup), rồi ghế, bát, chai. Có thể một phần do annotation COCO thiếu nhãn (giới hạn đã ghi trước).
 6. Dòng OCR làm F1 zero-shot giảm nhẹ (−0,6 đến −1,2 điểm), chủ yếu qua recall.
 
-Tham chiếu W07: trong 200 lỗi EM của B2, hallucination chiếm khoảng 7,0% [4,2; 11,4] (gán tay).
+Đối chiếu audit tay (mục 5.6): hallucination chiếm 5,0% [2,2; 11,2] lỗi EM của B3-full và 16,0% [8,3; 28,5] lỗi của C3, tức khoảng 2,3% và 3,7% mọi câu trả lời. Tham chiếu W07: 7,0% [4,2; 11,4] trong 200 lỗi EM của B2.
 
 ## 7. Qualitative examples
 

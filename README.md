@@ -23,7 +23,7 @@ ViVQA-VLM/
 │   ├── 03_report/            # thesis LaTeX (đồng bộ Overleaf) + R1..R7
 │   ├── 04_slides/            # slide theo milestone; cumulative/ = bộ slide cộng dồn (R1 → bảo vệ)
 │   ├── notes/ · templates/   # ghi chú & template nhóm
-│   ├── W01/ … W11/           # deliverable theo tuần
+│   ├── W01/ … W12/           # deliverable theo tuần
 │   ├── Glossary.md           # sổ tay thuật ngữ (ôn bảo vệ)
 │   ├── Review_W01-W04_and_Defense_Prep.md
 │   └── master_instruction.md

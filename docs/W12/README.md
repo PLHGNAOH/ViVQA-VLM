@@ -11,12 +11,12 @@
 | 1 | Khởi động: README W12 + luật H4 ghi trước + từ điển `configs/pope_vi_objects.json` | 0,5 h | ✅ |
 | 2 | Code `src/eval/pope_vi.py` (sinh câu hỏi, chấm, phán quyết) + selftest + notebook 21; commit luật TRƯỚC khi chạy | 1,5 h | ✅ |
 | 3 | Colab L4: chạy POPE-vi 5 cấu hình | ≈ 4,5 h GPU (≈ 7 CU) | ✅ (23/10, ≈ 3 h 20 phút L4) |
-| 4 | Error analysis C3 (ViVQA, 4 loại có sẵn) + B3-full (ViTextVQA, `qt-v1`), luật phân loại lỗi chốt trước, không cần GPU | 2,5 h | ⏳ (4a tự động ✅ · 4b audit tay: chờ SV4) |
+| 4 | Error analysis C3 (ViVQA, 4 loại có sẵn) + B3-full (ViTextVQA, `qt-v1`), luật phân loại lỗi chốt trước, không cần GPU | 2,5 h | ✅ (4a tự động · 4b audit tay SV4, 24/10) |
 | 5 | Kết luận H4 theo luật + ghi README | 1 h | ✅ |
 | 6 | Ví dụ định tính 6–8 failure case | 1,5 h | ✅ (12 ví dụ, R6 §7) |
 | 7 | R6 §5–§7 bản tiếng Việt | 2 h | ✅ (bản nháp; §5.6 chờ audit) |
 | 8 | Sửa đánh số cũ trong `docs/W02/Hypotheses.md` (H8 cũ = H4 mới) | 0,3 h | ✅ (bảng đối chiếu, không đổi số cũ) |
-| 9 | Đóng tuần: Team Report, dọn Downloads + Drive, commit + push | 1 h | ☐ |
+| 9 | Đóng tuần: Team Report, dọn Downloads + Drive, commit + push | 1 h | ✅ 24/10 |
 
 ## Quyết định
 
@@ -141,3 +141,32 @@ Nguồn: `experiments/W12_pope_vi_L4_seed42/pope_vi_summary.md` (bảng đầy �
 - **Giả thuyết "SH thiên lệch 'có' do dữ liệu có/không lệch" bị bác:** đáp án "có" = 0 trong ViTextVQA train (35.159), tập con 8k (8.000) và ViVQA train (10.799); câu hỏi dạng có/không chỉ 18 / 5 / 7. Nguyên nhân thiên lệch của SH chưa rõ.
 - **Quyết định (Hoàng, 23/10):** sửa SH để sang **đầu W13** (chẩn đoán rồi mới sửa, vì sửa SH là việc chuẩn bị prototype). W12 ghi giới hạn này trong R6 §6.
 - Viết đầy đủ ở `docs/03_report/R6_Results.md` §6.
+
+## Kết quả audit tay (bước 4b, 24/10/2026)
+
+Nguồn: `experiments/W12_error_audit/audit_summary.md` (commit `3f3ce27`). Người gán: SV4, gán mù, mẫu khoá ở `e3e6168`.
+
+| | B3-full (100 lỗi) | C3 (50 lỗi) |
+|---|---|---|
+| % lỗi EM mà đúng ý | 55,0 [45,2; 64,4] | 64,0 [50,1; 75,9] |
+| % lỗi là hallucination | 5,0 [2,2; 11,2] | 16,0 [8,3; 28,5] |
+| EM → EM theo người đọc | 53,35 → 79,01 | 76,64 → 91,59 |
+
+- Trong 78 câu `ocr_upstream`, chỉ 43,6% là lỗi đọc chữ thật; 35,9% là đúng ý. Lỗi đọc chữ thật chiếm 36% số lỗi của B3-full (≈ 17 điểm EM), là trần thô cho việc nâng cấp OCR.
+- Viết đầy đủ ở R6 §5.6.
+
+## Tổng kết W12 (đóng tuần 24/10/2026)
+
+| Mục tiêu | Kết quả |
+|---|---|
+| H4 (hallucination) | Theo luật: **MỘT PHẦN**. B3-full không tăng (ΔF1 +2,5 đến +5,5); C3 không đo được (91% câu không trả lời có/không); SH tăng (ΔF1 −5,7 đến −9,4, yes-ratio 77–89%) |
+| Error analysis tự động | QLoRA chủ yếu sửa lỗi trả lời dài dòng; OCR sửa 705 / làm hỏng 395 câu (+3,09 EM); 11,5% câu có OCR sai dấu; C3 nhầm đếm ±1, màu gần nhau, đồng nghĩa |
+| Error analysis tay | EM theo người đọc B3-full ≈ 79, C3 ≈ 92; hallucination 2,3% / 3,7% mọi câu trả lời |
+| Report | R6 §5–§7 bản nháp tiếng Việt; bảng đối chiếu đánh số giả thuyết trong `docs/W02/Hypotheses.md` |
+
+**Ngân sách:** đầu tuần 34,96 CU. Dùng ≈ 5 CU (POPE-vi ≈ 3 h 20 phút L4 + Phần A trên CPU). Còn ≈ 30 CU (ước tính); được cộng thêm khi gia hạn gói ngày 02/11.
+
+**Chuyển W13 (prototype):**
+1. Chẩn đoán và xử lý thiên lệch "có" của SH **trước** khi dùng cho prototype. Ứng viên: đo xác suất "có"/"không" (ngưỡng lúc suy luận), hoặc train lại có câu có/không cân bằng từ ảnh ViVQA train (template khác POPE-vi), rồi kiểm lại không-kém + POPE-vi.
+2. Prototype web: upload ảnh, câu hỏi tiếng Việt, câu trả lời, confidence, văn bản OCR (master §11), chạy trên Colab L4.
+3. Xử lý code-switching ("no" tiếng Anh) trong prototype; nếu có hậu xử lý thì phải báo cáo.
