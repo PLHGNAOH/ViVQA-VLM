@@ -1,0 +1,88 @@
+{
+  "metrics": {
+    "exact_match": 0.8832497492477432,
+    "vqa_accuracy": 0.8832497492477432,
+    "anls": 0.8832497492477432,
+    "token_f1": 0.8832497492477432,
+    "exact_match__pope_yes": 0.7346666666666667,
+    "vqa_accuracy__pope_yes": 0.7346666666666667,
+    "anls__pope_yes": 0.7346666666666667,
+    "token_f1__pope_yes": 0.7346666666666667,
+    "exact_match__pope_no": 0.9472022955523672,
+    "vqa_accuracy__pope_no": 0.9472022955523672,
+    "anls__pope_no": 0.9472022955523672,
+    "token_f1__pope_no": 0.9472022955523672
+  },
+  "meta": {
+    "run_name": "W12_POPE_b1_ocr_vietocr_v1_qwen25vl_popevi_v1_bf16_L4_seed42",
+    "finished_utc": "2026-10-23T06:03:35+00:00",
+    "num_samples": 4985,
+    "question_type_counts": {
+      "pope_yes": 1500,
+      "pope_no": 3485
+    },
+    "prompting_mode": "ocr",
+    "decoding": "greedy (do_sample=False)",
+    "max_new_tokens": 32,
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "backbone": "qwen2_5_vl",
+    "variant": null,
+    "quantization": {
+      "4bit": true,
+      "type": "nf4",
+      "double_quant": true,
+      "compute_dtype": "bfloat16"
+    },
+    "torch_dtype": "bfloat16",
+    "min_pixels": 200704,
+    "max_pixels": 401408,
+    "seed": 42,
+    "git_commit": "b09aff4",
+    "config_file": "configs/qwen_lora.yaml",
+    "hardware": {
+      "gpus_seen": [
+        "NVIDIA L4"
+      ],
+      "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+    },
+    "inference_time_sec": 1539.7,
+    "sec_per_sample": 0.309,
+    "peak_vram_gb_this_session": 2.55,
+    "dataset": "vivqa",
+    "data_file": "experiments/W12_pope_vi_questions/pope_vi_questions_v1.json",
+    "data_file_sha256": "53d04eb23ad41ecee372d6dee01201578de75d992d33dd2c5b94d4aa328928fd",
+    "limit": null,
+    "chunk_size": 500,
+    "adapter": null,
+    "few_shot": null,
+    "ocr": {
+      "backend": "paddledet_vietocr",
+      "cache_format": "vivqa-vlm/ocr-cache/v2",
+      "engine": {
+        "paddleocr": "3.7.0",
+        "det_model": "PP-OCRv6_medium_det",
+        "rec_model": "vietocr/vgg_transformer",
+        "lang": "vi",
+        "vietocr_config": "vgg_transformer, beamsearch=False"
+      },
+      "cache_file": "paddledet_vietocr.json",
+      "subset_sha256": "8c3606e6c2b49a6d4ff51c1bd6e1a261076913bdbcd187775b5664b857de6f94",
+      "template": "v1",
+      "max_chars": 600,
+      "min_conf": 0.0,
+      "stats": {
+        "n_samples": 4985,
+        "n_images": 500,
+        "n_ocr_errors": 0,
+        "pct_samples_with_text": 47.7,
+        "pct_samples_truncated": 0.18,
+        "mean_chars": 11.0,
+        "subset_sha256": "8c3606e6c2b49a6d4ff51c1bd6e1a261076913bdbcd187775b5664b857de6f94"
+      }
+    },
+    "versions": {
+      "transformers": "5.17.0",
+      "torch": "2.11.0+cu130"
+    }
+  }
+}

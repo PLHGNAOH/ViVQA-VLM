@@ -1,0 +1,43 @@
+{
+  "hardware": {
+    "gpu": "Tesla T4",
+    "compute_capability": "sm_75",
+    "bf16_supported": true,
+    "vram_gb": 14.6,
+    "torch": "2.11.0+cu128",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+  },
+  "dev_file": "dev_subset300_seed42.json",
+  "n_dev": 300,
+  "dtype": "float32",
+  "runs": [
+    {
+      "run_name": "W06_ablation_A1_mp512_4bit_qwen25vl_vitextvqa_dev300_seed42",
+      "status": "ok",
+      "compute_dtype": "float32",
+      "torch_dtype": "float32",
+      "max_pixels": 401408,
+      "load_in_4bit": true,
+      "exact_match": 0.3333,
+      "anls": 0.4654,
+      "n_degraded": 0,
+      "degraded_ids": [],
+      "sec_per_sample": 2.605,
+      "elapsed_sec": 817.2
+    },
+    {
+      "run_name": "W06_ablation_A2_mp1280_4bit_qwen25vl_vitextvqa_dev300_seed42",
+      "status": "ok",
+      "compute_dtype": "float32",
+      "torch_dtype": "float32",
+      "max_pixels": 1003520,
+      "load_in_4bit": true,
+      "exact_match": 0.36,
+      "anls": 0.5041,
+      "n_degraded": 0,
+      "degraded_ids": [],
+      "sec_per_sample": 3.807,
+      "elapsed_sec": 1180.3
+    }
+  ]
+}

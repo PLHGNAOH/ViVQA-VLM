@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "run_name": "W06_smoke_qlora_qwen25vl_vivqa_mp512_seed42",
+    "finished_utc": "2026-09-29T08:24:50+00:00",
+    "dataset": "vivqa",
+    "data_file": "data/vivqa/train.json",
+    "data_file_sha256": "892243fa732fc7fb5b9a3bd8d2f28c85d7e9f99bb0e617efd193e7303cee96ec",
+    "num_samples": 200,
+    "num_dropped": 0,
+    "answer_policy": "đáp án đầu tiên trong trường answers",
+    "prompting_mode": "zero_shot",
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "max_pixels": 401408,
+    "min_pixels": 200704,
+    "torch_dtype": "float32",
+    "quantization": {
+      "enabled": true,
+      "load_in_4bit": true,
+      "bnb_4bit_quant_type": "nf4",
+      "bnb_4bit_use_double_quant": true,
+      "bnb_4bit_compute_dtype": "float32"
+    },
+    "lora": {
+      "r": 16,
+      "lora_alpha": 32,
+      "lora_dropout": 0.05,
+      "bias": "none",
+      "target_modules": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj"
+      ]
+    },
+    "training": {
+      "epochs": 3,
+      "per_device_batch_size": 2,
+      "gradient_accumulation_steps": 8,
+      "learning_rate": 0.0002,
+      "warmup_ratio": 0.03,
+      "weight_decay": 0.0,
+      "logging_steps": 10,
+      "save_strategy": "epoch",
+      "gradient_checkpointing": true,
+      "max_steps": 30,
+      "limit": 200,
+      "steps_per_epoch": 13,
+      "total_steps": 30,
+      "warmup_steps": 1,
+      "unsupported_training_args": []
+    },
+    "peft_only": true,
+    "trainable_params": 7372800,
+    "total_params": 2041397248,
+    "trainable_pct": 0.3612,
+    "seed": 42,
+    "git_commit": "e7f9a40",
+    "config_file": "configs/qwen_lora.yaml",
+    "hardware": {
+      "gpu": "Tesla T4",
+      "bf16_supported": true,
+      "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+    },
+    "cost": {
+      "train_runtime_sec": 2364.2,
+      "steps": 30,
+      "sec_per_step": 78.807,
+      "peak_vram_gb": 5.93,
+      "final_loss": 1.1722
+    },
+    "adapter_dir": "/content/drive/MyDrive/ViVQA-VLM/adapters/W06_smoke_qlora_qwen25vl_vivqa_mp512_seed42",
+    "versions": {
+      "transformers": "5.17.0",
+      "torch": "2.11.0+cu128",
+      "peft": "0.20.0"
+    }
+  },
+  "log_history": [
+    {
+      "loss": 1.6096275329589844,
+      "grad_norm": 3.5609519481658936,
+      "learning_rate": 0.00014482758620689657,
+      "epoch": 0.8,
+      "step": 10
+    },
+    {
+      "loss": 1.0258491516113282,
+      "grad_norm": 2.555600643157959,
+      "learning_rate": 7.586206896551724e-05,
+      "epoch": 1.56,
+      "step": 20
+    },
+    {
+      "loss": 0.8811262130737305,
+      "grad_norm": 2.1920838356018066,
+      "learning_rate": 6.896551724137932e-06,
+      "epoch": 2.32,
+      "step": 30
+    },
+    {
+      "train_runtime": 2364.2175,
+      "train_samples_per_second": 0.203,
+      "train_steps_per_second": 0.013,
+      "total_flos": 4491822284931072.0,
+      "train_loss": 1.1722009658813477,
+      "epoch": 2.32,
+      "step": 30
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "metrics": {
+    "exact_match": 0.7350883038987004,
+    "vqa_accuracy": 0.7350883038987004,
+    "anls": 0.7544793048041967,
+    "token_f1": 0.7608765332190859,
+    "exact_match__color": 0.824,
+    "vqa_accuracy__color": 0.824,
+    "anls__color": 0.8264,
+    "token_f1__color": 0.8264,
+    "exact_match__location": 0.6306569343065693,
+    "vqa_accuracy__location": 0.6306569343065693,
+    "anls__location": 0.664371188422283,
+    "token_f1__location": 0.6722627737226279,
+    "exact_match__object": 0.7337610264635124,
+    "vqa_accuracy__object": 0.7337610264635124,
+    "anls__object": 0.7607041937835842,
+    "token_f1__object": 0.7717646160308547,
+    "exact_match__number": 0.7747747747747747,
+    "vqa_accuracy__number": 0.7747747747747747,
+    "anls__number": 0.7747747747747747,
+    "token_f1__number": 0.7747747747747747
+  },
+  "meta": {
+    "run_name": "W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vivqa_test_bf16_L4_seed42",
+    "finished_utc": "2026-10-21T14:20:31+00:00",
+    "num_samples": 3001,
+    "question_type_counts": {
+      "color": 625,
+      "location": 685,
+      "object": 1247,
+      "number": 444
+    },
+    "prompting_mode": "ocr",
+    "decoding": "greedy (do_sample=False)",
+    "max_new_tokens": 32,
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "backbone": "qwen2_5_vl",
+    "variant": null,
+    "quantization": {
+      "4bit": true,
+      "type": "nf4",
+      "double_quant": true,
+      "compute_dtype": "bfloat16"
+    },
+    "torch_dtype": "bfloat16",
+    "min_pixels": 200704,
+    "max_pixels": 401408,
+    "seed": 42,
+    "git_commit": "72286c4",
+    "config_file": "configs/qwen_lora.yaml",
+    "hardware": {
+      "gpus_seen": [
+        "NVIDIA L4"
+      ],
+      "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+    },
+    "inference_time_sec": 1723.1,
+    "sec_per_sample": 0.574,
+    "peak_vram_gb_this_session": 2.6,
+    "dataset": "vivqa",
+    "data_file": "data/vivqa/test.json",
+    "data_file_sha256": "0a09f7bac471ce7359eda5b965d94821ae78fd151217f84cf9a59b14b6ccb787",
+    "limit": null,
+    "chunk_size": 500,
+    "adapter": {
+      "path": "/content/drive/MyDrive/ViVQA-VLM/adapters/W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42/epoch_1",
+      "weights_sha256": "c9791e961aaa58fdcd7d9baafede3bd7bd8c902acc9cc43917306f1e0fecc354",
+      "config_sha256": "5e5bae40c27b5905ccdd0189cad597f2ecf0727bbbabafe6685f489c31624553",
+      "weights_mb": 29.53
+    },
+    "few_shot": null,
+    "ocr": {
+      "backend": "paddledet_vietocr",
+      "cache_format": "vivqa-vlm/ocr-cache/v2",
+      "engine": {
+        "paddleocr": "3.7.0",
+        "det_model": "PP-OCRv6_medium_det",
+        "rec_model": "vietocr/vgg_transformer",
+        "lang": "vi",
+        "vietocr_config": "vgg_transformer, beamsearch=False"
+      },
+      "cache_file": "paddledet_vietocr.json",
+      "subset_sha256": "606d8dfdc2977aa39875ce2126e8ecefaefd52154c8da08908d01334f5ec3646",
+      "template": "v1",
+      "max_chars": 600,
+      "min_conf": 0.0,
+      "stats": {
+        "n_samples": 3001,
+        "n_images": 2789,
+        "n_ocr_errors": 0,
+        "pct_samples_with_text": 44.25,
+        "pct_samples_truncated": 0.1,
+        "mean_chars": 7.9,
+        "subset_sha256": "606d8dfdc2977aa39875ce2126e8ecefaefd52154c8da08908d01334f5ec3646"
+      }
+    },
+    "versions": {
+      "transformers": "5.17.0",
+      "torch": "2.11.0+cu130"
+    }
+  }
+}

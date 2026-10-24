@@ -1,0 +1,157 @@
+{
+ "by_dataset": {
+  "vitextvqa": {
+   "model": "B3-full",
+   "n": 100,
+   "error_type_pct": {
+    "Định dạng / độ dài (ý đúng)": 40.0,
+    "Đọc chữ sai (OCR)": 29.0,
+    "Sai vùng / không có trong ảnh (hallucination)": 15.0,
+    "Sai dấu thanh": 7.0,
+    "Gold sai / nhiễu": 5.0,
+    "Đồng nghĩa / khác từ (ý đúng)": 4.0
+   },
+   "error_type_ci95": {
+    "Định dạng / độ dài (ý đúng)": [
+     30.9,
+     49.8
+    ],
+    "Đọc chữ sai (OCR)": [
+     21.0,
+     38.5
+    ],
+    "Sai vùng / không có trong ảnh (hallucination)": [
+     9.3,
+     23.3
+    ],
+    "Sai dấu thanh": [
+     3.4,
+     13.7
+    ],
+    "Gold sai / nhiễu": [
+     2.2,
+     11.2
+    ],
+    "Đồng nghĩa / khác từ (ý đúng)": [
+     1.6,
+     9.8
+    ]
+   },
+   "correct_in_meaning_pct": 55.0,
+   "correct_in_meaning_ci95": [
+    45.2,
+    64.4
+   ],
+   "hallucination_pct": 5.0,
+   "hallucination_ci95": [
+    2.2,
+    11.2
+   ],
+   "em_pct": 53.35,
+   "reader_accuracy_pct": 79.01,
+   "reader_accuracy_ci95": [
+    74.44,
+    83.39
+   ],
+   "hallucination_of_all_answers_pct": 2.33,
+   "w07_B2": {
+    "n": 100,
+    "correct_in_meaning_pct": 46.0,
+    "hallucination_pct": 9.0,
+    "error_type_pct": {
+     "F": 33.0,
+     "O": 28.0,
+     "H": 23.0,
+     "T": 8.0,
+     "G": 6.0,
+     "S": 1.0,
+     "C": 1.0
+    }
+   }
+  },
+  "vivqa": {
+   "model": "C3",
+   "n": 50,
+   "error_type_pct": {
+    "Đồng nghĩa / khác từ (ý đúng)": 36.0,
+    "Gold sai / nhiễu": 28.0,
+    "Sai vùng / không có trong ảnh (hallucination)": 28.0,
+    "Đếm sai": 6.0,
+    "Khác": 2.0
+   },
+   "error_type_ci95": {
+    "Đồng nghĩa / khác từ (ý đúng)": [
+     24.1,
+     49.9
+    ],
+    "Gold sai / nhiễu": [
+     17.5,
+     41.7
+    ],
+    "Sai vùng / không có trong ảnh (hallucination)": [
+     17.5,
+     41.7
+    ],
+    "Đếm sai": [
+     2.1,
+     16.2
+    ],
+    "Khác": [
+     0.4,
+     10.5
+    ]
+   },
+   "correct_in_meaning_pct": 64.0,
+   "correct_in_meaning_ci95": [
+    50.1,
+    75.9
+   ],
+   "hallucination_pct": 16.0,
+   "hallucination_ci95": [
+    8.3,
+    28.5
+   ],
+   "em_pct": 76.64,
+   "reader_accuracy_pct": 91.59,
+   "reader_accuracy_ci95": [
+    88.34,
+    94.37
+   ],
+   "hallucination_of_all_answers_pct": 3.74,
+   "w07_B2": {
+    "n": 100,
+    "correct_in_meaning_pct": 62.0,
+    "hallucination_pct": 5.0,
+    "error_type_pct": {
+     "S": 34.0,
+     "K": 25.0,
+     "G": 19.0,
+     "F": 9.0,
+     "H": 8.0,
+     "N": 5.0
+    }
+   }
+  }
+ },
+ "vitextvqa_human_label_x_auto_source": {
+  "ocr_upstream": {
+   "Đọc chữ sai (OCR)": 27,
+   "Định dạng / độ dài (ý đúng)": 26,
+   "Đồng nghĩa / khác từ (ý đúng)": 2,
+   "Sai dấu thanh": 7,
+   "Gold sai / nhiễu": 5,
+   "Sai vùng / không có trong ảnh (hallucination)": 11
+  },
+  "model_outside_ocr": {
+   "Đọc chữ sai (OCR)": 2,
+   "Sai vùng / không có trong ảnh (hallucination)": 2,
+   "Định dạng / độ dài (ý đúng)": 3,
+   "Đồng nghĩa / khác từ (ý đúng)": 1
+  },
+  "model_wrong_span": {
+   "Định dạng / độ dài (ý đúng)": 11,
+   "Sai vùng / không có trong ảnh (hallucination)": 2,
+   "Đồng nghĩa / khác từ (ý đúng)": 1
+  }
+ }
+}
