@@ -1,16 +1,14 @@
 ViVQA-VLM — Review 1 + Review 2 (cộng dồn) · lời nói theo slide (trích từ speaker notes của ViVQA-VLM_Review1-2_KLTN.pptx)
 
-=== Slide 1 ·  ===
+=== Slide 1 · ViVQA–VLM ===
 [Mở đầu · ~20 giây]
 Kính chào thầy cô. Nhóm em là GFA26AI35, đề tài ViVQA-VLM: hỏi đáp hình ảnh tiếng Việt hiệu quả bằng mô hình thị giác–ngôn ngữ, GVHD là thầy Đặng Ngọc Minh Đức và thầy Phạm Minh Trí.
 Bộ slide hôm nay là bộ cộng dồn: phần A là nội dung Review 1 đã sửa theo góp ý — xoay quanh phạm vi bài toán; phần B là nội dung mới của Review 2 — hệ thống hiện có (Existing System) và phương pháp (Methodology).
 
 === Slide 2 · NỘI DUNG ===
-[Nội dung · ~30 giây]
-Bộ slide có hai phần. Phần A, slide 3 đến 17, trả lời: nhóm làm bài toán gì, vì sao khó với tiếng Việt, làm trong giới hạn nào. Phần B, slide 18 đến 44, trả lời: các hệ thống hiện có — kể cả baseline nhóm chọn — làm được đến đâu, và nhóm cải tiến bằng phương pháp nào, với bằng chứng gì.
-Gợi ý thời gian: phần A đi nhanh (khoảng 1/3 thời gian), chỉ dừng lâu ở các điểm đã sửa theo góp ý; phần lớn thời gian dành cho phần B.
+[Nội dung · ~30 giây] Bộ slide có hai phần. Phần A, slide 3 đến 14, trả lời: nhóm làm bài toán gì, vì sao khó với tiếng Việt, làm trong giới hạn nào. Phần B, slide 15 đến 33, trả lời: hệ thống hiện có — kể cả baseline nhóm chọn — làm được đến đâu, và nhóm cải tiến bằng phương pháp nào, với bằng chứng gì. Slide 34 đến 42 là phụ lục, chỉ mở khi hội đồng hỏi.
 
-=== Slide 3 · Phạm vi bài toán ===
+=== Slide 3 · Review 1 ===
 [Chuyển phần · ~5 giây]
 "Trước hết là phần A — phạm vi bài toán."
 
@@ -29,19 +27,19 @@ V1: dấu thanh là nét rất nhỏ, sai dấu là đổi nghĩa (má khác mà
 V2: model pretrain chủ yếu bằng tiếng Anh/Trung nên hay trả lời tiếng Anh hoặc dài dòng → EM = 0 dù hiểu đúng.
 V3: khoảng trắng tiếng Việt tách âm tiết chứ không tách từ; đọc sai thứ tự chữ làm vỡ từ.
 V4: hallucination — trả lời trôi chảy nhưng không có trong ảnh.
-Hai ô dưới (đây là góp ý số 2 của phản biện): chuẩn hoá NFC, chữ thường, resize ảnh chỉ là tiền xử lý bắt buộc, không phải đóng góp. Vấn đề nghiên cứu là đọc đúng chữ có dấu, trả lời đúng ngôn ngữ và định dạng, không bịa — và đạt được chỉ bằng PEFT trên một GPU.
+Mỗi thẻ có một ví dụ: V1 má/mà/mã/ma; V2 hỏi tiếng Việt, model trả lời tiếng Anh nên EM = 0; V3 biển “cửa hàng điện thoại” đọc theo cột thành “cửa điện hàng thoại”; V4 ảnh không có người nhưng model vẫn tả áo người đạp xe. Ví dụ V2, V4 là minh hoạ dạng lỗi; ảnh V4 lấy từ ViVQA.
+Nếu bị hỏi (góp ý số 2): chuẩn hoá NFC, chữ thường, resize chỉ là tiền xử lý bắt buộc, không phải đóng góp.
 
 === Slide 6 · REVIEW 1 · PHẠM VI · 03 · KHOẢNG TRỐNG NGHIÊN CỨU ===
 [Khoảng trống · ~1 phút]
 Bốn khoảng trống, G3 là trọng tâm.
 G1: alignment của VLM tối ưu cho tiếng Anh. G2: VQA tiếng Việt còn yếu, nhất là ảnh có chữ — SOTA công bố trên ViTextVQA chỉ 25,48 EM so với 88 của con người. G3 — trọng tâm: chưa có nghiên cứu hệ thống dùng LoRA/QLoRA cho VLM trên VQA tiếng Việt; ba paper VQA tiếng Việt nhóm khảo sát đều không dùng PEFT. G4: chưa có đánh giá hallucination kiểu POPE cho tiếng Việt.
-Dòng cuối là "bản đồ": G2 được trả lời ở slide 34–37 (QLoRA nhận biết OCR), G3 ở slide 29–30 (QLoRA), G4 ở slide 33 và 42.
+Dòng cuối là "bản đồ": G2 được trả lời ở slide 28–30 (QLoRA nhận biết OCR), G3 ở slide 26–35 (QLoRA), G4 ở slide 27 và 42.
 
 === Slide 7 · REVIEW 1 · PHẠM VI · 04 · TRONG VÀ NGOÀI PHẠM VI ===
 [Trong và ngoài phạm vi · ~1 phút — slide mới, trả lời thẳng "phạm vi bài toán"]
 Hàng trên là những gì nằm trong phạm vi: dữ liệu là hai benchmark công khai với split cố định; mô hình là một baseline mở Qwen2.5-VL-3B, chỉ PEFT; đánh giá bằng EM, VQA-Acc, ANLS cộng ablation, phân tích lỗi, hallucination — tất cả trên một GPU Colab.
-Ô trái dưới — ngoài phạm vi: full fine-tuning; câu trả lời dài, giải thích, hội thoại nhiều lượt; video; ngôn ngữ khác; tự train lại OCR. RAG tri thức ngoài chỉ làm nếu phân tích lỗi đòi hỏi.
-Ô phải dưới — tiêu chí thành công đo được: tái lập baseline khớp số công bố trong ±2 điểm; ít nhất một cải tiến hơn baseline, p < 0,05, cùng điều kiện; có đủ ablation, lỗi, hallucination; prototype chạy được.
+Ô dưới — ngoài phạm vi: full fine-tuning; câu trả lời dài, giải thích, hội thoại nhiều lượt; video; ngôn ngữ khác; tự train lại OCR. RAG tri thức ngoài chỉ làm nếu phân tích lỗi đòi hỏi.
 Nếu bị hỏi "vì sao không full fine-tune": đó là ràng buộc của đề cương và của phần cứng; mục tiêu đề tài là hiệu quả.
 
 === Slide 8 · REVIEW 1 · PHẠM VI · 05 · CÂU HỎI NGHIÊN CỨU ===
@@ -54,7 +52,7 @@ Nhấn: mỗi câu hỏi ghi rõ đo bằng metric gì — câu nào cũng kiể
 [Giả thuyết · ~1 phút]
 Mỗi giả thuyết có ngưỡng chốt trước khi chạy và gắn một vấn đề tiếng Việt.
 H1: QLoRA tăng ít nhất 5 điểm EM so với chính model đó zero-shot. H2: chữ OCR có dấu trong prompt tăng ít nhất 3 điểm ANLS và tốt nhất khi kết hợp QLoRA. H3: prompt định dạng tiếng Việt tăng ít nhất 3 điểm EM. H4: QLoRA không làm tăng hallucination.
-Hai ô dưới (góp ý số 3): 4-bit/16-bit không còn là giả thuyết mà là số đo hiệu quả; cấu hình LoRA chuyển thành ablation A1, A2; bảng đối chiếu cách đánh số cũ sang mới. Kết quả từng giả thuyết ở slide 42.
+Kết quả từng giả thuyết ở slide 31. Nếu bị hỏi (góp ý số 3): 4-bit/16-bit không còn là giả thuyết mà là số đo hiệu quả; cấu hình LoRA chuyển thành ablation A1, A2.
 
 === Slide 10 · REVIEW 1 · PHẠM VI · 07 · DỮ LIỆU ===
 [Dữ liệu · ~1 phút]
@@ -62,12 +60,8 @@ ViVQA: 15.000 cặp hỏi–đáp trên 10.328 ảnh COCO; bản gốc chỉ có
 Đặc điểm đáp án quyết định metric: ViVQA rất ngắn → EM/VQA-Acc; ViTextVQA dài hơn, đọc từ ảnh → thêm ANLS.
 Dải dưới trả lời góp ý số 9: tiền xử lý trước, rồi mới cố định split; chọn cấu hình chỉ trên val/dev; test chỉ dùng để báo cáo, không dùng để chọn.
 
-=== Slide 11 · REVIEW 1 · PHẠM VI · 08 · BASELINE & QLoRA ===
-[Baseline & QLoRA · ~1 phút — đây là chỗ baseline xuất hiện trong phần phạm vi]
-Ở phần phạm vi, nhóm chỉ nói baseline LÀ GÌ và DÙNG ĐỂ LÀM GÌ; còn baseline hoạt động THẾ NÀO và có chạy ĐÚNG không thì để phần B (slide 23, 25).
-Bảng phải: Qwen2.5-VL-3B là baseline nhóm tái lập và cũng là nền của phương pháp đề xuất — chỉ mô hình này được dùng để kết luận cải tiến. Qwen2-VL-7B chỉ là ablation backbone zero-shot; Florence-2 là dự phòng; BLIP-2, PreSTU, ViTextBLIP-2 là công trình trước, chỉ để định vị.
-Ô trái trên: QLoRA nén trọng số gốc 4-bit NF4 và đóng băng; mỗi lớp đích gắn hai ma trận nhỏ A·B, chỉ A và B được train → adapter khoảng 30 MB.
-Ô vàng (góp ý số 5, 6): vì sao không so LoRA với QLoRA — model 3B ở 16-bit cần 7–8 GB chưa tính ảnh, lúc đó GPU là T4 → QLoRA là điều kiện để chạy được, không phải biến so sánh. Nguyên tắc: chỉ kết luận cải thiện khi cùng backbone, split, seed, phần cứng.
+=== Slide 11 · REVIEW 1 · PHẠM VI · 08 · BASELINE ===
+[Baseline · ~1 phút] Baseline của nhóm là Qwen2.5-VL-3B-Instruct. Hình bên trái là kiến trúc trong cấu hình của nhóm: ảnh được cắt thành patch 14×14 qua 32 khối ViT, patch merger gộp 2×2 patch thành một token, tối đa 512 token ảnh; token ảnh ghép với câu hỏi đưa vào LLM decoder 36 lớp, nén 4-bit và đóng băng, sinh câu trả lời. Nhóm chọn model này vì là VLM mở, đa ngôn ngữ, đọc chữ trong ảnh tốt, và với 3 tỉ tham số thì nén 4-bit vừa một GPU Colab. Mọi run dùng chung cấu hình: 4-bit NF4, tối đa 512 token ảnh, sinh greedy tối đa 32 token; khi train QLoRA chỉ thêm LoRA hạng 16 ở q, k, v, o — 0,196% tham số. Bằng chứng tái lập chi tiết ở slide 22.
 
 === Slide 12 · REVIEW 1 · PHẠM VI · 09 · PHƯƠNG PHÁP ĐỀ XUẤT ===
 [Phương pháp đề xuất · ~1,5 phút]
@@ -77,36 +71,22 @@ B — huấn luyện và suy luận, giống hệt cho mọi run: ghép prompt (
 C — chấm điểm sau cùng một bước chuẩn hoá, phân tích lỗi, hallucination, và prototype web.
 Nhấn: bước 1–4 cố định nên mọi so sánh chỉ khác đúng một yếu tố (góp ý số 4: đã có một phương pháp và hình pipeline).
 
-=== Slide 13 · REVIEW 1 · PHẠM VI · 10 · NGÂN SÁCH TOKEN & RAG ===
-[Ngân sách token & RAG · ~45 giây — góp ý số 8]
-Mỗi mẫu: token ảnh bị chặn bởi max_pixels → tối đa 512; câu hỏi vài chục token; một dòng OCR; đầu ra tối đa 32 token → tổng dưới khoảng 1.000 token, nhỏ hơn nhiều context window; giới hạn thật là VRAM.
-RAG: chữ OCR trong prompt đã là "truy xuất bằng chứng" từ chính ảnh. RAG tri thức ngoài chỉ làm nếu phân tích lỗi cho thấy nhiều câu sai do thiếu tri thức ngoài ảnh. Duyệt 200 lỗi (slide 33) cho thấy lỗi chủ yếu là đọc chữ và định dạng → chưa kích hoạt RAG.
-
-=== Slide 14 · REVIEW 1 · PHẠM VI · 11 · SẢN PHẨM & GIÁ TRỊ ===
+=== Slide 13 · REVIEW 1 · PHẠM VI · 11 · SẢN PHẨM & GIÁ TRỊ ===
 [Sản phẩm & giá trị · ~45 giây]
 Ba sản phẩm: (1) đóng góp nghiên cứu — ít nhất một cải tiến PEFT đã kiểm chứng so với baseline tái lập, kèm ablation, phân tích lỗi, hallucination; (2) prototype web — tải ảnh, hỏi tiếng Việt, nhận câu trả lời kèm chữ OCR làm bằng chứng; (3) luận văn và gói tái lập: code, adapter, config, log.
 Giá trị thực tiễn: đọc biển hiệu, nhãn hàng, giá cả; hỗ trợ người khiếm thị; thực đơn, biểu mẫu. Ý nghĩa khoa học: nghiên cứu PEFT có hệ thống cho VLM tiếng Việt, xử lý đặc thù tiếng Việt, đo hallucination cho VQA tiếng Việt.
 
-=== Slide 15 · REVIEW 1 · PHẠM VI · 12 · KẾ HOẠCH ===
+=== Slide 14 · REVIEW 1 · PHẠM VI · 12 · KẾ HOẠCH ===
 [Kế hoạch · ~45 giây — góp ý số 10]
 Cột mới "Đầu ra · trạng thái" trả lời góp ý: kế hoạch phải có đầu ra kiểm chứng được. Bốn mốc: Review 1 (W3), Review 2 (W8), Review 3 (W13), bảo vệ (W15).
 Đến Review 2: W1–W8 đã xong. Phần thí nghiệm của W9–W10 (B3 toàn bộ dữ liệu, ablation LoRA, đánh giá đầy đủ, adapter dùng chung) đã làm sớm — kết quả có ở phần B. Vì vậy hallucination và phân tích lỗi được dời lên W9–W10, prototype dời lên W11–12.
 
-=== Slide 16 · REVIEW 1 · PHẠM VI · 13 · RỦI RO & RÀNG BUỘC ===
-[Rủi ro & ràng buộc · ~45 giây]
-Đọc cột trạng thái: các rủi ro mức cao đều đã khử — OOM (train ≤ 7 GB VRAM nhờ QLoRA), Colab ngắt (resume từ checkpoint đã kiểm), baseline khó tái lập (đã tái lập 79,6 so với 79,3), train không hội tụ (không xảy ra). Còn mở: chất lượng OCR vẫn là nguồn lỗi chính.
-Ô phải là ràng buộc bắt buộc: chỉ PEFT; tái lập baseline trước rồi mới cải tiến; cùng split, seed, phần cứng cho mọi so sánh; log VRAM và thời gian mỗi run.
-
-=== Slide 17 · REVIEW 1 · TIẾP THU GÓP Ý PHẢN BIỆN (24/09/2026) ===
-[Tiếp thu góp ý Review 1 · ~20 giây]
-Không đọc hết bảng. Chỉ nói: "Mười góp ý của phản biện ngày 24/09 đều đã được xử lý; cột cuối là slide tương ứng để thầy cô tra cứu." Nếu hội đồng hỏi góp ý nào thì chỉ vào cột Slide và mở slide đó.
-
-=== Slide 18 · Existing System + Methodology ===
+=== Slide 15 · Review 2 ===
 [Chuyển phần · ~10 giây]
 "Phần B — nội dung chính của Review 2: hệ thống hiện có và phương pháp."
 Logic của phần B: trước tiên xem các hệ thống hiện có — công trình trước và baseline nhóm tái lập — làm được đến đâu và yếu ở đâu; sau đó là phương pháp nhóm dùng để sửa đúng những điểm yếu đó.
 
-=== Slide 19 · REVIEW 2 · TÓM TẮT ===
+=== Slide 16 · REVIEW 2 · TÓM TẮT ===
 [Tóm tắt · ~45 giây — nói 4 con số trước khi vào chi tiết]
 79,6: pipeline của nhóm tái lập đúng số công bố của Qwen2.5-VL-3B (79,3).
 +21,1: QLoRA tăng EM so với zero-shot trên full test ViTextVQA (+51,7 ở ViVQA).
@@ -114,137 +94,134 @@ Logic của phần B: trước tiên xem các hệ thống hiện có — công 
 +3,1: riêng phần đóng góp của OCR — cùng QLoRA, cùng toàn bộ dữ liệu, thêm OCR tăng 3,1 EM.
 Dòng dưới: tất cả chỉ train 0,196% tham số; và một adapter dùng chung cho cả hai dataset không kém adapter riêng.
 
-=== Slide 20 · REVIEW 2 · XỬ LÝ GÓP Ý GVHD ===
-[Góp ý GVHD 07/10 · ~30 giây]
-Năm góp ý của thầy Trí và việc nhóm đã làm, kèm slide: sơ đồ kiến trúc baseline (23); giải thích dataset và nhiễu (22, 7); chạy lại baseline với phương pháp đánh giá rõ ràng (24–26); nắm SOTA (21, 27, 31–32); chạy thí nghiệm rồi mới bàn cải tiến (29–41). Thứ tự phần B đi đúng theo thứ tự các góp ý này.
-
-=== Slide 21 · REVIEW 2 · EXISTING SYSTEM · 01 · CÔNG TRÌNH TRƯỚC & SOTA ===
+=== Slide 17 · REVIEW 2 · EXISTING SYSTEM · 01 · CÔNG TRÌNH TRƯỚC & SOTA ===
 [Existing System 1 · công trình trước & SOTA · ~1 phút]
 ViTextVQA: BLIP-2 15,58 EM; PreSTU 22,64; ViTextBLIP-2 — SOTA — 25,48 EM / 53,95 F1; con người 88. ViVQA: các công trình dùng accuracy phân loại trên tập nhãn cố định (71,04 và 62,41).
 Lưu ý: metric và thiết lập khác nhau nên chỉ để định vị, không so trực tiếp.
 Bài học: ViTextBLIP-2 chỉ train khoảng 5% tham số mà vẫn thắng mô hình full fine-tune → ủng hộ hướng PEFT của nhóm.
 
-=== Slide 22 · REVIEW 2 · EXISTING SYSTEM · 02 · DỮ LIỆU BENCHMARK ===
+=== Slide 18 · REVIEW 2 · EXISTING SYSTEM · 02 · DỮ LIỆU BENCHMARK ===
 [Existing System 2 · dữ liệu benchmark có nhiễu · ~1 phút]
 ViVQA được tạo từ COCO-QA: câu hỏi sinh tự động rồi dịch bằng Google Translate → các điểm nhiễu N1–N4 (ví dụ purple dịch thành "tía").
-Kiểm tra rò rỉ: ở ViVQA, 1.274/2.789 ảnh test cũng có trong train, 99,4% đáp án test thuộc 333 đáp án của train — từ vựng đóng. ViTextVQA không có ảnh trùng → phép thử tổng quát hoá sạch hơn. Vì vậy nhóm luôn báo cáo thêm phần test sạch của ViVQA (slide 30).
+Kiểm tra rò rỉ: ở ViVQA, 1.274/2.789 ảnh test cũng có trong train, 99,4% đáp án test thuộc 333 đáp án của train — từ vựng đóng. ViTextVQA không có ảnh trùng → phép thử tổng quát hoá sạch hơn. Vì vậy nhóm luôn báo cáo thêm phần test sạch của ViVQA (slide 35).
 
-=== Slide 23 · REVIEW 2 · EXISTING SYSTEM · 03 · KIẾN TRÚC BASELINE ===
-[Existing System 3 · kiến trúc baseline · ~1,5 phút — góp ý của thầy Trí]
+=== Slide 19 · REVIEW 2 · EXISTING SYSTEM · 03 · XỬ LÝ DỮ LIỆU ===
+[Existing System 3 · xử lý dữ liệu · ~1 phút] Slide này cho thấy dữ liệu trước và sau xử lý trên một mẫu thật của ViTextVQA. Một: ảnh ViVQA gốc 640 nhân 360 được làm tròn về 644 nhân 364, cạnh là bội số của 28; mỗi ô 28 nhân 28 là một token ảnh, nên ảnh thành lưới 23 nhân 13 bằng 299 token. Ảnh ViTextVQA lớn hơn, như ảnh 16267 kích thước 1024 nhân 996, bị thu nhỏ giữ tỉ lệ còn 616 nhân 616, tức 484 token — luôn dưới giới hạn 512. Hai: với ViTextVQA, đây là vị trí 13 khung chữ thật trên ảnh 16267. PaddleOCR dò vùng chữ, VietOCR đọc tiếng Việt, các dòng được sắp từ trái-trên sang phải-dưới rồi ghép thành một dòng trong prompt. Ví dụ ở đây OCR đọc ra 'đại lý xổ só miến bắc' — còn sai dấu — nên model phải học cách dùng OCR có nhiễu; đó là lý do nhóm train cùng OCR. Ba: trước khi chấm, câu trả lời của model và đáp án chuẩn đi qua cùng một hàm chuẩn hoá: NFC, chữ thường, bỏ dấu câu, gộp khoảng trắng, nhưng giữ dấu thanh.
+
+=== Slide 20 · REVIEW 2 · EXISTING SYSTEM · 04 · KIẾN TRÚC BASELINE ===
+[Existing System 4 · kiến trúc baseline · ~1,5 phút — góp ý của thầy Trí]
 Đi theo luồng dữ liệu bên phải. (1) Ảnh vào ViT: tối đa 401.408 pixel, cắt patch 14×14, qua 32 khối. (2) Patch merger gộp 2×2 patch thành 1 token → 256–512 token ảnh. (3) Prompt: chat template + token ảnh + câu hỏi tiếng Việt. (4) Decoder Qwen2.5, 36 lớp, sinh tham lam tối đa 32 token, rồi chuẩn hoá và chấm.
 Ô vàng: phần được train là LoRA r = 16, α = 32 trên q, k, v, o — 7,37 triệu tham số, 29,5 MB; còn lại đóng băng, LLM 4-bit NF4.
-Baseline không dùng OCR; OCR là cải tiến B3 (slide 34).
+Baseline không dùng OCR; OCR là cải tiến B3 (slide 28).
 
-=== Slide 24 · REVIEW 2 · EXISTING SYSTEM · 04 · GIAO THỨC ĐÁNH GIÁ ===
-[Existing System 4 · giao thức đánh giá · ~45 giây]
+=== Slide 21 · REVIEW 2 · EXISTING SYSTEM · 05 · GIAO THỨC ĐÁNH GIÁ ===
+[Existing System 5 · giao thức đánh giá · ~45 giây]
 Trước khi chạy baseline, nhóm chốt một giao thức cố định cho mọi run: bf16, 4-bit NF4, tối đa 512 token ảnh, greedy 32 token, seed 42, GPU L4.
 Metric chính EM, VQA-Acc, ANLS; F1 để so với paper. Chuẩn hoá tiếng Việt đối xứng cho dự đoán và đáp án, giữ dấu thanh.
 Thống kê: McNemar ghép cặp cho EM, CI95 bootstrap cho ANLS; luật kết luận chốt trước mỗi run.
 Nếu bị hỏi: hai dataset chỉ có một đáp án mỗi câu nên VQA-Acc trùng EM — nhóm vẫn báo cáo cột này vì là metric bắt buộc.
 
-=== Slide 25 · REVIEW 2 · EXISTING SYSTEM · 05 · KIỂM CHỨNG PIPELINE (R0) ===
-[Existing System 5 · kiểm chứng pipeline R0 · ~1 phút]
-Trước khi tin bất kỳ con số nào, nhóm chứng minh pipeline chạy đúng: chạy Qwen2.5-VL-3B trên TextVQA val (5.000 câu) theo đúng cấu hình báo cáo chính thức → 79,6 so với 79,3 công bố, chênh 0,3, trong ngưỡng ±2 đã chốt trước → đạt.
-Cột thứ ba: cấu hình tiết kiệm của nhóm (4-bit, 512 token) mất 4,4 điểm nhưng VRAM giảm từ 10,9 xuống 2,5 GB — giữ 94,5% độ chính xác. Đây là số đo hiệu quả, không phải giả thuyết.
+=== Slide 22 · REVIEW 2 · EXISTING SYSTEM · 06 · KIỂM CHỨNG PIPELINE (R0) ===
+[Existing System 6 · tái lập baseline R0 · ~1 phút] Chưa có paper nào công bố Qwen2.5-VL-3B trên ViVQA hay ViTextVQA, nên nhóm kiểm chứng pipeline bằng một con số đã công bố: Table 5 của báo cáo kỹ thuật Qwen2.5-VL ghi TextVQA val của bản 3B là 79,3. Luật chốt trước khi chạy: tái lập được nếu chênh không quá 2 điểm. Ô đen thứ nhất là file metrics.json thật của run R0: chạy toàn bộ 5.000 câu, bf16, trên GPU L4, commit fefa9ed, được 0,79596 tức 79,6 — chênh +0,3. Ô đen thứ hai: tính lại độc lập từ 5.000 dự đoán thô trong predictions.json, ra đúng 0,79596. Cấu hình tiết kiệm của nhóm, 4-bit và 512 token, mất 4,4 điểm nhưng VRAM giảm từ 10,9 xuống 2,5 GB.
 
-=== Slide 26 · REVIEW 2 · EXISTING SYSTEM · 06 · BASELINE ZERO-SHOT (B1) ===
-[Existing System 6 · baseline zero-shot B1 · ~1 phút]
+=== Slide 23 · REVIEW 2 · EXISTING SYSTEM · 07 · BASELINE ZERO-SHOT (B1) ===
+[Existing System 7 · baseline zero-shot B1 · ~1 phút]
 EM 22,1 ở ViVQA, khoảng 29 ở ViTextVQA. Lỗi chính không phải "không hiểu" mà là định dạng: trả lời dài gần gấp đôi đáp án chuẩn; 19% câu trả lời ViTextVQA chứa đáp án nhưng vẫn trượt EM (ví dụ "Lịch tết năm 2021" so với "2021"). Ngoài ra có chen tiếng Anh, hallucination và đáp án chuẩn nhiễu.
 Biểu đồ: ViVQA zero-shot gần 0 ở câu hỏi vị trí và vật thể. Đây chính là điểm yếu V2 mà phương pháp phải sửa.
 
-=== Slide 27 · REVIEW 2 · EXISTING SYSTEM · 07 · ABLATION BACKBONE (R1) ===
-[Existing System 7 · có nên dùng model lớn hơn? · ~1 phút]
+=== Slide 24 · REVIEW 2 · EXISTING SYSTEM · 08 · ABLATION BACKBONE (R1) ===
+[Existing System 8 · có nên dùng model lớn hơn? · ~1 phút]
 Paper ViTextVQA báo QwenVL-7B zero-shot 28 EM. Nhóm chạy Qwen2-VL-7B trong cùng điều kiện: chỉ 16,2 EM, thấp hơn 3B 12,6 điểm, p ≈ 10⁻³³; tăng độ phân giải cũng không giúp.
 Lý do: 7B trả lời dài 8,2 từ so với đáp án 3,7 từ — EM trượt dù đọc đúng chữ. Table 7 của paper chỉ có 100 câu (±9 EM) nên không đủ để quyết định.
 Kết luận phần Existing System: giữ Qwen2.5-VL-3B; điểm yếu là định dạng câu trả lời và đọc chữ → chuyển sang Methodology.
 
-=== Slide 28 · REVIEW 2 · METHODOLOGY · 01 · LỘ TRÌNH ===
+=== Slide 25 · REVIEW 2 · METHODOLOGY · 01 · LỘ TRÌNH ===
 [Methodology 1 · lộ trình · ~45 giây]
 Phương pháp đi bốn bước, mỗi bước chỉ đổi một yếu tố so với bước trước; khởi điểm là B1 zero-shot.
 B2: thêm QLoRA — PEFT có hơn zero-shot không. B3: thêm một dòng OCR vào prompt khi train và test — dạy model dùng chữ OCR có giúp không (trên tập con 8.000 câu để tiết kiệm). B3F (B3-full): cùng công thức trên toàn bộ dữ liệu — đủ dữ liệu OCR còn giúp không. SH: một adapter cho cả hai dataset — để làm prototype.
 Luật kết luận của từng bước được chốt trước khi chạy.
 
-=== Slide 29 · REVIEW 2 · METHODOLOGY · 02 · QLoRA (B2) ===
+=== Slide 26 · REVIEW 2 · METHODOLOGY · 02 · QLoRA (B2) ===
 [Methodology 2 · QLoRA B2 · ~45 giây]
 Biểu đồ: ViVQA 22,1 → 73,8 EM; ViTextVQA 29,1 → 50,3 trên full test. Luật chốt trước: cải thiện nếu EM tăng và McNemar p < 0,05 → đạt trên cả hai dataset.
 Chi phí: 3 giờ (ViVQA) và 12 giờ (ViTextVQA) trên một L4, VRAM tối đa 6,9 GB. H1 được ủng hộ.
 
-=== Slide 30 · REVIEW 2 · METHODOLOGY · 03 · ĐỐI CHỨNG ===
-[Methodology 3 · đối chứng · ~1 phút]
-Mức tăng có thật không? Hai đối chứng.
-(1) Rò rỉ ViVQA: chỉ tính phần test sạch (ảnh và cặp hỏi–đáp chưa thấy, n = 1.219) vẫn 25,0 → 69,1; mốc đoán theo phân bố đáp án chỉ 14,4. ViTextVQA không trùng ảnh mà vẫn +21,1.
-(2) Few-shot FS5: cho 5 ví dụ trong prompt để model học định dạng — câu trả lời ngắn lại nhưng mất nội dung, EM còn giảm. B2 vượt FS5 rõ → QLoRA học nhiều hơn định dạng. Đây cũng là bằng chứng H3 chưa được ủng hộ.
-
-=== Slide 31 · REVIEW 2 · METHODOLOGY · 04 · SO VỚI SOTA ===
-[Methodology 4 · so với SOTA · ~45 giây]
-Luật: chỉ nói "cao hơn" khi cận dưới CI95 của nhóm lớn hơn số công bố. B1 zero-shot đã cao hơn về EM; B2 cao hơn cả EM và F1.
-Giới hạn: paper không công bố cách chuẩn hoá đáp án nên phép so giả định cách chấm tương đương. Kết quả của phương pháp đề xuất B3-full (53,35 EM) ở slide 37.
-
-=== Slide 32 · REVIEW 2 · METHODOLOGY · 05 · SOTA SO VỚI NHÓM ===
-[Methodology 5 · SOTA khác nhóm ở đâu · ~45 giây]
-ViTextBLIP-2 dùng OCR ngoài (SwinTextSpotter), LM tiếng Việt ViT5 đóng băng, chỉ train Q-Former. Nhóm dùng VLM đa ngôn ngữ tự đọc chữ, chỉ train LoRA 0,196%. Hai bên cùng train trên toàn bộ train ViTextVQA.
-Điểm rút ra: SOTA có dùng OCR — một gợi ý cho bước B3 của nhóm.
-
-=== Slide 33 · REVIEW 2 · METHODOLOGY · 06 · PHÂN TÍCH LỖI B2 ===
-[Methodology 6 · B2 còn sai ở đâu · ~1 phút]
+=== Slide 27 · REVIEW 2 · METHODOLOGY · 03 · PHÂN TÍCH LỖI B2 ===
+[Methodology 3 · B2 còn sai ở đâu · ~1 phút]
 Nhóm chọn cải tiến dựa trên lỗi thật, không đoán. Duyệt tay 200 lỗi: 54% thực ra đúng ý nhưng EM quá khắt khe; 12,5% đáp án chuẩn nhiễu.
 Lỗi thật ở ViTextVQA: đọc sai chữ 28%, nhầm vùng chữ 23%, sai dấu 8% → đọc chữ là điểm yếu lớn nhất → động lực cho OCR (B3). Hallucination chỉ 7% số lỗi. Nhãn có kiểm độ đồng thuận κ = 0,62.
 
-=== Slide 34 · REVIEW 2 · METHODOLOGY · 07 · PHƯƠNG PHÁP ĐỀ XUẤT (B3) ===
-[Methodology 7 · phương pháp đề xuất B3 · ~1 phút]
+=== Slide 28 · REVIEW 2 · METHODOLOGY · 04 · PHƯƠNG PHÁP ĐỀ XUẤT (B3) ===
+[Methodology 4 · phương pháp đề xuất B3 · ~1 phút]
 Ảnh → PaddleOCR dò dòng chữ → VietOCR đọc tiếng Việt, giữ dấu → một dòng "Văn bản đọc được trong ảnh: …" đặt trước câu hỏi → Qwen2.5-VL + LoRA train cùng dòng OCR.
 VietOCR được chọn theo luật trên dev300: đáp án nằm trong văn bản OCR 37,7% so với 27,0% của PaddleOCR (bản Latin làm rơi dấu).
 Mọi thứ khác y hệt B2. Phép thử có kiểm soát: tập con 8.000 câu, so với B2-sub cùng tập nhưng không OCR.
 
-=== Slide 35 · REVIEW 2 · METHODOLOGY · 08 · ABLATION: OCR LÚC TRAIN × OCR LÚC TEST ===
-[Methodology 8 · ablation 2×2 · ~1 phút — slide quan trọng nhất về OCR]
+=== Slide 29 · REVIEW 2 · METHODOLOGY · 05 · ABLATION: OCR LÚC TRAIN × OCR LÚC TEST ===
+[Methodology 5 · ablation 2×2 · ~1 phút — slide quan trọng nhất về OCR]
 OCR lúc train × OCR lúc test, trên test2000. Chỉ thêm OCR lúc test: không giúp. Chỉ lúc train: không giúp. Cả hai: +4,35 EM. Tương tác +4,9 EM, CI95 từ +3,2 đến +6,6.
-Kết luận: đóng góp không phải "nhét OCR vào prompt", mà là dùng QLoRA dạy model khi nào tin chữ OCR, khi nào tin ảnh.
+Kết luận: đóng góp không phải "nhét OCR vào prompt", mà là dùng QLoRA dạy model khi nào tin chữ OCR, khi nào tin ảnh. Lặp lại với 3 seed 42, 43, 44: B3 hơn B2-sub trung bình 3,57 ± 0,76 EM, cả ba seed đều có p nhỏ hơn 1,4 nhân 10 mũ trừ 4 — chi tiết ở phụ lục.
 
-=== Slide 36 · REVIEW 2 · METHODOLOGY · 09 · ĐỘ VỮNG ===
-[Methodology 9 · độ vững · ~45 giây]
-Ba seed: +3,57 ± 0,76 EM, cả ba seed p ≤ 1,4 × 10⁻⁴. Full test 10.028 câu: B3 49,10 so với B2-sub 46,56, p = 10⁻¹⁴, cao hơn ViTextBLIP-2.
-Nói trung thực: với 23% dữ liệu, B3 vẫn thấp hơn B2 dữ liệu đầy đủ 1,16 EM — câu hỏi "đủ dữ liệu thì OCR còn giúp không?" được trả lời ở slide tiếp theo.
-
-=== Slide 37 · REVIEW 2 · METHODOLOGY · 10 · B3 TRÊN TOÀN BỘ DỮ LIỆU (B3-full) ===
-[Methodology 10 · B3-full (W10) · ~1 phút]
+=== Slide 30 · REVIEW 2 · METHODOLOGY · 06 · B3 TRÊN TOÀN BỘ DỮ LIỆU (B3-full) ===
+[Methodology 6 · B3-full (W10) · ~1 phút]
 B3-full = công thức B3 y hệt, trên toàn bộ 35.159 câu train. Bảng 2×2 dữ liệu × OCR trên full test: không OCR 46,56 → 50,26 khi thêm dữ liệu; có OCR 49,10 → 53,35.
 So sánh chính B2 → B3-full: +3,09 EM; 705 câu chỉ B3-full đúng so với 395 câu chỉ B2 đúng; p = 7 × 10⁻²¹ → theo luật ghi trước: OCR-aware vượt B2 khi đủ dữ liệu. Tương tác +0,55 không có ý nghĩa: lợi ích của OCR không giảm khi thêm dữ liệu.
 B3-full là mô hình ViTextVQA chính thức: 53,35 EM — gấp đôi SOTA công bố.
 
-=== Slide 38 · REVIEW 2 · METHODOLOGY · 11 · ABLATION CẤU HÌNH LoRA ===
-[Methodology 11 · ablation LoRA (W10) · ~45 giây]
+=== Slide 31 · REVIEW 2 · GIẢ THUYẾT ===
+[Giả thuyết · ~45 giây] H1 ủng hộ: QLoRA tăng 51,7 EM ở ViVQA và 21,1 ở ViTextVQA. H2 một phần: OCR cộng hưởng với QLoRA — tương tác +4,9 EM, và +3,1 EM khi đủ dữ liệu — nhưng ANLS chỉ +1,87, chưa tới ngưỡng +3. H3 chưa ủng hộ: few-shot làm giảm EM. H4 một phần: trên POPE tiếng Việt, 500 ảnh chưa thấy khi train, B3-full không làm tăng hallucination; còn C3, model QLoRA trên ViVQA, chưa kết luận được vì 91% câu trả lời không theo dạng có/không — model quên định dạng sau khi train trên ViVQA không có câu yes/no. Ablation A1, A2 đã làm: giữ r = 16 trên q, k, v, o.
+
+=== Slide 32 · REVIEW 2 · BƯỚC TIẾP THEO ===
+[Bước tiếp theo · ~30 giây] Đo hallucination và phân tích lỗi đã xong, H4 ủng hộ một phần. Việc tiếp theo: sửa thiên vị trả lời 'có' của adapter dùng chung trước khi làm prototype; prototype web chạy OCR trước, trả lời kèm chữ OCR và độ tin cậy; Review 3 thêm Phần C gồm kết quả cuối, lỗi, hallucination và demo.
+
+=== Slide 33 · Nhóm rất mong nhận được góp ý. ===
+[Kết · ~10 giây]
+"Nhóm em xin cảm ơn thầy cô và rất mong nhận được góp ý." Mọi con số trong bài đều có log và tái lập được.
+
+=== Slide 34 · Phụ lục ===
+Phụ lục: các slide dự phòng, chỉ mở khi hội đồng hỏi.
+
+=== Slide 35 · PHỤ LỤC · P1 · ĐỐI CHỨNG ===
+[Phụ lục P1 · đối chứng · ~1 phút]
+Mức tăng có thật không? Hai đối chứng.
+(1) Rò rỉ ViVQA: chỉ tính phần test sạch (ảnh và cặp hỏi–đáp chưa thấy, n = 1.219) vẫn 25,0 → 69,1; mốc đoán theo phân bố đáp án chỉ 14,4. ViTextVQA không trùng ảnh mà vẫn +21,1.
+(2) Few-shot FS5: cho 5 ví dụ trong prompt để model học định dạng — câu trả lời ngắn lại nhưng mất nội dung, EM còn giảm. B2 vượt FS5 rõ → QLoRA học nhiều hơn định dạng. Đây cũng là bằng chứng H3 chưa được ủng hộ.
+
+=== Slide 36 · PHỤ LỤC · P2 · SO VỚI SOTA ===
+[Phụ lục P2 · so với SOTA · ~45 giây]
+Luật: chỉ nói "cao hơn" khi cận dưới CI95 của nhóm lớn hơn số công bố. B1 zero-shot đã cao hơn về EM; B2 cao hơn cả EM và F1.
+Giới hạn: paper không công bố cách chuẩn hoá đáp án nên phép so giả định cách chấm tương đương. Kết quả của phương pháp đề xuất B3-full (53,35 EM) ở slide 30.
+
+=== Slide 37 · PHỤ LỤC · P3 · SOTA SO VỚI NHÓM ===
+[Phụ lục P3 · SOTA khác nhóm ở đâu · ~45 giây]
+ViTextBLIP-2 dùng OCR ngoài (SwinTextSpotter), LM tiếng Việt ViT5 đóng băng, chỉ train Q-Former. Nhóm dùng VLM đa ngôn ngữ tự đọc chữ, chỉ train LoRA 0,196%. Hai bên cùng train trên toàn bộ train ViTextVQA.
+Điểm rút ra: SOTA có dùng OCR — một gợi ý cho bước B3 của nhóm.
+
+=== Slide 38 · PHỤ LỤC · P4 · ĐỘ VỮNG ===
+[Phụ lục P4 · độ vững · ~45 giây]
+Ba seed: +3,57 ± 0,76 EM, cả ba seed p ≤ 1,4 × 10⁻⁴. Full test 10.028 câu: B3 49,10 so với B2-sub 46,56, p = 10⁻¹⁴, cao hơn ViTextBLIP-2.
+Nói trung thực: với 23% dữ liệu, B3 vẫn thấp hơn B2 dữ liệu đầy đủ 1,16 EM — câu hỏi "đủ dữ liệu thì OCR còn giúp không?" được trả lời ở slide tiếp theo.
+
+=== Slide 39 · PHỤ LỤC · P5 · ABLATION CẤU HÌNH LoRA ===
+[Phụ lục P5 · ablation LoRA (W10) · ~45 giây]
 Cấu hình LoRA đã hợp lý chưa? Hai ablation trên công thức B3.
 A1: gắn LoRA thêm vào các lớp MLP, giữ cùng ngân sách tham số (r = 4): −0,55 EM, p = 0,34 → không cải thiện, lại chậm hơn 17,5%. A2: tăng rank lên 64: +1,05 EM nhưng p = 0,07 → không khác có ý nghĩa, adapter lớn gấp 4.
 Quyết định: giữ r = 16 trên q, k, v, o. B3-full dùng cấu hình B3 bất kể kết quả ablation — không chọn cấu hình bằng test.
 
-=== Slide 39 · REVIEW 2 · METHODOLOGY · 12 · ViVQA: SỐ EPOCH ===
-[Methodology 12 · ViVQA: số epoch · ~45 giây]
+=== Slide 40 · PHỤ LỤC · P6 · ViVQA: SỐ EPOCH ===
+[Phụ lục P6 · ViVQA: số epoch · ~45 giây]
 Với ViVQA, train 1 hay 2 epoch? Chọn trên val sạch, vì 512/1.200 câu val dùng chung ảnh với train — train lâu sẽ làm val thường bị thiên vị. Luật: giữ 1 epoch trừ khi 2 epoch hơn có ý nghĩa → chọn C3 (2 epoch).
 Chạm test một lần: 73,8 → 76,6, p = 4,6 × 10⁻⁹; trên phần test sạch vẫn +3,2 → không phải nhớ ảnh. C3 là mô hình ViVQA chính thức.
 
-=== Slide 40 · REVIEW 2 · METHODOLOGY · 13 · ADAPTER DÙNG CHUNG (SH) ===
-[Methodology 13 · adapter dùng chung SH (W11) · ~1 phút]
+=== Slide 41 · PHỤ LỤC · P7 · ADAPTER DÙNG CHUNG (SH) ===
+[Phụ lục P7 · adapter dùng chung SH (W11) · ~1 phút]
 Một adapter train trộn ViVQA + ViTextVQA (8k), mọi câu dùng prompt có OCR — đúng như cách demo chạy thật, vì demo không biết trước câu hỏi thuộc loại nào.
 Luật không kém δ = 1,5 EM: so với C1 trên ViVQA −0,27, CI95 [−1,13; +0,60]; so với B3 trên ViTextVQA +0,25, CI95 [−0,95; +1,45] → ĐẠT trên cả hai.
 44% câu ViVQA có dòng OCR vô nghĩa (ảnh COCO, chữ tiếng Anh) nhưng không bị hại (+0,15); chép nhầm chữ OCR chỉ 0,3%.
 Đánh đổi: SH là bản rẻ nên thấp hơn C3 và B3-full khoảng 3–4 EM → bảng kết quả chính giữ C3/B3-full, prototype dùng SH.
 
-=== Slide 41 · REVIEW 2 · METHODOLOGY · 14 · KẾT QUẢ THEO LOẠI CÂU HỎI ===
-[Methodology 14 · theo loại câu hỏi (W11) · ~1 phút]
+=== Slide 42 · PHỤ LỤC · P8 · KẾT QUẢ THEO LOẠI CÂU HỎI ===
+[Phụ lục P8 · theo loại câu hỏi (W11) · ~1 phút]
 ViTextVQA không có nhãn loại câu hỏi, nên nhóm viết bộ phân loại bằng luật từ khoá trên dev, đóng băng trước khi chạy test, rồi kiểm bằng 150 câu gán tay mù: khớp 80,7%.
 Kết quả: OCR giúp nhiều nhất ở câu phải chép đúng từng ký tự — số điện thoại, website +8,6 EM; tên người +6,4. Gần như không giúp ở watermark nguồn ảnh (+0,9). Loại khó nhất là sản phẩm/dịch vụ và địa điểm — phải suy ra từ chữ — là trọng tâm phân tích lỗi tiếp theo.
 Ba loại có dấu ⚠ có nhãn kém tin cậy, chỉ dùng để mô tả.
-
-=== Slide 42 · REVIEW 2 · GIẢ THUYẾT ===
-[Giả thuyết · ~45 giây]
-H1 ủng hộ (+51,7 / +21,1 EM). H2 một phần: OCR cộng hưởng với QLoRA (tương tác +4,9 EM; +3,1 EM khi đủ dữ liệu) nhưng ANLS chỉ +1,87, chưa tới ngưỡng +3. H3 chưa ủng hộ: few-shot làm giảm EM. H4 đang chờ: đo hallucination kiểu POPE ở W9.
-Ablation A1/A2 đã làm: giữ r = 16. Hiệu quả: 4-bit giữ 94,5% độ chính xác, VRAM −77%, adapter dùng chung không kém.
-
-=== Slide 43 · REVIEW 2 · BƯỚC TIẾP THEO ===
-[Bước tiếp theo · ~30 giây]
-Nhóm đi trước kế hoạch khoảng 2 tuần. W9: đo hallucination có hệ thống (H4) theo kiểu POPE tiếng Việt cho B1, B2, B3-full. W10: phân tích lỗi theo loại câu hỏi và theo V1–V4, chốt bảng kết quả cuối. W11–12: prototype web dùng một adapter chung, viết report. W13: Review 3.
-
-=== Slide 44 · Nhóm rất mong nhận được góp ý. ===
-[Kết · ~10 giây]
-"Nhóm em xin cảm ơn thầy cô và rất mong nhận được góp ý." Mọi con số trong bài đều có log và tái lập được.
