@@ -1,0 +1,831 @@
+"""
+yesno_calib.py — W13 bước 1–2: chẩn đoán + sửa thiên lệch "có" của adapter dùng chung SH bằng NGƯỠNG lúc suy luận.
+
+Vấn đề (W12, POPE-vi): SH (adapter của prototype) trả lời "có" ở 77–89% câu, ΔF1 so với B1-ocr −5,7 đến −9,4
+-> hỏi "Trong ảnh có X không?" thì gần như luôn "có". Train lại tốn ≈ 7 h L4; trước đó cần biết: thiên lệch là
+"lệch ngưỡng" (điểm "có" vẫn xếp đúng thứ tự, chỉ bị đẩy lên -> dời ngưỡng là sửa được) hay "mất khả năng phân biệt"
+(điểm "có" không còn tách câu có-thật / không-có -> phải train lại).
+
+Cách đo: MỘT lượt forward (không sinh chữ) -> log-xác suất token ĐẦU của câu trả lời:
+    s_yes = logsumexp(log p(t) | t ∈ token "có"/"yes"),  s_no = logsumexp(log p(t) | t ∈ token "không"/"no")
+    margin m = s_yes − s_no;  quyết định "có" ⇔ m > τ   (τ = 0 ≈ greedy hiện tại)
+Luật ghi trước: docs/W13/README.md (R-YB). τ chọn CHỈ trên tập calibration (ảnh khác POPE-vi), áp lên POPE-vi 1 lần.
+
+Bốn việc:
+  --build     Sinh tập calibration (ảnh ViVQA test chưa thấy lúc train, KHÔNG thuộc 500 ảnh POPE-vi, >= 1 lớp COCO,
+              tối đa 600 ảnh, seed 42; cùng mẫu câu POPE-vi) + POPE-vi mẫu câu 2 (`Có {vật} trong ảnh không?`,
+              không có chỉ dẫn trả lời -> gần câu hỏi thật của người dùng prototype; chỉ mô tả).
+  --score     (GPU) chấm logit token đầu cho một cấu hình × một file câu hỏi; theo lô, resume, chữ ký run.
+  --analyze   Kiểm hợp lệ, AUC, chọn τ trên calibration, áp lên POPE-vi, phán quyết R-YB -> yesno_calib_summary.json + .md
+  --selftest  Kiểm thử offline (không GPU, không mạng).
+
+Chạy:
+    python -m src.eval.yesno_calib --build --coco_ann_dir <dir> --vivqa_dir <drive>/data/vivqa \
+        --pope experiments/W12_pope_vi_questions/pope_vi_questions_v1.json --out_dir <exp>/W13_yesno_questions
+    python -m src.eval.yesno_calib --score --data_file <file> --run_name <run> [--adapter <dir>] --mode ocr \
+        --ocr_backend paddledet_vietocr --ocr_template v1 --ocr_max_chars 600 --ocr_min_conf 0
+    python -m src.eval.yesno_calib --analyze --questions_dir <exp>/W13_yesno_questions \
+        --pope experiments/W12_pope_vi_questions/pope_vi_questions_v1.json --exp_root <exp> --out <exp>/W13_yesno_calib_L4_seed42
+    python -m src.eval.yesno_calib --selftest
+"""
+from __future__ import annotations
+
+import argparse
+import copy
+import hashlib
+import json
+import math
+import os
+import random
+import sys
+import time
+from collections import Counter, defaultdict
+from datetime import datetime, timezone
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
+from src.eval.pope_vi import (OBJECTS_FILE, QUESTION_TEMPLATE, SETTINGS, MARGIN_PTS, N_BOOT, SEED,  # noqa: E402
+                              blocked_classes, bootstrap_delta_f1, coco_split_of, load_coco_classes,
+                              load_objects, metrics_of, parse_yes_no, per_image_counts)
+
+# --------------------------------------------------------------------------- #
+# Hằng số (ghi trước — đổi bất kỳ giá trị nào = luật khác, phải ghi lại README W13)
+# --------------------------------------------------------------------------- #
+BUILD_VERSION = "yesno-calib-build-v1"
+SCORING_VERSION = "first-token-logsumexp-v1"
+CALIB_MAX_IMAGES = 600
+CALIB_MIN_CLASSES = 1
+N_POS = 3
+N_NEG = 3
+TEMPLATE2 = "Có {obj} trong ảnh không?"
+YES_WORDS = ("có", "Có", "CÓ", "yes", "Yes")
+NO_WORDS = ("không", "Không", "KHÔNG", "no", "No")
+TAU_MIN, TAU_MAX, TAU_STEP = -15.0, 15.0, 0.05
+AGREE_MIN = 0.98              # kiểm hợp lệ: quyết định logit ở τ = 0 trùng greedy W12 >= 98% (SH, B1-ocr)
+MAX_YES_RATIO = 0.60          # R-YB: yes-ratio sau khi sửa <= 60% ở cả 3 cách chọn
+CONFIGS = ("SH", "B1_ocr", "B3full")
+QSETS = ("calib", "popevi", "popevi_t2")
+QFILES = {"calib": "yesno_calib_v1.json", "popevi_t2": "pope_vi_questions_t2_v1.json"}   # popevi = file W12
+RUN_TAG = {"SH": "sh_qlora_ocr_vietocr_v1_r16_shared", "B1_ocr": "b1_ocr_vietocr_v1_qwen25vl",
+           "B3full": "b3full_qlora_ocr_vietocr_v1_r16"}
+# Run greedy W12 trên POPE-vi (cùng file câu hỏi) -> mốc so sánh + kiểm hợp lệ
+GREEDY_W12 = {
+    "B1_ocr": "W12_POPE_b1_ocr_vietocr_v1_qwen25vl_popevi_v1_bf16_L4_seed42",
+    "B3full": "W12_POPE_b3full_qlora_ocr_vietocr_v1_r16_popevi_v1_bf16_L4_seed42",
+    "SH": "W12_POPE_sh_qlora_ocr_vietocr_v1_r16_shared_popevi_v1_bf16_L4_seed42",
+}
+VERDICTS = ("ĐẠT", "KHÔNG ĐẠT", "KHÔNG HỢP LỆ")
+
+
+def logit_run_name(label: str, qset: str) -> str:
+    return f"W13_YN_{RUN_TAG[label]}_{qset}_bf16_L4_seed42"
+
+
+def _log(msg: str) -> None:
+    print(msg, flush=True)
+
+
+def _sha256(path: str) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as fp:
+        for b in iter(lambda: fp.read(1 << 20), b""):
+            h.update(b)
+    return h.hexdigest()
+
+
+def _load_json(path: str) -> Any:
+    with open(path, encoding="utf-8") as fp:
+        return json.load(fp)
+
+
+def _write_json(path: str, obj: Any, indent: Optional[int] = 2) -> None:
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    tmp = path + ".part"
+    with open(tmp, "w", encoding="utf-8", newline="\n") as fp:
+        json.dump(obj, fp, ensure_ascii=False, indent=indent)
+        fp.write("\n")
+    os.replace(tmp, path)
+
+
+# =============================================================================
+# 1) Sinh câu hỏi: calibration + POPE-vi mẫu câu 2
+# =============================================================================
+def build_calib(vivqa_dir: str, coco_ann_dir: str, pope_file: str, objects_path: str = OBJECTS_FILE,
+                max_images: int = CALIB_MAX_IMAGES, seed: int = SEED) -> Dict[str, Any]:
+    """Tập calibration: cùng khuôn POPE-vi, nhưng trên ảnh ViVQA test chưa thấy lúc train và KHÔNG thuộc POPE-vi.
+    Ảnh có ít hơn 3 lớp vẫn dùng: số câu "có" = số câu "không" mỗi cách chọn = min(3, số lớp)."""
+    objs = load_objects(objects_path)
+    vi, group_of = objs["objects"], objs["group_of"]
+    used = [s for s in ("train", "val", "test") if os.path.exists(os.path.join(vivqa_dir, f"{s}.json"))]
+    if "train" not in used or "test" not in used:
+        raise FileNotFoundError(f"{vivqa_dir} thiếu train.json / test.json")
+    recs = {s: _load_json(os.path.join(vivqa_dir, f"{s}.json")) for s in used}
+    seen_ids = {r["img_id"] for s in used if s != "test" for r in recs[s]}
+    test_imgs: Dict[int, str] = {}
+    for r in recs["test"]:
+        test_imgs.setdefault(int(r["img_id"]), r["image"])
+    pope_imgs = {int(q["img_id"]) for q in _load_json(pope_file)["data"]}
+    unseen = {i: f for i, f in test_imgs.items() if i not in seen_ids}
+    cand = {i: f for i, f in unseen.items() if i not in pope_imgs}
+    needed: Dict[str, set] = defaultdict(set)
+    for i, f in cand.items():
+        needed[coco_split_of(f)].add(i)
+    classes = load_coco_classes(coco_ann_dir, needed)
+    unknown = {c for v in classes.values() for c in v} - set(vi)
+    if unknown:
+        raise ValueError(f"lớp COCO không có trong từ điển: {sorted(unknown)}")
+    pool = {i: sorted(classes[(coco_split_of(f), i)]) for i, f in cand.items()
+            if len(classes[(coco_split_of(f), i)]) >= CALIB_MIN_CLASSES}
+    if not pool:
+        raise ValueError("pool calibration rỗng")
+
+    freq = Counter(c for cs in pool.values() for c in cs)
+    cooc: Dict[str, Counter] = defaultdict(Counter)
+    for cs in pool.values():
+        for a in cs:
+            for b in cs:
+                if a != b:
+                    cooc[a][b] += 1
+    popular_rank = sorted(vi, key=lambda c: (-freq[c], c))
+    chosen = sorted(random.Random(seed).sample(sorted(pool), min(max_images, len(pool))))
+
+    rows: Dict[Tuple[int, str], Dict[str, Any]] = {}
+
+    def add(img_id: int, cls: str, label: str, setting: str) -> None:
+        key = (img_id, cls)
+        if key not in rows:
+            rows[key] = {"question_id": f"calib_{img_id}_{cls.replace(' ', '_')}",
+                         "question": QUESTION_TEMPLATE.format(obj=vi[cls]),
+                         "answers": ["có" if label == "yes" else "không"],
+                         "image": cand[img_id], "img_id": img_id,
+                         "question_type": "pope_yes" if label == "yes" else "pope_no",
+                         "coco_class": cls, "label": label, "settings": []}
+        if rows[key]["label"] != label:
+            raise AssertionError(f"{key}: một cặp vừa là câu có vừa là câu không")
+        rows[key]["settings"].append(setting)
+
+    for img_id in chosen:
+        present = pool[img_id]
+        k = min(N_POS, len(present))
+        rng = random.Random(seed * 1_000_003 + img_id)
+        pos = sorted(rng.sample(present, k))
+        allowed = [c for c in sorted(vi) if c not in blocked_classes(present, group_of)]
+        adv = {c: sum(cooc[p][c] for p in present) for c in allowed}
+        kn = min(N_NEG, k)
+        negs = {"random": sorted(rng.sample(allowed, kn)),
+                "popular": [c for c in popular_rank if c in set(allowed)][:kn],
+                "adversarial": sorted(allowed, key=lambda c: (-adv[c], -freq[c], c))[:kn]}
+        for c in pos:
+            for s in SETTINGS:
+                add(img_id, c, "yes", s)
+        for s in SETTINGS:
+            for c in negs[s]:
+                add(img_id, c, "no", s)
+
+    questions = sorted(rows.values(), key=lambda r: (r["img_id"], r["label"] != "yes", r["coco_class"]))
+    stats = {
+        "build_version": BUILD_VERSION, "objects_version": objs["version"], "objects_sha256": objs["sha256"],
+        "seed": seed, "template": QUESTION_TEMPLATE, "purpose": "calibration (chọn τ) — KHÔNG dùng để đánh giá",
+        "test_images": len(test_imgs), "test_images_unseen": len(unseen), "excluded_pope_images": len(pope_imgs),
+        "candidate_images": len(cand), "pool_images": len(pool), "chosen_images": len(chosen),
+        "unique_questions": len(questions),
+        "yes_questions": sum(r["label"] == "yes" for r in questions),
+        "no_questions": sum(r["label"] == "no" for r in questions),
+        "items_per_setting": {s: sum(s in r["settings"] for r in questions) for s in SETTINGS},
+        "pope_file_sha256": _sha256(pope_file),
+        "vivqa_sha256": {s: _sha256(os.path.join(vivqa_dir, f"{s}.json")) for s in used},
+        "coco_ann_sha256": {s: _sha256(os.path.join(coco_ann_dir, f"instances_{s}.json")) for s in sorted(needed)},
+    }
+    return {"data": questions, "stats": stats}
+
+
+def build_template2(pope_file: str, objects_path: str = OBJECTS_FILE) -> Dict[str, Any]:
+    """POPE-vi y hệt (cùng ảnh, cùng lớp, cùng question_id), chỉ đổi câu hỏi sang mẫu 2 (không chỉ dẫn trả lời)."""
+    vi = load_objects(objects_path)["objects"]
+    src = _load_json(pope_file)
+    data = [{**q, "question": TEMPLATE2.format(obj=vi[q["coco_class"]]), "template": "t2"} for q in src["data"]]
+    return {"data": data, "stats": {"build_version": BUILD_VERSION, "template": TEMPLATE2,
+                                    "source": os.path.basename(pope_file), "source_sha256": _sha256(pope_file),
+                                    "unique_questions": len(data), "purpose": "chỉ mô tả (độ bền với cách hỏi)"}}
+
+
+# =============================================================================
+# 2) Chấm logit token đầu (GPU)
+# =============================================================================
+def yes_no_token_ids(tokenizer) -> Dict[str, Any]:
+    """Token id của các từ có/không. Chỉ dùng từ mã hoá thành ĐÚNG 1 token (từ nhiều token -> token đầu có thể là
+    tiền tố chung như "C", làm s_yes lẫn xác suất của câu trả lời khác). Phải còn >= 1 từ mỗi phía, hai phía tách rời."""
+    info, ids = {}, {"yes": set(), "no": set()}
+    for side, words in (("yes", YES_WORDS), ("no", NO_WORDS)):
+        for w in words:
+            enc = tokenizer.encode(w, add_special_tokens=False)
+            info[w] = {"ids": list(enc), "single": len(enc) == 1}
+            if len(enc) == 1:
+                ids[side].add(int(enc[0]))
+    if not ids["yes"] or not ids["no"]:
+        raise ValueError(f"không có từ có/không nào là 1 token: {info}")
+    if ids["yes"] & ids["no"]:
+        raise ValueError(f"token có/không trùng nhau: {ids}")
+    return {"yes_ids": sorted(ids["yes"]), "no_ids": sorted(ids["no"]), "words": info,
+            "used_yes": [w for w in YES_WORDS if info[w]["single"]], "used_no": [w for w in NO_WORDS if info[w]["single"]]}
+
+
+def score_sample(model, processor, image_path: str, prompt_text: str, yes_ids: Sequence[int],
+                 no_ids: Sequence[int]) -> Dict[str, Any]:
+    """Một lượt forward, cùng input như generate_answer (src/eval/run_eval.py) -> logit bước sinh ĐẦU TIÊN của greedy."""
+    import torch
+    from PIL import Image
+    from qwen_vl_utils import process_vision_info
+    from src.prompting.builder import to_chat_messages
+    image = Image.open(image_path).convert("RGB")
+    messages = to_chat_messages(image, prompt_text)
+    text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    image_inputs, video_inputs = process_vision_info(messages)
+    inputs = processor(text=[text], images=image_inputs, videos=video_inputs,
+                       padding=True, return_tensors="pt").to(model.device)
+    with torch.inference_mode():
+        try:
+            out = model(**inputs, logits_to_keep=1)
+        except TypeError:
+            out = model(**inputs)
+    logp = torch.log_softmax(out.logits[0, -1].float(), dim=-1)
+    top = int(torch.argmax(logp))
+    return {"s_yes": float(torch.logsumexp(logp[list(yes_ids)], 0)),
+            "s_no": float(torch.logsumexp(logp[list(no_ids)], 0)),
+            "top1_id": top, "top1_logp": float(logp[top])}
+
+
+def logit_signature(cfg: Dict[str, Any], data_sha256: str, chunk: int, adapter: Optional[Dict[str, Any]],
+                    tokens: Dict[str, Any]) -> Dict[str, Any]:
+    from src.eval.run_baseline import run_signature
+    base = run_signature(cfg, data_sha256, None, chunk, adapter=adapter)
+    base.pop("sha256")
+    payload = {**base, "scoring": {"version": SCORING_VERSION, "yes_ids": tokens["yes_ids"],
+                                   "no_ids": tokens["no_ids"]}}
+    digest = hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+    return {"sha256": digest, **payload}
+
+
+def score_chunks(samples: List[Dict[str, Any]], prompting: Dict[str, Any], out_dir: str, chunk: int,
+                 model, processor, tokens: Dict[str, Any], score_fn: Callable = score_sample,
+                 gpu_name: str = "unknown") -> int:
+    """Chấm theo lô, ghi lô ngay khi xong; lô đã có thì kiểm id rồi bỏ qua."""
+    from src.prompting.builder import prompt_for_sample
+    cdir = os.path.join(out_dir, "chunks")
+    os.makedirs(cdir, exist_ok=True)
+    n = (len(samples) + chunk - 1) // chunk
+    for k in range(n):
+        part = samples[k * chunk:(k + 1) * chunk]
+        ids = [s["question_id"] for s in part]
+        path = os.path.join(cdir, f"chunk_{k:02d}.json")
+        if os.path.exists(path):
+            if [r["question_id"] for r in _load_json(path)["records"]] != ids:
+                raise ValueError(f"{path} không khớp dữ liệu hiện tại -> dùng run_name mới")
+            _log(f"[lô {k + 1}/{n}] đã có -> bỏ qua")
+            continue
+        t0, recs = time.time(), []
+        for j, s in enumerate(part):
+            r = score_fn(model, processor, s["image_path"], prompt_for_sample(s, prompting),
+                         tokens["yes_ids"], tokens["no_ids"])
+            recs.append({"question_id": s["question_id"], **r})
+            if (j + 1) % 100 == 0:
+                _log(f"   {j + 1}/{len(part)} | {(time.time() - t0) / (j + 1):.3f} s/câu")
+        dt = time.time() - t0
+        _write_json(os.path.join(path), {"records": recs, "time_sec": round(dt, 2), "gpu": gpu_name}, indent=None)
+        _log(f"[lô {k + 1}/{n}] xong {len(part)} câu | {dt:.0f}s")
+    return n
+
+
+def score_run(data_file: str, run_name: str, drive_root: str, out_root: Optional[str] = None,
+              config: str = os.path.join(REPO_ROOT, "configs/qwen_lora.yaml"), mode: Optional[str] = None,
+              chunk: int = 500, image_dir: Optional[str] = None, limit: Optional[int] = None,
+              adapter: Optional[str] = None, ocr_backend: Optional[str] = None, ocr_cache: Optional[str] = None,
+              ocr_template: str = "v1", ocr_max_chars: Optional[int] = 600, ocr_min_conf: float = 0.0,
+              model=None, processor=None, score_fn: Callable = score_sample, check_config: bool = True) -> Dict[str, Any]:
+    from src.data.ocr import default_cache_path, setup_ocr_prompting
+    from src.data.vivqa_dataset import load_vivqa
+    from src.eval.run_baseline import adapter_fingerprint, check_or_write_signature, load_config, load_model, prepare_images
+    from src.prompting.builder import OCR_MODES
+    out_dir = os.path.join(out_root or os.path.join(drive_root, "experiments"), run_name)
+    cfg = copy.deepcopy(load_config(config, mode=mode, check=check_config))
+    cfg["run"]["name"] = run_name
+    use_ocr = cfg["prompting"]["mode"] in OCR_MODES
+    if use_ocr and not (ocr_backend or ocr_cache):
+        raise ValueError("--mode ocr cần --ocr_backend hoặc --ocr_cache")
+    image_dir = image_dir or prepare_images("vivqa", drive_root)
+    samples = load_vivqa(data_file, image_dir=image_dir, max_samples=limit)
+    missing = [s["image_path"] for s in samples if not os.path.exists(s["image_path"])]
+    if missing:
+        raise FileNotFoundError(f"{len(missing)} ảnh thiếu, vd {missing[0]}")
+    ocr_stats = None
+    if use_ocr:
+        ocr_path = ocr_cache or default_cache_path(drive_root, "vivqa", ocr_backend)
+        ocr_stats = setup_ocr_prompting(cfg, samples, ocr_path, template=ocr_template,
+                                        max_chars=ocr_max_chars, min_conf=ocr_min_conf)
+    ad_info = {"path": adapter, **adapter_fingerprint(adapter)} if adapter else None
+    _log(f"== {run_name} | {len(samples)} câu | mode={cfg['prompting']['mode']} | adapter={'có' if adapter else 'không'}")
+    real = model is None
+    if real:
+        model, processor = load_model(cfg)
+        if adapter:
+            from peft import PeftModel
+            model = PeftModel.from_pretrained(model, adapter)
+        model.eval()
+    tokenizer = processor.tokenizer if hasattr(processor, "tokenizer") else processor
+    tokens = yes_no_token_ids(tokenizer)
+    _log(f"   token có: {tokens['used_yes']} -> {tokens['yes_ids']} | không: {tokens['used_no']} -> {tokens['no_ids']}")
+    data_sha = _sha256(data_file)
+    check_or_write_signature(out_dir, logit_signature(cfg, data_sha, chunk, ad_info, tokens))
+    gpu = "cpu"
+    if real:
+        import torch
+        if torch.cuda.is_available():
+            gpu = torch.cuda.get_device_name(0)
+            torch.cuda.reset_peak_memory_stats()
+    n = score_chunks(samples, cfg["prompting"], out_dir, chunk, model, processor, tokens, score_fn, gpu)
+    recs, tsec, gpus = [], 0.0, set()
+    for k in range(n):
+        d = _load_json(os.path.join(out_dir, "chunks", f"chunk_{k:02d}.json"))
+        recs += d["records"]
+        tsec += d["time_sec"]
+        gpus.add(d["gpu"])
+    if [r["question_id"] for r in recs] != [s["question_id"] for s in samples]:
+        raise ValueError("bản gộp không khớp danh sách câu")
+    top_tok = {}
+    for r in recs:
+        if r["top1_id"] not in top_tok:
+            top_tok[r["top1_id"]] = tokenizer.convert_ids_to_tokens(r["top1_id"]) if hasattr(
+                tokenizer, "convert_ids_to_tokens") else str(r["top1_id"])
+    for r in recs:
+        r["top1_token"] = top_tok[r["top1_id"]]
+        r["margin"] = r["s_yes"] - r["s_no"]
+    meta = {"run_name": run_name, "finished_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "scoring": SCORING_VERSION, "num_samples": len(recs), "data_file": os.path.basename(data_file),
+            "data_file_sha256": data_sha, "prompting_mode": cfg["prompting"]["mode"], "tokens": tokens,
+            "adapter": ad_info, "ocr": ({**cfg["prompting"]["ocr"], "stats": ocr_stats} if use_ocr else None),
+            "model_id": cfg["model"]["model_id"], "torch_dtype": cfg["model"]["torch_dtype"],
+            "max_pixels": cfg["model"].get("max_pixels"), "seed": cfg["run"].get("seed"),
+            "hardware": {"gpus_seen": sorted(gpus)}, "time_sec": round(tsec, 1),
+            "sec_per_sample": round(tsec / max(len(recs), 1), 4)}
+    if real:
+        import torch, transformers
+        meta["versions"] = {"torch": torch.__version__, "transformers": transformers.__version__}
+        if torch.cuda.is_available():
+            meta["peak_vram_gb"] = round(torch.cuda.max_memory_allocated() / 1e9, 2)
+    _write_json(os.path.join(out_dir, "logits.json"), recs, indent=None)
+    _write_json(os.path.join(out_dir, "meta.json"), meta)
+    _log(f"== xong {len(recs)} câu | {meta['sec_per_sample']} s/câu | {tsec / 60:.1f} phút -> {out_dir}")
+    return {"meta": meta, "records": recs}
+
+
+# =============================================================================
+# 3) Phân tích + phán quyết R-YB
+# =============================================================================
+def tau_grid() -> List[float]:
+    n = int(round((TAU_MAX - TAU_MIN) / TAU_STEP))
+    return [round(TAU_MIN + i * TAU_STEP, 2) for i in range(n + 1)]
+
+
+def decide(margin: float, tau: float) -> str:
+    return "yes" if margin > tau else "no"
+
+
+def balanced_accuracy(labels: Sequence[str], margins: Sequence[float], tau: float) -> float:
+    tp = sum(1 for l, m in zip(labels, margins) if l == "yes" and m > tau)
+    tn = sum(1 for l, m in zip(labels, margins) if l == "no" and m <= tau)
+    npos = sum(l == "yes" for l in labels)
+    nneg = len(labels) - npos
+    return 0.5 * (tp / max(npos, 1) + tn / max(nneg, 1))
+
+
+def select_tau(labels: Sequence[str], margins: Sequence[float]) -> Dict[str, Any]:
+    """τ* = argmax balanced accuracy trên calibration (mỗi câu duy nhất tính 1 lần); hoà -> |τ| nhỏ nhất, rồi τ nhỏ hơn."""
+    best = None
+    for t in tau_grid():
+        ba = balanced_accuracy(labels, margins, t)
+        key = (round(ba, 12), -abs(t), -t)
+        if best is None or key > best[0]:
+            best = (key, t, ba)
+    return {"tau": best[1], "balanced_accuracy": best[2], "balanced_accuracy_at_0": balanced_accuracy(labels, margins, 0.0)}
+
+
+def auc(pos: Sequence[float], neg: Sequence[float]) -> float:
+    """ROC-AUC = P(margin câu có-thật > margin câu không-có), hoà tính 1/2 (Mann–Whitney)."""
+    import numpy as np
+    if not len(pos) or not len(neg):
+        return float("nan")
+    allv = np.concatenate([np.asarray(pos, float), np.asarray(neg, float)])
+    order = allv.argsort(kind="mergesort")
+    ranks = np.empty(len(allv))
+    sv = allv[order]
+    i = 0
+    while i < len(sv):
+        j = i
+        while j + 1 < len(sv) and sv[j + 1] == sv[i]:
+            j += 1
+        ranks[order[i:j + 1]] = 0.5 * (i + j) + 1
+        i = j + 1
+    rp = ranks[:len(pos)].sum()
+    return float((rp - len(pos) * (len(pos) + 1) / 2) / (len(pos) * len(neg)))
+
+
+def auc_by_setting(questions: List[Dict[str, Any]], margin: Dict[str, float]) -> Dict[str, float]:
+    pos = [margin[q["question_id"]] for q in questions if q["label"] == "yes"]
+    return {s: auc(pos, [margin[q["question_id"]] for q in questions if q["label"] == "no" and s in q["settings"]])
+            for s in SETTINGS}
+
+
+def setting_metrics(questions: List[Dict[str, Any]], parsed: Dict[str, Optional[str]],
+                    images: Sequence[int]) -> Tuple[Dict[str, Any], Dict[str, Dict[str, List[int]]]]:
+    counts = per_image_counts(questions, parsed, images)
+    out = {}
+    for s in SETTINGS:
+        m = metrics_of(counts[s])
+        tot = {k: sum(v) for k, v in counts[s].items()}
+        m["false_alarm"] = tot["FP"] / max(tot["FP"] + tot["TN"], 1)
+        out[s] = m
+    return out, counts
+
+
+def check_logit_run(label: str, qset: str, meta: Dict[str, Any], recs: List[Dict[str, Any]],
+                    questions: List[Dict[str, Any]], q_sha: str, greedy_meta: Dict[str, Any],
+                    sh_ocr: Dict[str, Any]) -> List[str]:
+    errs, tag = [], f"{label}/{qset}"
+    if [r["question_id"] for r in recs] != [q["question_id"] for q in questions]:
+        errs.append(f"{tag}: logits không khớp danh sách câu ({len(recs)} vs {len(questions)})")
+    if meta.get("data_file_sha256") != q_sha:
+        errs.append(f"{tag}: chấm trên file câu hỏi khác")
+    if meta.get("prompting_mode") != "ocr":
+        errs.append(f"{tag}: mode {meta.get('prompting_mode')} ≠ ocr")
+    want = (greedy_meta.get("adapter") or {}).get("weights_sha256")
+    got = (meta.get("adapter") or {}).get("weights_sha256")
+    if want != got:
+        errs.append(f"{tag}: adapter khác run greedy W12 ({str(got)[:12]} vs {str(want)[:12]})")
+    keys = ("backend", "template", "max_chars", "min_conf")
+    o = meta.get("ocr") or {}
+    if any(o.get(k) != sh_ocr.get(k) for k in keys):
+        errs.append(f"{tag}: thiết lập OCR khác SH W12")
+    if meta.get("scoring") != SCORING_VERSION:
+        errs.append(f"{tag}: scoring {meta.get('scoring')} ≠ {SCORING_VERSION}")
+    return errs
+
+
+def agreement(questions: List[Dict[str, Any]], margin: Dict[str, float],
+              greedy: Dict[str, Optional[str]]) -> Dict[str, Any]:
+    ids = [q["question_id"] for q in questions if greedy[q["question_id"]] in ("yes", "no")]
+    same = sum(decide(margin[i], 0.0) == greedy[i] for i in ids)
+    return {"n_parsed": len(ids), "n_total": len(questions), "agree": same / max(len(ids), 1)}
+
+
+def verdict_ryb(valid: bool, ci: Dict[str, Tuple[float, float]], yes_ratio: Dict[str, float]) -> str:
+    if not valid:
+        return "KHÔNG HỢP LỆ"
+    if all(lo > -MARGIN_PTS for lo, _ in ci.values()) and all(v <= MAX_YES_RATIO for v in yes_ratio.values()):
+        return "ĐẠT"
+    return "KHÔNG ĐẠT"
+
+
+def analyze(pope_file: str, questions_dir: str, exp_root: str, n_boot: int = N_BOOT) -> Dict[str, Any]:
+    qfiles = {"popevi": pope_file, **{k: os.path.join(questions_dir, v) for k, v in QFILES.items()}}
+    qdocs = {k: _load_json(p)["data"] for k, p in qfiles.items()}
+    qsha = {k: _sha256(p) for k, p in qfiles.items()}
+    out: Dict[str, Any] = {"rules": {"agree_min": AGREE_MIN, "margin_pts": MARGIN_PTS, "max_yes_ratio": MAX_YES_RATIO,
+                                     "tau_grid": [TAU_MIN, TAU_MAX, TAU_STEP], "n_boot": n_boot, "seed": SEED,
+                                     "scoring": SCORING_VERSION},
+                           "questions_sha256": qsha, "n_questions": {k: len(v) for k, v in qdocs.items()},
+                           "errors": []}
+    greedy_meta, greedy_parsed = {}, {}
+    for label, run in GREEDY_W12.items():
+        d = os.path.join(exp_root, run)
+        gm = _load_json(os.path.join(d, "metrics.json"))["meta"]
+        gp = _load_json(os.path.join(d, "predictions.json"))
+        if gm.get("data_file_sha256") != qsha["popevi"]:
+            out["errors"].append(f"greedy W12 {label}: file câu hỏi khác POPE-vi v1")
+        greedy_meta[label] = gm
+        greedy_parsed[label] = {p["question_id"]: parse_yes_no(p["prediction"]) for p in gp}
+    sh_ocr = greedy_meta["SH"].get("ocr") or {}
+    margins: Dict[str, Dict[str, Dict[str, float]]] = defaultdict(dict)
+    run_info: Dict[str, Any] = {}
+    for label in CONFIGS:
+        for qset in QSETS:
+            run = logit_run_name(label, qset)
+            d = os.path.join(exp_root, run)
+            meta = _load_json(os.path.join(d, "meta.json"))
+            recs = _load_json(os.path.join(d, "logits.json"))
+            out["errors"] += check_logit_run(label, qset, meta, recs, qdocs[qset], qsha[qset],
+                                             greedy_meta[label], sh_ocr)
+            margins[label][qset] = {r["question_id"]: r["s_yes"] - r["s_no"] for r in recs}
+            yn = set((meta.get("tokens") or {}).get("yes_ids", [])) | set((meta.get("tokens") or {}).get("no_ids", []))
+            run_info[f"{label}/{qset}"] = {"run": run, "sec_per_sample": meta.get("sec_per_sample"),
+                                           "gpus": (meta.get("hardware") or {}).get("gpus_seen"),
+                                           "peak_vram_gb": meta.get("peak_vram_gb"),
+                                           "top1_is_yes_no": sum(r["top1_id"] in yn for r in recs) / max(len(recs), 1),
+                                           "top1_other_examples": Counter(r.get("top1_token") for r in recs
+                                                                          if r["top1_id"] not in yn).most_common(5)}
+    out["runs"] = run_info
+    if out["errors"]:
+        out["verdict"] = "KHÔNG HỢP LỆ"
+        return out
+
+    pope = qdocs["popevi"]
+    images = sorted({q["img_id"] for q in pope})
+    # (1) kiểm hợp lệ: quyết định logit ở τ = 0 trùng greedy W12
+    agree = {l: agreement(pope, margins[l]["popevi"], greedy_parsed[l]) for l in CONFIGS}
+    valid = all(agree[l]["agree"] >= AGREE_MIN for l in ("SH", "B1_ocr"))
+    out["agreement_tau0_vs_greedy"] = agree
+    out["valid"] = valid
+    # (2) chẩn đoán (chỉ mô tả): AUC
+    out["auc"] = {l: {"popevi": auc_by_setting(pope, margins[l]["popevi"]),
+                      "popevi_t2": auc_by_setting(qdocs["popevi_t2"], margins[l]["popevi_t2"]),
+                      "calib": auc([margins[l]["calib"][q["question_id"]] for q in qdocs["calib"] if q["label"] == "yes"],
+                                   [margins[l]["calib"][q["question_id"]] for q in qdocs["calib"] if q["label"] == "no"])}
+                  for l in CONFIGS}
+    # (3) τ trên calibration
+    lab_c = [q["label"] for q in qdocs["calib"]]
+    out["tau"] = {l: select_tau(lab_c, [margins[l]["calib"][q["question_id"]] for q in qdocs["calib"]]) for l in CONFIGS}
+    tau_sh = out["tau"]["SH"]["tau"]
+    # (4) mốc: B1-ocr greedy W12 (đúng mốc của luật H4)
+    base_m, base_c = setting_metrics(pope, greedy_parsed["B1_ocr"], images)
+
+    def apply(label: str, qset: str, tau: float) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+        qs = qdocs[qset]
+        parsed = {q["question_id"]: decide(margins[label][qset][q["question_id"]], tau) for q in qs}
+        return setting_metrics(qs, parsed, sorted({q["img_id"] for q in qs}))
+
+    fix_m, fix_c = apply("SH", "popevi", tau_sh)
+    ci = {s: bootstrap_delta_f1(fix_c[s], base_c[s], n_boot) for s in SETTINGS}
+    delta = {s: 100 * (fix_m[s]["f1"] - base_m[s]["f1"]) for s in SETTINGS}
+    yr = {s: fix_m[s]["yes_ratio"] for s in SETTINGS}
+    out["rule"] = {"tau_sh": tau_sh, "sh_fixed": fix_m, "b1_ocr_greedy": base_m, "delta_f1_pts": delta, "ci95_pts": ci,
+                   "yes_ratio": yr}
+    out["verdict"] = verdict_ryb(valid, ci, yr)
+    # (5) chỉ mô tả
+    desc: Dict[str, Any] = {}
+    desc["SH_tau0_popevi"] = apply("SH", "popevi", 0.0)[0]
+    desc["SH_greedy_popevi"] = setting_metrics(pope, greedy_parsed["SH"], images)[0]
+    for l in ("B1_ocr", "B3full"):
+        desc[f"{l}_own_tau_popevi"] = apply(l, "popevi", out["tau"][l]["tau"])[0]
+    desc["SH_fixed_t2"] = apply("SH", "popevi_t2", tau_sh)[0]
+    desc["SH_tau0_t2"] = apply("SH", "popevi_t2", 0.0)[0]
+    desc["B1_ocr_tau0_t2"] = apply("B1_ocr", "popevi_t2", 0.0)[0]
+    desc["B3full_tau0_t2"] = apply("B3full", "popevi_t2", 0.0)[0]
+    out["descriptive"] = desc
+    return out
+
+
+def report(s: Dict[str, Any]) -> str:
+    L = ["# W13 · Thiên lệch \"có\" của SH — chẩn đoán logit + ngưỡng lúc suy luận (R-YB)", ""]
+    if s.get("errors"):
+        return "\n".join(L + ["## ❌ KHÔNG HỢP LỆ — không kết luận", ""] + [f"- {e}" for e in s["errors"]]) + "\n"
+    pct = lambda x: f"{100 * x:.1f}%"
+    L += ["## 1. Kiểm hợp lệ: quyết định logit (τ = 0) trùng greedy W12", "",
+          "| Cấu hình | Trùng | Câu đọc được |", "|---|---|---|"]
+    for l, a in s["agreement_tau0_vs_greedy"].items():
+        L.append(f"| {l} | {pct(a['agree'])} | {a['n_parsed']}/{a['n_total']} |")
+    L += ["", f"Ngưỡng hợp lệ (SH, B1-ocr): ≥ {pct(AGREE_MIN)} → **{'HỢP LỆ' if s['valid'] else 'KHÔNG HỢP LỆ'}**", "",
+          "## 2. Chẩn đoán (chỉ mô tả): AUC của margin = P(câu có-thật xếp trên câu không-có)", "",
+          "| Cấu hình | calib | random | popular | adversarial | t2 random | t2 popular | t2 adversarial |",
+          "|---|---|---|---|---|---|---|---|"]
+    for l, a in s["auc"].items():
+        L.append(f"| {l} | {a['calib']:.3f} | " + " | ".join(f"{a['popevi'][x]:.3f}" for x in SETTINGS) + " | "
+                 + " | ".join(f"{a['popevi_t2'][x]:.3f}" for x in SETTINGS) + " |")
+    L += ["", "## 3. Ngưỡng τ chọn trên calibration (balanced accuracy)", "",
+          "| Cấu hình | τ* | BA(τ*) | BA(τ = 0) |", "|---|---|---|---|"]
+    for l, t in s["tau"].items():
+        L.append(f"| {l} | {t['tau']:+.2f} | {pct(t['balanced_accuracy'])} | {pct(t['balanced_accuracy_at_0'])} |")
+    r = s["rule"]
+    L += ["", f"## 4. Luật R-YB — SH với τ* = {r['tau_sh']:+.2f} so với B1-ocr greedy (POPE-vi, đánh giá 1 lần)", "",
+          "| Cách chọn | F1 SH-sửa | F1 B1-ocr | ΔF1 [CI95] | yes-ratio | báo sai SH-sửa | báo sai B1-ocr |",
+          "|---|---|---|---|---|---|---|"]
+    for st in SETTINGS:
+        a, b = r["sh_fixed"][st], r["b1_ocr_greedy"][st]
+        lo, hi = r["ci95_pts"][st]
+        L.append(f"| {st} | {100 * a['f1']:.2f} | {100 * b['f1']:.2f} | {r['delta_f1_pts'][st]:+.2f} [{lo:+.2f}; {hi:+.2f}] | "
+                 f"{pct(a['yes_ratio'])} | {pct(a['false_alarm'])} | {pct(b['false_alarm'])} |")
+    L += ["", f"## ➜ R-YB: **{s['verdict']}**", "",
+          "## 5. Chỉ mô tả (không thuộc luật)", "",
+          "| Cấu hình | Cách chọn | F1 | yes-ratio | báo sai |", "|---|---|---|---|---|"]
+    for name, m in s["descriptive"].items():
+        for st in SETTINGS:
+            L.append(f"| {name} | {st} | {100 * m[st]['f1']:.2f} | {pct(m[st]['yes_ratio'])} | {pct(m[st]['false_alarm'])} |")
+    L += ["", "## 6. Chi phí", "", "| Run | s/câu | GPU | VRAM đỉnh (GB) | top-1 là token có/không |", "|---|---|---|---|---|"]
+    for k, v in s["runs"].items():
+        L.append(f"| {k} | {v['sec_per_sample']} | {', '.join(v['gpus'] or [])} | {v['peak_vram_gb']} | {pct(v['top1_is_yes_no'])} |")
+    return "\n".join(L) + "\n"
+
+
+# =============================================================================
+# 4) Kiểm thử offline
+# =============================================================================
+def _selftest() -> None:
+    import tempfile
+    from src.eval.pope_vi import _fake_world, build_questions
+    import numpy as np
+    # (a) τ, AUC
+    assert len(tau_grid()) == 601 and tau_grid()[0] == -15.0 and tau_grid()[-1] == 15.0 and 0.0 in tau_grid()
+    assert abs(auc([2, 3], [0, 1]) - 1.0) < 1e-12 and abs(auc([1], [1]) - 0.5) < 1e-12 and abs(auc([0], [1])) < 1e-12
+    labs = ["yes"] * 50 + ["no"] * 50
+    mg = [4.0 + 0.01 * i for i in range(50)] + [1.0 + 0.01 * i for i in range(50)]   # tách hoàn hảo, lệch +
+    t = select_tau(labs, mg)
+    assert 1.49 <= t["tau"] < 4.0 and t["balanced_accuracy"] == 1.0 and t["balanced_accuracy_at_0"] == 0.5, t
+    t0 = select_tau(labs, [1.0] * 50 + [-1.0] * 50)
+    assert t0["tau"] == 0.0, t0                        # hoà -> |τ| nhỏ nhất
+    print("tau + auc OK")
+    # (b) token
+    class Tok:
+        vocab = {"có": 10, "Có": 11, "không": 20, "Không": 21, "no": 22, "No": 23, "yes": 12, "Yes": 13}
+
+        def encode(self, w, add_special_tokens=False):
+            return [self.vocab[w]] if w in self.vocab else [1, 2]
+
+        def convert_ids_to_tokens(self, i):
+            return {v: k for k, v in self.vocab.items()}.get(i, f"<{i}>")
+    tk = yes_no_token_ids(Tok())
+    assert tk["yes_ids"] == [10, 11, 12, 13] and tk["no_ids"] == [20, 21, 22, 23] and "CÓ" not in tk["used_yes"]
+    print("token ids OK (bỏ từ nhiều token)")
+
+    with tempfile.TemporaryDirectory() as td:
+        vv, coco = _fake_world(td, n_test_img=120)
+        pope = build_questions(vv, coco, n_images=60)
+        pf = os.path.join(td, "pope.json")
+        _write_json(pf, pope)
+        c1, c2 = build_calib(vv, coco, pf, max_images=600), build_calib(vv, coco, pf, max_images=600)
+        assert json.dumps(c1, sort_keys=True) == json.dumps(c2, sort_keys=True), "build calib phải tất định"
+        pimg = {q["img_id"] for q in pope["data"]}
+        cimg = {q["img_id"] for q in c1["data"]}
+        assert not cimg & pimg and not cimg & {1, 2, 3, 4, 5}, "calib phải loại ảnh POPE-vi + ảnh train"
+        assert 6 in cimg and len(cimg) == 55, (sorted(cimg), c1["stats"])      # ảnh 6 (2 lớp) vẫn vào calib
+        for img in cimg:
+            qs = [q for q in c1["data"] if q["img_id"] == img]
+            ny = sum(q["label"] == "yes" for q in qs)
+            for s in SETTINGS:
+                assert sum(q["label"] == "no" and s in q["settings"] for q in qs) == ny
+        assert all(q["question_id"].startswith("calib_") for q in c1["data"])
+        t2 = build_template2(pf)
+        assert [q["question_id"] for q in t2["data"]] == [q["question_id"] for q in pope["data"]]
+        assert all(q["question"].startswith("Có ") and q["question"].endswith(" trong ảnh không?") for q in t2["data"])
+        print("build calib + t2 OK (tất định, rời POPE-vi, câu có = câu không mỗi cách chọn)")
+
+        # (c) score_chunks: resume + kiểm id
+        from src.data.vivqa_dataset import load_vivqa
+        qfile = os.path.join(td, "q.json")
+        _write_json(qfile, pope)
+        samples = load_vivqa(qfile, image_dir=td)
+        calls = []
+
+        def fake_score(model, processor, image_path, prompt, yes_ids, no_ids):
+            calls.append(prompt)
+            return {"s_yes": -0.1, "s_no": -2.0, "top1_id": 10, "top1_logp": -0.1}
+        od = os.path.join(td, "run")
+        prm = {"mode": "zero_shot"}
+        n = score_chunks(samples, prm, od, 50, None, None, tk, fake_score)
+        k1 = len(calls)
+        assert k1 == len(samples) and n == (len(samples) + 49) // 50
+        os.remove(os.path.join(od, "chunks", "chunk_01.json"))
+        score_chunks(samples, prm, od, 50, None, None, tk, fake_score)
+        assert len(calls) - k1 == len(samples[50:100]), "resume phải chỉ chạy lại lô thiếu"
+        try:
+            score_chunks(samples[::-1], prm, od, 50, None, None, tk, fake_score)
+            raise AssertionError("không chặn lô lệch id")
+        except ValueError:
+            pass
+        assert calls[0].startswith("Câu hỏi: Trong ảnh có "), calls[0]
+        print("score_chunks OK (resume, chặn lệch id, prompt dùng chung prompt_for_sample)")
+
+        # (d) analyze trên dữ liệu giả: SH lệch "có" nhưng vẫn tách được -> τ sửa được -> ĐẠT
+        qdir = os.path.join(td, "qdir")
+        _write_json(os.path.join(qdir, QFILES["calib"]), c1)
+        _write_json(os.path.join(qdir, QFILES["popevi_t2"]), t2)
+        exp = os.path.join(td, "exp")
+        ocr = {"backend": "b", "template": "v1", "max_chars": 600, "min_conf": 0.0}
+        qd = {"calib": c1["data"], "popevi": pope["data"], "popevi_t2": t2["data"]}
+        qs_sha = {"calib": _sha256(os.path.join(qdir, QFILES["calib"])), "popevi": _sha256(pf),
+                  "popevi_t2": _sha256(os.path.join(qdir, QFILES["popevi_t2"]))}
+
+        def world(bias_sh: float, sep_sh: float, greedy_noise: bool = False) -> None:
+            rng = np.random.default_rng(0)
+            shift = {"SH": bias_sh, "B1_ocr": -0.5, "B3full": 0.3}
+            sep = {"SH": sep_sh, "B1_ocr": 3.0, "B3full": 3.0}
+            for label in CONFIGS:
+                ad = None if label == "B1_ocr" else {"weights_sha256": f"w{label}"}
+                for qset in QSETS:
+                    recs = []
+                    for q in qd[qset]:
+                        m = shift[label] + (sep[label] if q["label"] == "yes" else -sep[label]) + rng.normal(0, 0.5)
+                        recs.append({"question_id": q["question_id"], "s_yes": m / 2, "s_no": -m / 2,
+                                     "top1_id": 10 if m > 0 else 20, "top1_token": "có" if m > 0 else "không"})
+                    d = os.path.join(exp, logit_run_name(label, qset))
+                    _write_json(os.path.join(d, "logits.json"), recs)
+                    _write_json(os.path.join(d, "meta.json"), {
+                        "data_file_sha256": qs_sha[qset], "prompting_mode": "ocr", "adapter": ad, "ocr": ocr,
+                        "scoring": SCORING_VERSION, "tokens": {"yes_ids": [10], "no_ids": [20]},
+                        "sec_per_sample": 0.1, "hardware": {"gpus_seen": ["fake"]}})
+                    if qset == "popevi":
+                        gd = os.path.join(exp, GREEDY_W12[label])
+                        preds = [{"question_id": r["question_id"],
+                                  "prediction": ("không" if (greedy_noise and i % 3 == 0) == (r["s_yes"] > r["s_no"])
+                                                 else "có")} for i, r in enumerate(recs)]
+                        _write_json(os.path.join(gd, "predictions.json"), preds)
+                        _write_json(os.path.join(gd, "metrics.json"), {"meta": {
+                            "data_file_sha256": qs_sha["popevi"], "adapter": ad, "ocr": ocr}})
+
+        world(bias_sh=4.0, sep_sh=3.0)
+        s = analyze(pf, qdir, exp, n_boot=300)
+        assert not s["errors"] and s["valid"], s.get("errors")
+        assert s["tau"]["SH"]["tau"] > 2.0 and s["verdict"] == "ĐẠT", (s["tau"]["SH"], s["rule"]["ci95_pts"], s["rule"]["yes_ratio"])
+        assert s["descriptive"]["SH_tau0_popevi"]["random"]["yes_ratio"] > 0.8
+        rep = report(s)
+        assert "R-YB: **ĐẠT**" in rep
+        # SH không còn tách được (sep = 0) -> dời ngưỡng không cứu được -> KHÔNG ĐẠT
+        world(bias_sh=4.0, sep_sh=0.0)
+        assert analyze(pf, qdir, exp, n_boot=300)["verdict"] == "KHÔNG ĐẠT"
+        # greedy không khớp quyết định logit -> KHÔNG HỢP LỆ (không được kết luận)
+        world(bias_sh=4.0, sep_sh=3.0, greedy_noise=True)
+        s3 = analyze(pf, qdir, exp, n_boot=300)
+        assert not s3["valid"] and s3["verdict"] == "KHÔNG HỢP LỆ"
+        # adapter khác run greedy -> lỗi hợp lệ
+        world(bias_sh=4.0, sep_sh=3.0)
+        mp = os.path.join(exp, logit_run_name("SH", "calib"), "meta.json")
+        m = _load_json(mp)
+        m["adapter"] = {"weights_sha256": "khac"}
+        _write_json(mp, m)
+        s4 = analyze(pf, qdir, exp, n_boot=300)
+        assert s4["errors"] and s4["verdict"] == "KHÔNG HỢP LỆ" and "KHÔNG HỢP LỆ" in report(s4)
+        print("analyze OK (ĐẠT / KHÔNG ĐẠT / KHÔNG HỢP LỆ, bắt lỗi adapter)")
+    print("yesno_calib selftest OK")
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="W13: thiên lệch 'có' của SH — logit token đầu + ngưỡng τ (R-YB)")
+    ap.add_argument("--build", action="store_true")
+    ap.add_argument("--score", action="store_true")
+    ap.add_argument("--analyze", action="store_true")
+    ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--coco_ann_dir")
+    ap.add_argument("--vivqa_dir")
+    ap.add_argument("--pope", default=os.path.join(REPO_ROOT, "experiments/W12_pope_vi_questions/pope_vi_questions_v1.json"))
+    ap.add_argument("--out_dir", help="--build: thư mục ghi 2 file câu hỏi")
+    ap.add_argument("--questions_dir", help="--analyze: thư mục có 2 file câu hỏi W13")
+    ap.add_argument("--exp_root")
+    ap.add_argument("--out", help="--analyze: thư mục ghi summary")
+    ap.add_argument("--data_file")
+    ap.add_argument("--run_name")
+    ap.add_argument("--drive_root", default="/content/drive/MyDrive/ViVQA-VLM")
+    ap.add_argument("--out_root", default=None)
+    ap.add_argument("--image_dir", default=None)
+    ap.add_argument("--mode", default=None)
+    ap.add_argument("--adapter", default=None)
+    ap.add_argument("--chunk", type=int, default=500)
+    ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--ocr_backend", default=None)
+    ap.add_argument("--ocr_cache", default=None)
+    ap.add_argument("--ocr_template", default="v1")
+    ap.add_argument("--ocr_max_chars", type=int, default=600)
+    ap.add_argument("--ocr_min_conf", type=float, default=0.0)
+    a = ap.parse_args()
+    if a.selftest:
+        _selftest()
+        return 0
+    if a.build:
+        if not (a.coco_ann_dir and a.vivqa_dir and a.out_dir):
+            ap.error("--build cần --coco_ann_dir --vivqa_dir --out_dir")
+        for name, doc in ((QFILES["calib"], build_calib(a.vivqa_dir, a.coco_ann_dir, a.pope)),
+                          (QFILES["popevi_t2"], build_template2(a.pope))):
+            p = os.path.join(a.out_dir, name)
+            if os.path.exists(p):
+                _log(f"⏭ {name} đã có -> KHÔNG sinh lại (bộ câu hỏi đã chốt) | sha256 {_sha256(p)}")
+                continue
+            _write_json(p, doc)
+            st = doc["stats"]
+            _log(f"✔ {name}: {st['unique_questions']} câu | sha256 {_sha256(p)}")
+            if "chosen_images" in st:
+                _log(f"   pool {st['pool_images']} ảnh -> chọn {st['chosen_images']} | có {st['yes_questions']} / "
+                     f"không {st['no_questions']} | mỗi cách chọn {st['items_per_setting']}")
+        return 0
+    if a.score:
+        if not (a.data_file and a.run_name):
+            ap.error("--score cần --data_file --run_name")
+        score_run(a.data_file, a.run_name, a.drive_root, out_root=a.out_root, mode=a.mode, chunk=a.chunk,
+                  image_dir=a.image_dir, limit=a.limit, adapter=a.adapter, ocr_backend=a.ocr_backend,
+                  ocr_cache=a.ocr_cache, ocr_template=a.ocr_template, ocr_max_chars=a.ocr_max_chars,
+                  ocr_min_conf=a.ocr_min_conf)
+        return 0
+    if a.analyze:
+        if not (a.questions_dir and a.exp_root and a.out):
+            ap.error("--analyze cần --questions_dir --exp_root --out")
+        s = analyze(a.pope, a.questions_dir, a.exp_root)
+        _write_json(os.path.join(a.out, "yesno_calib_summary.json"), s)
+        rep = report(s)
+        with open(os.path.join(a.out, "yesno_calib_summary.md"), "w", encoding="utf-8", newline="\n") as fp:
+            fp.write(rep)
+        print(rep)
+        return 0 if not s.get("errors") else 1
+    ap.error("chọn một: --build | --score | --analyze | --selftest")
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())
