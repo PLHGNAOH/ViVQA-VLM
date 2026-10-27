@@ -1,0 +1,88 @@
+{
+  "run_name": "W13_PT_sh_vitextvqa_test2000_bf16_L4_seed42",
+  "dataset": "vitextvqa_official",
+  "finished_utc": "2026-10-27T13:56:16+00:00",
+  "check": "prototype-check-v1",
+  "core": "prototype-core-v1",
+  "detector": "yesno-detector-v1",
+  "limit": null,
+  "num_samples": 2000,
+  "data_file": "data/vitextvqa_official/test_subset2000_seed42.json",
+  "data_file_sha256": "69a8b35c64fb505147fbd7904b19dce3853d7b63a24bb888359bdff61b30f68e",
+  "ref_run": "W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vitextvqa_test2000_bf16_L4_seed42",
+  "ref_signature": "955fc63c849c28996bf905fd66f597603727a900dbb61fa7b2371dbe0e7567a1",
+  "config_signature_matches_ref": true,
+  "adapter": {
+    "path": "/content/drive/MyDrive/ViVQA-VLM/adapters/W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42/epoch_1",
+    "weights_sha256": "c9791e961aaa58fdcd7d9baafede3bd7bd8c902acc9cc43917306f1e0fecc354",
+    "config_sha256": "5e5bae40c27b5905ccdd0189cad597f2ecf0727bbbabafe6685f489c31624553",
+    "weights_mb": 29.53
+  },
+  "ocr": {
+    "backend": "paddledet_vietocr",
+    "cache_format": "vivqa-vlm/ocr-cache/v2",
+    "engine": {
+      "paddleocr": "3.7.0",
+      "det_model": "PP-OCRv6_medium_det",
+      "rec_model": "vietocr/vgg_transformer",
+      "lang": "vi",
+      "vietocr_config": "vgg_transformer, beamsearch=False"
+    },
+    "cache_file": "paddledet_vietocr.json",
+    "subset_sha256": "e9ef758e8492aa98cf15146c584e08595e597e15936f75209162b6123e4fa904",
+    "template": "v1",
+    "max_chars": 600,
+    "min_conf": 0.0,
+    "stats": {
+      "n_samples": 2000,
+      "n_images": 1486,
+      "n_ocr_errors": 0,
+      "pct_samples_with_text": 99.85,
+      "pct_samples_truncated": 3.55,
+      "mean_chars": 144.1,
+      "subset_sha256": "e9ef758e8492aa98cf15146c584e08595e597e15936f75209162b6123e4fa904"
+    }
+  },
+  "repetition_penalty": 1.05,
+  "generation_config": {
+    "repetition_penalty": 1.05,
+    "do_sample": true,
+    "temperature": 1e-06,
+    "top_k": null,
+    "top_p": null,
+    "no_repeat_ngram_size": null,
+    "encoder_repetition_penalty": null,
+    "bad_words_ids": null,
+    "sequence_bias": null
+  },
+  "special_ids": [
+    151645,
+    151643,
+    151644,
+    151646,
+    151647,
+    151648,
+    151649,
+    151650,
+    151651,
+    151652,
+    151653,
+    151654,
+    151655,
+    151656
+  ],
+  "em": 0.495,
+  "n_yesno_detected": 0,
+  "hardware": {
+    "gpus_seen": [
+      "NVIDIA L4"
+    ]
+  },
+  "time_sec": 1908.5,
+  "sec_per_sample": 0.9542,
+  "peak_vram_gb": 2.61,
+  "versions": {
+    "torch": "2.11.0+cu130",
+    "transformers": "5.17.0"
+  }
+}

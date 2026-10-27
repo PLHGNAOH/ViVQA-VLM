@@ -23,7 +23,7 @@
 | 1c–1d | Sửa ghép lô (`mm_token_type_ids`) → smoke v2 dừng ở chốt (96,7%) → v3: token đầu, max mỗi phía, forward 1 hàng | 2 h | ✅ 27/10 |
 | 2 | Fix A: ngưỡng τ lúc suy luận (chọn trên calibration) — notebook 22 bản v3 | ≈ 3 h L4 | ✅ 27/10 — **R-YB v3: ĐẠT** (τ* = +4,85) |
 | 3 | *(chỉ khi R-YB KHÔNG ĐẠT)* Fix B: train lại SH có câu có/không cân bằng | ≈ 10 h (≈ 7 h L4) | ⏭ bỏ (R-YB ĐẠT) |
-| 4–6 | **Gộp:** backend `src/prototype/core.py` + parity (R-PAR) + độ tin cậy (R-CONF) + detector có/không (R-YB-det), notebook 23 | ≈ 3 h (≈ 1,7 h L4) | ⏳ |
+| 4–6 | **Gộp:** backend `src/prototype/core.py` + parity (R-PAR) + độ tin cậy (R-CONF) + detector có/không (R-YB-det), notebook 23 | ≈ 3 h (≈ 1,7 h L4) | ✅ 27/10 — **R-PAR · R-CONF · R-YB-det: ĐẠT** |
 | 7 | Giao diện Gradio (ảnh, câu hỏi, câu trả lời, confidence, OCR + box, cảnh báo, disclaimer) | 3 h | ⏳ |
 | 8 | Đo hiệu năng (latency p50/p95 tách OCR / VLM, VRAM, thời gian khởi động) + thử 15–20 ảnh thật | 2 h | ⏳ |
 | 9 | Tài liệu: hướng dẫn chạy prototype, Team Report W13, video demo dự phòng | 2 h | ⏳ |
@@ -210,6 +210,27 @@ Train lại SH (cùng công thức S2 W11) có thêm câu có/không cân bằng
 - **Mẫu câu 3** `Có {vật} trong ảnh không? Trả lời "có" hoặc "không".` (= câu prototype gửi cho kiểu hỏi tự nhiên, file `pope_vi_questions_t3_v1.json`, sha256 `d03600fc…`): SH với τ* / τ = 0, so với SH τ* trên mẫu 1 và B1-ocr greedy.
 - Chi phí: s/câu, VRAM.
 
+## Kết quả bước 4–6 (27/10/2026): R-PAR · R-CONF · R-YB-det **ĐẠT**
+
+Nguồn: `experiments/W13_prototype_check_L4_seed42/prototype_check_summary.md` (run `W13_PT_*` + `W13_YN3_…_popevi_t3_…`, L4). Chữ ký cấu hình trùng run W11 (`c12787d1…`, `955fc63c…`). Claude đã tính lại độc lập từ `records.json` và `predictions.json` W11: parity, conf, EM theo mức và ECE trùng summary (khác nội suy phân vị làm 1 câu đổi mức, không đổi phán quyết).
+
+| Luật | Kết quả | Phán quyết |
+|---|---|---|
+| R-PAR | ViVQA 3.001/3.001 (100%), ViTextVQA test2000 2.000/2.000 (100%), 0 câu lệch; EM 73,51 / 49,50 = W11 | ĐẠT |
+| R-CONF (nửa B, 2.505 câu; ngưỡng trên nửa A 2.496 câu: 0,839 / 0,958) | EM Cao > TB > Thấp: gộp 92,0 > 69,6 > 34,2 · ViVQA 94,9 > 76,6 > 42,5 · ViTextVQA 82,2 > 61,5 > 25,6 | ĐẠT |
+| R-YB-det | Detector bắt 1/3.001 (ViVQA, EM −0,03) và 0/2.000 (ViTextVQA) | ĐẠT |
+
+**Hệ quả cho prototype:**
+- Backend = eval, nên mọi số đã báo cáo của SH đúng cho demo.
+- ECE (B gộp) = **0,198** > 0,05 → giao diện **chỉ hiện mức** Cao / Trung bình / Thấp, không hiện con số. Model tự tin quá mức (bin conf ≈ 0,97 chỉ đúng 88%), nặng nhất ở ViTextVQA (ECE 0,308; ViVQA 0,125).
+- Câu duy nhất detector bắt là bắt nhầm (câu dịch máy "điều này có một giấc ngủ ngắn trên một chiếc ghế dài chữ l không", gold "con chó"). Tập test gần như không có câu có/không, nên detector chủ yếu phục vụ câu hỏi của người dùng.
+
+**Chỉ mô tả:**
+- Độ tin cậy câu có/không σ(|margin − τ*|): đúng 98,2% (Cao, 952) / 95,6% (TB, 1.722) / 77,1% (Thấp, 2.311) trên POPE-vi; ECE 0,0505 > 0,05 → cũng chỉ hiện mức.
+- Mẫu câu 3 (câu prototype gửi đi), SH τ*: F1 85,80 / 84,60 / 83,07 (random / popular / adversarial), yes-ratio 42–45%, báo sai 5,3 / 7,9 / 11,4%. Cùng SH ở τ = 0: báo sai 43,8 / 54,4 / 64,8%. So với B1-ocr greedy (mẫu 1): F1 +2,4 / +2,6 / +2,5 nhưng báo sai vẫn cao hơn 2,6 / 2,2 / 2,5 điểm → ghi vào Discussion.
+
+**Chi phí:** 0,54 s/câu (ViVQA), 0,95 s/câu (ViTextVQA), VRAM đỉnh 2,6 GB, OCR lấy từ cache. CU: 21,03 → 18,58 (≈ 2,45).
+
 ## Ngân sách
 
 | Việc | GPU | CU (L4 ≈ 1,54 CU/h) |
@@ -248,3 +269,4 @@ CU được cộng thêm khi gia hạn gói ngày 02/11; giờ GPU và VRAM vẫ
 | `src/eval/prototype_check.py` | `--score` (backend trên test, kiểm chữ ký = W11 trước khi chạy) · `--parity` (smoke) · `--build_t3` · `--analyze` (R-PAR, R-CONF, R-YB-det + mô tả) | `--selftest`: detector (bắt 100% POPE t1/t2), độ tin cậy, ECE, Qwen2.5-VL tí hon (generate + output_scores = generate của eval), resume, phán quyết, chặn run smoke |
 | `experiments/W13_yesno_questions/pope_vi_questions_t3_v1.json` | Mẫu câu 3 (4.985 câu) | sha256 `d03600fc5f7a1590f5ed44d45cd0a4429eba0bcecd328390d6af6a182db4ca8d` |
 | `notebooks/23_prototype_parity_confidence_sh_qwen25vl.ipynb` | L4: kiểm → smoke parity 100 câu → ViVQA test → ViTextVQA test2000 → POPE mẫu 3 → phân tích → tự trả máy | Cú pháp mọi cell; mỗi code cell có markdown mô tả + kỳ vọng |
+| `experiments/W13_prototype_check_L4_seed42/` + `meta.json` 4 run | Kết quả R-PAR / R-CONF / R-YB-det + mô tả | Claude tính lại độc lập: trùng |
