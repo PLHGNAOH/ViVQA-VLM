@@ -120,9 +120,10 @@ Hình sáu bước, mỗi bước một ví dụ thật: (1) split của hai dat
 
 === Slide 20 · REVIEW 2 · METHODOLOGY · 01 · LỘ TRÌNH ===
 [Methodology 1 · lộ trình · ~45 giây]
-Phương pháp đi bốn bước, mỗi bước chỉ đổi một yếu tố so với bước trước; khởi điểm là B1 zero-shot.
+Phương pháp đi năm bước, mỗi bước chỉ đổi một yếu tố so với bước bên trái.
+B1: zero-shot — hỏi thẳng model gốc, không train gì; đây là khởi điểm: EM 22,1 trên ViVQA và 29,1 trên ViTextVQA.
 B2: thêm QLoRA — PEFT có hơn zero-shot không. B3: thêm một dòng OCR vào prompt khi train và test — dạy model dùng chữ OCR có giúp không (trên tập con 8.000 câu để tiết kiệm). B3F (B3-full): cùng công thức trên toàn bộ dữ liệu — đủ dữ liệu OCR còn giúp không. SH: một adapter cho cả hai dataset — để làm prototype.
-Mỗi thẻ có một hình nhỏ: B2 — model gốc đóng băng, chỉ train phần LoRA màu cam; B3 — dòng OCR nằm ngay trong prompt khi train; B3-full — từ 23% lên 100% dữ liệu; SH — một adapter dùng cho cả hai bộ.
+Mỗi thẻ có một hình nhỏ: B1 — model gốc đóng băng, không có phần nào được train; B2 — model gốc đóng băng, chỉ train phần LoRA màu cam; B3 — dòng OCR nằm ngay trong prompt khi train; B3-full — từ 23% lên 100% dữ liệu; SH — một adapter dùng cho cả hai bộ.
 
 === Slide 21 · REVIEW 2 · METHODOLOGY · 02 · QLoRA (B2) ===
 [Methodology 2 · QLoRA B2 · ~45 giây]
@@ -131,7 +132,7 @@ Chi phí: 3 giờ (ViVQA) và 12 giờ (ViTextVQA) trên một L4, VRAM tối đ
 
 === Slide 22 · REVIEW 2 · METHODOLOGY · 03 · PHÂN TÍCH LỖI B2 ===
 [Methodology 3 · B2 còn sai ở đâu · ~1 phút]
-Nhóm chọn cải tiến dựa trên lỗi thật, không đoán. Duyệt tay 200 lỗi: 54% thực ra đúng ý nhưng EM quá khắt khe; 12,5% đáp án chuẩn nhiễu.
+Nhóm chọn cải tiến dựa trên lỗi thật, không đoán. Biểu đồ trái: phân loại tự động 4.988 câu B2 trả lời sai trên full test ViTextVQA — 47,4% sai nội dung hoặc vùng ảnh, 16,8% lệch 1–2 ký tự, 13,6% thừa chữ, 13,2% thiếu chữ, 9,0% chỉ sai dấu thanh; bảng dưới là ví dụ thật của ba nhóm. Duyệt tay 200 lỗi: 54% thực ra đúng ý nhưng EM quá khắt khe; 12,5% đáp án chuẩn nhiễu.
 Lỗi thật ở ViTextVQA: đọc sai chữ 28%, nhầm vùng chữ 23%, sai dấu 8% → đọc chữ là điểm yếu lớn nhất → động lực cho OCR (B3). Hallucination chỉ 7% số lỗi. Nhãn có kiểm độ đồng thuận κ = 0,62.
 
 === Slide 23 · REVIEW 2 · METHODOLOGY · 04 · PHƯƠNG PHÁP ĐỀ XUẤT (B3) ===
@@ -139,6 +140,7 @@ Lỗi thật ở ViTextVQA: đọc sai chữ 28%, nhầm vùng chữ 23%, sai d�
 Ảnh → PaddleOCR dò dòng chữ → VietOCR đọc tiếng Việt, giữ dấu → một dòng "Văn bản đọc được trong ảnh: …" đặt trước câu hỏi → Qwen2.5-VL + LoRA train cùng dòng OCR.
 VietOCR được chọn trên dev300: đáp án nằm trong văn bản OCR 37,7% so với 27,0% của PaddleOCR (bản Latin làm rơi dấu).
 Mọi thứ khác y hệt B2. Phép thử có kiểm soát: tập con 8.000 câu, so với B2-sub cùng tập nhưng không OCR.
+Hình là một mẫu thật trong tập train ViTextVQA (train_48788, ảnh 16267.jpg): hỏi 'cửa hàng có biển màu vàng là nơi nào?'. PaddleOCR dò 13 khung chữ, số trên khung là thứ tự đọc; VietOCR đọc ra 'ĐẠI LÝ XỔ SÓ MIẾN BẮC' — vẫn sai dấu, nên nhóm train cùng OCR để model học dùng OCR có nhiễu. Các dòng được ghép bằng dấu | thành một dòng 'Văn bản đọc được trong ảnh: …' đặt trước câu hỏi; LoRA học sinh ra đáp án 'đại lý xổ số miền bắc'.
 
 === Slide 24 · REVIEW 2 · METHODOLOGY · 05 · ABLATION: OCR LÚC TRAIN × OCR LÚC TEST ===
 [Methodology 5 · ablation 2×2 · ~1 phút — slide quan trọng nhất về OCR]
