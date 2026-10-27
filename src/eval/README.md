@@ -16,6 +16,6 @@ Mọi số liệu phải gắn run log: split, seed, hardware, time.
 | `run_textvqa_r0.py` | R0: tái lập TextVQA val của Qwen2.5-VL-3B (kiểm chứng pipeline) | `--selftest` |
 | `seed_stability.py` (W09) | Gộp các file `paired_*.json` qua nhiều seed huấn luyện: mean ± std (ddof 1) + kết luận theo luật ghi trước trong `docs/W09/README.md` | `--selftest` |
 | `factorial_2x2.py` (W09) | Bảng 2×2 OCR lúc train × OCR lúc test: 4 hiệu ứng đơn (McNemar + ΔANLS CI95) + tương tác theo câu (CI95 bootstrap) + luật ghi trước | `--selftest` |
-| `yesno_calib.py` (W13) | Thiên lệch "có" của SH: log P có/không chấm bằng teacher forcing + repetition penalty như `generate()` (v2), AUC, tập calibration rời POPE-vi, ngưỡng τ lúc suy luận, phán quyết R-YB (`docs/W13/README.md`) | `--selftest` |
+| `yesno_calib.py` (W13) | Thiên lệch "có" của SH: điểm token đầu (max mỗi phía) + repetition penalty như `generate()` (v3), AUC, tập calibration rời POPE-vi, ngưỡng τ lúc suy luận, phán quyết R-YB (`docs/W13/README.md`) | `--selftest` |
 
 Duyệt tay (W07): `python -m src.data.make_audit_sheet` tạo `audit/W07/W07_audit_400.xlsx` + ảnh trên Drive (data_audit 200 dòng train, error_audit 200 câu B2 sai).

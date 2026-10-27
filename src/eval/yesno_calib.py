@@ -6,14 +6,13 @@ Vấn đề (W12, POPE-vi): SH (adapter của prototype) trả lời "có" ở 7
 "lệch ngưỡng" (điểm "có" vẫn xếp đúng thứ tự, chỉ bị đẩy lên -> dời ngưỡng là sửa được) hay "mất khả năng phân biệt"
 (điểm "có" không còn tách câu có-thật / không-có -> phải train lại).
 
-Cách đo v2 (`teacher-forced-reppen-v2`, thay v1 sau khi v1 KHÔNG HỢP LỆ — xem docs/W13/README.md):
-    log P(từ) chấm CHÍNH XÁC bằng teacher forcing, kể cả từ nhiều token ("không" = kh + ông, "Có" = C + ó):
-        log P(w) = Σ_i log p(t_i | prompt, t_<i)
-    và áp ĐÚNG repetition penalty mà model.generate() áp (đọc từ model.generation_config) ở mỗi bước, để
-    margin > 0 ⇔ greedy chọn "có" (kiểm hợp lệ: trùng greedy W12 >= 98%).
-    s_yes = logsumexp(log P(w) | w ∈ {có, Có, yes, Yes}),  s_no = logsumexp(log P(w) | w ∈ {không, Không, no, No})
-    margin m = s_yes − s_no;  quyết định "có" ⇔ m > τ   (τ = 0 ≈ greedy hiện tại)
-    Ghi kèm margin_raw (không áp penalty) để mô tả.
+Cách đo v3 (`first-token-max-reppen-v3`; v1 KHÔNG HỢP LỆ, v2 dừng ở smoke test — xem docs/W13/README.md):
+    MỘT forward 1 hàng (= bước prefill của model.generate), áp ĐÚNG repetition penalty mà generate() áp
+    (đọc từ model.generation_config, Qwen2.5-VL-3B-Instruct: 1.05), log-softmax -> log p của TOKEN ĐẦU:
+        s_yes = max log p(t) | t ∈ token đầu của {có, Có, yes, Yes} = {có, C, yes, Yes}
+        s_no  = max log p(t) | t ∈ token đầu của {không, Không, no, No} = {kh, Không, no, No}
+    margin m = s_yes − s_no;  quyết định "có" ⇔ m > τ.  τ = 0 ⇔ đúng phép so của greedy ở bước đầu
+    (lấy MAX như greedy, không cộng dồn; kiểm hợp lệ: trùng greedy W12 >= 98%). Ghi kèm margin_raw (không penalty).
 Luật ghi trước: docs/W13/README.md (R-YB). τ chọn CHỈ trên tập calibration (ảnh khác POPE-vi), áp lên POPE-vi.
 
 Năm việc:
@@ -28,7 +27,7 @@ Chạy:
         --ocr_backend paddledet_vietocr --ocr_template v1 --ocr_max_chars 600 --ocr_min_conf 0 [--limit 300]
     python -m src.eval.yesno_calib --agree --run_dir <exp>/<run> --greedy_dir <exp>/<run greedy W12>
     python -m src.eval.yesno_calib --analyze --questions_dir <exp>/W13_yesno_questions \
-        --pope experiments/W12_pope_vi_questions/pope_vi_questions_v1.json --exp_root <exp> --out <exp>/W13_yesno_calib_v2_L4_seed42
+        --pope experiments/W12_pope_vi_questions/pope_vi_questions_v1.json --exp_root <exp> --out <exp>/W13_yesno_calib_v3_L4_seed42
     python -m src.eval.yesno_calib --selftest
 """
 from __future__ import annotations
@@ -58,13 +57,13 @@ from src.eval.pope_vi import (OBJECTS_FILE, QUESTION_TEMPLATE, SETTINGS, MARGIN_
 # Hằng số (ghi trước — đổi bất kỳ giá trị nào = luật khác, phải ghi lại README W13)
 # --------------------------------------------------------------------------- #
 BUILD_VERSION = "yesno-calib-build-v1"            # bộ câu hỏi giữ nguyên từ v1
-SCORING_VERSION = "teacher-forced-reppen-v2"
+SCORING_VERSION = "first-token-max-reppen-v3"
 CALIB_MAX_IMAGES = 600
 CALIB_MIN_CLASSES = 1
 N_POS = 3
 N_NEG = 3
 TEMPLATE2 = "Có {obj} trong ảnh không?"
-# v2: bỏ dạng VIẾT HOA TOÀN BỘ (CÓ, KHÔNG) — không run greedy W12 nào sinh ra; "KHÔNG" dài 3 token
+# từ v2: bỏ dạng VIẾT HOA TOÀN BỘ (CÓ, KHÔNG) — không run greedy W12 nào sinh ra
 YES_WORDS = ("có", "Có", "yes", "Yes")
 NO_WORDS = ("không", "Không", "no", "No")
 TAU_MIN, TAU_MAX, TAU_STEP = -15.0, 15.0, 0.05
@@ -90,8 +89,8 @@ VERDICTS = ("ĐẠT", "KHÔNG ĐẠT", "KHÔNG HỢP LỆ")
 
 
 def logit_run_name(label: str, qset: str) -> str:
-    # v2 dùng tiền tố YN2 -> không đụng thư mục run v1 (W13_YN_*), giữ v1 làm hồ sơ
-    return f"W13_YN2_{RUN_TAG[label]}_{qset}_bf16_L4_seed42"
+    # v3 dùng tiền tố YN3 -> không đụng thư mục run v1 (W13_YN_*) / smoke v2 (W13_YN2_*), giữ làm hồ sơ
+    return f"W13_YN3_{RUN_TAG[label]}_{qset}_bf16_L4_seed42"
 
 
 def _log(msg: str) -> None:
@@ -223,26 +222,24 @@ def build_template2(pope_file: str, objects_path: str = OBJECTS_FILE) -> Dict[st
 
 
 # =============================================================================
-# 2) Chấm v2: teacher forcing từ nhiều token + repetition penalty như generate() (GPU)
+# 2) Chấm v3: MỘT forward 1 hàng (= prefill của generate) + repetition penalty như generate() + so token đầu
 # =============================================================================
 def candidate_tokens(tokenizer) -> Dict[str, Any]:
-    """Token của các từ ứng viên. Từ 1 token chấm ngay ở bước đầu; từ nhiều token chấm bằng teacher forcing.
-    Mọi từ nhiều token phải CÙNG độ dài (để ghép lô không cần pad); hai phía không được có từ trùng chuỗi token."""
-    cands = {"yes": {}, "no": {}}
+    """Token ĐẦU của các từ ứng viên — đúng thứ greedy so ở bước sinh đầu tiên.
+    "không" = kh + ông, "Có" = C + ó: dùng kh / C (smoke v2: P(ông | kh) trung vị 0,984, thấp nhất 0,893).
+    Hai phía không được chung token đầu (nếu chung thì không tách được quyết định ở bước đầu)."""
+    cands: Dict[str, Dict[str, List[int]]] = {"yes": {}, "no": {}}
     for side, words in (("yes", YES_WORDS), ("no", NO_WORDS)):
         for w in words:
             ids = [int(t) for t in tokenizer.encode(w, add_special_tokens=False)]
             if not ids:
                 raise ValueError(f"từ '{w}' mã hoá rỗng")
             cands[side][w] = ids
-    seqs = [tuple(v) for s in cands.values() for v in s.values()]
-    if len(set(seqs)) != len(seqs):
-        raise ValueError(f"hai từ ứng viên trùng chuỗi token: {cands}")
-    multi = {len(v) for s in cands.values() for v in s.values() if len(v) > 1}
-    if len(multi) > 1:
-        raise ValueError(f"từ nhiều token khác độ dài {sorted(multi)} -> chưa hỗ trợ (cần pad): {cands}")
-    first_ids = sorted({v[0] for s in cands.values() for v in s.values()})
-    return {"cands": cands, "multi_len": (multi.pop() if multi else 1), "first_ids": first_ids}
+    first = {s: {w: ids[0] for w, ids in cands[s].items()} for s in cands}
+    if set(first["yes"].values()) & set(first["no"].values()):
+        raise ValueError(f"hai phía chung token đầu: {first}")
+    return {"cands": cands, "first": first,
+            "first_ids": sorted(set(first["yes"].values()) | set(first["no"].values()))}
 
 
 def apply_repetition_penalty(logits, seen_ids: Sequence[int], penalty: float):
@@ -258,66 +255,37 @@ def apply_repetition_penalty(logits, seen_ids: Sequence[int], penalty: float):
     return out
 
 
-def score_from_logits(first_logits, next_logits, prompt_ids: Sequence[int], tokens: Dict[str, Any],
+def score_from_logits(first_logits, prompt_ids: Sequence[int], tokens: Dict[str, Any],
                       penalty: float) -> Dict[str, Any]:
-    """Phần toán thuần (kiểm offline được).
-    first_logits: [V] logit dự đoán token đầu (sau prompt).
-    next_logits: [M, L-1, V] — hàng j = từ nhiều token thứ j (thứ tự `multi_words`), vị trí i dự đoán token i+1.
-    Trả log P từng từ (có và không penalty), s_yes / s_no, margin, top-1 (sau penalty)."""
+    """Phần toán thuần (kiểm offline được). first_logits: [V] logit bước sinh đầu (sau prompt).
+    margin = max log p(token đầu phía có) − max log p(token đầu phía không), sau penalty như generate()
+    -> margin > 0 ⇔ trong các token ứng viên, greedy xếp một token phía "có" cao nhất."""
     import torch
-    multi_words = [(s, w) for s in ("yes", "no") for w, ids in tokens["cands"][s].items() if len(ids) > 1]
-    seen0 = list(prompt_ids)
     res: Dict[str, Any] = {}
     for tag, pen in (("", penalty), ("_raw", 1.0)):
-        lp1 = torch.log_softmax(apply_repetition_penalty(first_logits.float(), seen0, pen), dim=-1)
-        lp: Dict[str, float] = {}
-        for s in ("yes", "no"):
-            for w, ids in tokens["cands"][s].items():
-                v = float(lp1[ids[0]])
-                if len(ids) > 1:
-                    j = multi_words.index((s, w))
-                    for i in range(1, len(ids)):
-                        seen = seen0 + ids[:i]
-                        lpi = torch.log_softmax(apply_repetition_penalty(next_logits[j, i - 1].float(), seen, pen), dim=-1)
-                        v += float(lpi[ids[i]])
-                lp[w] = v
-        sy = float(torch.logsumexp(torch.tensor([lp[w] for w in tokens["cands"]["yes"]]), 0))
-        sn = float(torch.logsumexp(torch.tensor([lp[w] for w in tokens["cands"]["no"]]), 0))
-        res[f"lp{tag}"] = {w: round(v, 5) for w, v in lp.items()}
-        res[f"s_yes{tag}"], res[f"s_no{tag}"], res[f"margin{tag}"] = sy, sn, sy - sn
+        lp1 = torch.log_softmax(apply_repetition_penalty(first_logits.float(), list(prompt_ids), pen), dim=-1)
+        lp = {w: round(float(lp1[t]), 5) for s in ("yes", "no") for w, t in tokens["first"][s].items()}
+        sy = max(float(lp1[t]) for t in tokens["first"]["yes"].values())
+        sn = max(float(lp1[t]) for t in tokens["first"]["no"].values())
+        res[f"lp{tag}"], res[f"s_yes{tag}"], res[f"s_no{tag}"], res[f"margin{tag}"] = lp, sy, sn, sy - sn
         if tag == "":
             top = int(torch.argmax(lp1))
             res["top1_id"], res["top1_logp"] = top, float(lp1[top])
     return res
 
 
-def _replicate_inputs(inputs, m: int, cont):
-    """Nhân 1 mẫu (processor output, batch 1) thành m hàng, nối thêm token teacher forcing `cont` [m, k]."""
-    import torch
-    # mm_token_type_ids (transformers 5.x): 0 = chữ, 1 = ảnh, 2 = video, 3 = âm thanh (ProcessorMixin.create_mm_token_type_ids).
-    # Qwen2.5-VL CẦN khoá này để tính vị trí 3D (mRoPE) cho token ảnh — thiếu thì model vẫn chạy nhưng sai vị trí.
-    known = {"input_ids", "attention_mask", "pixel_values", "image_grid_thw", "mm_token_type_ids"}
-    extra = set(inputs.keys()) - known
-    if extra:
-        raise ValueError(f"processor trả khoá chưa hỗ trợ khi nhân lô: {sorted(extra)}")
-    ids = inputs["input_ids"]
-    cont = cont.to(ids.device, dtype=ids.dtype)
-    out = {"input_ids": torch.cat([ids.repeat(m, 1), cont], dim=1)}
-    out["attention_mask"] = torch.ones_like(out["input_ids"])
-    out["pixel_values"] = torch.cat([inputs["pixel_values"]] * m, dim=0)
-    out["image_grid_thw"] = torch.cat([inputs["image_grid_thw"]] * m, dim=0)
-    if "mm_token_type_ids" in inputs:
-        tt = inputs["mm_token_type_ids"]
-        if tt.shape != ids.shape:
-            raise ValueError(f"mm_token_type_ids {tuple(tt.shape)} khác input_ids {tuple(ids.shape)}")
-        out["mm_token_type_ids"] = torch.cat([tt.repeat(m, 1), torch.zeros_like(cont, dtype=tt.dtype)], dim=1)
-    return out
+def forward_first(model, inputs) -> Any:
+    """Logit bước sinh đầu: đúng cách gọi của v1 (đã chạy trơn 9 run trên L4) — 1 hàng, mọi khoá processor."""
+    try:
+        lg = model(**inputs, logits_to_keep=1).logits
+    except TypeError:                                         # bản transformers không có logits_to_keep
+        lg = model(**inputs).logits
+    return lg[0, -1]
 
 
 def score_sample(model, processor, image_path: str, prompt_text: str, tokens: Dict[str, Any],
                  penalty: float) -> Dict[str, Any]:
-    """Cùng input như generate_answer (src/eval/run_eval.py). Một lần forward cho cả lô M hàng
-    (M = số từ nhiều token, mỗi hàng = prompt + các token đầu của từ đó); hàng 0 cho phân phối token đầu."""
+    """Cùng input như generate_answer (src/eval/run_eval.py)."""
     import torch
     from PIL import Image
     from qwen_vl_utils import process_vision_info
@@ -329,29 +297,8 @@ def score_sample(model, processor, image_path: str, prompt_text: str, tokens: Di
     inputs = processor(text=[text], images=image_inputs, videos=video_inputs,
                        padding=True, return_tensors="pt").to(model.device)
     with torch.inference_mode():
-        first, nxt = forward_candidates(model, dict(inputs), tokens)
-    return score_from_logits(first, nxt, inputs["input_ids"][0].tolist(), tokens, penalty)
-
-
-def forward_candidates(model, inputs: Dict[str, Any], tokens: Dict[str, Any]):
-    """Forward lô M hàng -> (first_logits [V], next_logits [M, L-1, V] hoặc None). Tách riêng để kiểm offline."""
-    import torch
-    multi = [ids for s in ("yes", "no") for ids in tokens["cands"][s].values() if len(ids) > 1]
-    L = tokens["multi_len"]
-    if multi:
-        cont = torch.tensor([ids[:L - 1] for ids in multi])
-        batch = _replicate_inputs(inputs, len(multi), cont)
-        try:
-            lg = model(**batch, logits_to_keep=L).logits
-        except TypeError:                                     # bản transformers không có logits_to_keep
-            lg = model(**batch).logits
-        lg = lg[:, -L:, :]                                    # [M, L, V]: vị trí 0 = sau prompt
-        return lg[0, 0], lg[:, 1:, :]
-    try:
-        lg = model(**inputs, logits_to_keep=1).logits
-    except TypeError:
-        lg = model(**inputs).logits
-    return lg[0, -1], None
+        first = forward_first(model, inputs)
+    return score_from_logits(first, inputs["input_ids"][0].tolist(), tokens, penalty)
 
 
 def generation_penalty(model) -> Tuple[float, Dict[str, Any]]:
@@ -448,7 +395,7 @@ def score_run(data_file: str, run_name: str, drive_root: str, out_root: Optional
         raise ValueError("cần penalty (model thật tự đọc từ generation_config)")
     tokenizer = processor.tokenizer if hasattr(processor, "tokenizer") else processor
     tokens = candidate_tokens(tokenizer)
-    _log(f"   ứng viên: {tokens['cands']} | repetition_penalty (như generate) = {penalty}")
+    _log(f"   ứng viên: {tokens['cands']} | token đầu: {tokens['first']} | repetition_penalty (như generate) = {penalty}")
     data_sha = _sha256(data_file)
     check_or_write_signature(out_dir, logit_signature(cfg, data_sha, limit, chunk, ad_info, tokens, penalty))
     gpu = "cpu"
@@ -727,7 +674,7 @@ def analyze(pope_file: str, questions_dir: str, exp_root: str, n_boot: int = N_B
 
 
 def report(s: Dict[str, Any]) -> str:
-    L = ["# W13 · Thiên lệch \"có\" của SH — R-YB v2 (teacher forcing + repetition penalty như generate)", ""]
+    L = ["# W13 · Thiên lệch \"có\" của SH — R-YB v3 (token đầu, max mỗi phía, repetition penalty như generate)", ""]
     if s.get("errors"):
         return "\n".join(L + ["## ❌ KHÔNG HỢP LỆ — không kết luận", ""] + [f"- {e}" for e in s["errors"]]) + "\n"
     pct = lambda x: f"{100 * x:.1f}%"
@@ -735,7 +682,7 @@ def report(s: Dict[str, Any]) -> str:
     if s["missing_optional"]:
         L += [f"Run chỉ mô tả chưa chạy: {', '.join(s['missing_optional'])}", ""]
     L += ["## 1. Kiểm hợp lệ: quyết định τ = 0 trùng greedy W12", "",
-          "| Cấu hình | Trùng (v2) | Câu đọc được | Lệch greedy→logit | Trùng nếu bỏ penalty (mô tả) |", "|---|---|---|---|---|"]
+          "| Cấu hình | Trùng (v3) | Câu đọc được | Lệch greedy→logit | Trùng nếu bỏ penalty (mô tả) |", "|---|---|---|---|---|"]
     for l, a in s["agreement_tau0_vs_greedy"].items():
         mm = ", ".join(f"{k} {v}" for k, v in a["mismatch_greedy_vs_logit"].items()) or "—"
         L.append(f"| {l} | {pct(a['agree'])} | {a['n_parsed']}/{a['n_total']} | {mm} | {pct(s['agreement_raw_tau0_vs_greedy'][l])} |")
@@ -761,7 +708,7 @@ def report(s: Dict[str, Any]) -> str:
         lo, hi = r["ci95_pts"][st]
         L.append(f"| {st} | {100 * a['f1']:.2f} | {100 * b['f1']:.2f} | {r['delta_f1_pts'][st]:+.2f} [{lo:+.2f}; {hi:+.2f}] | "
                  f"{pct(a['yes_ratio'])} | {pct(a['false_alarm'])} | {pct(b['false_alarm'])} |")
-    L += ["", f"## ➜ R-YB v2: **{s['verdict']}**", "",
+    L += ["", f"## ➜ R-YB v3: **{s['verdict']}**", "",
           "## 5. Chỉ mô tả (không thuộc luật)", "",
           "| Cấu hình | Cách chọn | F1 | yes-ratio | báo sai |", "|---|---|---|---|---|"]
     for name, m in s["descriptive"].items():
@@ -780,7 +727,7 @@ def report(s: Dict[str, Any]) -> str:
 # 4) Kiểm thử offline
 # =============================================================================
 class _FakeTok:
-    """Tokenizer giả mô phỏng đúng kiểu tách của Qwen ghi ở meta v1: 'không' = kh + ông, 'Có' = C + ó."""
+    """Tokenizer giả mô phỏng đúng kiểu tách của Qwen (meta v1/v2): 'không' = kh + ông, 'Có' = C + ó."""
     vocab = {"có": [10], "Có": [40, 41], "yes": [12], "Yes": [13],
              "không": [30, 31], "Không": [21], "no": [22], "No": [23]}
 
@@ -804,81 +751,30 @@ def _selftest_math() -> bool:
     y = apply_repetition_penalty(x, [0, 1, 1], 2.0)
     assert torch.allclose(y, torch.tensor([1.0, -4.0, 3.0, 0.5])) and torch.equal(x, torch.tensor([2.0, -2.0, 3.0, 0.5]))
     assert torch.equal(apply_repetition_penalty(x, [0], 1.0), x)
-    # (2) teacher forcing: log P("không") = log p(kh) + log p(ông | kh), từng bước có penalty với tập token đã thấy
-    g = torch.Generator().manual_seed(0)
-    first = torch.randn(V, generator=g)
-    first[10], first[21], first[30], first[40] = 12.0, 11.6, 9.0, 5.0     # có hơn Không 0,4 logit khi chưa phạt
-    nxt = torch.randn(2, 1, V, generator=g)
-    nxt[1, 0, 31] = 8.0                                                    # hàng 1 = "không" (thứ tự: Có, không)
-    nxt[0, 0, 41] = 8.0
-    prompt = [5, 10, 30, 31]                                               # prompt chứa "có" và "không" (kh, ông)
-    p = 1.05
-    r = score_from_logits(first, nxt, prompt, tk, p)
-    lp1 = torch.log_softmax(apply_repetition_penalty(first, prompt, p), -1)
-    lpk = torch.log_softmax(apply_repetition_penalty(nxt[1, 0], prompt + [30], p), -1)
-    assert abs(r["lp"]["không"] - float(lp1[30] + lpk[31])) < 1e-5, r["lp"]
-    lpc = torch.log_softmax(apply_repetition_penalty(nxt[0, 0], prompt + [40], p), -1)
-    assert abs(r["lp"]["Có"] - float(lp1[40] + lpc[41])) < 1e-5
-    assert abs(r["lp_raw"]["có"] - float(torch.log_softmax(first, -1)[10])) < 1e-5
-    # penalty trên "có" (có trong prompt) đảo quyết định: chưa phạt -> "có", phạt như generate -> "Không" (giống W12)
-    assert r["margin_raw"] > 0 > r["margin"], (r["margin_raw"], r["margin"])
-    assert r["top1_id"] == 21
-    # (3) ghép lô + cắt logit: model giả "nhìn" token hiện tại -> logit token kế = one-hot (token + 1) + dấu vết hàng
-    class _Out:
-        def __init__(self, logits):
-            self.logits = logits
-
-    class _Model:
-        def __init__(self, kw_ok=True):
-            self.kw_ok, self.seen = kw_ok, None
-
-        def __call__(self, input_ids, attention_mask, pixel_values, image_grid_thw, mm_token_type_ids=None, **kw):
-            if kw and not self.kw_ok:
-                raise TypeError("logits_to_keep")
-            self.seen = (input_ids.clone(), pixel_values.shape[0], image_grid_thw.shape[0], attention_mask.sum().item())
-            self.tt = None if mm_token_type_ids is None else mm_token_type_ids.clone()
-            B, T = input_ids.shape
-            lg = torch.zeros(B, T, V)
-            for b in range(B):
-                for t in range(T):
-                    lg[b, t, (int(input_ids[b, t]) + 1) % V] = 10.0
-            k = kw.get("logits_to_keep")
-            return _Out(lg[:, -k:, :] if k else lg)
-    inp = {"input_ids": torch.tensor([[5, 6, 7]]), "attention_mask": torch.ones(1, 3, dtype=torch.long),
-           "pixel_values": torch.zeros(4, 3), "image_grid_thw": torch.tensor([[1, 2, 2]])}
-    inp_tt = {**inp, "mm_token_type_ids": torch.tensor([[0, 1, 0]])}     # transformers 5.x: token 6 là ảnh
-    for kw_ok, x in ((True, inp), (False, inp), (True, inp_tt), (False, inp_tt)):
-        mdl = _Model(kw_ok)
-        f, nx = forward_candidates(mdl, x, tk)
-        ids, npix, nthw, nmask = mdl.seen
-        assert ids.tolist() == [[5, 6, 7, 40], [5, 6, 7, 30]], ids.tolist()     # hàng 0 = Có (C), hàng 1 = không (kh)
-        assert npix == 8 and nthw == 2 and nmask == 8
-        assert int(torch.argmax(f)) == 8                      # sau token cuối prompt (7)
-        assert nx.shape == (2, 1, V) and int(torch.argmax(nx[0, 0])) == 41 and int(torch.argmax(nx[1, 0])) == 31
-        if "mm_token_type_ids" in x:                          # nhân hàng, token nối thêm = chữ (0)
-            assert mdl.tt.tolist() == [[0, 1, 0, 0], [0, 1, 0, 0]], mdl.tt.tolist()
-        else:
-            assert mdl.tt is None
-    for bad in ({**inp, "second_per_grid_ts": torch.tensor([1.0])},
-                {**inp, "mm_token_type_ids": torch.tensor([[0, 1]])}):
-        try:
-            forward_candidates(_Model(), bad, tk)
-            raise AssertionError("không chặn khoá lạ / mm_token_type_ids sai kích thước")
-        except ValueError:
-            pass
-    print("toán OK (penalty như transformers, teacher forcing từ nhiều token, đảo quyết định do penalty, ghép lô + cắt logit + mm_token_type_ids)")
+    # (2) margin = so token TỐT NHẤT mỗi phía (như greedy), KHÔNG cộng dồn — đúng ca lệch của smoke v2:
+    #     có 0,23 > từng token phía không (kh 0,13; no 0,13; Không 0,02) nhưng tổng phía không 0,28 > 0,23
+    p = torch.full((V,), 1e-4)
+    p[10], p[30], p[22], p[21] = 0.23, 0.13, 0.13, 0.02
+    r = score_from_logits(torch.log(p / p.sum()), [5], tk, 1.0)
+    assert r["margin"] > 0 and r["top1_id"] == 10, r                       # greedy chọn "có" -> margin > 0
+    # (3) penalty đảo quyết định như W12: "có" (10) có trong prompt bị phạt, "Không" (21) thì không
+    first = torch.zeros(V)
+    first[10], first[21], first[30] = 12.0, 11.6, 9.0
+    r = score_from_logits(first, [5, 10, 30, 31], tk, 1.05)
+    assert r["margin_raw"] > 0 > r["margin"] and r["top1_id"] == 21, r
+    assert abs(r["lp"]["có"] - float(torch.log_softmax(apply_repetition_penalty(first, [5, 10, 30, 31], 1.05), -1)[10])) < 1e-5
+    print("toán OK (penalty như transformers, margin = token tốt nhất mỗi phía như greedy, penalty đảo quyết định)")
     return True
 
 
 def _selftest_tiny_qwen() -> bool:
-    """Kiến trúc Qwen2.5-VL THẬT (transformers đang cài), trọng số ngẫu nhiên, rất nhỏ, chạy CPU vài giây:
-    (1) lô 2 hàng cho logit token đầu trùng forward 1 hàng (như prefill của generate);
-    (2) hàng 'không' cho logit token 2 trùng forward prompt + kh;
-    (3) bỏ mm_token_type_ids thì logit LỆCH (chứng minh khoá này phải được nhân hàng đúng);
-    (4) apply_repetition_penalty trùng RepetitionPenaltyLogitsProcessor của transformers."""
+    """Kiến trúc Qwen2.5-VL THẬT (transformers đang cài), trọng số ngẫu nhiên, rất nhỏ, chạy CPU vài giây.
+    So với CHÍNH model.generate(do_sample=False, repetition_penalty=1.05): điểm sau penalty của bước sinh đầu
+    (output_scores) phải trùng điểm v3 tính; token generate chọn phải là argmax của v3. Kiểm thêm: bỏ
+    mm_token_type_ids thì logit lệch (đường forward phải giữ mọi khoá processor)."""
     try:
         import torch
-        from transformers import Qwen2_5_VLConfig, Qwen2_5_VLForConditionalGeneration, RepetitionPenaltyLogitsProcessor
+        from transformers import Qwen2_5_VLConfig, Qwen2_5_VLForConditionalGeneration
     except Exception as e:                                    # máy không có transformers/torch -> Colab sẽ kiểm
         print(f"⚠ bỏ qua kiểm Qwen2.5-VL tí hon ({type(e).__name__})")
         return False
@@ -893,33 +789,33 @@ def _selftest_tiny_qwen() -> bool:
                            fullatt_block_indexes=[1]),
         image_token_id=img, video_token_id=151656, vision_start_token_id=151652)
     m = Qwen2_5_VLForConditionalGeneration(cfg).eval()
-    thw = torch.tensor([[1, 4, 4]])
-    pix = torch.randn(16, 3 * 2 * 14 * 14)
-    ids = torch.tensor([[100, 151652] + [img] * 4 + [151653, 200, 129133, 300, 30664, 24015, 400]])
-    tt = (ids == img).long()
-    inp = {"input_ids": ids, "attention_mask": torch.ones_like(ids), "pixel_values": pix, "image_grid_thw": thw,
-           "mm_token_type_ids": tt}
-    tok = {"cands": {"yes": {"có": [129133], "Có": [34, 1794], "yes": [9693], "Yes": [9454]},
-                     "no": {"không": [30664, 24015], "Không": [142899], "no": [2152], "No": [2753]}},
-           "multi_len": 2, "first_ids": []}
-    with torch.inference_mode():
-        single = m(**inp).logits[0, -1]
-        first, nxt = forward_candidates(m, dict(inp), tok)
-        ids_kh = torch.cat([ids, torch.tensor([[30664]])], 1)
-        ref_kh = m(input_ids=ids_kh, attention_mask=torch.ones_like(ids_kh), pixel_values=pix, image_grid_thw=thw,
-                   mm_token_type_ids=torch.cat([tt, torch.zeros(1, 1, dtype=tt.dtype)], 1)).logits[0, -1]
-        no_tt = m(**{k: v for k, v in inp.items() if k != "mm_token_type_ids"}).logits[0, -1]
-    d1 = float((first - single).abs().max())
-    d2 = float((nxt[1, 0] - ref_kh).abs().max())
-    d3 = float((no_tt - single).abs().max())
-    assert d1 < 1e-4 and d2 < 1e-4, (d1, d2)
-    assert d3 > 1e-4, f"bỏ mm_token_type_ids mà logit không đổi ({d3}) -> kiểm lại giả định mRoPE"
-    lg = torch.randn(1, 151936) * 8
-    seen = torch.randint(0, 151936, (1, 700))
-    ref = RepetitionPenaltyLogitsProcessor(1.05)(seen, lg.clone())[0]
-    assert float((ref - apply_repetition_penalty(lg[0], seen[0].tolist(), 1.05)).abs().max()) == 0.0
-    print(f"tiny Qwen2.5-VL OK (lô 2 hàng = 1 hàng: {d1:.1e}; teacher forcing: {d2:.1e}; "
-          f"bỏ mm_token_type_ids lệch {d3:.1e}; penalty = transformers)")
+    tok = {"first": {"yes": {"có": 129133, "Có": 34, "yes": 9693, "Yes": 9454},
+                     "no": {"không": 30664, "Không": 142899, "no": 2152, "No": 2753}}}
+    worst, n_flip = 0.0, 0
+    for k in range(6):
+        g = torch.Generator().manual_seed(100 + k)
+        txt = torch.randint(200, 150000, (1, 9), generator=g)
+        ids = torch.cat([txt[:, :2], torch.tensor([[151652] + [img] * 4 + [151653]]), txt[:, 2:],
+                         torch.tensor([[129133, 30664, 24015]])], 1)    # prompt chứa "có" và "không" như POPE-vi
+        tt = (ids == img).long()
+        inp = {"input_ids": ids, "attention_mask": torch.ones_like(ids), "image_grid_thw": torch.tensor([[1, 4, 4]]),
+               "pixel_values": torch.randn(16, 3 * 2 * 14 * 14, generator=g), "mm_token_type_ids": tt}
+        with torch.inference_mode():
+            first = forward_first(m, inp)
+            out = m.generate(**inp, max_new_tokens=1, do_sample=False, repetition_penalty=1.05,
+                             output_scores=True, return_dict_in_generate=True)
+            no_tt = m(**{a: b for a, b in inp.items() if a != "mm_token_type_ids"}).logits[0, -1]
+        gen_scores = out.scores[0][0].float()
+        mine = apply_repetition_penalty(first.float(), ids[0].tolist(), 1.05)
+        worst = max(worst, float((gen_scores - mine).abs().max()))
+        assert int(out.sequences[0, -1]) == int(torch.argmax(mine)), "token generate ≠ argmax v3"
+        r = score_from_logits(first, ids[0].tolist(), tok, 1.05)
+        assert r["top1_id"] == int(out.sequences[0, -1])
+        n_flip += int(torch.argmax(first)) != r["top1_id"]
+        assert float((no_tt - first).abs().max()) > 1e-4, "bỏ mm_token_type_ids mà logit không đổi"
+    assert worst < 1e-4, f"điểm v3 ≠ scores của generate (max |Δ| = {worst})"
+    print(f"tiny Qwen2.5-VL OK (6 input: điểm v3 = scores của generate, max |Δ| {worst:.1e}; token generate = argmax v3; "
+          f"bỏ mm_token_type_ids thì lệch)")
     return True
 
 
@@ -938,16 +834,16 @@ def _selftest() -> None:
     print("tau + auc OK")
     # (b) token ứng viên
     tk = candidate_tokens(_FakeTok())
-    assert tk["multi_len"] == 2 and tk["cands"]["no"]["không"] == [30, 31] and tk["first_ids"] == [10, 12, 13, 21, 22, 23, 30, 40]
+    assert tk["first"]["no"]["không"] == 30 and tk["first"]["yes"]["Có"] == 40 and tk["first_ids"] == [10, 12, 13, 21, 22, 23, 30, 40]
 
     class _BadTok(_FakeTok):
-        vocab = {**_FakeTok.vocab, "Không": [21, 50, 51]}
+        vocab = {**_FakeTok.vocab, "Không": [10, 50]}
     try:
         candidate_tokens(_BadTok())
-        raise AssertionError("không chặn từ nhiều token khác độ dài")
+        raise AssertionError("không chặn hai phía chung token đầu")
     except ValueError:
         pass
-    print("token ứng viên OK (giữ từ nhiều token, chặn độ dài khác nhau)")
+    print("token ứng viên OK (token đầu của từ nhiều token, chặn hai phía chung token đầu)")
     if _selftest_math():
         _selftest_tiny_qwen()
 
@@ -1044,7 +940,7 @@ def _selftest() -> None:
         assert not s["errors"] and s["valid"], s.get("errors")
         assert s["tau"]["SH"]["tau"] > 2.0 and s["verdict"] == "ĐẠT", (s["tau"]["SH"], s["rule"]["ci95_pts"], s["rule"]["yes_ratio"])
         assert s["descriptive"]["SH_tau0_popevi"]["random"]["yes_ratio"] > 0.8
-        assert "R-YB v2: **ĐẠT**" in report(s)
+        assert "R-YB v3: **ĐẠT**" in report(s)
         assert abs(agree_run(os.path.join(exp, logit_run_name("SH", "popevi")), os.path.join(exp, GREEDY_W12["SH"]))["agree"] - 1.0) < 1e-12
         world(bias_sh=4.0, sep_sh=0.0)
         assert analyze(pf, qdir, exp, n_boot=300)["verdict"] == "KHÔNG ĐẠT"
@@ -1077,7 +973,7 @@ def _selftest() -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="W13: thiên lệch 'có' của SH — R-YB v2 (teacher forcing + repetition penalty)")
+    ap = argparse.ArgumentParser(description="W13: thiên lệch 'có' của SH — R-YB v3 (token đầu + repetition penalty như generate)")
     ap.add_argument("--build", action="store_true")
     ap.add_argument("--score", action="store_true")
     ap.add_argument("--agree", action="store_true")
@@ -1138,7 +1034,7 @@ def main() -> int:
         if r["agree"] < AGREE_MIN:
             print(f"❌ < {100 * AGREE_MIN:.0f}% -> DỪNG, gửi Claude output này (không chạy run đầy đủ)")
             return 1
-        print(f"✅ ≥ {100 * AGREE_MIN:.0f}% -> cách đo v2 tái hiện greedy, chạy tiếp")
+        print(f"✅ ≥ {100 * AGREE_MIN:.0f}% -> cách đo v3 tái hiện greedy, chạy tiếp")
         return 0
     if a.analyze:
         if not (a.questions_dir and a.exp_root and a.out):
