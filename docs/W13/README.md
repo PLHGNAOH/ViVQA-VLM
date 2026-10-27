@@ -109,6 +109,8 @@ Nguồn: `experiments/W13_yesno_calib_L4_seed42/yesno_calib_summary.md` (9 run `
 
 **Smoke test trước khi chạy đầy đủ** (không thuộc luật, chỉ để tiết kiệm GPU): 300 câu POPE-vi đầu, SH. Trùng greedy W12 < 98% → dừng, không chạy tiếp.
 
+**Smoke lần 1 (27/10 ≈ 15:25) — dừng ở chốt chặn, chưa chấm câu nào:** processor của transformers 5.17 trả thêm khoá `mm_token_type_ids` (0 = chữ, 1 = ảnh). Qwen2.5-VL dùng khoá này để tính vị trí 3D (mRoPE) cho token ảnh; code v2 chỉ nhận các khoá đã biết nên dừng. **Sửa lỗi code (không đổi cách đo, không đổi luật):** nhân hàng khoá này như `input_ids`, token nối thêm gán 0 (chữ). Kiểm bằng Qwen2.5-VL tí hon kiến trúc thật (transformers 5.17, CPU, trong `--selftest`): logit lô 2 hàng trùng forward 1 hàng (Δ ≈ 2·10⁻⁷); bỏ khoá này thì logit lệch (Δ ≈ 1,5·10⁻³); `apply_repetition_penalty` trùng `RepetitionPenaltyLogitsProcessor` (Δ = 0). Log lần 1 xác nhận **`repetition_penalty = 1.05`** (đọc từ `generation_config` của Qwen2.5-VL-3B-Instruct) và tách token như chẩn đoán (`không` = [30664, 24015], `Có` = [34, 1794]).
+
 **Run:** tiền tố mới `W13_YN2_*` (giữ nguyên run v1 `W13_YN_*` làm hồ sơ). Bắt buộc cho luật: SH calib, SH POPE-vi, B1-ocr POPE-vi. Chỉ mô tả: SH t2, B1-ocr calib + t2, B3-full × 3. Thiếu run mô tả thì vẫn phán quyết được, có ghi run còn thiếu.
 
 **Câu hỏi:** dùng lại nguyên 2 file sinh ở v1 (nay commit vào `experiments/W13_yesno_questions/`): `yesno_calib_v1.json` (3.774 câu, 600 ảnh, sha256 `69d0316c…`), `pope_vi_questions_t2_v1.json` (4.985 câu, sha256 `e9a83055…`).
@@ -156,3 +158,4 @@ CU được cộng thêm khi gia hạn gói ngày 02/11; giờ GPU và VRAM vẫ
 | `notebooks/22_yesbias_logit_calib_sh_qwen25vl.ipynb` (v2, sửa tại chỗ; bản v1 ở commit `3147496`) | Kiểm câu hỏi repo = Drive → smoke 300 câu (dừng nếu < 98%) → 3 run bắt buộc → 6 run mô tả → phân tích → tự trả máy | Cú pháp mọi cell; mỗi code cell có markdown mô tả + kỳ vọng |
 | `experiments/W13_yesno_questions/` | 2 file câu hỏi đã chốt (sinh ở v1) | sha256 ghi ở mục R-YB v2 |
 | `experiments/W13_yesno_calib_L4_seed42/` | Hồ sơ v1: `yesno_calib_summary.json/.md` (KHÔNG HỢP LỆ) + `v1_diagnosis.md` | — |
+| `src/eval/yesno_calib.py` (bước 1c, 27/10) | Nhân hàng `mm_token_type_ids` khi ghép lô; selftest thêm Qwen2.5-VL tí hon (kiến trúc thật) + so penalty với transformers | `--selftest`: `tiny Qwen2.5-VL OK (…)` |

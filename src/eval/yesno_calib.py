@@ -294,7 +294,9 @@ def score_from_logits(first_logits, next_logits, prompt_ids: Sequence[int], toke
 def _replicate_inputs(inputs, m: int, cont):
     """Nhân 1 mẫu (processor output, batch 1) thành m hàng, nối thêm token teacher forcing `cont` [m, k]."""
     import torch
-    known = {"input_ids", "attention_mask", "pixel_values", "image_grid_thw"}
+    # mm_token_type_ids (transformers 5.x): 0 = chữ, 1 = ảnh, 2 = video, 3 = âm thanh (ProcessorMixin.create_mm_token_type_ids).
+    # Qwen2.5-VL CẦN khoá này để tính vị trí 3D (mRoPE) cho token ảnh — thiếu thì model vẫn chạy nhưng sai vị trí.
+    known = {"input_ids", "attention_mask", "pixel_values", "image_grid_thw", "mm_token_type_ids"}
     extra = set(inputs.keys()) - known
     if extra:
         raise ValueError(f"processor trả khoá chưa hỗ trợ khi nhân lô: {sorted(extra)}")
@@ -304,6 +306,11 @@ def _replicate_inputs(inputs, m: int, cont):
     out["attention_mask"] = torch.ones_like(out["input_ids"])
     out["pixel_values"] = torch.cat([inputs["pixel_values"]] * m, dim=0)
     out["image_grid_thw"] = torch.cat([inputs["image_grid_thw"]] * m, dim=0)
+    if "mm_token_type_ids" in inputs:
+        tt = inputs["mm_token_type_ids"]
+        if tt.shape != ids.shape:
+            raise ValueError(f"mm_token_type_ids {tuple(tt.shape)} khác input_ids {tuple(ids.shape)}")
+        out["mm_token_type_ids"] = torch.cat([tt.repeat(m, 1), torch.zeros_like(cont, dtype=tt.dtype)], dim=1)
     return out
 
 
@@ -825,10 +832,11 @@ def _selftest_math() -> bool:
         def __init__(self, kw_ok=True):
             self.kw_ok, self.seen = kw_ok, None
 
-        def __call__(self, input_ids, attention_mask, pixel_values, image_grid_thw, **kw):
+        def __call__(self, input_ids, attention_mask, pixel_values, image_grid_thw, mm_token_type_ids=None, **kw):
             if kw and not self.kw_ok:
                 raise TypeError("logits_to_keep")
             self.seen = (input_ids.clone(), pixel_values.shape[0], image_grid_thw.shape[0], attention_mask.sum().item())
+            self.tt = None if mm_token_type_ids is None else mm_token_type_ids.clone()
             B, T = input_ids.shape
             lg = torch.zeros(B, T, V)
             for b in range(B):
@@ -838,15 +846,80 @@ def _selftest_math() -> bool:
             return _Out(lg[:, -k:, :] if k else lg)
     inp = {"input_ids": torch.tensor([[5, 6, 7]]), "attention_mask": torch.ones(1, 3, dtype=torch.long),
            "pixel_values": torch.zeros(4, 3), "image_grid_thw": torch.tensor([[1, 2, 2]])}
-    for kw_ok in (True, False):
+    inp_tt = {**inp, "mm_token_type_ids": torch.tensor([[0, 1, 0]])}     # transformers 5.x: token 6 là ảnh
+    for kw_ok, x in ((True, inp), (False, inp), (True, inp_tt), (False, inp_tt)):
         mdl = _Model(kw_ok)
-        f, nx = forward_candidates(mdl, inp, tk)
+        f, nx = forward_candidates(mdl, x, tk)
         ids, npix, nthw, nmask = mdl.seen
         assert ids.tolist() == [[5, 6, 7, 40], [5, 6, 7, 30]], ids.tolist()     # hàng 0 = Có (C), hàng 1 = không (kh)
         assert npix == 8 and nthw == 2 and nmask == 8
         assert int(torch.argmax(f)) == 8                      # sau token cuối prompt (7)
         assert nx.shape == (2, 1, V) and int(torch.argmax(nx[0, 0])) == 41 and int(torch.argmax(nx[1, 0])) == 31
-    print("toán OK (penalty như transformers, teacher forcing từ nhiều token, đảo quyết định do penalty, ghép lô + cắt logit)")
+        if "mm_token_type_ids" in x:                          # nhân hàng, token nối thêm = chữ (0)
+            assert mdl.tt.tolist() == [[0, 1, 0, 0], [0, 1, 0, 0]], mdl.tt.tolist()
+        else:
+            assert mdl.tt is None
+    for bad in ({**inp, "second_per_grid_ts": torch.tensor([1.0])},
+                {**inp, "mm_token_type_ids": torch.tensor([[0, 1]])}):
+        try:
+            forward_candidates(_Model(), bad, tk)
+            raise AssertionError("không chặn khoá lạ / mm_token_type_ids sai kích thước")
+        except ValueError:
+            pass
+    print("toán OK (penalty như transformers, teacher forcing từ nhiều token, đảo quyết định do penalty, ghép lô + cắt logit + mm_token_type_ids)")
+    return True
+
+
+def _selftest_tiny_qwen() -> bool:
+    """Kiến trúc Qwen2.5-VL THẬT (transformers đang cài), trọng số ngẫu nhiên, rất nhỏ, chạy CPU vài giây:
+    (1) lô 2 hàng cho logit token đầu trùng forward 1 hàng (như prefill của generate);
+    (2) hàng 'không' cho logit token 2 trùng forward prompt + kh;
+    (3) bỏ mm_token_type_ids thì logit LỆCH (chứng minh khoá này phải được nhân hàng đúng);
+    (4) apply_repetition_penalty trùng RepetitionPenaltyLogitsProcessor của transformers."""
+    try:
+        import torch
+        from transformers import Qwen2_5_VLConfig, Qwen2_5_VLForConditionalGeneration, RepetitionPenaltyLogitsProcessor
+    except Exception as e:                                    # máy không có transformers/torch -> Colab sẽ kiểm
+        print(f"⚠ bỏ qua kiểm Qwen2.5-VL tí hon ({type(e).__name__})")
+        return False
+    torch.manual_seed(0)
+    img = 151655
+    cfg = Qwen2_5_VLConfig(
+        text_config=dict(vocab_size=151936, hidden_size=64, intermediate_size=128, num_hidden_layers=2,
+                         num_attention_heads=4, num_key_value_heads=2,
+                         rope_scaling={"type": "mrope", "mrope_section": [2, 3, 3]}, max_position_embeddings=2048),
+        vision_config=dict(depth=2, hidden_size=32, intermediate_size=64, num_heads=2, out_hidden_size=64,
+                           patch_size=14, spatial_merge_size=2, temporal_patch_size=2, in_channels=3, window_size=56,
+                           fullatt_block_indexes=[1]),
+        image_token_id=img, video_token_id=151656, vision_start_token_id=151652)
+    m = Qwen2_5_VLForConditionalGeneration(cfg).eval()
+    thw = torch.tensor([[1, 4, 4]])
+    pix = torch.randn(16, 3 * 2 * 14 * 14)
+    ids = torch.tensor([[100, 151652] + [img] * 4 + [151653, 200, 129133, 300, 30664, 24015, 400]])
+    tt = (ids == img).long()
+    inp = {"input_ids": ids, "attention_mask": torch.ones_like(ids), "pixel_values": pix, "image_grid_thw": thw,
+           "mm_token_type_ids": tt}
+    tok = {"cands": {"yes": {"có": [129133], "Có": [34, 1794], "yes": [9693], "Yes": [9454]},
+                     "no": {"không": [30664, 24015], "Không": [142899], "no": [2152], "No": [2753]}},
+           "multi_len": 2, "first_ids": []}
+    with torch.inference_mode():
+        single = m(**inp).logits[0, -1]
+        first, nxt = forward_candidates(m, dict(inp), tok)
+        ids_kh = torch.cat([ids, torch.tensor([[30664]])], 1)
+        ref_kh = m(input_ids=ids_kh, attention_mask=torch.ones_like(ids_kh), pixel_values=pix, image_grid_thw=thw,
+                   mm_token_type_ids=torch.cat([tt, torch.zeros(1, 1, dtype=tt.dtype)], 1)).logits[0, -1]
+        no_tt = m(**{k: v for k, v in inp.items() if k != "mm_token_type_ids"}).logits[0, -1]
+    d1 = float((first - single).abs().max())
+    d2 = float((nxt[1, 0] - ref_kh).abs().max())
+    d3 = float((no_tt - single).abs().max())
+    assert d1 < 1e-4 and d2 < 1e-4, (d1, d2)
+    assert d3 > 1e-4, f"bỏ mm_token_type_ids mà logit không đổi ({d3}) -> kiểm lại giả định mRoPE"
+    lg = torch.randn(1, 151936) * 8
+    seen = torch.randint(0, 151936, (1, 700))
+    ref = RepetitionPenaltyLogitsProcessor(1.05)(seen, lg.clone())[0]
+    assert float((ref - apply_repetition_penalty(lg[0], seen[0].tolist(), 1.05)).abs().max()) == 0.0
+    print(f"tiny Qwen2.5-VL OK (lô 2 hàng = 1 hàng: {d1:.1e}; teacher forcing: {d2:.1e}; "
+          f"bỏ mm_token_type_ids lệch {d3:.1e}; penalty = transformers)")
     return True
 
 
@@ -875,7 +948,8 @@ def _selftest() -> None:
     except ValueError:
         pass
     print("token ứng viên OK (giữ từ nhiều token, chặn độ dài khác nhau)")
-    _selftest_math()
+    if _selftest_math():
+        _selftest_tiny_qwen()
 
     with tempfile.TemporaryDirectory() as td:
         vv, coco = _fake_world(td, n_test_img=120)
