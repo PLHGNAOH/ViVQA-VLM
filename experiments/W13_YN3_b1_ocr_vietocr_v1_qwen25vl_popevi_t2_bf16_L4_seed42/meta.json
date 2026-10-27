@@ -1,0 +1,122 @@
+{
+  "run_name": "W13_YN3_b1_ocr_vietocr_v1_qwen25vl_popevi_t2_bf16_L4_seed42",
+  "finished_utc": "2026-10-27T11:11:58+00:00",
+  "scoring": "first-token-max-reppen-v3",
+  "num_samples": 4985,
+  "limit": null,
+  "data_file": "pope_vi_questions_t2_v1.json",
+  "data_file_sha256": "e9a83055fa28588392081b452676dc8fe3fd4e4fcaf9f2581008ee7a9f3ddf1c",
+  "prompting_mode": "ocr",
+  "tokens": {
+    "cands": {
+      "yes": {
+        "có": [
+          129133
+        ],
+        "Có": [
+          34,
+          1794
+        ],
+        "yes": [
+          9693
+        ],
+        "Yes": [
+          9454
+        ]
+      },
+      "no": {
+        "không": [
+          30664,
+          24015
+        ],
+        "Không": [
+          142899
+        ],
+        "no": [
+          2152
+        ],
+        "No": [
+          2753
+        ]
+      }
+    },
+    "first": {
+      "yes": {
+        "có": 129133,
+        "Có": 34,
+        "yes": 9693,
+        "Yes": 9454
+      },
+      "no": {
+        "không": 30664,
+        "Không": 142899,
+        "no": 2152,
+        "No": 2753
+      }
+    },
+    "first_ids": [
+      34,
+      2152,
+      2753,
+      9454,
+      9693,
+      30664,
+      129133,
+      142899
+    ]
+  },
+  "repetition_penalty": 1.05,
+  "generation_config": {
+    "repetition_penalty": 1.05,
+    "do_sample": true,
+    "temperature": 1e-06,
+    "top_k": null,
+    "top_p": null,
+    "no_repeat_ngram_size": null,
+    "encoder_repetition_penalty": null,
+    "bad_words_ids": null,
+    "sequence_bias": null
+  },
+  "adapter": null,
+  "ocr": {
+    "backend": "paddledet_vietocr",
+    "cache_format": "vivqa-vlm/ocr-cache/v2",
+    "engine": {
+      "paddleocr": "3.7.0",
+      "det_model": "PP-OCRv6_medium_det",
+      "rec_model": "vietocr/vgg_transformer",
+      "lang": "vi",
+      "vietocr_config": "vgg_transformer, beamsearch=False"
+    },
+    "cache_file": "paddledet_vietocr.json",
+    "subset_sha256": "8c3606e6c2b49a6d4ff51c1bd6e1a261076913bdbcd187775b5664b857de6f94",
+    "template": "v1",
+    "max_chars": 600,
+    "min_conf": 0.0,
+    "stats": {
+      "n_samples": 4985,
+      "n_images": 500,
+      "n_ocr_errors": 0,
+      "pct_samples_with_text": 47.7,
+      "pct_samples_truncated": 0.18,
+      "mean_chars": 11.0,
+      "subset_sha256": "8c3606e6c2b49a6d4ff51c1bd6e1a261076913bdbcd187775b5664b857de6f94"
+    }
+  },
+  "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+  "torch_dtype": "bfloat16",
+  "max_pixels": 401408,
+  "seed": 42,
+  "hardware": {
+    "gpus_seen": [
+      "NVIDIA L4"
+    ]
+  },
+  "time_sec": 1058.1,
+  "sec_per_sample": 0.2123,
+  "versions": {
+    "torch": "2.11.0+cu130",
+    "transformers": "5.17.0"
+  },
+  "peak_vram_gb": 2.55
+}

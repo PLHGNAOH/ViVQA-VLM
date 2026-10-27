@@ -18,11 +18,11 @@
 | # | Việc | Ước tính | Trạng thái |
 |---|---|---|---|
 | 0 | README W13 + luật R-YB ghi trước | 1,5 h | ✅ (commit cùng code bước 1) |
-| 1 | Chẩn đoán thiên lệch "có": `src/eval/yesno_calib.py` + notebook 22 (logit token đầu, AUC, tập calibration) | 2,5 h (≈ 2–3 h L4) | v1 ✅ chạy 27/10 → **KHÔNG HỢP LỆ** (lỗi cách đo, xem dưới) · v2 ⏳ |
+| 1 | Chẩn đoán thiên lệch "có": `src/eval/yesno_calib.py` + notebook 22 (logit token đầu, AUC, tập calibration) | 2,5 h (≈ 2–3 h L4) | v1 → KHÔNG HỢP LỆ · v2 → dừng ở smoke · **v3 ✅ HỢP LỆ** (27/10) |
 | 1b | Chẩn đoán v1 + sửa cách đo (v2: teacher forcing từ nhiều token + repetition penalty như `generate()`), không tốn GPU | 2 h | ✅ 27/10 |
 | 1c–1d | Sửa ghép lô (`mm_token_type_ids`) → smoke v2 dừng ở chốt (96,7%) → v3: token đầu, max mỗi phía, forward 1 hàng | 2 h | ✅ 27/10 |
-| 2 | Fix A: ngưỡng τ lúc suy luận (chọn trên calibration) — notebook 22 bản v3 | ≈ 3 h L4 (≈ 1 h nếu chỉ chạy 3 run bắt buộc) | ⏳ |
-| 3 | *(chỉ khi R-YB KHÔNG ĐẠT)* Fix B: train lại SH có câu có/không cân bằng | ≈ 10 h (≈ 7 h L4) | — |
+| 2 | Fix A: ngưỡng τ lúc suy luận (chọn trên calibration) — notebook 22 bản v3 | ≈ 3 h L4 | ✅ 27/10 — **R-YB v3: ĐẠT** (τ* = +4,85) |
+| 3 | *(chỉ khi R-YB KHÔNG ĐẠT)* Fix B: train lại SH có câu có/không cân bằng | ≈ 10 h (≈ 7 h L4) | ⏭ bỏ (R-YB ĐẠT) |
 | 4 | Confidence: định nghĩa + ECE + 3 mức Cao / Trung bình / Thấp (luật R-CONF chốt trước khi chạy) | 2,5 h (≈ 1 h L4) | ⏳ |
 | 5 | Backend `src/prototype/` (dùng lại `prompt_for_sample`, `ocr.py`, adapter SH 4-bit; OCR det chạy CPU) | 4 h | ⏳ |
 | 6 | Kiểm khớp pipeline (parity) prototype ↔ eval, 200 + 200 câu (luật R-PAR) | 1,5 h | ⏳ |
@@ -141,6 +141,38 @@ Nguồn: `experiments/W13_yesno_calib_L4_seed42/yesno_calib_summary.md` (9 run `
 - (i) v2 chưa chấm calibration / POPE-vi đầy đủ (chỉ 300 câu smoke, chưa tính F1 hay yes-ratio), nên đổi sang v3 **không dựa trên kết quả luật nào**;
 - (ii) lý do đổi đến từ phép kiểm hợp lệ;
 - (iii) POPE-vi đầy đủ đã được chấm một lần ở v1 (không hợp lệ), như đã ghi ở mục v2.
+
+## Kết quả R-YB v3 (27/10/2026): **ĐẠT** → không cần Fix B
+
+Nguồn: `experiments/W13_yesno_calib_v3_L4_seed42/yesno_calib_summary.md` (9 run `W13_YN3_*` + smoke, L4, 16:20–19:09). Claude đã tính lại độc lập τ*, F1, yes-ratio và tỉ lệ báo sai từ `logits.json` thô: trùng summary.
+
+**Kiểm hợp lệ:** quyết định τ = 0 trùng greedy W12: SH **100,0%** (4.977 câu đọc được), B1-ocr **100,0%**, B3-full 99,94% (3 câu lệch) → **HỢP LỆ**. Nếu bỏ penalty thì chỉ còn 99,2% / 95,8% / 97,8%, xác nhận greedy W05–W12 có `repetition_penalty = 1.05`.
+
+**Luật** (SH với τ* = **+4,85**, chọn trên calibration: balanced accuracy 74,6% → 91,1%; so với B1-ocr greedy W12):
+
+| Cách chọn | F1 SH-sửa | F1 B1-ocr | ΔF1 [CI95] | yes-ratio |
+|---|---|---|---|---|
+| random | 85,14 | 83,39 | +1,75 [+0,68; +2,89] | 41,5% |
+| popular | 83,32 | 81,99 | +1,33 [+0,21; +2,50] | 43,5% |
+| adversarial | 81,69 | 80,59 | +1,11 [−0,05; +2,30] | 45,4% |
+
+So với trước khi sửa (SH greedy W12): yes-ratio 77–89% → 41–45%; F1 71–78 → 82–85.
+
+**Chẩn đoán (chỉ mô tả):** AUC của SH 0,944 / 0,917 / 0,897, so với B1-ocr 0,955 / 0,934 / 0,910. SH vẫn xếp câu có-thật trên câu không-có gần như B1 (AUC thấp hơn 0,011–0,017), nên thiên lệch "có" của SH **chủ yếu là lệch ngưỡng**, không phải mất khả năng phân biệt. Đây là lý do dời ngưỡng sửa được mà không cần train lại.
+
+**Phân tích sau (KHÔNG thuộc luật, phải báo cáo):**
+- **Tỉ lệ báo sai** (câu "không" bị trả lời "có") của SH-sửa vẫn **cao hơn B1-ocr 2,4–4,0 điểm** (5,1 / 9,1 / 12,9% so với 2,7 / 5,7 / 8,9%). F1 đạt nhờ recall cao hơn. Đây là cùng giới hạn của F1 đã ghi ở W12 → ghi vào Discussion.
+- **Mẫu câu 2** `Có {vật} trong ảnh không?` (không có chỉ dẫn trả lời):
+  - SH với τ* thì **quá dè dặt** (yes-ratio 34–35%, F1 77,7–78,8, báo sai 1,6–3,8%);
+  - SH ở τ = 0 cho F1 82,7–87,7 nhưng báo sai 17–30%;
+  - 31% câu có token đầu **không phải** có/không (`c…`, `b…`: SH trả lời bằng tên vật).
+  
+  → τ* chỉ đúng với mẫu câu đã calibration. Đề xuất cho prototype (chốt và ghi trước ở bước 5): câu có/không của người dùng được **chuẩn hoá về mẫu POPE-vi** (thêm `Trả lời "có" hoặc "không".`) trước khi áp τ*.
+- B1-ocr và B3-full với τ* của chính chúng (−2,05 / +0,45) chỉ đổi F1 ±1,5 điểm: hai model này gần như đã cân ngưỡng sẵn.
+
+**Chi phí:** 9 run ≈ 41.000 câu, 0,21–0,25 s/câu, VRAM đỉnh 2,6 GB. CU: 25,70 → 21,03 (≈ 4,7, gồm cả smoke).
+
+**Quyết định (27/10):** Fix A được chọn. Prototype dùng SH + τ* = +4,85 cho câu có/không (bộ nhận diện câu có/không + chuẩn hoá mẫu câu chốt ở bước 5). **Không** train lại SH (bỏ bước 3 / Fix B).
 
 ## Fix B (chỉ khi R-YB KHÔNG ĐẠT) — phác thảo, luật chi tiết chốt trước khi train
 
