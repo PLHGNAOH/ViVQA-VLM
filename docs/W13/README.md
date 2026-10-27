@@ -23,9 +23,7 @@
 | 1c–1d | Sửa ghép lô (`mm_token_type_ids`) → smoke v2 dừng ở chốt (96,7%) → v3: token đầu, max mỗi phía, forward 1 hàng | 2 h | ✅ 27/10 |
 | 2 | Fix A: ngưỡng τ lúc suy luận (chọn trên calibration) — notebook 22 bản v3 | ≈ 3 h L4 | ✅ 27/10 — **R-YB v3: ĐẠT** (τ* = +4,85) |
 | 3 | *(chỉ khi R-YB KHÔNG ĐẠT)* Fix B: train lại SH có câu có/không cân bằng | ≈ 10 h (≈ 7 h L4) | ⏭ bỏ (R-YB ĐẠT) |
-| 4 | Confidence: định nghĩa + ECE + 3 mức Cao / Trung bình / Thấp (luật R-CONF chốt trước khi chạy) | 2,5 h (≈ 1 h L4) | ⏳ |
-| 5 | Backend `src/prototype/` (dùng lại `prompt_for_sample`, `ocr.py`, adapter SH 4-bit; OCR det chạy CPU) | 4 h | ⏳ |
-| 6 | Kiểm khớp pipeline (parity) prototype ↔ eval, 200 + 200 câu (luật R-PAR) | 1,5 h | ⏳ |
+| 4–6 | **Gộp:** backend `src/prototype/core.py` + parity (R-PAR) + độ tin cậy (R-CONF) + detector có/không (R-YB-det), notebook 23 | ≈ 3 h (≈ 1,7 h L4) | ⏳ |
 | 7 | Giao diện Gradio (ảnh, câu hỏi, câu trả lời, confidence, OCR + box, cảnh báo, disclaimer) | 3 h | ⏳ |
 | 8 | Đo hiệu năng (latency p50/p95 tách OCR / VLM, VRAM, thời gian khởi động) + thử 15–20 ảnh thật | 2 h | ⏳ |
 | 9 | Tài liệu: hướng dẫn chạy prototype, Team Report W13, video demo dự phòng | 2 h | ⏳ |
@@ -180,10 +178,37 @@ Train lại SH (cùng công thức S2 W11) có thêm câu có/không cân bằng
 1. Không kém SH hiện tại trên ViVQA test và ViTextVQA test2000 (δ = 1,5 EM như W11).
 2. POPE-vi ở τ = 0 theo cùng tiêu chí R-YB.
 
-## R-CONF, R-PAR — bản nháp (chốt trước khi chạy bước 4 / bước 6)
+## Bước 4–6 gộp: backend prototype + R-PAR + R-CONF + R-YB-det (ghi trước, commit TRƯỚC notebook 23)
 
-- **R-CONF (confidence):** `conf = exp(trung bình log-prob các token trả lời)` (greedy). Câu có/không dùng `sigmoid(margin − τ*)`. Chia 3 mức Cao / Trung bình / Thấp bằng ngưỡng chọn **trên val** (ViVQA val sạch 688, ViTextVQA dev). Báo ECE (15 bin) + reliability diagram trên test. ĐẠT nếu EM test giảm **đơn điệu** Cao > Trung bình > Thấp. ECE cao thì giao diện ghi "độ tin cậy tương đối", không bao giờ ghi "% đúng".
-- **R-PAR (khớp pipeline):** backend prototype chạy 200 câu ViVQA test + 200 câu ViTextVQA test2000 (seed 42), so với `predictions.json` của run eval SH. ĐẠT nếu ≥ 99% câu trả lời trùng hệt và mọi câu lệch đều giải thích được (ví dụ khác OCR vì prototype chạy OCR trực tiếp thay vì đọc cache).
+**Vì sao gộp:** cả ba việc đều cần chạy backend prototype trên tập test của SH. Gộp lại thì chỉ thuê L4 một lần (≈ 1,7 h, ≈ 2,7 CU).
+
+**Thay đổi so với bản nháp (27/10, trước khi chạy, có lý do kiểm được):**
+- (i) **Không dùng ViVQA val sạch để chọn ngưỡng độ tin cậy.** OCR cache W11 chỉ phủ **102/660** ảnh của `val_imgdisjoint.json` (cache dựng cho ảnh train + test; ảnh val không thuộc train). Chạy sẽ dừng ở `attach_ocr`. Thay bằng chia **nửa A / nửa B theo ảnh** trong chính tập test (seed 42): nửa A chọn ngưỡng, nửa B đánh giá.
+- (ii) **Parity chạy trên toàn bộ tập test** (3.001 + 2.000 câu) thay vì 200 + 200, vì đằng nào cũng phải chạy đủ để có độ tin cậy.
+- (iii) **OCR lấy từ cache** (giống eval), không chạy Paddle trong cùng runtime với torch (tránh lỗi W08). OCR chạy trực tiếp cho ảnh người dùng tải lên được kiểm riêng ở bước 7–8.
+
+**Backend** (`src/prototype/core.py`, `prototype-core-v1`):
+- Câu thường: `build_inputs` + `generate_from_inputs` = y hệt `generate_answer` của eval (cùng messages, processor, `model.generate(max_new_tokens=32, do_sample=False)`), chỉ thêm `output_scores` để lấy log-prob.
+- Câu có/không: `yesno-detector-v1` (luật chữ, thiết kế **chỉ** trên ViVQA train + ViTextVQA dev, chốt trước khi nhìn test; bắt 1/10.799 câu ViVQA train, 3/5.155 câu ViTextVQA dev, 100% câu POPE t1/t2) → `normalize_yes_no` (thêm `Trả lời "có" hoặc "không".`) → margin token đầu (R-YB v3) so với **τ* = +4,85**.
+- Điều kiện tiên quyết khi chạy: **chữ ký cấu hình** (model, 4-bit, prompt, OCR subset, dữ liệu, adapter) dựng lại phải **trùng hệt** run eval W11 của SH (`c12787d1…` ViVQA, `955fc63c…` ViTextVQA). Claude đã kiểm offline bằng dữ liệu thật: trùng cả hai.
+
+**R-PAR (backend = eval):** trên ViVQA test (3.001) và ViTextVQA test2000 (2.000), câu trả lời của backend **trùng hệt** `predictions.json` của run W11 ở **≥ 99%** câu, **từng tập** → ĐẠT; ngược lại KHÔNG ĐẠT. Liệt kê các câu lệch. Smoke 100 câu ViVQA đầu tiên phải ≥ 99% thì notebook mới chạy tiếp.
+
+**R-CONF (độ tin cậy câu thường):**
+- `conf = exp(trung bình log-prob các token trả lời)`, bỏ token đặc biệt (`<|im_end|>`, …). Log-prob lấy từ `scores` sau bộ xử lý logit (phân phối greedy thật sự dùng, có repetition penalty 1,05). Không còn token nào thì conf = 0.
+- Chia mỗi tập theo **ảnh** (sắp xếp tên ảnh, `random.Random(42).shuffle`, nửa đầu = A). Hai ngưỡng = **phân vị 1/3 và 2/3** của conf trên A (gộp hai tập): Thấp < q₁ ≤ Trung bình < q₂ ≤ Cao.
+- Trên **B**:
+  - **ĐẠT** nếu EM giảm ngặt Cao > Trung bình > Thấp, cả trên B gộp **và** từng tập;
+  - **MỘT PHẦN** nếu chỉ đúng trên B gộp;
+  - còn lại **KHÔNG ĐẠT**.
+- Báo ECE (15 bin đều) + bảng reliability. **Giao diện chỉ hiện con số khi ECE (B gộp) ≤ 0,05**; còn lại chỉ hiện **mức** (Cao / Trung bình / Thấp), không bao giờ ghi "% đúng".
+
+**R-YB-det (detector không làm hỏng câu thường — kế thừa yêu cầu đã ghi ở R-YB):** với các câu test bị detector bắt, thay câu trả lời greedy bằng "có"/"không" (margin > τ*). EM **toàn tập** giảm **≤ 1,5 điểm** ở từng tập → ĐẠT; ngược lại KHÔNG ĐẠT (prototype phải hỏi lại người dùng thay vì tự đi đường có/không).
+
+**Chỉ mô tả, không có luật:**
+- Độ tin cậy câu có/không = σ(|margin − τ*|): ngưỡng tertile trên calibration, tỉ lệ đúng theo mức trên POPE-vi (đọc từ run YN3).
+- **Mẫu câu 3** `Có {vật} trong ảnh không? Trả lời "có" hoặc "không".` (= câu prototype gửi cho kiểu hỏi tự nhiên, file `pope_vi_questions_t3_v1.json`, sha256 `d03600fc…`): SH với τ* / τ = 0, so với SH τ* trên mẫu 1 và B1-ocr greedy.
+- Chi phí: s/câu, VRAM.
 
 ## Ngân sách
 
@@ -214,3 +239,12 @@ CU được cộng thêm khi gia hạn gói ngày 02/11; giờ GPU và VRAM vẫ
 | `src/eval/yesno_calib.py` (bước 1c, 27/10) | Nhân hàng `mm_token_type_ids` khi ghép lô; selftest thêm Qwen2.5-VL tí hon (kiến trúc thật) + so penalty với transformers | `--selftest`: `tiny Qwen2.5-VL OK (…)` |
 | `src/eval/yesno_calib.py` (bước 1d, 27/10) | v3: forward 1 hàng, token đầu, max mỗi phía, repetition penalty như `generate()`; bỏ teacher forcing lô 2 hàng; selftest so với chính `model.generate()` trên Qwen2.5-VL tí hon | `--selftest`: `tiny Qwen2.5-VL OK (… = scores của generate …)` |
 | `notebooks/22_yesbias_logit_calib_sh_qwen25vl.ipynb` (v3, sửa tại chỗ) | Run `W13_YN3_*`, kết quả `W13_yesno_calib_v3_L4_seed42/`; mục 2 bắt buộc selftest có phép so với `generate()` | Cú pháp mọi cell |
+
+## File mới (bước 4–6, 27/10)
+
+| File | Nội dung | Kiểm |
+|---|---|---|
+| `src/prototype/core.py` | Lõi prototype: sinh y hệt eval + log-prob, detector có/không v1, chuẩn hoá câu có/không, độ tin cậy, lớp `Backend` cho giao diện | qua selftest của `prototype_check` |
+| `src/eval/prototype_check.py` | `--score` (backend trên test, kiểm chữ ký = W11 trước khi chạy) · `--parity` (smoke) · `--build_t3` · `--analyze` (R-PAR, R-CONF, R-YB-det + mô tả) | `--selftest`: detector (bắt 100% POPE t1/t2), độ tin cậy, ECE, Qwen2.5-VL tí hon (generate + output_scores = generate của eval), resume, phán quyết, chặn run smoke |
+| `experiments/W13_yesno_questions/pope_vi_questions_t3_v1.json` | Mẫu câu 3 (4.985 câu) | sha256 `d03600fc5f7a1590f5ed44d45cd0a4429eba0bcecd328390d6af6a182db4ca8d` |
+| `notebooks/23_prototype_parity_confidence_sh_qwen25vl.ipynb` | L4: kiểm → smoke parity 100 câu → ViVQA test → ViTextVQA test2000 → POPE mẫu 3 → phân tích → tự trả máy | Cú pháp mọi cell; mỗi code cell có markdown mô tả + kỳ vọng |
