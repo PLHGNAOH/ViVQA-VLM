@@ -18,8 +18,9 @@
 | # | Việc | Ước tính | Trạng thái |
 |---|---|---|---|
 | 0 | README W13 + luật R-YB ghi trước | 1,5 h | ✅ (commit cùng code bước 1) |
-| 1 | Chẩn đoán thiên lệch "có": `src/eval/yesno_calib.py` + notebook 22 (logit token đầu, AUC, tập calibration) | 2,5 h (≈ 2–3 h L4) | ⏳ |
-| 2 | Fix A: ngưỡng τ lúc suy luận (chọn trên calibration, áp POPE-vi 1 lần) — cùng notebook 22 | (trong bước 1) | ⏳ |
+| 1 | Chẩn đoán thiên lệch "có": `src/eval/yesno_calib.py` + notebook 22 (logit token đầu, AUC, tập calibration) | 2,5 h (≈ 2–3 h L4) | v1 ✅ chạy 27/10 → **KHÔNG HỢP LỆ** (lỗi cách đo, xem dưới) · v2 ⏳ |
+| 1b | Chẩn đoán v1 + sửa cách đo (v2: teacher forcing từ nhiều token + repetition penalty như `generate()`), không tốn GPU | 2 h | ✅ 27/10 |
+| 2 | Fix A: ngưỡng τ lúc suy luận (chọn trên calibration) — notebook 22 bản v2 | ≈ 4,5 h L4 (≈ 1,6 h nếu chỉ chạy 3 run bắt buộc) | ⏳ |
 | 3 | *(chỉ khi R-YB KHÔNG ĐẠT)* Fix B: train lại SH có câu có/không cân bằng | ≈ 10 h (≈ 7 h L4) | — |
 | 4 | Confidence: định nghĩa + ECE + 3 mức Cao / Trung bình / Thấp (luật R-CONF chốt trước khi chạy) | 2,5 h (≈ 1 h L4) | ⏳ |
 | 5 | Backend `src/prototype/` (dùng lại `prompt_for_sample`, `ocr.py`, adapter SH 4-bit; OCR det chạy CPU) | 4 h | ⏳ |
@@ -84,6 +85,40 @@ File `calib` và `t2` sinh **tất định** từ code + seed trong commit này.
 
 **Giới hạn đã biết:** kế thừa giới hạn POPE-vi W12 (annotation COCO thiếu; backbone có thể đã thấy ảnh COCO khi pretrain). Calibration cùng mẫu câu POPE-vi nên τ có thể lệch với cách hỏi khác; t2 đo mức lệch này.
 
+## R-YB v1 — kết quả (27/10/2026): **KHÔNG HỢP LỆ**
+
+Nguồn: `experiments/W13_yesno_calib_L4_seed42/yesno_calib_summary.md` (9 run `W13_YN_*`, ≈ 3 h L4). Phán quyết theo luật: kiểm hợp lệ trượt (quyết định logit ở τ = 0 trùng greedy W12: SH **87,4%**, B1-ocr **94,4%** < 98%) → **không kết luận từ số v1**, kể cả các số ở bảng luật trông như đạt.
+
+**Chẩn đoán** (không tốn GPU, `experiments/W13_yesno_calib_L4_seed42/v1_diagnosis.md`):
+1. **Từ nhiều token bị bỏ sót.** Với tokenizer Qwen2.5-VL, "không" viết thường = `kh` + `ông`, "Có" = `C` + `ó`. v1 chỉ lấy từ 1 token, nên `s_no` thiếu đúng câu trả lời "không" phổ biến nhất của SH / B3-full. Token top-1 ngoài tập v1 gần như toàn là `kh` (SH 1.159, B3-full 2.847) hoặc `C` (B1-ocr 331).
+2. **Greedy có repetition penalty, v1 thì không.** Xét các câu có top-1 (logit, không phạt) là "có": greedy W12 **luôn** đổi sang "Không"/"no" khi margin < 0,5, **không bao giờ** đổi khi margin > 1 (cả 3 cấu hình). Ngưỡng sắc nét này khớp với một khoản phạt cố định lên logit "có", không khớp với nhiễu số học. Giải thích phù hợp nhất: `model.generate()` dùng `generation_config` mặc định của Qwen2.5-VL-3B-Instruct có `repetition_penalty` > 1, phạt token đã có trong prompt (`Trả lời "có" hoặc "không"`). Giá trị thật được đọc và ghi vào `meta.json` ở v2.
+
+**Hệ quả cho các tuần trước (ghi nhận, không sửa số):** mọi run eval W05–W12 dùng cùng `generate()` nên so sánh giữa các run vẫn công bằng. Tuy vậy, dòng `decoding: greedy (do_sample=False)` trong meta là **chưa đủ**: phần Phương pháp (R4) phải ghi giá trị repetition penalty. Giả thuyết hậu kiểm, chưa kiểm định: penalty có thể là nguyên nhân của code-switching "no" ở B3-full (17,7% câu POPE-vi, W12).
+
+## R-YB v2 — sửa cách đo (ghi trước, commit TRƯỚC khi chạy notebook 22 bản v2)
+
+**Chỉ đổi cách đo; mọi ngưỡng giữ nguyên v1** (trùng greedy ≥ 98%; cận dưới CI95 ΔF1 > −2,0; yes-ratio ≤ 60%; cả 3 cách chọn; mốc B1-ocr greedy W12; bootstrap theo ảnh 10.000 lần, seed 42; lưới τ −15…+15 bước 0,05, balanced accuracy, hoà chọn |τ| nhỏ nhất).
+
+**Đo** (`teacher-forced-reppen-v2`):
+- Từ ứng viên: có {có, Có, yes, Yes}, không {không, Không, no, No}. Bỏ dạng viết hoa toàn bộ (CÓ, KHÔNG) vì không run greedy W12 nào sinh ra; "KHÔNG" dài 3 token.
+- `log P(từ) = Σ log p(token_i | prompt, token_<i)`, chấm bằng teacher forcing trong **một** lần forward lô M hàng (hàng j = prompt + token đầu của từ nhiều token thứ j; mọi từ nhiều token phải cùng độ dài, hiện là 2).
+- Ở mỗi bước áp **đúng `RepetitionPenaltyLogitsProcessor`** của transformers với `repetition_penalty` đọc từ `model.generation_config` (tập token đã thấy = toàn bộ `input_ids` của prompt + các token đã nối). Code dừng nếu `generation_config` có thêm bộ xử lý logit khác (no_repeat_ngram, bad_words, sequence_bias…) chưa mô phỏng.
+- `s_yes / s_no = logsumexp` trên các từ của từng phía; `margin = s_yes − s_no`. Ghi kèm `margin_raw` (không penalty) để mô tả.
+
+**Kiểm hợp lệ** bổ sung so với v1: run không có `--limit` (run smoke không dùng được cho luật); mọi run cùng giá trị repetition penalty.
+
+**Smoke test trước khi chạy đầy đủ** (không thuộc luật, chỉ để tiết kiệm GPU): 300 câu POPE-vi đầu, SH. Trùng greedy W12 < 98% → dừng, không chạy tiếp.
+
+**Run:** tiền tố mới `W13_YN2_*` (giữ nguyên run v1 `W13_YN_*` làm hồ sơ). Bắt buộc cho luật: SH calib, SH POPE-vi, B1-ocr POPE-vi. Chỉ mô tả: SH t2, B1-ocr calib + t2, B3-full × 3. Thiếu run mô tả thì vẫn phán quyết được, có ghi run còn thiếu.
+
+**Câu hỏi:** dùng lại nguyên 2 file sinh ở v1 (nay commit vào `experiments/W13_yesno_questions/`): `yesno_calib_v1.json` (3.774 câu, 600 ảnh, sha256 `69d0316c…`), `pope_vi_questions_t2_v1.json` (4.985 câu, sha256 `e9a83055…`).
+
+**Công khai về việc POPE-vi đã được xem:** POPE-vi đã chấm một lần ở v1 (không hợp lệ) trước khi chốt v2. Để giảm rủi ro "chỉnh cho đẹp":
+- (i) v2 chỉ sửa hai lỗi đo, được xác định từ **phép kiểm hợp lệ** (danh sách token, so với greedy), không xuất phát từ số F1/yes-ratio;
+- (ii) τ vẫn chỉ chọn trên calibration;
+- (iii) mọi ngưỡng giữ nguyên;
+- (iv) kết quả v1 được giữ trong repo và sẽ báo cáo cùng v2.
+
 ## Fix B (chỉ khi R-YB KHÔNG ĐẠT) — phác thảo, luật chi tiết chốt trước khi train
 
 Train lại SH (cùng công thức S2 W11) có thêm câu có/không cân bằng 50/50 từ **ảnh ViVQA train** (annotation COCO). Mẫu câu khác POPE-vi, và không dùng ảnh POPE-vi lẫn ảnh calibration. Kiểm lại:
@@ -99,7 +134,8 @@ Train lại SH (cùng công thức S2 W11) có thêm câu có/không cân bằng
 
 | Việc | GPU | CU (L4 ≈ 1,54 CU/h) |
 |---|---|---|
-| Notebook 22: 3 cấu hình × (calib ≈ 4–6 nghìn + 4.985 + 4.985 câu), 1 forward / câu | ≈ 2–3 h L4 | ≈ 4 |
+| Notebook 22 v1 (đã chạy 27/10, không hợp lệ) | ≈ 3 h L4 (0,21–0,24 s/câu) | ≈ 4,6 |
+| Notebook 22 v2: smoke 300 câu + 3 run bắt buộc (≈ 13.700 câu) + 6 run mô tả (≈ 27.500 câu), lô 2 hàng ≈ 0,4 s/câu (ước tính) | ≈ 1,6 h + ≈ 3 h L4 | ≈ 2,5 + ≈ 4,6 |
 | Fix B (nếu cần) | ≈ 7 h L4 | ≈ 11 |
 | Confidence + parity + đo hiệu năng | ≈ 2 h L4 | ≈ 3 |
 
@@ -111,3 +147,12 @@ CU được cộng thêm khi gia hạn gói ngày 02/11; giờ GPU và VRAM vẫ
 |---|---|---|
 | `src/eval/yesno_calib.py` | `--build` sinh calib + t2 · `--score` chấm logit token đầu theo lô (resume, chữ ký run kèm id token) · `--analyze` kiểm hợp lệ, AUC, τ*, phán quyết R-YB, báo cáo | `--selftest`: lưới τ + hoà, AUC (Mann–Whitney), loại từ nhiều token, build tất định + rời POPE-vi + loại ảnh train + số câu có = số câu không, chấm theo lô (resume, chặn lệch id, prompt dùng chung `prompt_for_sample`), phân tích 4 nhánh (ĐẠT / KHÔNG ĐẠT khi mất phân biệt / KHÔNG HỢP LỆ khi lệch greedy / bắt lỗi adapter) |
 | `notebooks/22_yesbias_logit_calib_sh_qwen25vl.ipynb` | L4: kiểm OCR cache = biên bản W11, adapter = run gốc, POPE-vi = bản W12 → sinh 2 file câu hỏi → 9 lượt chấm logit → phân tích → tự trả máy | Cú pháp mọi cell; mỗi code cell có markdown mô tả + kỳ vọng |
+
+## File mới / đổi (bước 1b, 27/10)
+
+| File | Nội dung | Kiểm |
+|---|---|---|
+| `src/eval/yesno_calib.py` (v2) | Chấm `teacher-forced-reppen-v2`: từ nhiều token chấm chính xác, áp repetition penalty như `generate()`, ghi `margin` + `margin_raw` + log P từng từ + `generation_config`. `--agree` (smoke test). `--analyze`: run bắt buộc / chỉ mô tả, từ chối run smoke, kiểm cùng penalty | `--selftest`: penalty đúng ngữ nghĩa transformers, teacher forcing (log P("không") = log p(kh) + log p(ông\|kh) với tập token đã thấy cập nhật), penalty đảo quyết định như W12, ghép lô + cắt logit (model giả, có/không `logits_to_keep`), chặn từ nhiều token khác độ dài, analyze 6 nhánh |
+| `notebooks/22_yesbias_logit_calib_sh_qwen25vl.ipynb` (v2, sửa tại chỗ; bản v1 ở commit `3147496`) | Kiểm câu hỏi repo = Drive → smoke 300 câu (dừng nếu < 98%) → 3 run bắt buộc → 6 run mô tả → phân tích → tự trả máy | Cú pháp mọi cell; mỗi code cell có markdown mô tả + kỳ vọng |
+| `experiments/W13_yesno_questions/` | 2 file câu hỏi đã chốt (sinh ở v1) | sha256 ghi ở mục R-YB v2 |
+| `experiments/W13_yesno_calib_L4_seed42/` | Hồ sơ v1: `yesno_calib_summary.json/.md` (KHÔNG HỢP LỆ) + `v1_diagnosis.md` | — |

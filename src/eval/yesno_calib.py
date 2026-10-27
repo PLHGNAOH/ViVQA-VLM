@@ -6,26 +6,29 @@ Vấn đề (W12, POPE-vi): SH (adapter của prototype) trả lời "có" ở 7
 "lệch ngưỡng" (điểm "có" vẫn xếp đúng thứ tự, chỉ bị đẩy lên -> dời ngưỡng là sửa được) hay "mất khả năng phân biệt"
 (điểm "có" không còn tách câu có-thật / không-có -> phải train lại).
 
-Cách đo: MỘT lượt forward (không sinh chữ) -> log-xác suất token ĐẦU của câu trả lời:
-    s_yes = logsumexp(log p(t) | t ∈ token "có"/"yes"),  s_no = logsumexp(log p(t) | t ∈ token "không"/"no")
+Cách đo v2 (`teacher-forced-reppen-v2`, thay v1 sau khi v1 KHÔNG HỢP LỆ — xem docs/W13/README.md):
+    log P(từ) chấm CHÍNH XÁC bằng teacher forcing, kể cả từ nhiều token ("không" = kh + ông, "Có" = C + ó):
+        log P(w) = Σ_i log p(t_i | prompt, t_<i)
+    và áp ĐÚNG repetition penalty mà model.generate() áp (đọc từ model.generation_config) ở mỗi bước, để
+    margin > 0 ⇔ greedy chọn "có" (kiểm hợp lệ: trùng greedy W12 >= 98%).
+    s_yes = logsumexp(log P(w) | w ∈ {có, Có, yes, Yes}),  s_no = logsumexp(log P(w) | w ∈ {không, Không, no, No})
     margin m = s_yes − s_no;  quyết định "có" ⇔ m > τ   (τ = 0 ≈ greedy hiện tại)
-Luật ghi trước: docs/W13/README.md (R-YB). τ chọn CHỈ trên tập calibration (ảnh khác POPE-vi), áp lên POPE-vi 1 lần.
+    Ghi kèm margin_raw (không áp penalty) để mô tả.
+Luật ghi trước: docs/W13/README.md (R-YB). τ chọn CHỈ trên tập calibration (ảnh khác POPE-vi), áp lên POPE-vi.
 
-Bốn việc:
-  --build     Sinh tập calibration (ảnh ViVQA test chưa thấy lúc train, KHÔNG thuộc 500 ảnh POPE-vi, >= 1 lớp COCO,
-              tối đa 600 ảnh, seed 42; cùng mẫu câu POPE-vi) + POPE-vi mẫu câu 2 (`Có {vật} trong ảnh không?`,
-              không có chỉ dẫn trả lời -> gần câu hỏi thật của người dùng prototype; chỉ mô tả).
-  --score     (GPU) chấm logit token đầu cho một cấu hình × một file câu hỏi; theo lô, resume, chữ ký run.
+Năm việc:
+  --build     Sinh tập calibration + POPE-vi mẫu câu 2 (giữ nguyên từ v1; file đã sinh thì KHÔNG sinh lại).
+  --score     (GPU) chấm một cấu hình × một file câu hỏi; theo lô, resume, chữ ký run.
+  --agree     Kiểm nhanh: quyết định τ = 0 của một run trùng greedy W12 bao nhiêu % (dùng cho smoke test).
   --analyze   Kiểm hợp lệ, AUC, chọn τ trên calibration, áp lên POPE-vi, phán quyết R-YB -> yesno_calib_summary.json + .md
-  --selftest  Kiểm thử offline (không GPU, không mạng).
+  --selftest  Kiểm thử offline (không GPU, không mạng; phần toán dùng torch CPU nếu có).
 
 Chạy:
-    python -m src.eval.yesno_calib --build --coco_ann_dir <dir> --vivqa_dir <drive>/data/vivqa \
-        --pope experiments/W12_pope_vi_questions/pope_vi_questions_v1.json --out_dir <exp>/W13_yesno_questions
     python -m src.eval.yesno_calib --score --data_file <file> --run_name <run> [--adapter <dir>] --mode ocr \
-        --ocr_backend paddledet_vietocr --ocr_template v1 --ocr_max_chars 600 --ocr_min_conf 0
+        --ocr_backend paddledet_vietocr --ocr_template v1 --ocr_max_chars 600 --ocr_min_conf 0 [--limit 300]
+    python -m src.eval.yesno_calib --agree --run_dir <exp>/<run> --greedy_dir <exp>/<run greedy W12>
     python -m src.eval.yesno_calib --analyze --questions_dir <exp>/W13_yesno_questions \
-        --pope experiments/W12_pope_vi_questions/pope_vi_questions_v1.json --exp_root <exp> --out <exp>/W13_yesno_calib_L4_seed42
+        --pope experiments/W12_pope_vi_questions/pope_vi_questions_v1.json --exp_root <exp> --out <exp>/W13_yesno_calib_v2_L4_seed42
     python -m src.eval.yesno_calib --selftest
 """
 from __future__ import annotations
@@ -54,23 +57,29 @@ from src.eval.pope_vi import (OBJECTS_FILE, QUESTION_TEMPLATE, SETTINGS, MARGIN_
 # --------------------------------------------------------------------------- #
 # Hằng số (ghi trước — đổi bất kỳ giá trị nào = luật khác, phải ghi lại README W13)
 # --------------------------------------------------------------------------- #
-BUILD_VERSION = "yesno-calib-build-v1"
-SCORING_VERSION = "first-token-logsumexp-v1"
+BUILD_VERSION = "yesno-calib-build-v1"            # bộ câu hỏi giữ nguyên từ v1
+SCORING_VERSION = "teacher-forced-reppen-v2"
 CALIB_MAX_IMAGES = 600
 CALIB_MIN_CLASSES = 1
 N_POS = 3
 N_NEG = 3
 TEMPLATE2 = "Có {obj} trong ảnh không?"
-YES_WORDS = ("có", "Có", "CÓ", "yes", "Yes")
-NO_WORDS = ("không", "Không", "KHÔNG", "no", "No")
+# v2: bỏ dạng VIẾT HOA TOÀN BỘ (CÓ, KHÔNG) — không run greedy W12 nào sinh ra; "KHÔNG" dài 3 token
+YES_WORDS = ("có", "Có", "yes", "Yes")
+NO_WORDS = ("không", "Không", "no", "No")
 TAU_MIN, TAU_MAX, TAU_STEP = -15.0, 15.0, 0.05
-AGREE_MIN = 0.98              # kiểm hợp lệ: quyết định logit ở τ = 0 trùng greedy W12 >= 98% (SH, B1-ocr)
-MAX_YES_RATIO = 0.60          # R-YB: yes-ratio sau khi sửa <= 60% ở cả 3 cách chọn
+AGREE_MIN = 0.98              # kiểm hợp lệ: quyết định ở τ = 0 trùng greedy W12 >= 98% (SH, B1-ocr) — giữ nguyên v1
+MAX_YES_RATIO = 0.60          # R-YB: yes-ratio sau khi sửa <= 60% ở cả 3 cách chọn — giữ nguyên v1
 CONFIGS = ("SH", "B1_ocr", "B3full")
 QSETS = ("calib", "popevi", "popevi_t2")
 QFILES = {"calib": "yesno_calib_v1.json", "popevi_t2": "pope_vi_questions_t2_v1.json"}   # popevi = file W12
 RUN_TAG = {"SH": "sh_qlora_ocr_vietocr_v1_r16_shared", "B1_ocr": "b1_ocr_vietocr_v1_qwen25vl",
            "B3full": "b3full_qlora_ocr_vietocr_v1_r16"}
+# Thứ tự chạy: 3 run BẮT BUỘC cho luật trước (dừng sau đó vẫn phán quyết được), rồi các run chỉ mô tả
+REQUIRED_RUNS = (("SH", "calib"), ("SH", "popevi"), ("B1_ocr", "popevi"))
+OPTIONAL_RUNS = (("SH", "popevi_t2"), ("B1_ocr", "calib"), ("B1_ocr", "popevi_t2"),
+                 ("B3full", "calib"), ("B3full", "popevi"), ("B3full", "popevi_t2"))
+RUN_ORDER = REQUIRED_RUNS + OPTIONAL_RUNS
 # Run greedy W12 trên POPE-vi (cùng file câu hỏi) -> mốc so sánh + kiểm hợp lệ
 GREEDY_W12 = {
     "B1_ocr": "W12_POPE_b1_ocr_vietocr_v1_qwen25vl_popevi_v1_bf16_L4_seed42",
@@ -81,7 +90,8 @@ VERDICTS = ("ĐẠT", "KHÔNG ĐẠT", "KHÔNG HỢP LỆ")
 
 
 def logit_run_name(label: str, qset: str) -> str:
-    return f"W13_YN_{RUN_TAG[label]}_{qset}_bf16_L4_seed42"
+    # v2 dùng tiền tố YN2 -> không đụng thư mục run v1 (W13_YN_*), giữ v1 làm hồ sơ
+    return f"W13_YN2_{RUN_TAG[label]}_{qset}_bf16_L4_seed42"
 
 
 def _log(msg: str) -> None:
@@ -213,29 +223,94 @@ def build_template2(pope_file: str, objects_path: str = OBJECTS_FILE) -> Dict[st
 
 
 # =============================================================================
-# 2) Chấm logit token đầu (GPU)
+# 2) Chấm v2: teacher forcing từ nhiều token + repetition penalty như generate() (GPU)
 # =============================================================================
-def yes_no_token_ids(tokenizer) -> Dict[str, Any]:
-    """Token id của các từ có/không. Chỉ dùng từ mã hoá thành ĐÚNG 1 token (từ nhiều token -> token đầu có thể là
-    tiền tố chung như "C", làm s_yes lẫn xác suất của câu trả lời khác). Phải còn >= 1 từ mỗi phía, hai phía tách rời."""
-    info, ids = {}, {"yes": set(), "no": set()}
+def candidate_tokens(tokenizer) -> Dict[str, Any]:
+    """Token của các từ ứng viên. Từ 1 token chấm ngay ở bước đầu; từ nhiều token chấm bằng teacher forcing.
+    Mọi từ nhiều token phải CÙNG độ dài (để ghép lô không cần pad); hai phía không được có từ trùng chuỗi token."""
+    cands = {"yes": {}, "no": {}}
     for side, words in (("yes", YES_WORDS), ("no", NO_WORDS)):
         for w in words:
-            enc = tokenizer.encode(w, add_special_tokens=False)
-            info[w] = {"ids": list(enc), "single": len(enc) == 1}
-            if len(enc) == 1:
-                ids[side].add(int(enc[0]))
-    if not ids["yes"] or not ids["no"]:
-        raise ValueError(f"không có từ có/không nào là 1 token: {info}")
-    if ids["yes"] & ids["no"]:
-        raise ValueError(f"token có/không trùng nhau: {ids}")
-    return {"yes_ids": sorted(ids["yes"]), "no_ids": sorted(ids["no"]), "words": info,
-            "used_yes": [w for w in YES_WORDS if info[w]["single"]], "used_no": [w for w in NO_WORDS if info[w]["single"]]}
+            ids = [int(t) for t in tokenizer.encode(w, add_special_tokens=False)]
+            if not ids:
+                raise ValueError(f"từ '{w}' mã hoá rỗng")
+            cands[side][w] = ids
+    seqs = [tuple(v) for s in cands.values() for v in s.values()]
+    if len(set(seqs)) != len(seqs):
+        raise ValueError(f"hai từ ứng viên trùng chuỗi token: {cands}")
+    multi = {len(v) for s in cands.values() for v in s.values() if len(v) > 1}
+    if len(multi) > 1:
+        raise ValueError(f"từ nhiều token khác độ dài {sorted(multi)} -> chưa hỗ trợ (cần pad): {cands}")
+    first_ids = sorted({v[0] for s in cands.values() for v in s.values()})
+    return {"cands": cands, "multi_len": (multi.pop() if multi else 1), "first_ids": first_ids}
 
 
-def score_sample(model, processor, image_path: str, prompt_text: str, yes_ids: Sequence[int],
-                 no_ids: Sequence[int]) -> Dict[str, Any]:
-    """Một lượt forward, cùng input như generate_answer (src/eval/run_eval.py) -> logit bước sinh ĐẦU TIÊN của greedy."""
+def apply_repetition_penalty(logits, seen_ids: Sequence[int], penalty: float):
+    """Đúng RepetitionPenaltyLogitsProcessor của transformers: token đã có trong input -> logit > 0 chia penalty,
+    logit < 0 nhân penalty. Trả tensor mới (không sửa tại chỗ)."""
+    import torch
+    out = logits.clone()
+    if penalty is None or penalty == 1.0 or not len(seen_ids):
+        return out
+    idx = torch.as_tensor(sorted(set(int(i) for i in seen_ids)), dtype=torch.long, device=out.device)
+    sc = out.index_select(-1, idx)
+    out[..., idx] = torch.where(sc < 0, sc * penalty, sc / penalty)
+    return out
+
+
+def score_from_logits(first_logits, next_logits, prompt_ids: Sequence[int], tokens: Dict[str, Any],
+                      penalty: float) -> Dict[str, Any]:
+    """Phần toán thuần (kiểm offline được).
+    first_logits: [V] logit dự đoán token đầu (sau prompt).
+    next_logits: [M, L-1, V] — hàng j = từ nhiều token thứ j (thứ tự `multi_words`), vị trí i dự đoán token i+1.
+    Trả log P từng từ (có và không penalty), s_yes / s_no, margin, top-1 (sau penalty)."""
+    import torch
+    multi_words = [(s, w) for s in ("yes", "no") for w, ids in tokens["cands"][s].items() if len(ids) > 1]
+    seen0 = list(prompt_ids)
+    res: Dict[str, Any] = {}
+    for tag, pen in (("", penalty), ("_raw", 1.0)):
+        lp1 = torch.log_softmax(apply_repetition_penalty(first_logits.float(), seen0, pen), dim=-1)
+        lp: Dict[str, float] = {}
+        for s in ("yes", "no"):
+            for w, ids in tokens["cands"][s].items():
+                v = float(lp1[ids[0]])
+                if len(ids) > 1:
+                    j = multi_words.index((s, w))
+                    for i in range(1, len(ids)):
+                        seen = seen0 + ids[:i]
+                        lpi = torch.log_softmax(apply_repetition_penalty(next_logits[j, i - 1].float(), seen, pen), dim=-1)
+                        v += float(lpi[ids[i]])
+                lp[w] = v
+        sy = float(torch.logsumexp(torch.tensor([lp[w] for w in tokens["cands"]["yes"]]), 0))
+        sn = float(torch.logsumexp(torch.tensor([lp[w] for w in tokens["cands"]["no"]]), 0))
+        res[f"lp{tag}"] = {w: round(v, 5) for w, v in lp.items()}
+        res[f"s_yes{tag}"], res[f"s_no{tag}"], res[f"margin{tag}"] = sy, sn, sy - sn
+        if tag == "":
+            top = int(torch.argmax(lp1))
+            res["top1_id"], res["top1_logp"] = top, float(lp1[top])
+    return res
+
+
+def _replicate_inputs(inputs, m: int, cont):
+    """Nhân 1 mẫu (processor output, batch 1) thành m hàng, nối thêm token teacher forcing `cont` [m, k]."""
+    import torch
+    known = {"input_ids", "attention_mask", "pixel_values", "image_grid_thw"}
+    extra = set(inputs.keys()) - known
+    if extra:
+        raise ValueError(f"processor trả khoá chưa hỗ trợ khi nhân lô: {sorted(extra)}")
+    ids = inputs["input_ids"]
+    cont = cont.to(ids.device, dtype=ids.dtype)
+    out = {"input_ids": torch.cat([ids.repeat(m, 1), cont], dim=1)}
+    out["attention_mask"] = torch.ones_like(out["input_ids"])
+    out["pixel_values"] = torch.cat([inputs["pixel_values"]] * m, dim=0)
+    out["image_grid_thw"] = torch.cat([inputs["image_grid_thw"]] * m, dim=0)
+    return out
+
+
+def score_sample(model, processor, image_path: str, prompt_text: str, tokens: Dict[str, Any],
+                 penalty: float) -> Dict[str, Any]:
+    """Cùng input như generate_answer (src/eval/run_eval.py). Một lần forward cho cả lô M hàng
+    (M = số từ nhiều token, mỗi hàng = prompt + các token đầu của từ đó); hàng 0 cho phân phối token đầu."""
     import torch
     from PIL import Image
     from qwen_vl_utils import process_vision_info
@@ -247,30 +322,56 @@ def score_sample(model, processor, image_path: str, prompt_text: str, yes_ids: S
     inputs = processor(text=[text], images=image_inputs, videos=video_inputs,
                        padding=True, return_tensors="pt").to(model.device)
     with torch.inference_mode():
+        first, nxt = forward_candidates(model, dict(inputs), tokens)
+    return score_from_logits(first, nxt, inputs["input_ids"][0].tolist(), tokens, penalty)
+
+
+def forward_candidates(model, inputs: Dict[str, Any], tokens: Dict[str, Any]):
+    """Forward lô M hàng -> (first_logits [V], next_logits [M, L-1, V] hoặc None). Tách riêng để kiểm offline."""
+    import torch
+    multi = [ids for s in ("yes", "no") for ids in tokens["cands"][s].values() if len(ids) > 1]
+    L = tokens["multi_len"]
+    if multi:
+        cont = torch.tensor([ids[:L - 1] for ids in multi])
+        batch = _replicate_inputs(inputs, len(multi), cont)
         try:
-            out = model(**inputs, logits_to_keep=1)
-        except TypeError:
-            out = model(**inputs)
-    logp = torch.log_softmax(out.logits[0, -1].float(), dim=-1)
-    top = int(torch.argmax(logp))
-    return {"s_yes": float(torch.logsumexp(logp[list(yes_ids)], 0)),
-            "s_no": float(torch.logsumexp(logp[list(no_ids)], 0)),
-            "top1_id": top, "top1_logp": float(logp[top])}
+            lg = model(**batch, logits_to_keep=L).logits
+        except TypeError:                                     # bản transformers không có logits_to_keep
+            lg = model(**batch).logits
+        lg = lg[:, -L:, :]                                    # [M, L, V]: vị trí 0 = sau prompt
+        return lg[0, 0], lg[:, 1:, :]
+    try:
+        lg = model(**inputs, logits_to_keep=1).logits
+    except TypeError:
+        lg = model(**inputs).logits
+    return lg[0, -1], None
 
 
-def logit_signature(cfg: Dict[str, Any], data_sha256: str, chunk: int, adapter: Optional[Dict[str, Any]],
-                    tokens: Dict[str, Any]) -> Dict[str, Any]:
+def generation_penalty(model) -> Tuple[float, Dict[str, Any]]:
+    """repetition_penalty mà model.generate(do_sample=False) sẽ áp + các khoá generation_config liên quan (ghi meta)."""
+    gc = getattr(model, "generation_config", None)
+    keys = ("repetition_penalty", "do_sample", "temperature", "top_k", "top_p", "no_repeat_ngram_size",
+            "encoder_repetition_penalty", "bad_words_ids", "sequence_bias")
+    info = {k: getattr(gc, k, None) for k in keys} if gc is not None else {}
+    for k in ("no_repeat_ngram_size", "encoder_repetition_penalty", "bad_words_ids", "sequence_bias"):
+        if info.get(k) not in (None, 0, 1.0):
+            raise ValueError(f"generation_config.{k}={info[k]} -> generate() có thêm bộ xử lý logit chưa mô phỏng")
+    p = info.get("repetition_penalty") or 1.0
+    return float(p), info
+
+
+def logit_signature(cfg: Dict[str, Any], data_sha256: str, limit: Optional[int], chunk: int,
+                    adapter: Optional[Dict[str, Any]], tokens: Dict[str, Any], penalty: float) -> Dict[str, Any]:
     from src.eval.run_baseline import run_signature
-    base = run_signature(cfg, data_sha256, None, chunk, adapter=adapter)
+    base = run_signature(cfg, data_sha256, limit, chunk, adapter=adapter)
     base.pop("sha256")
-    payload = {**base, "scoring": {"version": SCORING_VERSION, "yes_ids": tokens["yes_ids"],
-                                   "no_ids": tokens["no_ids"]}}
+    payload = {**base, "scoring": {"version": SCORING_VERSION, "cands": tokens["cands"], "repetition_penalty": penalty}}
     digest = hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
     return {"sha256": digest, **payload}
 
 
 def score_chunks(samples: List[Dict[str, Any]], prompting: Dict[str, Any], out_dir: str, chunk: int,
-                 model, processor, tokens: Dict[str, Any], score_fn: Callable = score_sample,
+                 model, processor, tokens: Dict[str, Any], penalty: float, score_fn: Callable = score_sample,
                  gpu_name: str = "unknown") -> int:
     """Chấm theo lô, ghi lô ngay khi xong; lô đã có thì kiểm id rồi bỏ qua."""
     from src.prompting.builder import prompt_for_sample
@@ -288,13 +389,12 @@ def score_chunks(samples: List[Dict[str, Any]], prompting: Dict[str, Any], out_d
             continue
         t0, recs = time.time(), []
         for j, s in enumerate(part):
-            r = score_fn(model, processor, s["image_path"], prompt_for_sample(s, prompting),
-                         tokens["yes_ids"], tokens["no_ids"])
+            r = score_fn(model, processor, s["image_path"], prompt_for_sample(s, prompting), tokens, penalty)
             recs.append({"question_id": s["question_id"], **r})
             if (j + 1) % 100 == 0:
                 _log(f"   {j + 1}/{len(part)} | {(time.time() - t0) / (j + 1):.3f} s/câu")
         dt = time.time() - t0
-        _write_json(os.path.join(path), {"records": recs, "time_sec": round(dt, 2), "gpu": gpu_name}, indent=None)
+        _write_json(path, {"records": recs, "time_sec": round(dt, 2), "gpu": gpu_name}, indent=None)
         _log(f"[lô {k + 1}/{n}] xong {len(part)} câu | {dt:.0f}s")
     return n
 
@@ -304,7 +404,8 @@ def score_run(data_file: str, run_name: str, drive_root: str, out_root: Optional
               chunk: int = 500, image_dir: Optional[str] = None, limit: Optional[int] = None,
               adapter: Optional[str] = None, ocr_backend: Optional[str] = None, ocr_cache: Optional[str] = None,
               ocr_template: str = "v1", ocr_max_chars: Optional[int] = 600, ocr_min_conf: float = 0.0,
-              model=None, processor=None, score_fn: Callable = score_sample, check_config: bool = True) -> Dict[str, Any]:
+              model=None, processor=None, score_fn: Callable = score_sample, penalty: Optional[float] = None,
+              check_config: bool = True) -> Dict[str, Any]:
     from src.data.ocr import default_cache_path, setup_ocr_prompting
     from src.data.vivqa_dataset import load_vivqa
     from src.eval.run_baseline import adapter_fingerprint, check_or_write_signature, load_config, load_model, prepare_images
@@ -328,24 +429,28 @@ def score_run(data_file: str, run_name: str, drive_root: str, out_root: Optional
     ad_info = {"path": adapter, **adapter_fingerprint(adapter)} if adapter else None
     _log(f"== {run_name} | {len(samples)} câu | mode={cfg['prompting']['mode']} | adapter={'có' if adapter else 'không'}")
     real = model is None
+    gen_info: Dict[str, Any] = {}
     if real:
         model, processor = load_model(cfg)
         if adapter:
             from peft import PeftModel
             model = PeftModel.from_pretrained(model, adapter)
         model.eval()
+        penalty, gen_info = generation_penalty(model)
+    if penalty is None:
+        raise ValueError("cần penalty (model thật tự đọc từ generation_config)")
     tokenizer = processor.tokenizer if hasattr(processor, "tokenizer") else processor
-    tokens = yes_no_token_ids(tokenizer)
-    _log(f"   token có: {tokens['used_yes']} -> {tokens['yes_ids']} | không: {tokens['used_no']} -> {tokens['no_ids']}")
+    tokens = candidate_tokens(tokenizer)
+    _log(f"   ứng viên: {tokens['cands']} | repetition_penalty (như generate) = {penalty}")
     data_sha = _sha256(data_file)
-    check_or_write_signature(out_dir, logit_signature(cfg, data_sha, chunk, ad_info, tokens))
+    check_or_write_signature(out_dir, logit_signature(cfg, data_sha, limit, chunk, ad_info, tokens, penalty))
     gpu = "cpu"
     if real:
         import torch
         if torch.cuda.is_available():
             gpu = torch.cuda.get_device_name(0)
             torch.cuda.reset_peak_memory_stats()
-    n = score_chunks(samples, cfg["prompting"], out_dir, chunk, model, processor, tokens, score_fn, gpu)
+    n = score_chunks(samples, cfg["prompting"], out_dir, chunk, model, processor, tokens, penalty, score_fn, gpu)
     recs, tsec, gpus = [], 0.0, set()
     for k in range(n):
         d = _load_json(os.path.join(out_dir, "chunks", f"chunk_{k:02d}.json"))
@@ -354,18 +459,18 @@ def score_run(data_file: str, run_name: str, drive_root: str, out_root: Optional
         gpus.add(d["gpu"])
     if [r["question_id"] for r in recs] != [s["question_id"] for s in samples]:
         raise ValueError("bản gộp không khớp danh sách câu")
-    top_tok = {}
+    names: Dict[int, str] = {}
     for r in recs:
-        if r["top1_id"] not in top_tok:
-            top_tok[r["top1_id"]] = tokenizer.convert_ids_to_tokens(r["top1_id"]) if hasattr(
+        if r["top1_id"] not in names:
+            names[r["top1_id"]] = tokenizer.convert_ids_to_tokens(r["top1_id"]) if hasattr(
                 tokenizer, "convert_ids_to_tokens") else str(r["top1_id"])
-    for r in recs:
-        r["top1_token"] = top_tok[r["top1_id"]]
-        r["margin"] = r["s_yes"] - r["s_no"]
+        r["top1_token"] = names[r["top1_id"]]
     meta = {"run_name": run_name, "finished_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "scoring": SCORING_VERSION, "num_samples": len(recs), "data_file": os.path.basename(data_file),
-            "data_file_sha256": data_sha, "prompting_mode": cfg["prompting"]["mode"], "tokens": tokens,
-            "adapter": ad_info, "ocr": ({**cfg["prompting"]["ocr"], "stats": ocr_stats} if use_ocr else None),
+            "scoring": SCORING_VERSION, "num_samples": len(recs), "limit": limit,
+            "data_file": os.path.basename(data_file), "data_file_sha256": data_sha,
+            "prompting_mode": cfg["prompting"]["mode"], "tokens": tokens, "repetition_penalty": penalty,
+            "generation_config": gen_info, "adapter": ad_info,
+            "ocr": ({**cfg["prompting"]["ocr"], "stats": ocr_stats} if use_ocr else None),
             "model_id": cfg["model"]["model_id"], "torch_dtype": cfg["model"]["torch_dtype"],
             "max_pixels": cfg["model"].get("max_pixels"), "seed": cfg["run"].get("seed"),
             "hardware": {"gpus_seen": sorted(gpus)}, "time_sec": round(tsec, 1),
@@ -458,6 +563,8 @@ def check_logit_run(label: str, qset: str, meta: Dict[str, Any], recs: List[Dict
         errs.append(f"{tag}: logits không khớp danh sách câu ({len(recs)} vs {len(questions)})")
     if meta.get("data_file_sha256") != q_sha:
         errs.append(f"{tag}: chấm trên file câu hỏi khác")
+    if meta.get("limit") is not None:
+        errs.append(f"{tag}: run có --limit {meta.get('limit')} (smoke), không dùng cho luật")
     if meta.get("prompting_mode") != "ocr":
         errs.append(f"{tag}: mode {meta.get('prompting_mode')} ≠ ocr")
     want = (greedy_meta.get("adapter") or {}).get("weights_sha256")
@@ -475,9 +582,19 @@ def check_logit_run(label: str, qset: str, meta: Dict[str, Any], recs: List[Dict
 
 def agreement(questions: List[Dict[str, Any]], margin: Dict[str, float],
               greedy: Dict[str, Optional[str]]) -> Dict[str, Any]:
-    ids = [q["question_id"] for q in questions if greedy[q["question_id"]] in ("yes", "no")]
+    ids = [q["question_id"] for q in questions if q["question_id"] in margin and greedy.get(q["question_id"]) in ("yes", "no")]
     same = sum(decide(margin[i], 0.0) == greedy[i] for i in ids)
-    return {"n_parsed": len(ids), "n_total": len(questions), "agree": same / max(len(ids), 1)}
+    by = Counter((greedy[i], decide(margin[i], 0.0)) for i in ids if decide(margin[i], 0.0) != greedy[i])
+    return {"n_parsed": len(ids), "n_total": len(questions), "agree": same / max(len(ids), 1),
+            "mismatch_greedy_vs_logit": {f"{a}->{b}": c for (a, b), c in sorted(by.items())}}
+
+
+def agree_run(run_dir: str, greedy_dir: str) -> Dict[str, Any]:
+    """Smoke test: quyết định τ = 0 của run (có thể --limit) so với greedy W12 trên các câu chung."""
+    recs = _load_json(os.path.join(run_dir, "logits.json"))
+    g = {p["question_id"]: parse_yes_no(p["prediction"]) for p in _load_json(os.path.join(greedy_dir, "predictions.json"))}
+    qs = [{"question_id": r["question_id"]} for r in recs]
+    return agreement(qs, {r["question_id"]: r["margin"] for r in recs}, g)
 
 
 def verdict_ryb(valid: bool, ci: Dict[str, Tuple[float, float]], yes_ratio: Dict[str, float]) -> str:
@@ -494,9 +611,9 @@ def analyze(pope_file: str, questions_dir: str, exp_root: str, n_boot: int = N_B
     qsha = {k: _sha256(p) for k, p in qfiles.items()}
     out: Dict[str, Any] = {"rules": {"agree_min": AGREE_MIN, "margin_pts": MARGIN_PTS, "max_yes_ratio": MAX_YES_RATIO,
                                      "tau_grid": [TAU_MIN, TAU_MAX, TAU_STEP], "n_boot": n_boot, "seed": SEED,
-                                     "scoring": SCORING_VERSION},
+                                     "scoring": SCORING_VERSION, "required_runs": REQUIRED_RUNS},
                            "questions_sha256": qsha, "n_questions": {k: len(v) for k, v in qdocs.items()},
-                           "errors": []}
+                           "errors": [], "missing_optional": []}
     greedy_meta, greedy_parsed = {}, {}
     for label, run in GREEDY_W12.items():
         d = os.path.join(exp_root, run)
@@ -508,23 +625,35 @@ def analyze(pope_file: str, questions_dir: str, exp_root: str, n_boot: int = N_B
         greedy_parsed[label] = {p["question_id"]: parse_yes_no(p["prediction"]) for p in gp}
     sh_ocr = greedy_meta["SH"].get("ocr") or {}
     margins: Dict[str, Dict[str, Dict[str, float]]] = defaultdict(dict)
+    margins_raw: Dict[str, Dict[str, Dict[str, float]]] = defaultdict(dict)
     run_info: Dict[str, Any] = {}
-    for label in CONFIGS:
-        for qset in QSETS:
-            run = logit_run_name(label, qset)
-            d = os.path.join(exp_root, run)
-            meta = _load_json(os.path.join(d, "meta.json"))
-            recs = _load_json(os.path.join(d, "logits.json"))
-            out["errors"] += check_logit_run(label, qset, meta, recs, qdocs[qset], qsha[qset],
-                                             greedy_meta[label], sh_ocr)
-            margins[label][qset] = {r["question_id"]: r["s_yes"] - r["s_no"] for r in recs}
-            yn = set((meta.get("tokens") or {}).get("yes_ids", [])) | set((meta.get("tokens") or {}).get("no_ids", []))
-            run_info[f"{label}/{qset}"] = {"run": run, "sec_per_sample": meta.get("sec_per_sample"),
-                                           "gpus": (meta.get("hardware") or {}).get("gpus_seen"),
-                                           "peak_vram_gb": meta.get("peak_vram_gb"),
-                                           "top1_is_yes_no": sum(r["top1_id"] in yn for r in recs) / max(len(recs), 1),
-                                           "top1_other_examples": Counter(r.get("top1_token") for r in recs
-                                                                          if r["top1_id"] not in yn).most_common(5)}
+    penalties = set()
+    for label, qset in RUN_ORDER:
+        run = logit_run_name(label, qset)
+        d = os.path.join(exp_root, run)
+        if not os.path.exists(os.path.join(d, "logits.json")):
+            if (label, qset) in REQUIRED_RUNS:
+                out["errors"].append(f"thiếu run BẮT BUỘC {label}/{qset} ({run})")
+            else:
+                out["missing_optional"].append(f"{label}/{qset}")
+            continue
+        meta = _load_json(os.path.join(d, "meta.json"))
+        recs = _load_json(os.path.join(d, "logits.json"))
+        out["errors"] += check_logit_run(label, qset, meta, recs, qdocs[qset], qsha[qset], greedy_meta[label], sh_ocr)
+        penalties.add(meta.get("repetition_penalty"))
+        margins[label][qset] = {r["question_id"]: r["margin"] for r in recs}
+        margins_raw[label][qset] = {r["question_id"]: r["margin_raw"] for r in recs}
+        first = set((meta.get("tokens") or {}).get("first_ids", []))
+        run_info[f"{label}/{qset}"] = {"run": run, "sec_per_sample": meta.get("sec_per_sample"),
+                                       "gpus": (meta.get("hardware") or {}).get("gpus_seen"),
+                                       "peak_vram_gb": meta.get("peak_vram_gb"),
+                                       "repetition_penalty": meta.get("repetition_penalty"),
+                                       "top1_is_candidate": sum(r["top1_id"] in first for r in recs) / max(len(recs), 1),
+                                       "top1_other_examples": Counter(r.get("top1_token") for r in recs
+                                                                      if r["top1_id"] not in first).most_common(5)}
+    if len(penalties) > 1:
+        out["errors"].append(f"các run dùng repetition_penalty khác nhau: {sorted(map(str, penalties))}")
+    out["repetition_penalty"] = sorted(map(str, penalties))
     out["runs"] = run_info
     if out["errors"]:
         out["verdict"] = "KHÔNG HỢP LỆ"
@@ -532,20 +661,32 @@ def analyze(pope_file: str, questions_dir: str, exp_root: str, n_boot: int = N_B
 
     pope = qdocs["popevi"]
     images = sorted({q["img_id"] for q in pope})
-    # (1) kiểm hợp lệ: quyết định logit ở τ = 0 trùng greedy W12
-    agree = {l: agreement(pope, margins[l]["popevi"], greedy_parsed[l]) for l in CONFIGS}
+    have = lambda l, q: q in margins.get(l, {})
+    # (1) kiểm hợp lệ: quyết định ở τ = 0 trùng greedy W12
+    agree = {l: agreement(pope, margins[l]["popevi"], greedy_parsed[l]) for l in CONFIGS if have(l, "popevi")}
     valid = all(agree[l]["agree"] >= AGREE_MIN for l in ("SH", "B1_ocr"))
     out["agreement_tau0_vs_greedy"] = agree
+    out["agreement_raw_tau0_vs_greedy"] = {l: agreement(pope, margins_raw[l]["popevi"], greedy_parsed[l])["agree"]
+                                           for l in agree}
     out["valid"] = valid
     # (2) chẩn đoán (chỉ mô tả): AUC
-    out["auc"] = {l: {"popevi": auc_by_setting(pope, margins[l]["popevi"]),
-                      "popevi_t2": auc_by_setting(qdocs["popevi_t2"], margins[l]["popevi_t2"]),
-                      "calib": auc([margins[l]["calib"][q["question_id"]] for q in qdocs["calib"] if q["label"] == "yes"],
-                                   [margins[l]["calib"][q["question_id"]] for q in qdocs["calib"] if q["label"] == "no"])}
-                  for l in CONFIGS}
+    out["auc"] = {}
+    for l in CONFIGS:
+        a: Dict[str, Any] = {}
+        for qset in ("popevi", "popevi_t2"):
+            if have(l, qset):
+                a[qset] = auc_by_setting(qdocs[qset], margins[l][qset])
+        if have(l, "popevi"):
+            a["popevi_raw"] = auc_by_setting(pope, margins_raw[l]["popevi"])
+        if have(l, "calib"):
+            c = qdocs["calib"]
+            a["calib"] = auc([margins[l]["calib"][q["question_id"]] for q in c if q["label"] == "yes"],
+                             [margins[l]["calib"][q["question_id"]] for q in c if q["label"] == "no"])
+        out["auc"][l] = a
     # (3) τ trên calibration
     lab_c = [q["label"] for q in qdocs["calib"]]
-    out["tau"] = {l: select_tau(lab_c, [margins[l]["calib"][q["question_id"]] for q in qdocs["calib"]]) for l in CONFIGS}
+    out["tau"] = {l: select_tau(lab_c, [margins[l]["calib"][q["question_id"]] for q in qdocs["calib"]])
+                  for l in CONFIGS if have(l, "calib")}
     tau_sh = out["tau"]["SH"]["tau"]
     # (4) mốc: B1-ocr greedy W12 (đúng mốc của luật H4)
     base_m, base_c = setting_metrics(pope, greedy_parsed["B1_ocr"], images)
@@ -563,41 +704,49 @@ def analyze(pope_file: str, questions_dir: str, exp_root: str, n_boot: int = N_B
                    "yes_ratio": yr}
     out["verdict"] = verdict_ryb(valid, ci, yr)
     # (5) chỉ mô tả
-    desc: Dict[str, Any] = {}
-    desc["SH_tau0_popevi"] = apply("SH", "popevi", 0.0)[0]
-    desc["SH_greedy_popevi"] = setting_metrics(pope, greedy_parsed["SH"], images)[0]
+    desc: Dict[str, Any] = {"SH_tau0_popevi": apply("SH", "popevi", 0.0)[0],
+                            "SH_greedy_popevi": setting_metrics(pope, greedy_parsed["SH"], images)[0]}
     for l in ("B1_ocr", "B3full"):
-        desc[f"{l}_own_tau_popevi"] = apply(l, "popevi", out["tau"][l]["tau"])[0]
-    desc["SH_fixed_t2"] = apply("SH", "popevi_t2", tau_sh)[0]
-    desc["SH_tau0_t2"] = apply("SH", "popevi_t2", 0.0)[0]
-    desc["B1_ocr_tau0_t2"] = apply("B1_ocr", "popevi_t2", 0.0)[0]
-    desc["B3full_tau0_t2"] = apply("B3full", "popevi_t2", 0.0)[0]
+        if have(l, "popevi") and l in out["tau"]:
+            desc[f"{l}_own_tau_popevi"] = apply(l, "popevi", out["tau"][l]["tau"])[0]
+    if have("SH", "popevi_t2"):
+        desc["SH_fixed_t2"] = apply("SH", "popevi_t2", tau_sh)[0]
+        desc["SH_tau0_t2"] = apply("SH", "popevi_t2", 0.0)[0]
+    for l in ("B1_ocr", "B3full"):
+        if have(l, "popevi_t2"):
+            desc[f"{l}_tau0_t2"] = apply(l, "popevi_t2", 0.0)[0]
     out["descriptive"] = desc
     return out
 
 
 def report(s: Dict[str, Any]) -> str:
-    L = ["# W13 · Thiên lệch \"có\" của SH — chẩn đoán logit + ngưỡng lúc suy luận (R-YB)", ""]
+    L = ["# W13 · Thiên lệch \"có\" của SH — R-YB v2 (teacher forcing + repetition penalty như generate)", ""]
     if s.get("errors"):
         return "\n".join(L + ["## ❌ KHÔNG HỢP LỆ — không kết luận", ""] + [f"- {e}" for e in s["errors"]]) + "\n"
     pct = lambda x: f"{100 * x:.1f}%"
-    L += ["## 1. Kiểm hợp lệ: quyết định logit (τ = 0) trùng greedy W12", "",
-          "| Cấu hình | Trùng | Câu đọc được |", "|---|---|---|"]
+    L += [f"repetition_penalty (đọc từ generation_config, như generate): **{', '.join(s['repetition_penalty'])}**", ""]
+    if s["missing_optional"]:
+        L += [f"Run chỉ mô tả chưa chạy: {', '.join(s['missing_optional'])}", ""]
+    L += ["## 1. Kiểm hợp lệ: quyết định τ = 0 trùng greedy W12", "",
+          "| Cấu hình | Trùng (v2) | Câu đọc được | Lệch greedy→logit | Trùng nếu bỏ penalty (mô tả) |", "|---|---|---|---|---|"]
     for l, a in s["agreement_tau0_vs_greedy"].items():
-        L.append(f"| {l} | {pct(a['agree'])} | {a['n_parsed']}/{a['n_total']} |")
+        mm = ", ".join(f"{k} {v}" for k, v in a["mismatch_greedy_vs_logit"].items()) or "—"
+        L.append(f"| {l} | {pct(a['agree'])} | {a['n_parsed']}/{a['n_total']} | {mm} | {pct(s['agreement_raw_tau0_vs_greedy'][l])} |")
     L += ["", f"Ngưỡng hợp lệ (SH, B1-ocr): ≥ {pct(AGREE_MIN)} → **{'HỢP LỆ' if s['valid'] else 'KHÔNG HỢP LỆ'}**", "",
           "## 2. Chẩn đoán (chỉ mô tả): AUC của margin = P(câu có-thật xếp trên câu không-có)", "",
-          "| Cấu hình | calib | random | popular | adversarial | t2 random | t2 popular | t2 adversarial |",
-          "|---|---|---|---|---|---|---|---|"]
+          "| Cấu hình | Tập | random | popular | adversarial |", "|---|---|---|---|---|"]
     for l, a in s["auc"].items():
-        L.append(f"| {l} | {a['calib']:.3f} | " + " | ".join(f"{a['popevi'][x]:.3f}" for x in SETTINGS) + " | "
-                 + " | ".join(f"{a['popevi_t2'][x]:.3f}" for x in SETTINGS) + " |")
+        if "calib" in a:
+            L.append(f"| {l} | calib (gộp) | {a['calib']:.3f} | | |")
+        for qset in ("popevi", "popevi_raw", "popevi_t2"):
+            if qset in a:
+                L.append(f"| {l} | {qset} | " + " | ".join(f"{a[qset][x]:.3f}" for x in SETTINGS) + " |")
     L += ["", "## 3. Ngưỡng τ chọn trên calibration (balanced accuracy)", "",
           "| Cấu hình | τ* | BA(τ*) | BA(τ = 0) |", "|---|---|---|---|"]
     for l, t in s["tau"].items():
         L.append(f"| {l} | {t['tau']:+.2f} | {pct(t['balanced_accuracy'])} | {pct(t['balanced_accuracy_at_0'])} |")
     r = s["rule"]
-    L += ["", f"## 4. Luật R-YB — SH với τ* = {r['tau_sh']:+.2f} so với B1-ocr greedy (POPE-vi, đánh giá 1 lần)", "",
+    L += ["", f"## 4. Luật R-YB — SH với τ* = {r['tau_sh']:+.2f} so với B1-ocr greedy (POPE-vi)", "",
           "| Cách chọn | F1 SH-sửa | F1 B1-ocr | ΔF1 [CI95] | yes-ratio | báo sai SH-sửa | báo sai B1-ocr |",
           "|---|---|---|---|---|---|---|"]
     for st in SETTINGS:
@@ -605,21 +754,102 @@ def report(s: Dict[str, Any]) -> str:
         lo, hi = r["ci95_pts"][st]
         L.append(f"| {st} | {100 * a['f1']:.2f} | {100 * b['f1']:.2f} | {r['delta_f1_pts'][st]:+.2f} [{lo:+.2f}; {hi:+.2f}] | "
                  f"{pct(a['yes_ratio'])} | {pct(a['false_alarm'])} | {pct(b['false_alarm'])} |")
-    L += ["", f"## ➜ R-YB: **{s['verdict']}**", "",
+    L += ["", f"## ➜ R-YB v2: **{s['verdict']}**", "",
           "## 5. Chỉ mô tả (không thuộc luật)", "",
           "| Cấu hình | Cách chọn | F1 | yes-ratio | báo sai |", "|---|---|---|---|---|"]
     for name, m in s["descriptive"].items():
         for st in SETTINGS:
             L.append(f"| {name} | {st} | {100 * m[st]['f1']:.2f} | {pct(m[st]['yes_ratio'])} | {pct(m[st]['false_alarm'])} |")
-    L += ["", "## 6. Chi phí", "", "| Run | s/câu | GPU | VRAM đỉnh (GB) | top-1 là token có/không |", "|---|---|---|---|---|"]
+    L += ["", "## 6. Chi phí", "", "| Run | s/câu | GPU | VRAM đỉnh (GB) | top-1 là token đầu của từ ứng viên | top-1 khác |",
+          "|---|---|---|---|---|---|"]
     for k, v in s["runs"].items():
-        L.append(f"| {k} | {v['sec_per_sample']} | {', '.join(v['gpus'] or [])} | {v['peak_vram_gb']} | {pct(v['top1_is_yes_no'])} |")
+        oth = ", ".join(f"{t} {c}" for t, c in v["top1_other_examples"]) or "—"
+        L.append(f"| {k} | {v['sec_per_sample']} | {', '.join(v['gpus'] or [])} | {v['peak_vram_gb']} | "
+                 f"{pct(v['top1_is_candidate'])} | {oth} |")
     return "\n".join(L) + "\n"
 
 
 # =============================================================================
 # 4) Kiểm thử offline
 # =============================================================================
+class _FakeTok:
+    """Tokenizer giả mô phỏng đúng kiểu tách của Qwen ghi ở meta v1: 'không' = kh + ông, 'Có' = C + ó."""
+    vocab = {"có": [10], "Có": [40, 41], "yes": [12], "Yes": [13],
+             "không": [30, 31], "Không": [21], "no": [22], "No": [23]}
+
+    def encode(self, w, add_special_tokens=False):
+        return list(self.vocab.get(w, [1, 2, 3]))
+
+    def convert_ids_to_tokens(self, i):
+        return f"<{i}>"
+
+
+def _selftest_math() -> bool:
+    try:
+        import torch
+    except ImportError:
+        print("⚠ không có torch -> bỏ qua kiểm phần toán (Colab có torch, notebook chạy selftest trên Colab)")
+        return False
+    tk = candidate_tokens(_FakeTok())
+    V = 60
+    # (1) repetition penalty đúng ngữ nghĩa transformers
+    x = torch.tensor([2.0, -2.0, 3.0, 0.5])
+    y = apply_repetition_penalty(x, [0, 1, 1], 2.0)
+    assert torch.allclose(y, torch.tensor([1.0, -4.0, 3.0, 0.5])) and torch.equal(x, torch.tensor([2.0, -2.0, 3.0, 0.5]))
+    assert torch.equal(apply_repetition_penalty(x, [0], 1.0), x)
+    # (2) teacher forcing: log P("không") = log p(kh) + log p(ông | kh), từng bước có penalty với tập token đã thấy
+    g = torch.Generator().manual_seed(0)
+    first = torch.randn(V, generator=g)
+    first[10], first[21], first[30], first[40] = 12.0, 11.6, 9.0, 5.0     # có hơn Không 0,4 logit khi chưa phạt
+    nxt = torch.randn(2, 1, V, generator=g)
+    nxt[1, 0, 31] = 8.0                                                    # hàng 1 = "không" (thứ tự: Có, không)
+    nxt[0, 0, 41] = 8.0
+    prompt = [5, 10, 30, 31]                                               # prompt chứa "có" và "không" (kh, ông)
+    p = 1.05
+    r = score_from_logits(first, nxt, prompt, tk, p)
+    lp1 = torch.log_softmax(apply_repetition_penalty(first, prompt, p), -1)
+    lpk = torch.log_softmax(apply_repetition_penalty(nxt[1, 0], prompt + [30], p), -1)
+    assert abs(r["lp"]["không"] - float(lp1[30] + lpk[31])) < 1e-5, r["lp"]
+    lpc = torch.log_softmax(apply_repetition_penalty(nxt[0, 0], prompt + [40], p), -1)
+    assert abs(r["lp"]["Có"] - float(lp1[40] + lpc[41])) < 1e-5
+    assert abs(r["lp_raw"]["có"] - float(torch.log_softmax(first, -1)[10])) < 1e-5
+    # penalty trên "có" (có trong prompt) đảo quyết định: chưa phạt -> "có", phạt như generate -> "Không" (giống W12)
+    assert r["margin_raw"] > 0 > r["margin"], (r["margin_raw"], r["margin"])
+    assert r["top1_id"] == 21
+    # (3) ghép lô + cắt logit: model giả "nhìn" token hiện tại -> logit token kế = one-hot (token + 1) + dấu vết hàng
+    class _Out:
+        def __init__(self, logits):
+            self.logits = logits
+
+    class _Model:
+        def __init__(self, kw_ok=True):
+            self.kw_ok, self.seen = kw_ok, None
+
+        def __call__(self, input_ids, attention_mask, pixel_values, image_grid_thw, **kw):
+            if kw and not self.kw_ok:
+                raise TypeError("logits_to_keep")
+            self.seen = (input_ids.clone(), pixel_values.shape[0], image_grid_thw.shape[0], attention_mask.sum().item())
+            B, T = input_ids.shape
+            lg = torch.zeros(B, T, V)
+            for b in range(B):
+                for t in range(T):
+                    lg[b, t, (int(input_ids[b, t]) + 1) % V] = 10.0
+            k = kw.get("logits_to_keep")
+            return _Out(lg[:, -k:, :] if k else lg)
+    inp = {"input_ids": torch.tensor([[5, 6, 7]]), "attention_mask": torch.ones(1, 3, dtype=torch.long),
+           "pixel_values": torch.zeros(4, 3), "image_grid_thw": torch.tensor([[1, 2, 2]])}
+    for kw_ok in (True, False):
+        mdl = _Model(kw_ok)
+        f, nx = forward_candidates(mdl, inp, tk)
+        ids, npix, nthw, nmask = mdl.seen
+        assert ids.tolist() == [[5, 6, 7, 40], [5, 6, 7, 30]], ids.tolist()     # hàng 0 = Có (C), hàng 1 = không (kh)
+        assert npix == 8 and nthw == 2 and nmask == 8
+        assert int(torch.argmax(f)) == 8                      # sau token cuối prompt (7)
+        assert nx.shape == (2, 1, V) and int(torch.argmax(nx[0, 0])) == 41 and int(torch.argmax(nx[1, 0])) == 31
+    print("toán OK (penalty như transformers, teacher forcing từ nhiều token, đảo quyết định do penalty, ghép lô + cắt logit)")
+    return True
+
+
 def _selftest() -> None:
     import tempfile
     from src.eval.pope_vi import _fake_world, build_questions
@@ -628,24 +858,24 @@ def _selftest() -> None:
     assert len(tau_grid()) == 601 and tau_grid()[0] == -15.0 and tau_grid()[-1] == 15.0 and 0.0 in tau_grid()
     assert abs(auc([2, 3], [0, 1]) - 1.0) < 1e-12 and abs(auc([1], [1]) - 0.5) < 1e-12 and abs(auc([0], [1])) < 1e-12
     labs = ["yes"] * 50 + ["no"] * 50
-    mg = [4.0 + 0.01 * i for i in range(50)] + [1.0 + 0.01 * i for i in range(50)]   # tách hoàn hảo, lệch +
+    mg = [4.0 + 0.01 * i for i in range(50)] + [1.0 + 0.01 * i for i in range(50)]
     t = select_tau(labs, mg)
     assert 1.49 <= t["tau"] < 4.0 and t["balanced_accuracy"] == 1.0 and t["balanced_accuracy_at_0"] == 0.5, t
-    t0 = select_tau(labs, [1.0] * 50 + [-1.0] * 50)
-    assert t0["tau"] == 0.0, t0                        # hoà -> |τ| nhỏ nhất
+    assert select_tau(labs, [1.0] * 50 + [-1.0] * 50)["tau"] == 0.0
     print("tau + auc OK")
-    # (b) token
-    class Tok:
-        vocab = {"có": 10, "Có": 11, "không": 20, "Không": 21, "no": 22, "No": 23, "yes": 12, "Yes": 13}
+    # (b) token ứng viên
+    tk = candidate_tokens(_FakeTok())
+    assert tk["multi_len"] == 2 and tk["cands"]["no"]["không"] == [30, 31] and tk["first_ids"] == [10, 12, 13, 21, 22, 23, 30, 40]
 
-        def encode(self, w, add_special_tokens=False):
-            return [self.vocab[w]] if w in self.vocab else [1, 2]
-
-        def convert_ids_to_tokens(self, i):
-            return {v: k for k, v in self.vocab.items()}.get(i, f"<{i}>")
-    tk = yes_no_token_ids(Tok())
-    assert tk["yes_ids"] == [10, 11, 12, 13] and tk["no_ids"] == [20, 21, 22, 23] and "CÓ" not in tk["used_yes"]
-    print("token ids OK (bỏ từ nhiều token)")
+    class _BadTok(_FakeTok):
+        vocab = {**_FakeTok.vocab, "Không": [21, 50, 51]}
+    try:
+        candidate_tokens(_BadTok())
+        raise AssertionError("không chặn từ nhiều token khác độ dài")
+    except ValueError:
+        pass
+    print("token ứng viên OK (giữ từ nhiều token, chặn độ dài khác nhau)")
+    _selftest_math()
 
     with tempfile.TemporaryDirectory() as td:
         vv, coco = _fake_world(td, n_test_img=120)
@@ -657,17 +887,16 @@ def _selftest() -> None:
         pimg = {q["img_id"] for q in pope["data"]}
         cimg = {q["img_id"] for q in c1["data"]}
         assert not cimg & pimg and not cimg & {1, 2, 3, 4, 5}, "calib phải loại ảnh POPE-vi + ảnh train"
-        assert 6 in cimg and len(cimg) == 55, (sorted(cimg), c1["stats"])      # ảnh 6 (2 lớp) vẫn vào calib
+        assert 6 in cimg and len(cimg) == 55, (sorted(cimg), c1["stats"])
         for img in cimg:
             qs = [q for q in c1["data"] if q["img_id"] == img]
             ny = sum(q["label"] == "yes" for q in qs)
             for s in SETTINGS:
                 assert sum(q["label"] == "no" and s in q["settings"] for q in qs) == ny
-        assert all(q["question_id"].startswith("calib_") for q in c1["data"])
         t2 = build_template2(pf)
         assert [q["question_id"] for q in t2["data"]] == [q["question_id"] for q in pope["data"]]
         assert all(q["question"].startswith("Có ") and q["question"].endswith(" trong ảnh không?") for q in t2["data"])
-        print("build calib + t2 OK (tất định, rời POPE-vi, câu có = câu không mỗi cách chọn)")
+        print("build calib + t2 OK")
 
         # (c) score_chunks: resume + kiểm id
         from src.data.vivqa_dataset import load_vivqa
@@ -676,26 +905,26 @@ def _selftest() -> None:
         samples = load_vivqa(qfile, image_dir=td)
         calls = []
 
-        def fake_score(model, processor, image_path, prompt, yes_ids, no_ids):
-            calls.append(prompt)
-            return {"s_yes": -0.1, "s_no": -2.0, "top1_id": 10, "top1_logp": -0.1}
+        def fake_score(model, processor, image_path, prompt, tokens, penalty):
+            calls.append((prompt, penalty))
+            return {"margin": 1.0, "margin_raw": 1.5, "top1_id": 10, "top1_logp": -0.1}
         od = os.path.join(td, "run")
         prm = {"mode": "zero_shot"}
-        n = score_chunks(samples, prm, od, 50, None, None, tk, fake_score)
+        n = score_chunks(samples, prm, od, 50, None, None, tk, 1.05, fake_score)
         k1 = len(calls)
-        assert k1 == len(samples) and n == (len(samples) + 49) // 50
+        assert k1 == len(samples) and n == (len(samples) + 49) // 50 and calls[0][1] == 1.05
         os.remove(os.path.join(od, "chunks", "chunk_01.json"))
-        score_chunks(samples, prm, od, 50, None, None, tk, fake_score)
+        score_chunks(samples, prm, od, 50, None, None, tk, 1.05, fake_score)
         assert len(calls) - k1 == len(samples[50:100]), "resume phải chỉ chạy lại lô thiếu"
         try:
-            score_chunks(samples[::-1], prm, od, 50, None, None, tk, fake_score)
+            score_chunks(samples[::-1], prm, od, 50, None, None, tk, 1.05, fake_score)
             raise AssertionError("không chặn lô lệch id")
         except ValueError:
             pass
-        assert calls[0].startswith("Câu hỏi: Trong ảnh có "), calls[0]
+        assert calls[0][0].startswith("Câu hỏi: Trong ảnh có ")
         print("score_chunks OK (resume, chặn lệch id, prompt dùng chung prompt_for_sample)")
 
-        # (d) analyze trên dữ liệu giả: SH lệch "có" nhưng vẫn tách được -> τ sửa được -> ĐẠT
+        # (d) analyze trên dữ liệu giả
         qdir = os.path.join(td, "qdir")
         _write_json(os.path.join(qdir, QFILES["calib"]), c1)
         _write_json(os.path.join(qdir, QFILES["popevi_t2"]), t2)
@@ -705,7 +934,9 @@ def _selftest() -> None:
         qs_sha = {"calib": _sha256(os.path.join(qdir, QFILES["calib"])), "popevi": _sha256(pf),
                   "popevi_t2": _sha256(os.path.join(qdir, QFILES["popevi_t2"]))}
 
-        def world(bias_sh: float, sep_sh: float, greedy_noise: bool = False) -> None:
+        def world(bias_sh: float, sep_sh: float, greedy_noise: bool = False, skip=()) -> None:
+            import shutil
+            shutil.rmtree(exp, ignore_errors=True)
             rng = np.random.default_rng(0)
             shift = {"SH": bias_sh, "B1_ocr": -0.5, "B3full": 0.3}
             sep = {"SH": sep_sh, "B1_ocr": 3.0, "B3full": 3.0}
@@ -715,38 +946,45 @@ def _selftest() -> None:
                     recs = []
                     for q in qd[qset]:
                         m = shift[label] + (sep[label] if q["label"] == "yes" else -sep[label]) + rng.normal(0, 0.5)
-                        recs.append({"question_id": q["question_id"], "s_yes": m / 2, "s_no": -m / 2,
-                                     "top1_id": 10 if m > 0 else 20, "top1_token": "có" if m > 0 else "không"})
-                    d = os.path.join(exp, logit_run_name(label, qset))
-                    _write_json(os.path.join(d, "logits.json"), recs)
-                    _write_json(os.path.join(d, "meta.json"), {
-                        "data_file_sha256": qs_sha[qset], "prompting_mode": "ocr", "adapter": ad, "ocr": ocr,
-                        "scoring": SCORING_VERSION, "tokens": {"yes_ids": [10], "no_ids": [20]},
-                        "sec_per_sample": 0.1, "hardware": {"gpus_seen": ["fake"]}})
+                        recs.append({"question_id": q["question_id"], "margin": m, "margin_raw": m + 0.7,
+                                     "top1_id": 10 if m > 0 else 30, "top1_token": "có" if m > 0 else "kh"})
                     if qset == "popevi":
                         gd = os.path.join(exp, GREEDY_W12[label])
                         preds = [{"question_id": r["question_id"],
-                                  "prediction": ("không" if (greedy_noise and i % 3 == 0) == (r["s_yes"] > r["s_no"])
+                                  "prediction": ("không" if (greedy_noise and i % 3 == 0) == (r["margin"] > 0)
                                                  else "có")} for i, r in enumerate(recs)]
                         _write_json(os.path.join(gd, "predictions.json"), preds)
                         _write_json(os.path.join(gd, "metrics.json"), {"meta": {
                             "data_file_sha256": qs_sha["popevi"], "adapter": ad, "ocr": ocr}})
+                    if (label, qset) in skip:
+                        continue
+                    d = os.path.join(exp, logit_run_name(label, qset))
+                    _write_json(os.path.join(d, "logits.json"), recs)
+                    _write_json(os.path.join(d, "meta.json"), {
+                        "data_file_sha256": qs_sha[qset], "prompting_mode": "ocr", "adapter": ad, "ocr": ocr,
+                        "scoring": SCORING_VERSION, "limit": None, "repetition_penalty": 1.05,
+                        "tokens": {"first_ids": [10, 30]}, "sec_per_sample": 0.4, "hardware": {"gpus_seen": ["fake"]}})
 
         world(bias_sh=4.0, sep_sh=3.0)
         s = analyze(pf, qdir, exp, n_boot=300)
         assert not s["errors"] and s["valid"], s.get("errors")
         assert s["tau"]["SH"]["tau"] > 2.0 and s["verdict"] == "ĐẠT", (s["tau"]["SH"], s["rule"]["ci95_pts"], s["rule"]["yes_ratio"])
         assert s["descriptive"]["SH_tau0_popevi"]["random"]["yes_ratio"] > 0.8
-        rep = report(s)
-        assert "R-YB: **ĐẠT**" in rep
-        # SH không còn tách được (sep = 0) -> dời ngưỡng không cứu được -> KHÔNG ĐẠT
+        assert "R-YB v2: **ĐẠT**" in report(s)
+        assert abs(agree_run(os.path.join(exp, logit_run_name("SH", "popevi")), os.path.join(exp, GREEDY_W12["SH"]))["agree"] - 1.0) < 1e-12
         world(bias_sh=4.0, sep_sh=0.0)
         assert analyze(pf, qdir, exp, n_boot=300)["verdict"] == "KHÔNG ĐẠT"
-        # greedy không khớp quyết định logit -> KHÔNG HỢP LỆ (không được kết luận)
         world(bias_sh=4.0, sep_sh=3.0, greedy_noise=True)
         s3 = analyze(pf, qdir, exp, n_boot=300)
         assert not s3["valid"] and s3["verdict"] == "KHÔNG HỢP LỆ"
-        # adapter khác run greedy -> lỗi hợp lệ
+        # thiếu run chỉ mô tả -> vẫn phán quyết; thiếu run bắt buộc -> lỗi
+        world(bias_sh=4.0, sep_sh=3.0, skip=OPTIONAL_RUNS)
+        s5 = analyze(pf, qdir, exp, n_boot=300)
+        assert s5["verdict"] == "ĐẠT" and len(s5["missing_optional"]) == len(OPTIONAL_RUNS), s5.get("errors")
+        report(s5)
+        world(bias_sh=4.0, sep_sh=3.0, skip=(("B1_ocr", "popevi"),))
+        assert analyze(pf, qdir, exp, n_boot=300)["verdict"] == "KHÔNG HỢP LỆ"
+        # adapter khác run greedy / run smoke (--limit) -> lỗi hợp lệ
         world(bias_sh=4.0, sep_sh=3.0)
         mp = os.path.join(exp, logit_run_name("SH", "calib"), "meta.json")
         m = _load_json(mp)
@@ -754,14 +992,21 @@ def _selftest() -> None:
         _write_json(mp, m)
         s4 = analyze(pf, qdir, exp, n_boot=300)
         assert s4["errors"] and s4["verdict"] == "KHÔNG HỢP LỆ" and "KHÔNG HỢP LỆ" in report(s4)
-        print("analyze OK (ĐẠT / KHÔNG ĐẠT / KHÔNG HỢP LỆ, bắt lỗi adapter)")
+        world(bias_sh=4.0, sep_sh=3.0)
+        mp = os.path.join(exp, logit_run_name("SH", "popevi"), "meta.json")
+        m = _load_json(mp)
+        m["limit"] = 300
+        _write_json(mp, m)
+        assert any("--limit" in e for e in analyze(pf, qdir, exp, n_boot=300)["errors"])
+        print("analyze OK (ĐẠT / KHÔNG ĐẠT / KHÔNG HỢP LỆ, run tuỳ chọn thiếu, run bắt buộc thiếu, adapter, smoke)")
     print("yesno_calib selftest OK")
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="W13: thiên lệch 'có' của SH — logit token đầu + ngưỡng τ (R-YB)")
+    ap = argparse.ArgumentParser(description="W13: thiên lệch 'có' của SH — R-YB v2 (teacher forcing + repetition penalty)")
     ap.add_argument("--build", action="store_true")
     ap.add_argument("--score", action="store_true")
+    ap.add_argument("--agree", action="store_true")
     ap.add_argument("--analyze", action="store_true")
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--coco_ann_dir")
@@ -771,6 +1016,8 @@ def main() -> int:
     ap.add_argument("--questions_dir", help="--analyze: thư mục có 2 file câu hỏi W13")
     ap.add_argument("--exp_root")
     ap.add_argument("--out", help="--analyze: thư mục ghi summary")
+    ap.add_argument("--run_dir", help="--agree: thư mục run logit")
+    ap.add_argument("--greedy_dir", help="--agree: thư mục run greedy W12")
     ap.add_argument("--data_file")
     ap.add_argument("--run_name")
     ap.add_argument("--drive_root", default="/content/drive/MyDrive/ViVQA-VLM")
@@ -799,11 +1046,7 @@ def main() -> int:
                 _log(f"⏭ {name} đã có -> KHÔNG sinh lại (bộ câu hỏi đã chốt) | sha256 {_sha256(p)}")
                 continue
             _write_json(p, doc)
-            st = doc["stats"]
-            _log(f"✔ {name}: {st['unique_questions']} câu | sha256 {_sha256(p)}")
-            if "chosen_images" in st:
-                _log(f"   pool {st['pool_images']} ảnh -> chọn {st['chosen_images']} | có {st['yes_questions']} / "
-                     f"không {st['no_questions']} | mỗi cách chọn {st['items_per_setting']}")
+            _log(f"✔ {name}: {doc['stats']['unique_questions']} câu | sha256 {_sha256(p)}")
         return 0
     if a.score:
         if not (a.data_file and a.run_name):
@@ -812,6 +1055,16 @@ def main() -> int:
                   image_dir=a.image_dir, limit=a.limit, adapter=a.adapter, ocr_backend=a.ocr_backend,
                   ocr_cache=a.ocr_cache, ocr_template=a.ocr_template, ocr_max_chars=a.ocr_max_chars,
                   ocr_min_conf=a.ocr_min_conf)
+        return 0
+    if a.agree:
+        if not (a.run_dir and a.greedy_dir):
+            ap.error("--agree cần --run_dir --greedy_dir")
+        r = agree_run(a.run_dir, a.greedy_dir)
+        print(f"trùng greedy W12: {100 * r['agree']:.2f}% trên {r['n_parsed']} câu | lệch {r['mismatch_greedy_vs_logit']}")
+        if r["agree"] < AGREE_MIN:
+            print(f"❌ < {100 * AGREE_MIN:.0f}% -> DỪNG, gửi Claude output này (không chạy run đầy đủ)")
+            return 1
+        print(f"✅ ≥ {100 * AGREE_MIN:.0f}% -> cách đo v2 tái hiện greedy, chạy tiếp")
         return 0
     if a.analyze:
         if not (a.questions_dir and a.exp_root and a.out):
@@ -823,7 +1076,7 @@ def main() -> int:
             fp.write(rep)
         print(rep)
         return 0 if not s.get("errors") else 1
-    ap.error("chọn một: --build | --score | --analyze | --selftest")
+    ap.error("chọn một: --build | --score | --agree | --analyze | --selftest")
     return 2
 
 
