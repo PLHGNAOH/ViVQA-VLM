@@ -24,7 +24,7 @@
 | 2 | Fix A: ngưỡng τ lúc suy luận (chọn trên calibration) — notebook 22 bản v3 | ≈ 3 h L4 | ✅ 27/10 — **R-YB v3: ĐẠT** (τ* = +4,85) |
 | 3 | *(chỉ khi R-YB KHÔNG ĐẠT)* Fix B: train lại SH có câu có/không cân bằng | ≈ 10 h (≈ 7 h L4) | ⏭ bỏ (R-YB ĐẠT) |
 | 4–6 | **Gộp:** backend `src/prototype/core.py` + parity (R-PAR) + độ tin cậy (R-CONF) + detector có/không (R-YB-det), notebook 23 | ≈ 3 h (≈ 1,7 h L4) | ✅ 27/10 — **R-PAR · R-CONF · R-YB-det: ĐẠT** |
-| 7 | Giao diện Gradio (ảnh, câu hỏi, câu trả lời, confidence, OCR + box, cảnh báo, disclaimer) | 3 h | ⏳ |
+| 7 | Giao diện Gradio (ảnh, câu hỏi, câu trả lời, confidence, OCR + box, cảnh báo, disclaimer) | 3 h | ✅ 29/10 — code + selftest + ảnh chụp giao diện (backend giả, CPU, 0 CU); model thật chạy ở bước 8 |
 | 8 | Đo hiệu năng (latency p50/p95 tách OCR / VLM, VRAM, thời gian khởi động) + thử 15–20 ảnh thật | 2 h | ⏳ |
 | 9 | Tài liệu: hướng dẫn chạy prototype, Team Report W13, video demo dự phòng | 2 h | ⏳ |
 | 10 | Đóng tuần: commit + push, dọn Downloads + `G:\My Drive\ViVQA-VLM` | 1 h | ⏳ |
@@ -231,6 +231,41 @@ Nguồn: `experiments/W13_prototype_check_L4_seed42/prototype_check_summary.md` 
 
 **Chi phí:** 0,54 s/câu (ViVQA), 0,95 s/câu (ViTextVQA), VRAM đỉnh 2,6 GB, OCR lấy từ cache. CU: 21,03 → 18,58 (≈ 2,45).
 
+## Bước 7 — giao diện Gradio (29/10/2026)
+
+**Vấn đề trước khi dựng:**
+1. **P4 — Paddle GPU xung đột torch** (W08: `paddlepaddle-gpu` ghi đè NCCL của torch). Giao diện cần OCR **và** Qwen trong cùng một phiên Colab.
+2. **Giao diện không được làm lệch cái đã kiểm.** R-PAR chỉ đúng nếu ảnh, prompt, OCR và adapter đi đúng đường của `core.Backend`.
+3. **Độ tin cậy:** ECE 0,198 (R-CONF) → luật chỉ cho hiện **mức**.
+
+**Quyết định (có lý do kiểm được):**
+
+| # | Quyết định | Lý do |
+|---|---|---|
+| D1 | **OCR chạy ở tiến trình riêng** (`src/prototype/ocr_worker.py`): tiến trình con giữ `PaddleDetVietOCREngine` nạp sẵn, nói chuyện bằng JSON từng dòng; tiến trình chính (Gradio + Qwen) **không import paddle** | Tách thư viện CUDA của Paddle khỏi torch. Tiến trình con = đúng môi trường đã dựng cache (Paddle + VietOCR, không transformers). Log của Paddle bị chuyển sang file, không lẫn kênh giao thức |
+| D2 | Khởi động model thật **chỉ khi** (a) cả 3 luật bước 4–6 ĐẠT trong `prototype_check_summary.json`; (b) engine OCR của tiến trình con **trùng** engine đã dựng cache (`paddleocr`, `det_model`, `rec_model`, `vietocr_config`, `lang` — như luật notebook 19); (c) adapter trùng sha256 đã kiểm (tuỳ chọn `--expect_adapter_sha`) | Demo phải là đúng hệ thống đã đánh giá |
+| D3 | **Ảnh dataset đi nguyên file** (Gradio `type="filepath"`, `image_mode=None` không mã hoá lại). Chỉ ảnh có cờ xoay EXIF hoặc cạnh dài > 2.048 px mới được xoay / thu nhỏ và lưu PNG | Giữ parity với eval; ảnh điện thoại chụp dọc không bị xoay ngang |
+| D4 | Mức tin cậy Cao / Trung bình / Thấp, **ngưỡng đọc từ summary** (0,839 / 0,958 câu mở; 0,975 / 0,999 câu có/không), **không hiện con số** (cả hai ECE > 0,05). Có mục "Về mức tin cậy" giải thích vì sao | Luật R-CONF; tránh người dùng tin quá mức |
+| D5 | Hiện **chữ OCR làm bằng chứng**: ảnh có khung đánh số theo thứ tự đọc, bảng các dòng, đánh dấu dòng khớp câu trả lời và dòng bị cắt (vượt 600 ký tự) | B3/SH phụ thuộc OCR (W09: bỏ OCR −4,25 EM) → người dùng cần thấy model "đọc" được gì |
+| D6 | Cảnh báo: độ tin cậy thấp · không đọc được chữ · OCR bị cắt · câu có/không đi đường riêng · ảnh đã xoay / thu nhỏ. Disclaimer luôn hiện | Master §13 Responsible AI |
+| D7 | **Không lưu ảnh / câu hỏi / câu trả lời.** Ảnh tạm xoá sau mỗi lượt. Log tuỳ chọn (`--log_jsonl`) chỉ ghi số đo (thời gian, mức, số dòng OCR, kích thước ảnh). Tắt analytics của Gradio | Riêng tư khi demo bằng ảnh thật |
+| D8 | Chế độ **backend giả** (`--mock`, CPU) có băng cảnh báo vàng "không phải kết quả của model"; prompt vẫn dựng bằng `builder` thật | Duyệt giao diện không tốn GPU; không thể nhầm ảnh chụp giao diện với kết quả thật |
+
+**Kiểm (offline, CPU):**
+- `python -m src.prototype.ocr_worker --selftest`: tiến trình con thật (engine mock); log thư viện ghi ra cả stdout lẫn fd 1 cấp C mà vẫn không phá giao thức; ảnh lỗi → báo lỗi rồi chạy tiếp; 6 luồng gọi cùng lúc không lệch id; tiến trình tắt sau `close()`; backend sai → lỗi rõ, không treo; so engine với biên bản cache W11.
+- `python -m src.prototype.app --selftest`:
+  - ngưỡng và phán quyết đọc đúng từ summary; luật chưa ĐẠT → chặn model thật;
+  - ảnh thường giữ nguyên từng byte; EXIF xoay 90°; ảnh 4.032 px → 2.048 px; file hỏng → lỗi dễ hiểu;
+  - bằng chứng OCR;
+  - phần hiển thị **không chứa con số độ tin cậy** (kiểm cả câu mở lẫn câu có/không);
+  - chữ của model được escape HTML;
+  - một lượt trọn vẹn với backend giả;
+  - log không chứa câu hỏi / câu trả lời;
+  - dựng được Gradio.
+- Ảnh chụp giao diện thật (Chromium, backend giả, không lỗi console): `docs/W13/figures/ui_mock_desktop.png`, `ui_mock_yesno.png`, `ui_mock_mobile.png`.
+
+**Chưa kiểm (để bước 8, cần L4):** OCR tiến trình con với Paddle GPU thật trong cùng phiên với Qwen; OCR trực tiếp có trùng cache không; latency; ảnh thật.
+
 ## Ngân sách
 
 | Việc | GPU | CU (L4 ≈ 1,54 CU/h) |
@@ -270,3 +305,12 @@ CU được cộng thêm khi gia hạn gói ngày 02/11; giờ GPU và VRAM vẫ
 | `experiments/W13_yesno_questions/pope_vi_questions_t3_v1.json` | Mẫu câu 3 (4.985 câu) | sha256 `d03600fc5f7a1590f5ed44d45cd0a4429eba0bcecd328390d6af6a182db4ca8d` |
 | `notebooks/23_prototype_parity_confidence_sh_qwen25vl.ipynb` | L4: kiểm → smoke parity 100 câu → ViVQA test → ViTextVQA test2000 → POPE mẫu 3 → phân tích → tự trả máy | Cú pháp mọi cell; mỗi code cell có markdown mô tả + kỳ vọng |
 | `experiments/W13_prototype_check_L4_seed42/` + `meta.json` 4 run | Kết quả R-PAR / R-CONF / R-YB-det + mô tả | Claude tính lại độc lập: trùng |
+
+## File mới (bước 7, 29/10)
+
+| File | Nội dung | Kiểm |
+|---|---|---|
+| `src/prototype/ocr_worker.py` | OCR ở tiến trình riêng (`OCRWorkerClient`), so engine với cache (`check_engine_matches_cache`) | `--selftest` (mục Bước 7) |
+| `src/prototype/app.py` | Giao diện Gradio: `load_ui_settings` (ngưỡng từ summary), `prepare_image`, `render_result`, `MockBackend`, `make_real_backend`, `Handler`, `build_demo`; CLI `--mock` / `--adapter … --share` | `--selftest` (mục Bước 7) |
+| `docs/W13/figures/ui_mock_*.png` | Ảnh chụp giao diện (backend giả) | — |
+| `requirements.txt` | + `gradio==6.31.0` | — |

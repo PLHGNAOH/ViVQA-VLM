@@ -13,3 +13,6 @@ pyyaml
 
 # make_audit_sheet.py (bảng duyệt tay W07)
 openpyxl
+
+# src/prototype/app.py (giao diện prototype W13)
+gradio==6.31.0
