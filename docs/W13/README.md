@@ -4,6 +4,24 @@
 > Review 2 (thứ Năm 29/10) làm ở phiên chat riêng, **không** thuộc phạm vi README này.
 > Colab đầu tuần: đọc ở **Colab → Resources** khi mở notebook 22 và ghi vào đây.
 
+## Tổng kết W13 (31/10/2026)
+
+**Prototype web hoạt động và đúng hệ thống đã đánh giá.**
+
+| Vấn đề đầu tuần | Kết quả |
+|---|---|
+| P1 SH thiên lệch "có" | Ngưỡng τ\* = +4,85 lúc suy luận (**R-YB v3 ĐẠT**); yes-ratio 77–89% → 41–45%, không train lại |
+| P2 confidence chưa kiểm | **R-CONF ĐẠT**: EM giảm dần Cao > TB > Thấp; ECE 0,198 → giao diện **chỉ hiện mức** |
+| P3 lệch pipeline demo / eval | **R-PAR** 100% (OCR cache) · **R-LIVE** 98,5–100% (OCR trực tiếp, đường giao diện) · **R-OCR KHÔNG ĐẠT** (ViTextVQA 87,5%: giao diện thu nhỏ ảnh > 2.048 px; khác GPU) |
+| P4 Paddle GPU vs torch | OCR ở tiến trình riêng, cùng engine với cache, chạy GPU cùng phiên Colab với Qwen |
+
+Tốc độ L4: p50 / p95 tổng 0,98 / 3,30 s mỗi câu. 20 ảnh thật: EM 14/20, câu có/không 5/5. Hướng dẫn chạy: `docs/W13/Prototype_Guide.md` · Báo cáo tuần: `docs/W13/W13_Team_Report.md`.
+
+**Mang sang W14:**
+- (1) kiểm giả thuyết EXIF của OCR cache ViTextVQA (1849.jpg, 14277.jpg), Colab CPU;
+- (2) quay video demo dự phòng (notebook 24, `UI_MINUTES = 20`, khoảng 1 CU);
+- (3) phần Prototype trong R6 / R7 bản tiếng Anh.
+
 ## Vấn đề trước khi dựng giao diện
 
 | # | Vấn đề | Vì sao chặn prototype |
@@ -26,8 +44,8 @@
 | 4–6 | **Gộp:** backend `src/prototype/core.py` + parity (R-PAR) + độ tin cậy (R-CONF) + detector có/không (R-YB-det), notebook 23 | ≈ 3 h (≈ 1,7 h L4) | ✅ 27/10 — **R-PAR · R-CONF · R-YB-det: ĐẠT** |
 | 7 | Giao diện Gradio (ảnh, câu hỏi, câu trả lời, confidence, OCR + box, cảnh báo, disclaimer) | 3 h | ✅ 29/10 — code + selftest + ảnh chụp giao diện (backend giả, CPU, 0 CU); model thật chạy ở bước 8 |
 | 8 | Đo hiệu năng (latency p50/p95 tách OCR / VLM, VRAM, thời gian khởi động) + thử 15–20 ảnh thật | 2 h | ✅ 31/10 — **R-LIVE: ĐẠT** · **R-OCR: KHÔNG ĐẠT** (ViTextVQA 87,5%; nguyên nhân ở mục Kết quả bước 8) · 20 ảnh thật EM 70% |
-| 9 | Tài liệu: hướng dẫn chạy prototype, Team Report W13, video demo dự phòng | 2 h | ⏳ |
-| 10 | Đóng tuần: commit + push, dọn Downloads + `G:\My Drive\ViVQA-VLM` | 1 h | ⏳ |
+| 9 | Tài liệu: hướng dẫn chạy prototype, Team Report W13, video demo dự phòng | 2 h | ✅ 31/10 — `Prototype_Guide.md`, `W13_Team_Report.md` · ⏳ video demo mang sang W14 |
+| 10 | Đóng tuần: commit + push, dọn Downloads + `G:\My Drive\ViVQA-VLM` | 1 h | ✅ 31/10 |
 | | **Tổng** (không Fix B / có Fix B) | **≈ 21,5 h / ≈ 31,5 h** | |
 
 ## Quyết định

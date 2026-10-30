@@ -20,4 +20,6 @@ Kiểm chứng:
 - Offline: `python -m src.prototype.app --selftest` · `python -m src.prototype.ocr_worker --selftest` · `python -m src.eval.prototype_check --selftest`
 - GPU: notebook 23 (L4: parity với eval W11, độ tin cậy, detector).
 
+Hướng dẫn chạy đầy đủ (Colab L4, backend giả, giới hạn, sự cố thường gặp): `docs/W13/Prototype_Guide.md` · notebook `notebooks/24_prototype_live_ocr_latency_sh_qwen25vl.ipynb` (đặt `UI_MINUTES = 20` để mở giao diện).
+
 Luật và quyết định: `docs/W13/README.md`.
