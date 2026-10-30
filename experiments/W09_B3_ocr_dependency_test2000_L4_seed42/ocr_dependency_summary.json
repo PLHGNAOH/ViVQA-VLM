@@ -1,0 +1,100 @@
+{
+  "what": "B3 seed 42 eval KHÔNG có dòng OCR lúc test (W09 Phần A) — chẩn đoán phụ thuộc OCR",
+  "rule": "docs/W09/README.md mục Luật Phần A",
+  "ocr_config_of_B3": {
+    "backend": "paddledet_vietocr",
+    "template": "v1",
+    "max_chars": 600,
+    "min_conf": 0.0,
+    "max_chars_needs_review": false
+  },
+  "table": [
+    {
+      "run": "B2-sub (không OCR)",
+      "EM": 0.4555,
+      "ANLS": 0.6848,
+      "token-F1 (phụ)": 0.6692,
+      "s/câu": 1.021
+    },
+    {
+      "run": "B3 (OCR train + test)",
+      "EM": 0.4925,
+      "ANLS": 0.7038,
+      "token-F1 (phụ)": 0.6981,
+      "s/câu": 1.001
+    },
+    {
+      "run": "B3 bỏ OCR lúc test",
+      "EM": 0.45,
+      "ANLS": 0.6746,
+      "token-F1 (phụ)": 0.6617,
+      "s/câu": 0.979
+    }
+  ],
+  "paired": {
+    "B3_vs_B3noocr": {
+      "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W08_B3_eval_qlora_ocr_vietocr_v1_r16_sub8k_ep1_vitextvqa_test2000_bf16_L4_seed42",
+      "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W09_B3noocr_eval_qlora_ocr_vietocr_v1_r16_sub8k_ep1_vitextvqa_test2000_bf16_L4_seed42",
+      "label_a": "B3",
+      "label_b": "B3noOCR",
+      "n": 2000,
+      "n_both_correct": 838,
+      "n_only_a": 147,
+      "n_only_b": 62,
+      "n_both_wrong": 953,
+      "b": 147,
+      "c": 62,
+      "p_value": 3.835598912331624e-09,
+      "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+      "em_a": 0.4925,
+      "em_b": 0.45,
+      "em_diff": -0.04249999999999998,
+      "anls_threshold": 0.5,
+      "anls_a": 0.7038322141490067,
+      "anls_b": 0.6746420653855115,
+      "anls_diff": -0.02919014876349512,
+      "anls_ci95": [
+        -0.04009563775546942,
+        -0.018455524753382073
+      ],
+      "bootstrap": {
+        "n_resamples": 10000,
+        "seed": 42,
+        "method": "paired percentile"
+      }
+    },
+    "B2sub_vs_B3noocr": {
+      "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W08_B2sub_eval_qlora_r16_sub8k_ep1_vitextvqa_test2000_bf16_L4_seed42",
+      "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W09_B3noocr_eval_qlora_ocr_vietocr_v1_r16_sub8k_ep1_vitextvqa_test2000_bf16_L4_seed42",
+      "label_a": "B2sub",
+      "label_b": "B3noOCR",
+      "n": 2000,
+      "n_both_correct": 848,
+      "n_only_a": 63,
+      "n_only_b": 52,
+      "n_both_wrong": 1037,
+      "b": 63,
+      "c": 52,
+      "p_value": 0.3511253697554317,
+      "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+      "em_a": 0.4555,
+      "em_b": 0.45,
+      "em_diff": -0.005500000000000005,
+      "anls_threshold": 0.5,
+      "anls_a": 0.6847517890602092,
+      "anls_b": 0.6746420653855115,
+      "anls_diff": -0.01010972367469764,
+      "anls_ci95": [
+        -0.01938328863196678,
+        -0.000718535626754389
+      ],
+      "bootstrap": {
+        "n_resamples": 10000,
+        "seed": 42,
+        "method": "paired percentile"
+      }
+    }
+  },
+  "verdict_dependency": "B3 PHỤ THUỘC OCR",
+  "verdict_vs_B2sub": "NGANG B2-sub"
+}

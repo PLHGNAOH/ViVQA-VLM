@@ -1,0 +1,158 @@
+{
+  "purpose": "Chốt cấu hình trên L4 trước khi chạy B1 (baseline chính thức) và B2 (QLoRA)",
+  "hardware": {
+    "gpu": "NVIDIA L4",
+    "compute_capability": "sm_89",
+    "bf16_native": true,
+    "bf16_supported_torch": true,
+    "vram_gb": 22.0,
+    "torch": "2.11.0+cu130",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+  },
+  "probe_file": "probe_dtype73_seed42.json",
+  "probe_sha256": "f9bc02ee748c2531c50046e347b428180e4dbcf4fe60523cee4d75f4938b3867",
+  "dtype_rule": "bf16 nếu n_degraded=0 và thoái lui đối chứng <= 2/50; ngược lại fp32",
+  "dtype_verdict": "CHỌN bf16: không tràn số, không thoái lui đáng kể so với fp32.",
+  "dtype_chosen": "bfloat16",
+  "fp16_note": "fp16 trên L4 tái hiện 23/23 câu hỏng (khớp T4)",
+  "bf16_vs_fp32": {
+    "control_regress_ids": [
+      "test_5014"
+    ],
+    "control_gain_ids": [],
+    "prediction_agreement": 0.7808219178082192
+  },
+  "infer_ratio_1280_vs_512": 1.1581740976645436,
+  "probe_runs": [
+    {
+      "run_name": "W07_probe_fp16_qwen25vl_vitextvqa73_L4_seed42",
+      "status": "ok",
+      "dtype": "float16",
+      "max_pixels": 401408,
+      "exact_match": 0.1918,
+      "anls": 0.271,
+      "n_degraded": 23,
+      "degraded_ids": [
+        "test_749",
+        "test_4007",
+        "test_4798",
+        "test_5273",
+        "test_5655",
+        "test_8823",
+        "test_10085",
+        "test_11453",
+        "test_13391",
+        "test_15291",
+        "test_15385",
+        "test_18344",
+        "test_18348",
+        "test_23863",
+        "test_23865",
+        "test_23977",
+        "test_26945",
+        "test_30176",
+        "test_34810",
+        "test_35375",
+        "test_41189",
+        "test_46724",
+        "test_47952"
+      ],
+      "sec_per_sample": 1.403,
+      "elapsed_sec": 422.7
+    },
+    {
+      "run_name": "W07_probe_fp32_qwen25vl_vitextvqa73_L4_seed42",
+      "status": "ok",
+      "dtype": "float32",
+      "max_pixels": 401408,
+      "exact_match": 0.3014,
+      "anls": 0.4407,
+      "n_degraded": 0,
+      "degraded_ids": [],
+      "sec_per_sample": 1.615,
+      "elapsed_sec": 135.1
+    },
+    {
+      "run_name": "W07_probe_bf16_qwen25vl_vitextvqa73_L4_seed42",
+      "status": "ok",
+      "dtype": "bfloat16",
+      "max_pixels": 401408,
+      "exact_match": 0.2877,
+      "anls": 0.4201,
+      "n_degraded": 0,
+      "degraded_ids": [],
+      "sec_per_sample": 0.942,
+      "elapsed_sec": 79.6
+    },
+    {
+      "run_name": "W07_probe_bf16_mp1280_qwen25vl_vitextvqa73_L4_seed42",
+      "status": "ok",
+      "dtype": "bfloat16",
+      "max_pixels": 1003520,
+      "exact_match": 0.2877,
+      "anls": 0.447,
+      "n_degraded": 0,
+      "degraded_ids": [],
+      "sec_per_sample": 1.091,
+      "elapsed_sec": 90.2
+    }
+  ],
+  "smoke_train": [
+    {
+      "max_tokens": 512,
+      "status": "ok",
+      "dtype": "bfloat16",
+      "sec_per_step": 15.681,
+      "sec_per_sample": 0.98,
+      "peak_vram_gb": 6.51,
+      "final_loss": 1.1861,
+      "gpu": "NVIDIA L4"
+    },
+    {
+      "max_tokens": 1280,
+      "status": "ok",
+      "dtype": "bfloat16",
+      "sec_per_step": 15.463,
+      "sec_per_sample": 0.966,
+      "peak_vram_gb": 6.71,
+      "final_loss": 1.1851,
+      "gpu": "NVIDIA L4"
+    }
+  ],
+  "epoch_estimates": [
+    {
+      "dataset": "vivqa",
+      "max_tokens": 512,
+      "n_train": 10799,
+      "steps_per_epoch": 675,
+      "hours_per_epoch": 2.94
+    },
+    {
+      "dataset": "vitextvqa_official",
+      "max_tokens": 512,
+      "n_train": 35159,
+      "steps_per_epoch": 2198,
+      "hours_per_epoch": 9.57
+    },
+    {
+      "dataset": "vivqa",
+      "max_tokens": 1280,
+      "n_train": 10799,
+      "steps_per_epoch": 675,
+      "hours_per_epoch": 2.9
+    },
+    {
+      "dataset": "vitextvqa_official",
+      "max_tokens": 1280,
+      "n_train": 35159,
+      "steps_per_epoch": 2198,
+      "hours_per_epoch": 9.44
+    }
+  ],
+  "n_train": {
+    "vivqa": 10799,
+    "vitextvqa_official": 35159
+  },
+  "config_evidence": "qwen25vl3b_config_evidence.json",
+  "max_pixels_decision": "CHƯA CHỐT — quyết định cùng Claude sau khi xem bảng"
+}
