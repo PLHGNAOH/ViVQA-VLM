@@ -25,7 +25,7 @@
 | 3 | *(chỉ khi R-YB KHÔNG ĐẠT)* Fix B: train lại SH có câu có/không cân bằng | ≈ 10 h (≈ 7 h L4) | ⏭ bỏ (R-YB ĐẠT) |
 | 4–6 | **Gộp:** backend `src/prototype/core.py` + parity (R-PAR) + độ tin cậy (R-CONF) + detector có/không (R-YB-det), notebook 23 | ≈ 3 h (≈ 1,7 h L4) | ✅ 27/10 — **R-PAR · R-CONF · R-YB-det: ĐẠT** |
 | 7 | Giao diện Gradio (ảnh, câu hỏi, câu trả lời, confidence, OCR + box, cảnh báo, disclaimer) | 3 h | ✅ 29/10 — code + selftest + ảnh chụp giao diện (backend giả, CPU, 0 CU); model thật chạy ở bước 8 |
-| 8 | Đo hiệu năng (latency p50/p95 tách OCR / VLM, VRAM, thời gian khởi động) + thử 15–20 ảnh thật | 2 h | ⏳ |
+| 8 | Đo hiệu năng (latency p50/p95 tách OCR / VLM, VRAM, thời gian khởi động) + thử 15–20 ảnh thật | 2 h | ⏳ luật R-OCR / R-LIVE ghi trước (30/10) · notebook 24 |
 | 9 | Tài liệu: hướng dẫn chạy prototype, Team Report W13, video demo dự phòng | 2 h | ⏳ |
 | 10 | Đóng tuần: commit + push, dọn Downloads + `G:\My Drive\ViVQA-VLM` | 1 h | ⏳ |
 | | **Tổng** (không Fix B / có Fix B) | **≈ 21,5 h / ≈ 31,5 h** | |
@@ -266,6 +266,46 @@ Nguồn: `experiments/W13_prototype_check_L4_seed42/prototype_check_summary.md` 
 
 **Chưa kiểm (để bước 8, cần L4):** OCR tiến trình con với Paddle GPU thật trong cùng phiên với Qwen; OCR trực tiếp có trùng cache không; latency; ảnh thật.
 
+## Bước 8 — prototype chạy thật: R-OCR + R-LIVE (ghi trước, commit TRƯỚC notebook 24)
+
+**Vấn đề:** R-PAR (bước 4–6) dùng OCR từ **cache**. Giao diện thật OCR **trực tiếp** từng ảnh ở tiến trình riêng, có thể trên môi trường Paddle khác lúc dựng cache (cache: Paddle GPU 3.3.1, phiên không có transformers; prototype: cùng phiên với Qwen). OCR đọc khác thì prompt khác → câu trả lời của demo có thể khác số trong khoá luận.
+
+**Đo** (`src/eval/prototype_live.py`, `prototype-live-v1`, notebook 24, L4):
+- **Mẫu:** mỗi tập (ViVQA test, ViTextVQA test2000) lấy 200 ảnh (sắp tên ảnh, `random.Random(42).shuffle`, lấy 200 đầu) và **mọi** câu hỏi của các ảnh đó. Danh sách câu tất định từ code + seed; sha256 danh sách `question_id` ghi vào `meta.json`.
+- **Đường chạy = đường giao diện:** `make_real_backend` (kiểm luật bước 4–6, adapter trùng sha256 run W11, engine OCR trùng cache) → mỗi câu `prepare_image` → `Backend.ask` (OCR trực tiếp ở tiến trình riêng → `lines_to_texts` 600 ký tự → prompt → Qwen + adapter SH → greedy / detector có/không).
+- OCR chạy GPU nếu Paddle GPU chạy chung được với torch (quy trình cài của notebook 19). Nếu không được thì chạy CPU, và ghi rõ device vào kết quả.
+
+**R-OCR (OCR trực tiếp = cache):** theo **ảnh**, văn bản OCR đưa vào prompt (danh sách dòng sau `lines_to_texts`) của OCR trực tiếp **trùng hệt** văn bản dựng từ cache ở **≥ 98%** ảnh, **từng tập** → ĐẠT; ngược lại KHÔNG ĐẠT. Liệt kê các ảnh khác.
+
+**R-LIVE (demo = số đã báo cáo):** trên các câu của mẫu, **bỏ** câu bị detector có/không bắt (đã đánh giá ở R-YB-det), **từng tập**:
+- câu trả lời **trùng hệt** `predictions.json` của run eval W11 ở **≥ 97%** câu;
+- **và** EM trên mẫu không thấp hơn EM của W11 trên cùng các câu quá **1,5 điểm** (δ như W11).
+
+Đủ cả hai → ĐẠT; thiếu một → KHÔNG ĐẠT. Liệt kê câu lệch.
+
+**Nếu KHÔNG ĐẠT:** không đổi số trong khoá luận. Giao diện vẫn dùng được, nhưng phần Prototype của báo cáo phải ghi rõ "OCR trực tiếp khác cache ở x% ảnh; số liệu chính thức dùng OCR cache", kèm phân tích nguyên nhân (device, phiên bản Paddle, thứ tự đọc).
+
+**Chỉ mô tả, không có luật:**
+- Latency p50 / p95 / max của OCR, model và tổng, theo tập; bỏ 5 câu đầu (khởi động CUDA).
+- Thời gian khởi động: tiến trình OCR, tổng gồm nạp model.
+- VRAM đỉnh tiến trình chính; VRAM mọi tiến trình (`nvidia-smi`, gồm tiến trình OCR).
+- Số câu theo mức tin cậy.
+- **Ảnh thật của nhóm** (15–20 ảnh, `ViVQA-VLM/data/real_photos_w13/` trên Drive + `cau_hoi.csv` theo mẫu `docs/W13/realphotos_cau_hoi_mau.csv`):
+  - bảng câu hỏi / câu trả lời / mức / chế độ / số dòng OCR / thời gian, và EM nếu có đáp án;
+  - đúng / sai do nhóm tự chấm.
+  - Ảnh **không** đưa lên GitHub.
+- Giao diện mở 20 phút qua link `*.gradio.live` để thử và quay video demo. Log chỉ ghi số đo.
+
+**Kiểm offline:** `python -m src.eval.prototype_live --selftest`:
+- mẫu tất định, lấy mọi câu của ảnh;
+- chạy qua đường giao diện + resume;
+- R-OCR, R-LIVE (bỏ câu có/không; W11 sai mà live đúng cũng tính vào Δ);
+- 4 nhánh phán quyết;
+- CSV từ Excel (BOM, dấu `;`, đáp án tách `|`, thiếu cột → lỗi rõ);
+- báo cáo.
+
+Thêm một lần chạy thử tích hợp `--run` → `--analyze` trên Drive giả (backend giả, cache giả có 1 ảnh khác, 1 câu W11 khác): phán quyết bắt đúng 90% / 95% → KHÔNG ĐẠT.
+
 ## Ngân sách
 
 | Việc | GPU | CU (L4 ≈ 1,54 CU/h) |
@@ -314,3 +354,12 @@ CU được cộng thêm khi gia hạn gói ngày 02/11; giờ GPU và VRAM vẫ
 | `src/prototype/app.py` | Giao diện Gradio: `load_ui_settings` (ngưỡng từ summary), `prepare_image`, `render_result`, `MockBackend`, `make_real_backend`, `Handler`, `build_demo`; CLI `--mock` / `--adapter … --share` | `--selftest` (mục Bước 7) |
 | `docs/W13/figures/ui_mock_*.png` | Ảnh chụp giao diện (backend giả) | — |
 | `requirements.txt` | + `gradio==6.31.0` | — |
+
+## File mới (bước 8, 30/10)
+
+| File | Nội dung | Kiểm |
+|---|---|---|
+| `src/eval/prototype_live.py` | `--run` (đường giao diện trên mẫu 200 ảnh / tập, OCR trực tiếp, resume) · `--analyze` (R-OCR, R-LIVE, latency) · `--realphotos` (ảnh thật + `cau_hoi.csv`) | `--selftest` + chạy thử tích hợp (mục Bước 8) |
+| `notebooks/24_prototype_live_ocr_latency_sh_qwen25vl.ipynb` | L4: cài Qwen + Paddle cùng phiên (giữ torch) → selftest 4 script → kiểm luật / adapter / cache / engine OCR → chạy mẫu → phân tích → ảnh thật → giao diện 20 phút (`--share`) → tự trả máy | Cú pháp mọi cell; mỗi code cell có markdown mô tả + kỳ vọng |
+| `docs/W13/realphotos_cau_hoi_mau.csv` | Mẫu file câu hỏi cho ảnh thật (cột `anh`, `cau_hoi`, `dap_an`) | đọc được bằng `read_questions_csv` |
+| `src/prototype/ocr_worker.py` | + `FLAGS_allocator_strategy=auto_growth` cho tiến trình OCR (Paddle không giữ trước VRAM) | `--selftest` |

@@ -112,6 +112,7 @@ class OCRWorkerClient:
         env = dict(os.environ)
         env["PYTHONPATH"] = REPO_ROOT + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
         env.setdefault("PYTHONIOENCODING", "utf-8")
+        env.setdefault("FLAGS_allocator_strategy", "auto_growth")   # Paddle không giữ trước phần lớn VRAM của Qwen
         self._proc = subprocess.Popen(cmd, cwd=REPO_ROOT, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                       stderr=self._log, text=True, encoding="utf-8", bufsize=1)
         self._q: "queue.Queue[Optional[Dict[str, Any]]]" = queue.Queue()

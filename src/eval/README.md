@@ -18,5 +18,6 @@ Mọi số liệu phải gắn run log: split, seed, hardware, time.
 | `factorial_2x2.py` (W09) | Bảng 2×2 OCR lúc train × OCR lúc test: 4 hiệu ứng đơn (McNemar + ΔANLS CI95) + tương tác theo câu (CI95 bootstrap) + luật ghi trước | `--selftest` |
 | `yesno_calib.py` (W13) | Thiên lệch "có" của SH: điểm token đầu (max mỗi phía) + repetition penalty như `generate()` (v3), AUC, tập calibration rời POPE-vi, ngưỡng τ lúc suy luận, phán quyết R-YB (`docs/W13/README.md`) | `--selftest` |
 | `prototype_check.py` (W13) | Backend prototype trên test của SH: parity với eval W11 (R-PAR), độ tin cậy theo mức + ECE (R-CONF), detector có/không (R-YB-det), mẫu câu 3 (`docs/W13/README.md`) | `--selftest` |
+| `prototype_live.py` (W13) | Prototype chạy thật (OCR trực tiếp ở tiến trình riêng + model, đúng đường giao diện): OCR trực tiếp = cache (R-OCR), câu trả lời = eval W11 (R-LIVE), latency p50/p95, VRAM, ảnh thật của nhóm (`docs/W13/README.md`) | `--selftest` |
 
 Duyệt tay (W07): `python -m src.data.make_audit_sheet` tạo `audit/W07/W07_audit_400.xlsx` + ảnh trên Drive (data_audit 200 dòng train, error_audit 200 câu B2 sai).
