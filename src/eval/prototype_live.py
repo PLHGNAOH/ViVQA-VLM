@@ -135,6 +135,7 @@ def run_live(drive_root: str, adapter: str, expect_adapter_sha: Optional[str], o
     from src.prototype.app import load_ocr_selection, load_ui_settings, make_real_backend
     exp_root = exp_root or os.path.join(drive_root, "experiments")
     out_dir = os.path.join(exp_root, LIVE_RUN)
+    os.makedirs(out_dir, exist_ok=True)                   # notebook 24 lần 1: thiếu dòng này -> lỗi mở log OCR
     items, sample_info = [], {}
     for ds in DATASETS:
         data_file = os.path.join(drive_root, DATA_REL[ds])
@@ -352,6 +353,7 @@ def run_realphotos(photos_dir: str, questions_csv: str, adapter: str, expect_ada
     from src.eval.metrics import exact_match
     from src.prototype.app import load_ocr_selection, load_ui_settings, make_real_backend
     qs = read_questions_csv(questions_csv)
+    os.makedirs(out, exist_ok=True)
     for q in qs:
         q["image_path"] = os.path.join(photos_dir, q["image"])
         q["dataset"] = "real"

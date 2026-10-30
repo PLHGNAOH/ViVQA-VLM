@@ -1,0 +1,73 @@
+{
+  "run_name": "W13_LIVE_sh_ocrlive_sample200img_bf16_L4_seed42",
+  "live": "prototype-live-v1",
+  "finished_utc": "2026-10-30T17:24:33+00:00",
+  "sample": {
+    "vivqa": {
+      "n_images": 200,
+      "n_questions": 211,
+      "question_ids_sha256": "90b2e600833862ede9cb5ec9c4750819207385f3eba9320812b532254fc7f3f0",
+      "data_file": "data/vivqa/test.json"
+    },
+    "vitextvqa_official": {
+      "n_images": 200,
+      "n_questions": 261,
+      "question_ids_sha256": "2ef6951ecef375abac937d0d9eaa00cda7d798468c73c9ebf9c5209e32ce7040",
+      "data_file": "data/vitextvqa_official/test_subset2000_seed42.json"
+    }
+  },
+  "n_images_per_dataset": 200,
+  "seed": 42,
+  "ocr_device": "gpu",
+  "ocr_selection": {
+    "backend": "paddledet_vietocr",
+    "template": "v1",
+    "max_chars": 600,
+    "min_conf": 0.0,
+    "max_chars_needs_review": false
+  },
+  "startup": {
+    "adapter": {
+      "weights_sha256": "c9791e961aaa58fdcd7d9baafede3bd7bd8c902acc9cc43917306f1e0fecc354",
+      "config_sha256": "5e5bae40c27b5905ccdd0189cad597f2ecf0727bbbabafe6685f489c31624553",
+      "weights_mb": 29.53
+    },
+    "ocr_engine": {
+      "engine": "PaddleOCR TextDetection + VietOCR",
+      "paddleocr": "3.7.0",
+      "paddlepaddle": "3.3.1",
+      "lang": "vi",
+      "device": "gpu",
+      "det_model": "PP-OCRv6_medium_det",
+      "rec_model": "vietocr/vgg_transformer",
+      "vietocr_config": "vgg_transformer, beamsearch=False"
+    },
+    "ocr_check": {
+      "ok": true,
+      "diff": {},
+      "device_note": null
+    },
+    "sec_start_ocr": 16.6,
+    "sec_start_total": 59.8
+  },
+  "sec_run": 664.3,
+  "peak_vram_gb_main": 2.61,
+  "gpu_memory_end": {
+    "processes": [
+      {
+        "pid": 21195,
+        "mib": 2858
+      },
+      {
+        "pid": 21218,
+        "mib": 1956
+      }
+    ],
+    "total_mib": 4814
+  },
+  "gpu": "NVIDIA L4",
+  "versions": {
+    "torch": "2.11.0+cu130",
+    "transformers": "5.17.0"
+  }
+}

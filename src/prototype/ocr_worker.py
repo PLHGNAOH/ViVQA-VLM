@@ -106,6 +106,7 @@ class OCRWorkerClient:
         self.backend, self.device = backend, device
         self.read_timeout = read_timeout
         self.log_path = log_path or os.path.join(tempfile.gettempdir(), "vivqa_ocr_worker.log")
+        os.makedirs(os.path.dirname(os.path.abspath(self.log_path)), exist_ok=True)   # W13: thư mục log chưa có -> tạo
         self._log = open(self.log_path, "a", encoding="utf-8")
         cmd = [python or sys.executable, "-u", "-m", "src.prototype.ocr_worker", "--serve",
                "--backend", backend, "--device", device] + (["--noise"] if noise else [])
@@ -217,7 +218,7 @@ def _selftest() -> None:
     tmp = tempfile.mkdtemp(prefix="ocrw_")
     img = os.path.join(tmp, "a.jpg")
     Image.new("RGB", (64, 32), "white").save(img)
-    log = os.path.join(tmp, "w.log")
+    log = os.path.join(tmp, "chua_co", "w.log")             # thư mục log chưa tồn tại (lỗi notebook 24 lần 1)
     with OCRWorkerClient(backend="mock", device="cpu", log_path=log, start_timeout=120, read_timeout=60,
                          noise=True) as c:
         assert c.info.get("engine") == "mock", c.info

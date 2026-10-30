@@ -25,7 +25,7 @@
 | 3 | *(chỉ khi R-YB KHÔNG ĐẠT)* Fix B: train lại SH có câu có/không cân bằng | ≈ 10 h (≈ 7 h L4) | ⏭ bỏ (R-YB ĐẠT) |
 | 4–6 | **Gộp:** backend `src/prototype/core.py` + parity (R-PAR) + độ tin cậy (R-CONF) + detector có/không (R-YB-det), notebook 23 | ≈ 3 h (≈ 1,7 h L4) | ✅ 27/10 — **R-PAR · R-CONF · R-YB-det: ĐẠT** |
 | 7 | Giao diện Gradio (ảnh, câu hỏi, câu trả lời, confidence, OCR + box, cảnh báo, disclaimer) | 3 h | ✅ 29/10 — code + selftest + ảnh chụp giao diện (backend giả, CPU, 0 CU); model thật chạy ở bước 8 |
-| 8 | Đo hiệu năng (latency p50/p95 tách OCR / VLM, VRAM, thời gian khởi động) + thử 15–20 ảnh thật | 2 h | ⏳ luật R-OCR / R-LIVE ghi trước (30/10) · notebook 24 |
+| 8 | Đo hiệu năng (latency p50/p95 tách OCR / VLM, VRAM, thời gian khởi động) + thử 15–20 ảnh thật | 2 h | ✅ 31/10 — **R-LIVE: ĐẠT** · **R-OCR: KHÔNG ĐẠT** (ViTextVQA 87,5%; nguyên nhân ở mục Kết quả bước 8) · 20 ảnh thật EM 70% |
 | 9 | Tài liệu: hướng dẫn chạy prototype, Team Report W13, video demo dự phòng | 2 h | ⏳ |
 | 10 | Đóng tuần: commit + push, dọn Downloads + `G:\My Drive\ViVQA-VLM` | 1 h | ⏳ |
 | | **Tổng** (không Fix B / có Fix B) | **≈ 21,5 h / ≈ 31,5 h** | |
@@ -306,6 +306,51 @@ Nguồn: `experiments/W13_prototype_check_L4_seed42/prototype_check_summary.md` 
 
 Thêm một lần chạy thử tích hợp `--run` → `--analyze` trên Drive giả (backend giả, cache giả có 1 ảnh khác, 1 câu W11 khác): phán quyết bắt đúng 90% / 95% → KHÔNG ĐẠT.
 
+## Kết quả bước 8 (31/10/2026): R-LIVE **ĐẠT** · R-OCR **KHÔNG ĐẠT**
+
+Nguồn: `experiments/W13_prototype_live_L4_seed42/prototype_live_summary.md` (run `W13_LIVE_sh_ocrlive_sample200img_bf16_L4_seed42`, L4, 30–31/10). OCR tiến trình riêng chạy **GPU** (Paddle GPU 3.3.1 cùng phiên với torch, theo quy trình notebook 19); engine trùng cache (`paddleocr`, `det_model`, `rec_model`, `vietocr_config`, `lang`). Mẫu: ViVQA 200 ảnh / 211 câu, ViTextVQA 200 ảnh / 261 câu (sha256 danh sách câu trong `meta.json`). Claude đã tính lại độc lập từ `records.jsonl`, OCR cache và `predictions.json` W11: trùng summary.
+
+| Luật | ViVQA | ViTextVQA test2000 | Phán quyết |
+|---|---|---|---|
+| R-OCR (văn bản OCR vào prompt: trực tiếp = cache, ≥ 98% ảnh) | 200/200 (100%) | 175/200 (**87,5%**) | **KHÔNG ĐẠT** |
+| R-LIVE (trả lời qua đường giao diện = W11, ≥ 97% câu và ΔEM ≥ −1,5) | 211/211 (100%), EM 75,83 = 75,83 | 257/261 (98,5%), EM 50,19 vs 49,81 (+0,38) | **ĐẠT** |
+
+**Vì sao R-OCR không đạt (phân tích sau, không đổi luật, không chạy lại):**
+- **(a) 18 ảnh ViTextVQA lớn hơn 2.048 px bị giao diện thu nhỏ** trước khi OCR (quyết định D3 ở bước 7), trong khi cache được OCR trên ảnh gốc. 17/18 ảnh này lệch cache. **Cả 4 câu trả lời lệch W11** đều nằm trên các ảnh bị thu nhỏ (25 câu, 21 trùng).
+- **(b) 8 ảnh đi nguyên file vẫn lệch nhẹ** (độ giống chuỗi 0,82–1,00, vd `Ironpot` → `Ironipor`). Cache ViTextVQA được dựng trên GPU khác (W08–W10), nên giải thích phù hợp nhất là sai khác số học giữa GPU. Câu trả lời trên ảnh nguyên file trùng W11 **236/236**.
+- **(c) Giả thuyết hậu kiểm, chưa kiểm định:** ở `1849.jpg` và `14277.jpg` (4000×3000), cache chứa chữ không liên quan (vd `WHIRS`, `Transly`, `Contracts`), còn OCR trên ảnh đã thu nhỏ đọc đúng biển hiệu tiếng Việt. Hai khả năng:
+  - Paddle dò hộp trên ảnh xoay theo EXIF (OpenCV) trong khi VietOCR cắt hộp từ ảnh PIL không xoay;
+  - OCR kém trên ảnh độ phân giải rất cao.
+
+  Cần kiểm tỉ lệ ảnh ViTextVQA có cờ EXIF Orientation ≠ 1 (Colab CPU, không tốn GPU) → **mang sang W14**.
+
+**Hệ quả (đúng như ghi trước):** không đổi số trong khoá luận (số chính thức dùng OCR cache). Phần Prototype của báo cáo ghi rõ: "OCR trực tiếp khác cache ở 12,5% ảnh ViTextVQA (chủ yếu do giao diện thu nhỏ ảnh > 2.048 px, phần còn lại do khác GPU); câu trả lời của demo vẫn trùng eval ở 98,5–100% câu". Giữ nguyên ngưỡng 2.048 px của giao diện (đường đã kiểm R-LIVE).
+
+**Chỉ mô tả — tốc độ, bộ nhớ (L4):**
+
+| Tập | n | OCR p50 / p95 (s) | Model p50 / p95 (s) | Tổng p50 / p95 (s) |
+|---|---|---|---|---|
+| ViVQA | 206 | 0,04 / 0,26 | 0,53 / 0,81 | 0,59 / 0,88 |
+| ViTextVQA | 261 | 0,69 / 2,40 | 0,81 / 1,75 | 1,63 / 3,65 |
+| Gộp | 467 | 0,31 / 1,92 | 0,63 / 1,58 | 0,98 / 3,30 |
+
+Khởi động 59,8 s (tiến trình OCR 16,6 s). VRAM: tiến trình chính (Qwen) đỉnh 2,61 GB; cả hai tiến trình 4,8 GB (Qwen 2,9 GB + OCR 1,9 GB). Lần chạy mẫu 11 phút. CU: 18,58 → 17,38 (≈ 1,2, gồm cài đặt và chép ảnh).
+
+**Chỉ mô tả — 20 ảnh thật của nhóm** (`experiments/W13_REAL_sh_realphotos_bf16_L4/realphotos_summary.md`; ảnh chụp bằng điện thoại, nằm trên Drive `data/real_photos_w13/`, **không** đưa lên GitHub):
+- EM **14/20 (70%)**. Câu có/không **5/5** đúng, gồm 3 câu hỏi về vật **không có** trong ảnh: không có hallucination "có".
+- Sai:
+  - 2 câu đúng ý nhưng thiếu chữ: `orion` so với "nha khoa orion"; `eleven` so với "7-eleven";
+  - 1 câu OCR đọc sai: "lắp dụng bình pccc";
+  - 1 câu gần đúng: "sân cát" so với "cát";
+  - 2 câu sai thật: đếm mèo "sáu" (đáp án 5), "dây" (đáp án móc áo).
+- VietOCR sinh **chữ tiếng Anh vô nghĩa** trên vùng không phải chữ hoặc chữ nghiêng (vd `CONCONTRICTIONALISTS`, `communicates`). Đây là một kiểu lỗi OCR → ghi vào Error analysis.
+- Mức tin cậy: 1 Cao / 11 Trung bình / 8 Thấp. 4/8 câu mức Thấp vẫn đúng: ảnh thật lệch phân phối so với test, nên mức tin cậy dè dặt hơn.
+- Tổng thời gian mỗi câu 1,4–4,7 s.
+
+**Sự cố khi chạy (đã sửa code, không đổi cách đo):** notebook 24 lần 1 dừng ở mục 4 vì thư mục kết quả chưa được tạo trước khi mở file log OCR (`FileNotFoundError`; kiểm thử tích hợp offline dùng backend giả nên không bắt được). Lần chạy này đã thêm tay một cell `os.makedirs` rồi chạy tiếp từ mục 4. Code giờ tự tạo thư mục (`OCRWorkerClient`, `run_live`, `run_realphotos`); selftest thêm trường hợp thư mục log chưa tồn tại.
+
+**Chưa làm:** mở giao diện qua link `--share` để thử tay và quay video demo (lần này `UI_MINUTES = 0` vì chạy qua đêm) → bước 9.
+
 ## Ngân sách
 
 | Việc | GPU | CU (L4 ≈ 1,54 CU/h) |
@@ -363,3 +408,12 @@ CU được cộng thêm khi gia hạn gói ngày 02/11; giờ GPU và VRAM vẫ
 | `notebooks/24_prototype_live_ocr_latency_sh_qwen25vl.ipynb` | L4: cài Qwen + Paddle cùng phiên (giữ torch) → selftest 4 script → kiểm luật / adapter / cache / engine OCR → chạy mẫu → phân tích → ảnh thật → giao diện 20 phút (`--share`) → tự trả máy | Cú pháp mọi cell; mỗi code cell có markdown mô tả + kỳ vọng |
 | `docs/W13/realphotos_cau_hoi_mau.csv` | Mẫu file câu hỏi cho ảnh thật (cột `anh`, `cau_hoi`, `dap_an`) | đọc được bằng `read_questions_csv` |
 | `src/prototype/ocr_worker.py` | + `FLAGS_allocator_strategy=auto_growth` cho tiến trình OCR (Paddle không giữ trước VRAM) | `--selftest` |
+
+## File mới / đổi (kết quả bước 8, 31/10)
+
+| File | Nội dung | Kiểm |
+|---|---|---|
+| `experiments/W13_prototype_live_L4_seed42/` | `prototype_live_summary.json/.md` (R-OCR, R-LIVE, latency) | Claude tính lại độc lập: trùng |
+| `experiments/W13_LIVE_sh_ocrlive_sample200img_bf16_L4_seed42/meta.json` | Mẫu, engine OCR, khởi động, VRAM, phiên bản | — |
+| `experiments/W13_REAL_sh_realphotos_bf16_L4/realphotos_summary.md/.json` | 20 ảnh thật: câu hỏi, câu trả lời, mức, thời gian (không có ảnh) | Claude tính lại EM: 14/20 |
+| `src/prototype/ocr_worker.py`, `src/eval/prototype_live.py` | Tự tạo thư mục log / kết quả | `--selftest` (thêm ca thư mục log chưa có) |
