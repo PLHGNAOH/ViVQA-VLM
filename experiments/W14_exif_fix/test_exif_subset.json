@@ -1,0 +1,1136 @@
+[
+{
+"question_id": "test_749",
+"question": "địa điểm này nằm ở đâu ?",
+"answers": [
+"nguyễn chi thanh , p . 9 , q . 5 , tp . hcm"
+],
+"image": "256.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_750",
+"question": "số điện thoại liên hệ là gì ?",
+"answers": [
+"đt : 02838 . 358 . 136"
+],
+"image": "256.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_751",
+"question": "trường học này tên gì ?",
+"answers": [
+"trường dự bị đại học tp . hcm"
+],
+"image": "256.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_752",
+"question": "đây là ủy ban gì ?",
+"answers": [
+"ủy ban dân tộc"
+],
+"image": "256.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_2334",
+"question": "tên của quán ăn này là gì ?",
+"answers": [
+"chicken plus+"
+],
+"image": "881.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_2335",
+"question": "địa chỉ của quán này là ở đâu ?",
+"answers": [
+"192 bà hom , f . 13 , q . 6"
+],
+"image": "881.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_2336",
+"question": "dưới dòng địa chỉ quán nói về gì ?",
+"answers": [
+"cảm ơn quý khách"
+],
+"image": "881.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_2337",
+"question": "mật khẩu wifi của quán này là gì ?",
+"answers": [
+"chicken0515"
+],
+"image": "881.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_2338",
+"question": "đây là thẻ bàn ăn số mấy ?",
+"answers": [
+"05"
+],
+"image": "881.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_2619",
+"question": "số nhà trước mặt người ngồi xe máy là gì ?",
+"answers": [
+"318"
+],
+"image": "979.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_2620",
+"question": "biển số xe của người chạy xe máy là gì ?",
+"answers": [
+"50 - n1 022 . 24"
+],
+"image": "979.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_2757",
+"question": "cuốn sách này vết về gì ?",
+"answers": [
+"10 nguyên tác xây dựng hệ giá trị bản thân"
+],
+"image": "1020.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_2758",
+"question": "nội dung của dòng dưới tên cuốn sách là gì ?",
+"answers": [
+"muốn mọi người tôn trọng và dành nhiều thời gian cho bạn , hãy luôn mang đến nhiều giá trị hơn cho họ"
+],
+"image": "1020.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_2759",
+"question": "cuốn sách này thuộc nhà xuất bản nào ?",
+"answers": [
+"thanh niên"
+],
+"image": "1020.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_2829",
+"question": "cuốn sách này được biên soạn về gì ?",
+"answers": [
+"mỹ thuật"
+],
+"image": "1036.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_2830",
+"question": "cuốn sách mỹ thuật 6 này dành cho ai ?",
+"answers": [
+"giáo viên"
+],
+"image": "1036.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_2831",
+"question": "cuốn sách thuộc nhà xuất bản nào ?",
+"answers": [
+"giáo dục việt nam"
+],
+"image": "1036.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_3419",
+"question": "cuốn sách này tên gì ?",
+"answers": [
+"tâm tĩnh lặng miệng mỉn cười"
+],
+"image": "1249.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_3420",
+"question": "cuốn sách này do ai dịch ?",
+"answers": [
+"nguyễn thị loan"
+],
+"image": "1249.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5270",
+"question": "quán trà sữa có bảng hiệu màu nâu trong ảnh là quán gì ?",
+"answers": [
+"happy life"
+],
+"image": "1849.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5271",
+"question": "quán chè - bánh quê có biển hiệu màu nâu trong ảnh tên là gì ?",
+"answers": [
+"kim hương"
+],
+"image": "1849.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5272",
+"question": "địa chỉ của quán kim hương là ở đâu ?",
+"answers": [
+"138b nguyễn tri phương , p . 9 , quận 5"
+],
+"image": "1849.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5273",
+"question": "cửa hàng trà sữa happy life nằm ở quận mấy ?",
+"answers": [
+"5"
+],
+"image": "1849.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5274",
+"question": "số hotline của cửa tiệm bảng hiệu màu nâu là gì ?",
+"answers": [
+"0908 60 60 93"
+],
+"image": "1849.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5275",
+"question": "chương trình khuyến mãi mà cửa hàng kim nương đang tổ chức là gì ?",
+"answers": [
+"mua 2 ly tặng 1 ly"
+],
+"image": "1849.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5276",
+"question": "khoảng thời gian áp dụng chương trình mua 2 ly tính 1 ly của cửa tiệm happy life là gì ?",
+"answers": [
+"từ 09 / 12 - 11 / 12 / 2022"
+],
+"image": "1849.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5524",
+"question": "quán ăn có bảng hiệu màu trắng tên là gì ?",
+"answers": [
+"tương ớt cơm tấm"
+],
+"image": "1920.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5525",
+"question": "địa chỉ của quán tương ớt là gì ?",
+"answers": [
+"136b nguyễn tri phương , p . 9 , q . 5 , tp . hcm"
+],
+"image": "1920.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5526",
+"question": "quán ăn tương ớt nằm trên đường nào ?",
+"answers": [
+"nguyễn tri phương"
+],
+"image": "1920.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5527",
+"question": "quán tương ớt có món chính là món gì ?",
+"answers": [
+"cơm tấm"
+],
+"image": "1920.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5528",
+"question": "món xiên qua của quán tương ớt có giá trung bình bao nhiêu ?",
+"answers": [
+"15k"
+],
+"image": "1920.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5652",
+"question": "tựa đề của cuốn sách này là gì ?",
+"answers": [
+"vũ trụ toàn ảnh"
+],
+"image": "1959.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5653",
+"question": "cuốn sách này được viết ra bởi ai ?",
+"answers": [
+"michael talbot"
+],
+"image": "1959.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5654",
+"question": "những người nào tham gia dịch cuốn sách này sang tiếng việt ?",
+"answers": [
+"phạm văn thiếu - nguyễn đình điện"
+],
+"image": "1959.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5655",
+"question": "cuốn sách này chủ yếu nói về điều gì ?",
+"answers": [
+"một lý thuyết cách mạng về thực tại giải thích được"
+],
+"image": "1959.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_5656",
+"question": "cuốn sách này được xuất bản bởi nhà xuất bản nào ?",
+"answers": [
+"trẻ"
+],
+"image": "1959.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_6856",
+"question": "địa chỉ của ngôi nhà này là gì ?",
+"answers": [
+"128 võ văn kiệt"
+],
+"image": "2371.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_6972",
+"question": "ai là người đã viết ra cuốn sách này ?",
+"answers": [
+"dr . sarah brever"
+],
+"image": "2415.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_6973",
+"question": "tên của cuốn sách này là gì ?",
+"answers": [
+"phương pháp thư giãn"
+],
+"image": "2415.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_7020",
+"question": "cuốn sách này được viết ở đâu ?",
+"answers": [
+"viện khoa học xã hội việt nam viện nghiên cứu đông nam á"
+],
+"image": "2430.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_7021",
+"question": "cuốn sách này do ai chủ biên ?",
+"answers": [
+"đức ninh"
+],
+"image": "2430.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_7022",
+"question": "cuốn sách này có tên là gì ?",
+"answers": [
+"từ điển văn học đông nam á"
+],
+"image": "2430.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_7023",
+"question": "nhà xuất bản phát hành cuốn sách này là gì ?",
+"answers": [
+"nhà xuất bản khoa học xã hội"
+],
+"image": "2430.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_7735",
+"question": "trên cột điện có ghi cấm điều gì ?",
+"answers": [
+"cấm trèo"
+],
+"image": "2654.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_7736",
+"question": "vì sao phải cấm trèo cột điện ?",
+"answers": [
+"điện áp cao nguy hiểm chết người"
+],
+"image": "2654.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_7737",
+"question": "căn nhà màu cam quảng cáo giá như thế nào ?",
+"answers": [
+"chỉ từ 69 . 000 đ / bé"
+],
+"image": "2654.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_7738",
+"question": "trên mái che sau cột điện có bảng thông tin của ai ?",
+"answers": [
+"kim lợis"
+],
+"image": "2654.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_9334",
+"question": "ngồi nhà bên trái kinh doanh dịch vụ gì ?",
+"answers": [
+"phòng công chứng"
+],
+"image": "3147.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_9335",
+"question": "phòng công chứng bên trái số mấy ?",
+"answers": [
+"số 7"
+],
+"image": "3147.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_9336",
+"question": "cửa hàng có biển hiệu màu xanh do công ty nào tài trợ ?",
+"answers": [
+"công ty luật tnhh"
+],
+"image": "3147.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_10579",
+"question": "chiếc ô tô góc trái bức hình mang biển số bao nhiêu ?",
+"answers": [
+"67a 191 . 49"
+],
+"image": "3539.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_10580",
+"question": "trong hình au á là gì ?",
+"answers": [
+"phòng khám đa khoa"
+],
+"image": "3539.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_10581",
+"question": "phòng khám đa khoa trong hình tên gì ?",
+"answers": [
+"au á"
+],
+"image": "3539.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_10657",
+"question": "cửa tiệm tấn tài là cửa tiệm như thế nào ?",
+"answers": [
+"đại lý vé số"
+],
+"image": "3569.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_10658",
+"question": "địa chỉ đại lý vé số tấn tài là ở đâu ?",
+"answers": [
+"524 an dương vương , p . 9 , q . 5"
+],
+"image": "3569.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_10659",
+"question": "cửa hàng bên phải tấn tài là điểm như thế nào ?",
+"answers": [
+"bán vé và giao nhận hàng tuyến"
+],
+"image": "3569.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_10660",
+"question": "cửa hàng bên phải điểm bán vé là tên là gì ?",
+"answers": [
+"cơ sở trường"
+],
+"image": "3569.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_10661",
+"question": "cơ sở trường chuyên nhận cung cấp những thứ gì ?",
+"answers": [
+"nội thất ôtô - bọc salo"
+],
+"image": "3569.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_10662",
+"question": "địa chỉ của cơ sở trường là ở đâu ?",
+"answers": [
+"522 an dương vương - p . 9 - q . 5"
+],
+"image": "3569.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_10663",
+"question": "số điện thoại liên lạc cho điểm bán vé trong ảnh là gì ?",
+"answers": [
+"19008678"
+],
+"image": "3569.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_13390",
+"question": "quán gochu có bán gì ?",
+"answers": [
+"mì cay 7 cấp độ hàn quốc"
+],
+"image": "4461.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_13391",
+"question": "của hàng bên trái quán gochu tên gì ?",
+"answers": [
+"việt"
+],
+"image": "4461.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_13392",
+"question": "quán nào bán mì cay ?",
+"answers": [
+"gochu"
+],
+"image": "4461.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_18711",
+"question": "nhà thuốc mai khanh là nhà thuốc gì ?",
+"answers": [
+"nhà thuốc tư nhân"
+],
+"image": "6230.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_18712",
+"question": "nhà thuốc trong đây được đặt tên là gì ?",
+"answers": [
+"mai khanh"
+],
+"image": "6230.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_18713",
+"question": "nhà thuốc mai khanh chuyên làm gì với thuốc ?",
+"answers": [
+"chuyên bán lẻ"
+],
+"image": "6230.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_18714",
+"question": "nhà thuốc tư nhân mai khanh nằm trên đương nào ?",
+"answers": [
+"hòa hảo"
+],
+"image": "6230.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_18806",
+"question": "chiếc xe bus xanh mang số hiệu bao nhiêu ?",
+"answers": [
+"150"
+],
+"image": "6261.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_18807",
+"question": "xe bus 150 đi đâu ?",
+"answers": [
+"xa lộ hà nội"
+],
+"image": "6261.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_18808",
+"question": "xe buýt 150 được sản suất bởi hãng xe nào ?",
+"answers": [
+"samco"
+],
+"image": "6261.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_18809",
+"question": "chiếc xe máy màu xe góc phải bức hình là của thương hiệu nào ?",
+"answers": [
+"honda"
+],
+"image": "6261.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_19605",
+"question": "bên kia đường là khu phố mấy ?",
+"answers": [
+"khu phố 4"
+],
+"image": "6551.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_19606",
+"question": "của hàng bên kia đường có tên là gì ?",
+"answers": [
+"hà nội"
+],
+"image": "6551.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_22743",
+"question": "cửa hàng này có tên là gì ?",
+"answers": [
+"hot & cold"
+],
+"image": "7644.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_22744",
+"question": "cửa hàng này kinh doanh cái gì ?",
+"answers": [
+"trà sữa & xiên que"
+],
+"image": "7644.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_22745",
+"question": "cửa hàng ngoài bán xiên que và bán cái gì ?",
+"answers": [
+"trà sữa"
+],
+"image": "7644.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_22746",
+"question": "cửa hàng ngoài bán trà sữa và bán cái gì ?",
+"answers": [
+"xiên que"
+],
+"image": "7644.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_22747",
+"question": "số điện thoại nào để free ship ?",
+"answers": [
+"1900 2230"
+],
+"image": "7644.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_22748",
+"question": "gọi số 1900 2230 để được gì ?",
+"answers": [
+"free ship"
+],
+"image": "7644.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_22749",
+"question": "số nhà của quán là bao nhiêu ?",
+"answers": [
+"393"
+],
+"image": "7644.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_25018",
+"question": "tác giả của quyển sách ?",
+"answers": [
+"ths . văn thị thanh mai"
+],
+"image": "8447.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_25019",
+"question": "nội dung của quyển sách mong muốn ?",
+"answers": [
+"góp phần tìm hiểu tư tưởng và đạo đức hồ chí minh"
+],
+"image": "8447.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_25020",
+"question": "nhà sản xuất nào hợp tác với tác giả để bán quyển sách này ?",
+"answers": [
+"nhà xuất bản chính trị quốc gia"
+],
+"image": "8447.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_27528",
+"question": "truyện này có tên là gì ?",
+"answers": [
+"mùa đông giấu những niềm riêng"
+],
+"image": "9172.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_27529",
+"question": "tác giả của cuốn sách này là ai ?",
+"answers": [
+"trương ngọc anh"
+],
+"image": "9172.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_27530",
+"question": "cuốn sách này do nhà xuất bản nào sản xuất ?",
+"answers": [
+"nhà xuất bản văn học"
+],
+"image": "9172.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_28890",
+"question": "tên của cuốn sách này là gì ?",
+"answers": [
+"phân tích dữ liệu với r"
+],
+"image": "9607.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_28891",
+"question": "ai là tác giả của cuốn sách này ?",
+"answers": [
+"nguyễn văn tuấn"
+],
+"image": "9607.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_28892",
+"question": "cuốn sách này được phát hành bởi nhà xuất bản nào ?",
+"answers": [
+"tổng hợp thành phố hồ chí minh"
+],
+"image": "9607.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_28900",
+"question": "cuốn sách này có tên là gì ?",
+"answers": [
+"cộng đồng kinh tế asean ( aec ) nội dung và lộ trình"
+],
+"image": "9610.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_28901",
+"question": "cuốn sách này thuộc thể loại nào ?",
+"answers": [
+"chuyên khảo"
+],
+"image": "9610.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_28902",
+"question": "ai là chủ biên của cuốn sách này ?",
+"answers": [
+"nguyễn hồng sơn"
+],
+"image": "9610.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_28903",
+"question": "cuốn sách này thuộc viện nào ?",
+"answers": [
+"khoa học xã hội việt nam viện nghiên cứu đông nam á"
+],
+"image": "9610.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_28904",
+"question": "nhà xuất bản của cuốn sách này là gì ?",
+"answers": [
+"khoa học xã hội"
+],
+"image": "9610.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_29131",
+"question": "cửa hàng này tên là gì ?",
+"answers": [
+"tiến phát"
+],
+"image": "9673.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_29132",
+"question": "loại công ty của cửa hàng tiến phát ?",
+"answers": [
+"công ty tnhh"
+],
+"image": "9673.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_29133",
+"question": "cửa hàng tiến phát chuyền về gì ?",
+"answers": [
+"camera quan sát - thiết bị an ninh - điện năng lượng mặt trời - báo trộm báo cháy - tổng đài điện thoại"
+],
+"image": "9673.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_30069",
+"question": "xuân trong bức tranh là xuân nào ?",
+"answers": [
+"xuân quý mão 2023"
+],
+"image": "10031.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_30220",
+"question": "tựa đề của cuốn sách này là gì ?",
+"answers": [
+"quản lý đất đai ở việt nam ( 1945 - 2010 )"
+],
+"image": "10086.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_30221",
+"question": "ai là nhà xuất bản của cuốn sách ?",
+"answers": [
+"chính trị quốc gia"
+],
+"image": "10086.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_30222",
+"question": "tác giả cuốn sách này là ai ?",
+"answers": [
+"ts . nguyễn đình bồng"
+],
+"image": "10086.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_30842",
+"question": "quyển sách được mọi người gọi là ?",
+"answers": [
+"tự do tài chính"
+],
+"image": "10297.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_30843",
+"question": "người đã viết nên quyển sách này là ?",
+"answers": [
+"brian tracy"
+],
+"image": "10297.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_31374",
+"question": "tiệm bán bạt nhựa mang tên gọi là gì ?",
+"answers": [
+"tuấn đạt"
+],
+"image": "10470.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_31375",
+"question": "tiệm tuấn đạt có số điện thoại nào ?",
+"answers": [
+"0903 . 016 . 329"
+],
+"image": "10470.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_31376",
+"question": "tiệm bạt nhựa tuấn đạt nằm trên con đường nào ?",
+"answers": [
+"dương tử giang"
+],
+"image": "10470.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_31441",
+"question": "chiếc xe khách là của nhà xe nào ?",
+"answers": [
+"duy quý"
+],
+"image": "10494.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_31442",
+"question": "chiếc xe của nhà xe duy quý có biển số xe là gì ?",
+"answers": [
+"63b . 019 . 49"
+],
+"image": "10494.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_31443",
+"question": "nhà xe duy quý có số điện thoại nào ?",
+"answers": [
+"02733 . 91 4444 - 028 . 3853 6944"
+],
+"image": "10494.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_31724",
+"question": "dòng chữ màu đỏ nền trắng bên phải bức ảnh có nội dung gì ?",
+"answers": [
+"sủa chữa mi"
+],
+"image": "10566.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_33214",
+"question": "dòng chữu được in trên tấm bìa nền trắng là gì ?",
+"answers": [
+"saigon"
+],
+"image": "11009.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_35729",
+"question": "chiếc xe bus màu xanh dương là xe số mấy ?",
+"answers": [
+"94"
+],
+"image": "11884.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_38986",
+"question": "chữ được in trên nón bảo hiểm màu xanh là gì ?",
+"answers": [
+"grab"
+],
+"image": "13006.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_38987",
+"question": "địa chỉ nơi chiếc xe máy đang đậu là gì ?",
+"answers": [
+"223 nguyễn tri phương , p . 9"
+],
+"image": "13006.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_41462",
+"question": "hẻm này ở đâu ?",
+"answers": [
+"497 sư vạn hạnh"
+],
+"image": "13853.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_41463",
+"question": "khẩu hiệu hẻm 497 là gì ?",
+"answers": [
+"toàn dân đoàn kết xây dựng đời sống văn hóa"
+],
+"image": "13853.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_42762",
+"question": "bệnh viện trong ảnh tên là gì ?",
+"answers": [
+"bệnh viện răng hàm mặt"
+],
+"image": "14277.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_42763",
+"question": "biển số xe của xe đậu trước cổng là số mấy ?",
+"answers": [
+"51d - 0421"
+],
+"image": "14277.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_42764",
+"question": "bệnh viện răng hàm mặt thược sở gì ?",
+"answers": [
+"y tế tp hồ chí minh"
+],
+"image": "14277.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_43322",
+"question": "bảng này của hãng nào ?",
+"answers": [
+"vnpt"
+],
+"image": "14454.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_43323",
+"question": "bảng này cấm gì ?",
+"answers": [
+"mở"
+],
+"image": "14454.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_43511",
+"question": "đèn đỏ trong ảnh còn mấy giây ?",
+"answers": [
+"8"
+],
+"image": "14513.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_47593",
+"question": "khu phố trong ảnh là khu phố như thế nào ?",
+"answers": [
+"văn hóa"
+],
+"image": "15904.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_47594",
+"question": "khu phố trong ảnh là khu phố mấy ?",
+"answers": [
+"khu phố 1 - khu phố 2"
+],
+"image": "15904.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_48048",
+"question": "địa điểm trong ảnh là nơi nào ?",
+"answers": [
+"phòng công chứng"
+],
+"image": "16039.jpg",
+"question_type": "unknown"
+},
+{
+"question_id": "test_48049",
+"question": "phòng công chứng là số mấy ?",
+"answers": [
+"số 7"
+],
+"image": "16039.jpg",
+"question_type": "unknown"
+}
+]

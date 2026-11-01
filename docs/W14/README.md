@@ -9,7 +9,7 @@
 | # | Việc | Ước tính | Trạng thái |
 |---|---|---|---|
 | 1 | **R-EXIF**: kiểm cờ xoay EXIF có làm hỏng OCR cache ViTextVQA không — luật (README này) + `src/data/exif_audit.py` + notebook `25_exif_ocr_audit_vitextvqa.ipynb` (T4) | 3 h (≈ 1 h T4) | ✅ 01/11 — **L1 XÁC NHẬN · L2 > 1% · L3 ≤ 5%** |
-| 2 | Theo L2: sửa `ocr.py` + cache mới (notebook `26_ocr_cache_exiffix_vitextvqa.ipynb`, T4) + suy luận lại B3-full full test (notebook `27_b3full_exiffix_testfull_qwen25vl.ipynb`, L4). Không train lại (L3) | ≈ 5 h (≈ 0,4 h T4 + 3 h L4) | ⏳ code xong, chờ chạy |
+| 2 | Theo L2: sửa `ocr.py` + cache mới (notebook `26_ocr_cache_exiffix_vitextvqa.ipynb`, T4) + suy luận lại B3-full full test (notebook `27_b3full_exiffix_testfull_qwen25vl.ipynb`, L4). Không train lại (L3) | ≈ 5 h (≈ 0,4 h T4 + 3 h L4) | ✅ 01/11 — V1–V5 **hợp lệ**; B3-full EM 53,35 → 53,63 (độ nhạy) |
 | 3 | Prototype: sửa đường ảnh (OCR trên ảnh độ phân giải gốc, xử lý EXIF thống nhất với eval) + kiểm lại R-OCR / R-LIVE (luật ghi trước) | 3 h (≈ 1 h L4) | ⏳ |
 | 4 | Demo hoàn chỉnh: bộ ví dụ chọn sẵn, kịch bản demo, quay video dự phòng | 2,5 h | ⏳ |
 | 5 | Gói tái lập phần code: ghim phiên bản thư viện, script suy luận dòng lệnh, README chạy lại, manifest adapter | 3 h | ⏳ |
@@ -101,6 +101,38 @@ Nguồn: `../../experiments/W14_exif_audit_vitextvqa/` (`exif_scan.json`, `exif_
 **Không chạy lại** các run OCR khác (B3 W08/W09 và 3 seed, A2/A3, SH test2000). Chúng dùng chung cache W10 nên chịu cùng lỗi ở 1,256% câu test và 1,28% câu train. So sánh giữa các run này vẫn công bằng (cùng lỗi ở cả hai phía), nhưng điều này phải ghi vào phần giới hạn.
 
 **Prototype:** giao diện đã xoay ảnh có cờ EXIF và đưa PNG không còn cờ cho tiến trình OCR, nên OCR trực tiếp của prototype vốn đã đúng. Với bản sửa, `ocr_worker` cũng tự xoay nếu nhận ảnh còn cờ.
+
+## Kết quả R-EXIF bước 2 (01/11/2026): **hợp lệ** · số chính thức không đổi · dòng độ nhạy +0,28 EM
+
+Nguồn: `../../experiments/W14_exif_fix/` (`ocr_cache_exiffix_manifest.json`, `exif_fix_b3full_summary.json`, `test_exif_subset.json`). Run: `W14_B3full_eval_exiffix_qlora_ocr_vietocr_v1_r16_full_ep1_vitextvqa_testfull_bf16_L4_seed42`, `W14_B3full_eval_exiffix_rotimg_qlora_ocr_vietocr_v1_r16_full_ep1_vitextvqa_testexif_bf16_L4_seed42`. Commit lúc chạy `cded8d9`.
+
+**Phần A — cache đã sửa (notebook 26, T4): HỢP LỆ.**
+- V1: 167 ảnh OCR lại (165 ảnh train + test, 2 ảnh dev300), 0 lỗi.
+- V2: 15.185 ảnh còn lại trùng từng dòng cache W10.
+- V3: 165/165 trùng kiểu `fixed` của notebook 25.
+- V4: engine trùng, có khoá `exif`.
+- Cache mới `data/vitextvqa_official/ocr/paddledet_vietocr_exiffix.json`, sha256 `41abe2ad85c5c9585a22ec62b246b0fb60d5e132ccdb5db6fb37aa7128aa7ad5`. Đáp án nằm trong OCR (126 câu): 0,0% → 41,27%.
+
+**Phần B — B3-full suy luận lại (notebook 27, L4): HỢP LỆ.** V5: 9.902 / 9.902 câu không bị ảnh hưởng có dự đoán trùng run W10 (100%) → mọi khác biệt chỉ đến từ OCR đã sửa.
+
+| Tập câu | Chỉ số | B3-full W10 (**chính thức**) | B3-full + OCR sửa EXIF (**độ nhạy**) | Δ [CI95] | McNemar |
+|---|---|---|---|---|---|
+| Full test 10.028 | EM | 53,35 | 53,63 | +0,28 [+0,17; +0,41] | 33 sửa / 5 làm sai, p = 4,3 × 10⁻⁶ |
+| | ANLS | 73,89 | 74,07 | +0,18 [+0,09; +0,28] | |
+| | F1 (phụ) | 73,73 | 73,96 | | |
+| 126 câu ảnh có cờ xoay | EM | 26,98 | 49,21 | +22,22 [+13,49; +30,95] | |
+| | ANLS | 52,93 | 67,40 | +14,47 [+7,58; +21,53] | |
+| 9.902 câu còn lại | EM / ANLS | 53,69 / 74,16 | 53,69 / 74,16 | 0 | |
+
+- B2 → B3-full: **+3,09 EM** (705 / 395, p = 6,7 × 10⁻²¹) với cache W10; **+3,37 EM** (732 / 394, p = 4,5 × 10⁻²⁴) với cache đã sửa. Kết luận W10 "OCR-aware vượt B2 khi đủ dữ liệu" không đổi và hơi mạnh hơn.
+- H2 vẫn **ủng hộ một phần**: ΔANLS so với B2 là +1,87 (W10) / +2,05 (đã sửa), vẫn < +3.
+- **Chỉ mô tả — ảnh đã xoay** (126 câu, cùng OCR đã sửa, đường ảnh của prototype): EM 49,21 → 53,97 (+4,76 [−1,59; +11,90], p = 0,26, không có ý nghĩa thống kê); ANLS 67,40 → 77,06 (+9,67 [+3,42; +16,17]).
+
+**Giới hạn ghi vào khoá luận:**
+1. Trước W14, OCR của 1,256% câu test và 1,28% câu train ViTextVQA là chữ rác do cờ xoay EXIF. Mọi run OCR (B3, B3-full, SH, A2/A3) chịu chung lỗi này. Riêng B3-full đã đo độ nhạy: +0,28 EM.
+2. Trong eval, mọi model (B1, B2, B3, B3-full, SH) nhận ảnh **chưa xoay** ở các câu này (PIL không xoay theo EXIF). Prototype thì xoay. Trên 126 câu, xoay ảnh tăng ANLS (chỉ mô tả).
+3. B3-full đã học trên OCR rác ở 450 câu train. Không train lại theo L3.
+4. W13 ghi "ảnh ViVQA / ViTextVQA đều nhỏ hơn 2.048 px" là **sai**: 1.418 / 16.762 ảnh ViTextVQA lớn hơn 2.048 px (lớn nhất 5.770 px). Đây là nguyên nhân chính khiến R-OCR không đạt ở W13 → sửa ở bước 3.
 
 ## File mới (bước 1, 01/11/2026)
 

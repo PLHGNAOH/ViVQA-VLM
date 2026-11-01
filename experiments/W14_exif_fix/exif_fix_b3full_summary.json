@@ -1,0 +1,134 @@
+{
+ "what": "W14 bước 2 — B3-full: OCR cache W10 (A) vs OCR cache đã sửa EXIF (B), full test ViTextVQA",
+ "created_utc": "2026-11-01T14:35:33",
+ "old_run": "W10_B3full_eval_qlora_ocr_vietocr_v1_r16_full_ep1_vitextvqa_testfull_bf16_L4_seed42",
+ "new_run": "W14_B3full_eval_exiffix_qlora_ocr_vietocr_v1_r16_full_ep1_vitextvqa_testfull_bf16_L4_seed42",
+ "n_questions": 10028,
+ "n_affected": 126,
+ "n_unaffected": 9902,
+ "V5_unaffected_identical": {
+  "n_identical": 9902,
+  "pct": 100.0,
+  "pass": true
+ },
+ "full_test": {
+  "n": 10028,
+  "em_a": 53.35,
+  "em_b": 53.63,
+  "anls_a": 73.89,
+  "anls_b": 74.07,
+  "d_em": 0.28,
+  "d_anls": 0.18,
+  "a_only": 5,
+  "b_only": 33,
+  "mcnemar_p": 4.255962267052382e-06,
+  "d_em_ci95": [
+   0.17,
+   0.41
+  ],
+  "d_anls_ci95": [
+   0.09,
+   0.28
+  ]
+ },
+ "affected_only": {
+  "n": 126,
+  "em_a": 26.98,
+  "em_b": 49.21,
+  "anls_a": 52.93,
+  "anls_b": 67.4,
+  "d_em": 22.22,
+  "d_anls": 14.47,
+  "a_only": 5,
+  "b_only": 33,
+  "mcnemar_p": 4.255962267052382e-06,
+  "d_em_ci95": [
+   13.49,
+   30.95
+  ],
+  "d_anls_ci95": [
+   7.58,
+   21.53
+  ]
+ },
+ "unaffected_only": {
+  "n": 9902,
+  "em_a": 53.69,
+  "em_b": 53.69,
+  "anls_a": 74.16,
+  "anls_b": 74.16,
+  "d_em": 0.0,
+  "d_anls": 0.0,
+  "a_only": 0,
+  "b_only": 0,
+  "mcnemar_p": 1.0
+ },
+ "metrics_json_old": {
+  "exact_match": 0.5335061826884723,
+  "vqa_accuracy": 0.5335061826884723,
+  "anls": 0.7389297956472233,
+  "token_f1": 0.7373005659476921,
+  "exact_match__unknown": 0.5335061826884723,
+  "vqa_accuracy__unknown": 0.5335061826884723,
+  "anls__unknown": 0.7389297956472233,
+  "token_f1__unknown": 0.7373005659476921
+ },
+ "metrics_json_new": {
+  "exact_match": 0.5362983645791783,
+  "vqa_accuracy": 0.5362983645791783,
+  "anls": 0.7407475024816447,
+  "token_f1": 0.7395867719960115,
+  "exact_match__unknown": 0.5362983645791783,
+  "vqa_accuracy__unknown": 0.5362983645791783,
+  "anls__unknown": 0.7407475024816447,
+  "token_f1__unknown": 0.7395867719960115
+ },
+ "B2_to_B3full_old": {
+  "n": 10028,
+  "em_a": 50.26,
+  "em_b": 53.35,
+  "anls_a": 72.02,
+  "anls_b": 73.89,
+  "d_em": 3.09,
+  "d_anls": 1.87,
+  "a_only": 395,
+  "b_only": 705,
+  "mcnemar_p": 6.656884762445767e-21
+ },
+ "B2_to_B3full_new": {
+  "n": 10028,
+  "em_a": 50.26,
+  "em_b": 53.63,
+  "anls_a": 72.02,
+  "anls_b": 74.07,
+  "d_em": 3.37,
+  "d_anls": 2.05,
+  "a_only": 394,
+  "b_only": 732,
+  "mcnemar_p": 4.519598710223842e-24
+ },
+ "descriptive_rotated_image_vs_new": {
+  "n": 126,
+  "em_a": 49.21,
+  "em_b": 53.97,
+  "anls_a": 67.4,
+  "anls_b": 77.06,
+  "d_em": 4.76,
+  "d_anls": 9.67,
+  "a_only": 7,
+  "b_only": 13,
+  "mcnemar_p": 0.26317596435546875,
+  "d_em_ci95": [
+   -1.59,
+   11.9
+  ],
+  "d_anls_ci95": [
+   3.42,
+   16.17
+  ]
+ },
+ "verdict": {
+  "valid": true,
+  "L2": "báo cả hai số; số chính thức ViTextVQA giữ B3-full W10 (L3: 1,28% câu train ≤ 5% -> không train lại)"
+ }
+}
