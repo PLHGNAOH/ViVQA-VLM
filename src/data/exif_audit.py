@@ -391,6 +391,200 @@ def run_analyze(scan: Dict[str, Any], reocr: Dict[str, Any], out_dir: str) -> Di
 
 
 # =============================================================================
+# 2b) BƯỚC 2 (luật R-EXIF L2: > 1% câu test -> sửa + OCR lại + suy luận lại B3-full) — docs/W14/README.md
+# =============================================================================
+RULE2 = {"v3_parity_min": 0.95,      # V3: ≥ 95% ảnh mẫu bước B cho chữ OCR (160 ký tự đầu) trùng kiểu `fixed`
+         "v5_identical_min": 0.995,  # V5: ≥ 99,5% câu ảnh KHÔNG cờ xoay có dự đoán trùng run W10
+         "n_boot": 10000, "seed": 42}
+ENGINE_MUST = ("paddleocr", "det_model", "rec_model", "vietocr_config", "lang")
+
+
+def exif_keys(scan: Dict[str, Any], keys) -> List[str]:
+    """Các ảnh (trong keys) có cờ xoay theo kết quả quét bước A. Ảnh không có trong kết quả quét -> lỗi."""
+    sizes = scan["images"]["_vitextvqa_all_sizes"]
+    unknown = [k for k in keys if k not in sizes]
+    if unknown:
+        raise KeyError(f"{len(unknown)} ảnh không có trong exif_scan.json, vd {unknown[:3]}")
+    return sorted(k for k in keys if sizes[k][2] != 1)
+
+
+def run_fix_cache(scan: Dict[str, Any], drive_root: str, img_dir: str, old_cache_path: str, new_cache_path: str,
+                  engine: Any, out_dir: str, reocr: Optional[Dict[str, Any]] = None,
+                  expect_old_sha: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Cache MỚI = cache W10 + OCR lại (engine đã sửa EXIF) đúng các ảnh có cờ xoay. Cache cũ không bị đụng.
+    Hợp lệ khi: V1 0 ảnh lỗi · V2 phần ảnh không cờ xoay trùng từng dòng cache cũ · V3 trùng kiểu `fixed` của
+    bước B ≥ 95% · V4 engine trùng cache ở các mục quyết định + có khoá `exif`.
+    """
+    import copy
+    from src.data.ocr import EXIF_FIX, cache_fingerprint, load_ocr_cache, save_ocr_cache
+    if os.path.abspath(new_cache_path) == os.path.abspath(old_cache_path):
+        raise ValueError("cache mới phải là file KHÁC cache cũ (luật: cache cũ giữ nguyên)")
+    old_sha = sha256_file(old_cache_path)
+    if expect_old_sha and old_sha != expect_old_sha:
+        raise ValueError(f"cache cũ sha256 {old_sha[:12]}… khác biên bản ({expect_old_sha[:12]}…) -> DỪNG")
+    old = load_ocr_cache(old_cache_path)
+    info = dict(getattr(engine, "info", {}) or {})
+    v4_diff = {k: (old.get("engine_info", {}).get(k), info.get(k)) for k in ENGINE_MUST
+               if old.get("engine_info", {}).get(k) != info.get(k)}
+    v4 = not v4_diff and info.get("exif") == EXIF_FIX
+    if not v4:
+        raise ValueError(f"V4 KHÔNG ĐẠT: engine khác cache ở {v4_diff} hoặc thiếu bản sửa EXIF (exif={info.get('exif')})")
+    fix = exif_keys(scan, list(old["images"]))
+    fix_set = set(fix)
+    others = [k for k in old["images"] if k not in fix_set]
+    new = copy.deepcopy(old)
+    errors: List[str] = []
+    t0 = time.time()
+    for i, k in enumerate(fix, 1):
+        try:
+            new["images"][k] = engine.read(os.path.join(img_dir, k))
+        except Exception as e:
+            errors.append(f"{k}: {type(e).__name__}: {e}"[:200])
+        if i % 25 == 0 or i == len(fix):
+            print(f"[R-EXIF fix] {i}/{len(fix)} | {(time.time() - t0) / i:.2f} s/ảnh", flush=True)
+    new["engine_info"] = info
+    new["exif_fix"] = {"what": "W14 R-EXIF L2: OCR lại ảnh có cờ xoay EXIF bằng engine đã sửa (oriented_image)",
+                       "created_utc": datetime.datetime.utcnow().isoformat(timespec="seconds"),
+                       "derived_from": os.path.basename(old_cache_path), "derived_from_sha256": old_sha,
+                       "engine_info_before": old.get("engine_info"), "replaced_images": fix}
+    fp_old, fp_new = cache_fingerprint(old, others), cache_fingerprint(new, others)
+    v2 = fp_old == fp_new
+    parity = {"n": 0, "n_match": 0, "mismatch_examples": []}
+    if reocr:
+        for r in reocr["records"]:
+            if r["group"] != "affected" or r["image"] not in fix_set or "text_fixed" not in r:
+                continue
+            parity["n"] += 1
+            got = norm_text(new["images"][r["image"]])[:160]
+            if got == r["text_fixed"]:
+                parity["n_match"] += 1
+            elif len(parity["mismatch_examples"]) < 5:
+                parity["mismatch_examples"].append({"image": r["image"], "step_b": r["text_fixed"][:80], "now": got[:80]})
+    parity["pct"] = round(100.0 * parity["n_match"] / parity["n"], 2) if parity["n"] else None
+    v3 = parity["n"] > 0 and parity["n_match"] >= RULE2["v3_parity_min"] * parity["n"]
+    test = _records(drive_root, "vitextvqa_official", "test")
+    q_fix = [r for r in test if str(r["image"]) in fix_set]
+    aio = {tag: round(100.0 * sum(answer_in(norm_text(c["images"][str(r["image"])]), r.get("answers") or [])
+                                  for r in q_fix) / max(len(q_fix), 1), 2)
+           for tag, c in (("old", old), ("new", new))}
+    valid = not errors and v2 and v3 and v4
+    save_ocr_cache(new, new_cache_path)
+    man = {"what": "W14 bước 2 — OCR cache ViTextVQA đã sửa EXIF (file cache nằm trên Drive)",
+           "created_utc": new["exif_fix"]["created_utc"], "valid": valid,
+           "cache_file": new_cache_path.replace(drive_root.rstrip("/") + "/", ""), "sha256": sha256_file(new_cache_path),
+           "derived_from": new["exif_fix"]["derived_from"], "derived_from_sha256": old_sha,
+           "n_images": len(new["images"]), "n_replaced": len(fix), "n_errors": len(errors), "errors": errors[:10],
+           "V1_no_errors": not errors, "V2_others_unchanged": v2, "others_fingerprint": fp_new, "n_others": len(others),
+           "V3_parity_step_b": v3, "parity": parity, "V4_engine": v4, "engine_info": info,
+           "test_questions_on_fixed_images": len(q_fix), "pct_answer_in_ocr_test_fixed_images": aio,
+           "sec_per_image": round((time.time() - t0) / max(len(fix), 1), 3)}
+    with open(os.path.join(out_dir, "ocr_cache_exiffix_manifest.json"), "w", encoding="utf-8", newline="\n") as f:
+        json.dump(man, f, ensure_ascii=False, indent=1)
+    return man
+
+
+def make_exif_subset(scan: Dict[str, Any], drive_root: str, img_dir: str, out_dir: str, rot_dir: str) -> Dict[str, Any]:
+    """
+    Chỉ mô tả (C): câu full test có ảnh cờ xoay -> file data con + bản ảnh ĐÃ XOAY (giữ nguyên TÊN file để tra
+    OCR cache; nội dung là PNG không còn cờ, PIL đọc theo nội dung). Dùng cho run "ảnh xoay + OCR đã sửa"
+    (giống đường ảnh của prototype).
+    """
+    from PIL import Image, ImageOps
+    test = _records(drive_root, "vitextvqa_official", "test")
+    keys = exif_keys(scan, sorted({str(r["image"]) for r in test}))
+    ks = set(keys)
+    sub = [r for r in test if str(r["image"]) in ks]
+    os.makedirs(rot_dir, exist_ok=True)
+    for k in keys:
+        with Image.open(os.path.join(img_dir, k)) as im:
+            ImageOps.exif_transpose(im).convert("RGB").save(os.path.join(rot_dir, k), format="PNG")
+    p = os.path.join(out_dir, "test_exif_subset.json")
+    with open(p, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(sub, f, ensure_ascii=False, indent=0)
+    return {"data_file": p, "n_questions": len(sub), "n_images": len(keys), "rot_dir": rot_dir,
+            "data_sha256": sha256_file(p)}
+
+
+def _paired(s_a: List[Dict[str, float]], s_b: List[Dict[str, float]], idx: List[int], boot: bool) -> Dict[str, Any]:
+    from src.eval.compare_runs import mcnemar_exact_p, paired_bootstrap_ci
+    n = len(idx)
+    if n == 0:
+        return {"n": 0}
+    em_a = [s_a[i]["exact_match"] for i in idx]
+    em_b = [s_b[i]["exact_match"] for i in idx]
+    an_a = [s_a[i]["anls"] for i in idx]
+    an_b = [s_b[i]["anls"] for i in idx]
+    b = sum(1 for x, y in zip(em_a, em_b) if x > y)          # A đúng, B sai
+    c = sum(1 for x, y in zip(em_a, em_b) if x < y)          # A sai, B đúng
+    out = {"n": n, "em_a": round(100 * sum(em_a) / n, 2), "em_b": round(100 * sum(em_b) / n, 2),
+           "anls_a": round(100 * sum(an_a) / n, 2), "anls_b": round(100 * sum(an_b) / n, 2),
+           "d_em": round(100 * (sum(em_b) - sum(em_a)) / n, 2),
+           "d_anls": round(100 * (sum(an_b) - sum(an_a)) / n, 2),
+           "a_only": b, "b_only": c, "mcnemar_p": mcnemar_exact_p(b, c)}
+    if boot:
+        lo, hi = paired_bootstrap_ci([y - x for x, y in zip(em_a, em_b)], RULE2["n_boot"], RULE2["seed"])
+        out["d_em_ci95"] = [round(100 * lo, 2), round(100 * hi, 2)]
+        lo, hi = paired_bootstrap_ci([y - x for x, y in zip(an_a, an_b)], RULE2["n_boot"], RULE2["seed"])
+        out["d_anls_ci95"] = [round(100 * lo, 2), round(100 * hi, 2)]
+    return out
+
+
+def run_compare(scan: Dict[str, Any], drive_root: str, old_run: str, new_run: str, out_dir: str,
+                b2_run: Optional[str] = None, rot_run: Optional[str] = None) -> Dict[str, Any]:
+    """So B3-full W10 (cache cũ) với B3-full W14 (cache đã sửa) theo luật L2 + kiểm hợp lệ V5."""
+    from src.eval.compare_runs import load_predictions, per_sample_scores
+    test = _records(drive_root, "vitextvqa_official", "test")
+    qimg = {r["question_id"]: str(r["image"]) for r in test}
+    p_old, p_new = load_predictions(old_run), load_predictions(new_run)
+    if [r["question_id"] for r in p_old] != [r["question_id"] for r in p_new] or len(p_old) != len(test):
+        raise ValueError("hai run không cùng tập / thứ tự câu hỏi full test -> DỪNG")
+    ks = set(exif_keys(scan, sorted(set(qimg.values()))))
+    aff = [i for i, r in enumerate(p_old) if qimg[r["question_id"]] in ks]
+    unaff = [i for i, r in enumerate(p_old) if qimg[r["question_id"]] not in ks]
+    ident = sum(1 for i in unaff if p_old[i].get("prediction") == p_new[i].get("prediction"))
+    v5 = ident >= RULE2["v5_identical_min"] * len(unaff)
+    s_old, s_new = per_sample_scores(p_old), per_sample_scores(p_new)
+    allidx = list(range(len(p_old)))
+    res: Dict[str, Any] = {
+        "what": "W14 bước 2 — B3-full: OCR cache W10 (A) vs OCR cache đã sửa EXIF (B), full test ViTextVQA",
+        "created_utc": datetime.datetime.utcnow().isoformat(timespec="seconds"),
+        "old_run": os.path.basename(old_run.rstrip("/")), "new_run": os.path.basename(new_run.rstrip("/")),
+        "n_questions": len(p_old), "n_affected": len(aff), "n_unaffected": len(unaff),
+        "V5_unaffected_identical": {"n_identical": ident, "pct": round(100.0 * ident / max(len(unaff), 1), 3),
+                                    "pass": v5},
+        "full_test": _paired(s_old, s_new, allidx, boot=True),
+        "affected_only": _paired(s_old, s_new, aff, boot=True),
+        "unaffected_only": _paired(s_old, s_new, unaff, boot=False)}
+    for tag, run in (("old", old_run), ("new", new_run)):
+        mp = os.path.join(run, "metrics.json")
+        if os.path.exists(mp):
+            res[f"metrics_json_{tag}"] = json.load(open(mp, encoding="utf-8")).get("metrics")
+    if b2_run:
+        p_b2 = load_predictions(b2_run)
+        if [r["question_id"] for r in p_b2] != [r["question_id"] for r in p_old]:
+            raise ValueError("run B2 không cùng thứ tự câu hỏi")
+        s_b2 = per_sample_scores(p_b2)
+        res["B2_to_B3full_old"] = _paired(s_b2, s_old, allidx, boot=False)
+        res["B2_to_B3full_new"] = _paired(s_b2, s_new, allidx, boot=False)
+    if rot_run:
+        p_rot = {r["question_id"]: r for r in load_predictions(rot_run)}
+        miss = [p_new[i]["question_id"] for i in aff if p_new[i]["question_id"] not in p_rot]
+        if miss:
+            raise ValueError(f"run ảnh xoay thiếu {len(miss)} câu, vd {miss[:3]}")
+        s_rot = per_sample_scores([p_rot[p_new[i]["question_id"]] for i in aff])
+        s_new_aff = [s_new[i] for i in aff]
+        res["descriptive_rotated_image_vs_new"] = _paired(s_new_aff, s_rot, list(range(len(aff))), boot=True)
+    res["verdict"] = {
+        "valid": v5,
+        "L2": ("báo cả hai số; số chính thức ViTextVQA giữ B3-full W10 (L3: 1,28% câu train ≤ 5% -> không train lại)"
+               if v5 else "KHÔNG HỢP LỆ (V5): câu không bị ảnh hưởng đổi dự đoán -> không dùng run, báo Claude")}
+    with open(os.path.join(out_dir, "exif_fix_b3full_summary.json"), "w", encoding="utf-8", newline="\n") as f:
+        json.dump(res, f, ensure_ascii=False, indent=1)
+    return res
+
+
+# =============================================================================
 # 3) KIỂM THỬ OFFLINE
 # =============================================================================
 def _selftest() -> None:
@@ -487,7 +681,97 @@ def _selftest() -> None:
         a = answer_stats([], ["1.jpg"], [{"image": "1.jpg", "answers": ["an khang"]}], full)
         assert a["cache"]["pct_answer_in_ocr"] == 0.0 and a["fixed"]["pct_answer_in_ocr"] == 100.0
         assert a["small"]["n"] == 0
+    _selftest_step2()
     print("exif_audit SELFTEST OK", flush=True)
+
+
+def _selftest_step2() -> None:
+    """Bước 2 trên dữ liệu giả: dựng cache sửa (V1–V4), file con + ảnh xoay, so 2 run (V5, McNemar)."""
+    from PIL import Image
+    from src.data.ocr import EXIF_FIX, load_ocr_cache, save_ocr_cache
+    saved = dict(EXPECTED_Q)
+    EXPECTED_Q.clear()
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            dr = os.path.join(td, "drive")
+            tv = os.path.join(dr, "data", "vitextvqa_official")
+            img = os.path.join(td, "img")
+            os.makedirs(os.path.join(tv, "ocr"))
+            os.makedirs(img)
+            names = [f"{i}.jpg" for i in range(10)]
+            for i, n in enumerate(names):
+                ex = Image.Exif()
+                if i < 3:
+                    ex[ORIENTATION_TAG] = 6
+                Image.new("RGB", (40, 30), "white").save(os.path.join(img, n), exif=ex)
+            test = [{"question_id": f"t{i}", "image": n, "answers": [f"chu {30 if i < 3 else 40}"], "question": "?"}
+                    for i, n in enumerate(names)]
+            json.dump(test, open(os.path.join(tv, "test.json"), "w", encoding="utf-8"))
+            scan = {"images": {"_vitextvqa_all_sizes": {n: [40, 30, 6 if i < 3 else 1] for i, n in enumerate(names)}}}
+            eng_info = {"paddleocr": "3.7.0", "det_model": "d", "rec_model": "r", "vietocr_config": "v", "lang": "vi"}
+            old_c = os.path.join(tv, "ocr", "paddledet_vietocr.json")
+            save_ocr_cache({"format": "vivqa-vlm/ocr-cache/v2", "backend": "paddledet_vietocr", "engine_info": eng_info,
+                            "images": {n: {"lines": [{"text": "rac" if i < 3 else "CHU 40 30"}]}
+                                       for i, n in enumerate(names)}, "timing": {}}, old_c)
+
+            class _Fixed:
+                info = {**eng_info, "exif": EXIF_FIX}
+
+                def read(self, p):
+                    from PIL import ImageOps
+                    with Image.open(p) as im:
+                        w, h = ImageOps.exif_transpose(im).size
+                    return {"w": w, "h": h, "lines": [{"text": f"CHU {w} {h}", "conf": 1.0, "box": [0, 0, 1, 1]}]}
+            reocr = {"records": [{"image": n, "group": "affected", "text_fixed": "chu 30 40"} for n in names[:3]]}
+            new_c = old_c.replace(".json", "_exiffix.json")
+            m = run_fix_cache(scan, dr, img, old_c, new_c, _Fixed(), td, reocr)
+            assert m["valid"] and m["n_replaced"] == 3 and m["parity"]["pct"] == 100.0, m
+            assert m["pct_answer_in_ocr_test_fixed_images"] == {"old": 0.0, "new": 100.0}, m
+            nc = load_ocr_cache(new_c)
+            assert nc["images"]["0.jpg"]["lines"][0]["text"] == "CHU 30 40" and nc["images"]["5.jpg"]["lines"][0]["text"] == "CHU 40 30"
+            assert load_ocr_cache(old_c)["images"]["0.jpg"]["lines"][0]["text"] == "rac"      # cache cũ giữ nguyên
+            for bad_eng, msg in ((type("E", (), {"info": eng_info, "read": _Fixed.read}), "thiếu khoá exif"),
+                                 (type("E", (), {"info": {**eng_info, "det_model": "x", "exif": EXIF_FIX},
+                                                 "read": _Fixed.read}), "det_model khác")):
+                try:
+                    run_fix_cache(scan, dr, img, old_c, new_c, bad_eng(), td, reocr)
+                    raise AssertionError(f"không chặn engine sai ({msg})")
+                except ValueError:
+                    pass
+            try:
+                run_fix_cache(scan, dr, img, old_c, old_c, _Fixed(), td, reocr)
+                raise AssertionError("không chặn ghi đè cache cũ")
+            except ValueError:
+                pass
+            m2 = run_fix_cache(scan, dr, img, old_c, new_c, _Fixed(), td,
+                               {"records": [{"image": n, "group": "affected", "text_fixed": "khac"} for n in names[:3]]})
+            assert not m2["valid"] and not m2["V3_parity_step_b"]
+            # file con + ảnh xoay
+            sub = make_exif_subset(scan, dr, img, td, os.path.join(td, "rot"))
+            assert sub["n_questions"] == 3 and Image.open(os.path.join(td, "rot", "0.jpg")).size == (30, 40)
+            # so 2 run: run mới đúng thêm 3 câu ảnh cờ xoay, câu còn lại giữ nguyên
+            def mkrun(name, preds):
+                d = os.path.join(td, name)
+                os.makedirs(d)
+                json.dump([{"question_id": r["question_id"], "prediction": p, "answers": r["answers"]}
+                           for r, p in zip(test, preds)], open(os.path.join(d, "predictions.json"), "w", encoding="utf-8"))
+                return d
+            base = ["sai"] * 3 + ["chu 40"] * 5 + ["sai"] * 2
+            r_old = mkrun("old", base)
+            r_new = mkrun("new", ["chu 30"] * 3 + base[3:])
+            r_b2 = mkrun("b2", ["sai"] * 10)
+            r_rot = mkrun("run_rot", ["chu 30", "sai", "chu 30"] + base[3:])
+            res = run_compare(scan, dr, r_old, r_new, td, r_b2, r_rot)
+            assert res["verdict"]["valid"] and res["V5_unaffected_identical"]["pct"] == 100.0
+            assert res["affected_only"]["d_em"] == 100.0 and res["affected_only"]["b_only"] == 3
+            assert res["full_test"]["d_em"] == 30.0 and res["unaffected_only"]["d_em"] == 0.0
+            assert res["B2_to_B3full_new"]["d_em"] == 80.0 and res["B2_to_B3full_old"]["d_em"] == 50.0
+            assert res["descriptive_rotated_image_vs_new"]["d_em"] < 0
+            r_bad = mkrun("bad", ["chu 30"] * 3 + ["khac"] * 7)
+            assert not run_compare(scan, dr, r_old, r_bad, td)["verdict"]["valid"]
+    finally:
+        EXPECTED_Q.update(saved)
+    print("exif_audit step2 OK", flush=True)
 
 
 # =============================================================================
@@ -508,6 +792,16 @@ def main() -> None:
     ap.add_argument("--expect_cache_sha", default=None)
     ap.add_argument("--device", default="gpu")
     ap.add_argument("--out", default=None)
+    # bước 2 (L2)
+    ap.add_argument("--fix_cache", action="store_true", help="dựng cache MỚI: OCR lại ảnh có cờ xoay (engine đã sửa)")
+    ap.add_argument("--new_cache", default=None, help="mặc định data/vitextvqa_official/ocr/paddledet_vietocr_exiffix.json")
+    ap.add_argument("--make_subset", action="store_true", help="file data con (câu test ảnh cờ xoay) + ảnh đã xoay")
+    ap.add_argument("--rot_dir", default="/content/vitextvqa_exif_rotated")
+    ap.add_argument("--compare", action="store_true", help="so B3-full cache cũ vs cache đã sửa (L2 + V5)")
+    ap.add_argument("--old_run", default=None)
+    ap.add_argument("--new_run", default=None)
+    ap.add_argument("--b2_run", default=None)
+    ap.add_argument("--rot_run", default=None)
     a = ap.parse_args()
     if a.selftest:
         _selftest()
@@ -530,6 +824,27 @@ def main() -> None:
         re_ = json.load(open(a.reocr_json or os.path.join(a.out, "exif_reocr.json"), encoding="utf-8"))
         s = run_analyze(scan, re_, a.out)
         print(json.dumps(s["verdict"], ensure_ascii=False, indent=1))
+    if a.fix_cache or a.make_subset or a.compare:
+        scan = json.load(open(a.scan_json or os.path.join(a.out, "exif_scan.json"), encoding="utf-8"))
+    if a.fix_cache:
+        from src.data.ocr import default_cache_path, get_ocr_engine
+        re_ = json.load(open(a.reocr_json or os.path.join(a.out, "exif_reocr.json"), encoding="utf-8"))
+        eng = get_ocr_engine("paddledet_vietocr", device=a.device)
+        print(f"[R-EXIF fix] engine: {json.dumps(eng.info, ensure_ascii=False)}", flush=True)
+        old_c = a.cache or default_cache_path(a.drive_root, "vitextvqa_official", "paddledet_vietocr")
+        new_c = a.new_cache or old_c.replace(".json", "_exiffix.json")
+        m = run_fix_cache(scan, a.drive_root, a.vitextvqa_images, old_c, new_c, eng, a.out, re_, a.expect_cache_sha)
+        print(json.dumps({k: m[k] for k in ("valid", "n_replaced", "n_errors", "V1_no_errors", "V2_others_unchanged",
+                                            "V3_parity_step_b", "V4_engine", "parity", "sha256",
+                                            "pct_answer_in_ocr_test_fixed_images")}, ensure_ascii=False))
+        if not m["valid"]:
+            raise SystemExit("❌ cache đã sửa KHÔNG HỢP LỆ (xem manifest) -> không dùng cho eval")
+    if a.make_subset:
+        print(json.dumps(make_exif_subset(scan, a.drive_root, a.vitextvqa_images, a.out, a.rot_dir), ensure_ascii=False))
+    if a.compare:
+        r = run_compare(scan, a.drive_root, a.old_run, a.new_run, a.out, a.b2_run, a.rot_run)
+        print(json.dumps({k: r[k] for k in ("verdict", "V5_unaffected_identical", "full_test", "affected_only")},
+                         ensure_ascii=False))
 
 
 if __name__ == "__main__":

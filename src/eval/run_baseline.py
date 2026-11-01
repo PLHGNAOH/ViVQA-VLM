@@ -969,6 +969,8 @@ def main() -> None:
     ap.add_argument("--ocr_template", default=OCR_DEFAULTS["template"], help="Mẫu dòng OCR trong prompt (v1 | v2)")
     ap.add_argument("--ocr_max_chars", type=int, default=OCR_DEFAULTS["max_chars"], help="Cắt văn bản OCR quá N ký tự")
     ap.add_argument("--ocr_min_conf", type=float, default=OCR_DEFAULTS["min_conf"], help="Bỏ dòng OCR có độ tin cậy < ngưỡng")
+    ap.add_argument("--image_dir", default=None,
+                    help="Thư mục ảnh thay cho bản chép về /content (W14: ảnh đã xoay theo EXIF). Không vào run_signature")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
     if a.selftest:
@@ -980,7 +982,7 @@ def main() -> None:
         config=a.config, mode=a.mode, chunk=a.chunk, limit=a.limit, adapter=a.adapter, variant=a.variant,
         few_shot_k=a.few_shot_k, few_shot_seed=a.few_shot_seed,
         ocr_backend=a.ocr_backend, ocr_cache=a.ocr_cache, ocr_template=a.ocr_template,
-        ocr_max_chars=a.ocr_max_chars, ocr_min_conf=a.ocr_min_conf)
+        ocr_max_chars=a.ocr_max_chars, ocr_min_conf=a.ocr_min_conf, image_dir=a.image_dir)
 
 
 if __name__ == "__main__":

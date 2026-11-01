@@ -1,0 +1,204 @@
+{
+ "what": "R-EXIF — phán quyết theo luật ghi trước (docs/W14/README.md)",
+ "created_utc": "2026-11-01T10:27:52",
+ "scan_summary": {
+  "vitextvqa_official": {
+   "train": {
+    "n_questions": 35159,
+    "n_images": 11733,
+    "n_images_exif": 124,
+    "n_questions_exif": 450,
+    "pct_images_exif": 1.057,
+    "pct_questions_exif": 1.28,
+    "exif_by_orientation": {
+     "3": 1,
+     "6": 118,
+     "8": 5
+    },
+    "n_images_gt_ui_max_side": 994
+   },
+   "dev": {
+    "n_questions": 5155,
+    "n_images": 1676,
+    "n_images_exif": 19,
+    "n_questions_exif": 74,
+    "pct_images_exif": 1.134,
+    "pct_questions_exif": 1.435,
+    "exif_by_orientation": {
+     "6": 19
+    },
+    "n_images_gt_ui_max_side": 144
+   },
+   "test": {
+    "n_questions": 10028,
+    "n_images": 3353,
+    "n_images_exif": 41,
+    "n_questions_exif": 126,
+    "pct_images_exif": 1.223,
+    "pct_questions_exif": 1.256,
+    "exif_by_orientation": {
+     "6": 41
+    },
+    "n_images_gt_ui_max_side": 280
+   },
+   "all_images": {
+    "n": 16762,
+    "n_exif": 184,
+    "scan_sec": 30.7
+   }
+  },
+  "vivqa": {
+   "train": {
+    "n_questions": 10799,
+    "n_images": 8255,
+    "n_images_exif": 0,
+    "n_questions_exif": 0,
+    "pct_images_exif": 0.0,
+    "pct_questions_exif": 0.0,
+    "exif_by_orientation": {},
+    "n_images_gt_ui_max_side": 0
+   },
+   "test": {
+    "n_questions": 3001,
+    "n_images": 2789,
+    "n_images_exif": 0,
+    "n_questions_exif": 0,
+    "pct_images_exif": 0.0,
+    "pct_questions_exif": 0.0,
+    "exif_by_orientation": {},
+    "n_images_gt_ui_max_side": 0
+   },
+   "all_images": {
+    "n": 9770,
+    "n_exif": 0,
+    "scan_sec": 1.5
+   }
+  }
+ },
+ "verdict": {
+  "rule": {
+   "sim_mismatch": 0.5,
+   "l1_exif_min": 0.8,
+   "l1_control_max": 0.05,
+   "l2_test_frac": 0.01,
+   "l3_train_frac": 0.05,
+   "n_affected": 300,
+   "n_control": 200,
+   "seed": 42
+  },
+  "L1": "CƠ CHẾ XÁC NHẬN",
+  "L1_mechanism_confirmed": true,
+  "mismatch_affected_fixed": {
+   "n": 165,
+   "n_mismatch": 164,
+   "pct": 99.39,
+   "ci95": [
+    96.65,
+    99.89
+   ]
+  },
+  "mismatch_control_fixed": {
+   "n": 200,
+   "n_mismatch": 0,
+   "pct": 0.0,
+   "ci95": [
+    0.0,
+    1.88
+   ]
+  },
+  "mismatch_affected_asis": {
+   "n": 165,
+   "n_mismatch": 0,
+   "pct": 0.0,
+   "ci95": [
+    0.0,
+    2.28
+   ]
+  },
+  "mismatch_control_asis": {
+   "n": 200,
+   "n_mismatch": 0,
+   "pct": 0.0,
+   "ci95": [
+    0.0,
+    1.88
+   ]
+  },
+  "test_frac_questions_exif": 1.256,
+  "L2": "> 1% -> SỬA ocr.py + OCR lại ảnh EXIF≠1 + suy luận lại B3-full full test, báo cả hai số",
+  "train_frac_questions_exif": 1.28,
+  "L3": "≤ 5% -> không train lại"
+ },
+ "answer_in_ocr_test": {
+  "affected": {
+   "n_questions": 126,
+   "cache": {
+    "n": 126,
+    "pct_answer_in_ocr": 0.0
+   },
+   "asis": {
+    "n": 126,
+    "pct_answer_in_ocr": 0.0
+   },
+   "fixed": {
+    "n": 126,
+    "pct_answer_in_ocr": 41.27
+   },
+   "small": {
+    "n": 126,
+    "pct_answer_in_ocr": 42.86
+   }
+  },
+  "control": {
+   "n_questions": 613,
+   "cache": {
+    "n": 613,
+    "pct_answer_in_ocr": 29.2
+   },
+   "asis": {
+    "n": 613,
+    "pct_answer_in_ocr": 29.2
+   },
+   "fixed": {
+    "n": 613,
+    "pct_answer_in_ocr": 29.2
+   },
+   "small": {
+    "n": 35,
+    "pct_answer_in_ocr": 37.14
+   }
+  }
+ },
+ "descriptive": {
+  "must_include": {
+   "1849.jpg": {
+    "group": "affected",
+    "o": 6,
+    "w": 4000,
+    "h": 3000,
+    "sim_asis": 1.0,
+    "sim_fixed": 0.1423,
+    "sim_small": 0.1109,
+    "cache_text": "lin whirs transly contracts 0301000000120 messing lit 031000000020 111 03010000000201 0310000000201 031000010001 031000000001 contransitionalists",
+    "text_fixed": "trà sữa reportite cho binh qua mat ty kim hương dc 130b nguyễn trị phương p 9 quận 5 hotline 0906 60 60 93 ing nam xã của happylife fini trating chỉ bánh quô ki",
+    "text_small": "trà sữa reportite cho banh que ma tây kim hương dc 130b nguyễn trị phương p 9 quận 5 hotline 0906 60 60 93 incomp xã của happylife flai trương 138b nguyễn tri p"
+   },
+   "14277.jpg": {
+    "group": "affected",
+    "o": 6,
+    "w": 4000,
+    "h": 3000,
+    "sim_asis": 1.0,
+    "sim_fixed": 0.039,
+    "sim_small": 0.0194,
+    "cache_text": "1 031000000199 03100000011 03610000199 031001990001 03800000099 0310001990 a",
+    "text_fixed": "10 năm 2023 sở y tế tp hồ chí minh health service of hom city bệnh viện rằng hàm mắt facialization đạo gn faxquisitionly 51d 0421",
+    "text_small": "10 năm 2023 sở y tế tp hồ chí minh health service of hom city bệnh viện rằng hàm mắt facialization đạo gn faxquisitions 51d 0421 e"
+   }
+  },
+  "n_large_images_in_sample": 169,
+  "control_large_mismatch_small": 0,
+  "control_large_n": 10,
+  "n_ocr_errors": 0
+ }
+}

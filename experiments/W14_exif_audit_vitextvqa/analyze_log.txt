@@ -1,0 +1,54 @@
+{
+ "rule": {
+  "sim_mismatch": 0.5,
+  "l1_exif_min": 0.8,
+  "l1_control_max": 0.05,
+  "l2_test_frac": 0.01,
+  "l3_train_frac": 0.05,
+  "n_affected": 300,
+  "n_control": 200,
+  "seed": 42
+ },
+ "L1": "CƠ CHẾ XÁC NHẬN",
+ "L1_mechanism_confirmed": true,
+ "mismatch_affected_fixed": {
+  "n": 165,
+  "n_mismatch": 164,
+  "pct": 99.39,
+  "ci95": [
+   96.65,
+   99.89
+  ]
+ },
+ "mismatch_control_fixed": {
+  "n": 200,
+  "n_mismatch": 0,
+  "pct": 0.0,
+  "ci95": [
+   0.0,
+   1.88
+  ]
+ },
+ "mismatch_affected_asis": {
+  "n": 165,
+  "n_mismatch": 0,
+  "pct": 0.0,
+  "ci95": [
+   0.0,
+   2.28
+  ]
+ },
+ "mismatch_control_asis": {
+  "n": 200,
+  "n_mismatch": 0,
+  "pct": 0.0,
+  "ci95": [
+   0.0,
+   1.88
+  ]
+ },
+ "test_frac_questions_exif": 1.256,
+ "L2": "> 1% -> SỬA ocr.py + OCR lại ảnh EXIF≠1 + suy luận lại B3-full full test, báo cả hai số",
+ "train_frac_questions_exif": 1.28,
+ "L3": "≤ 5% -> không train lại"
+}

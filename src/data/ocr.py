@@ -282,6 +282,42 @@ def _image_size(image_path: str) -> Tuple[int, int]:
         return im.size
 
 
+EXIF_FIX = "transpose-v1 (W14 R-EXIF)"     # ghi vào engine_info của engine đã sửa
+
+
+def exif_orientation_of(image_path: str) -> int:
+    """Cờ EXIF Orientation (1 = bình thường; thiếu / không hợp lệ -> 1)."""
+    from PIL import Image
+    with Image.open(image_path) as im:
+        try:
+            o = int(im.getexif().get(274, 1))
+        except Exception:
+            return 1
+    return o if 2 <= o <= 8 else 1
+
+
+def oriented_image(image_path: str) -> Tuple[Any, Optional[str]]:
+    """
+    W14 (luật R-EXIF, L1 xác nhận): Paddle đọc ảnh bằng OpenCV, mà OpenCV TỰ XOAY theo cờ EXIF; PIL thì KHÔNG.
+    Trước W14, ảnh có cờ xoay bị dò hộp trên ảnh đã xoay nhưng cắt trên ảnh chưa xoay -> chữ rác
+    (164/165 ảnh lệch cache, 0/200 ảnh đối chứng).
+    Trả (ảnh PIL RGB dùng để CẮT, đường dẫn đưa cho Paddle DÒ):
+      - ảnh không có cờ xoay -> (ảnh gốc, None): Paddle vẫn đọc file gốc -> GIỮ NGUYÊN hành vi W08–W10;
+      - ảnh có cờ xoay      -> (ảnh đã xoay, PNG tạm không còn cờ): OpenCV và PIL nhìn CÙNG một ảnh.
+    Người gọi phải xoá file PNG tạm (nếu có).
+    """
+    import tempfile
+    from PIL import Image, ImageOps
+    if exif_orientation_of(image_path) == 1:
+        return Image.open(image_path).convert("RGB"), None
+    with Image.open(image_path) as im:
+        img = ImageOps.exif_transpose(im).convert("RGB")
+    fd, tmp = tempfile.mkstemp(prefix="exif_", suffix=".png")
+    os.close(fd)
+    img.save(tmp)
+    return img, tmp
+
+
 class PaddleOCREngine(BaseOCREngine):
     """PaddleOCR 3.x pipeline đầy đủ, lang='vi' (dò + đọc). Tắt xoay/nắn tài liệu: ảnh cảnh thật, không phải scan."""
     backend = "paddleocr"
@@ -325,15 +361,18 @@ class PaddleDetVietOCREngine(BaseOCREngine):
         self.info = {"engine": "PaddleOCR TextDetection + VietOCR", "paddleocr": po.__version__,
                      "paddlepaddle": _paddle_version(), "lang": lang,
                      "device": device, "det_model": det_model, "rec_model": "vietocr/vgg_transformer",
-                     "vietocr_config": "vgg_transformer, beamsearch=False"}
+                     "vietocr_config": "vgg_transformer, beamsearch=False", "exif": EXIF_FIX}
         if not device.startswith("gpu"):                # chỉ ghi khi chạy CPU -> info bản GPU giữ nguyên như W08–W10
             self.info["det_mkldnn"] = False
 
     def read(self, image_path: str) -> Dict[str, Any]:
-        from PIL import Image
-        img = Image.open(image_path).convert("RGB")
+        img, tmp_png = oriented_image(image_path)       # W14: dò và cắt trên CÙNG một ảnh (xem oriented_image)
+        try:
+            det = self._det.predict(tmp_png or image_path)
+        finally:
+            if tmp_png:
+                os.remove(tmp_png)
         w, h = img.size
-        det = self._det.predict(image_path)
         polys = list(det[0]["dt_polys"]) if det else []
         boxes = [poly_to_box(p) for p in polys]
         boxes = [[max(0, b[0]), max(0, b[1]), min(w, b[2]), min(h, b[3])] for b in boxes]
@@ -525,6 +564,20 @@ def _selftest() -> None:
         build_ocr_cache(dict(list(ims.items())[:3]), MockOCREngine(), cp)      # ít ảnh hơn N, engine tốt -> chạy bình thường
         assert len(load_ocr_cache(cp)["images"]) == 3
     print("ocr fail-fast OK", flush=True)
+    # W14 R-EXIF: ảnh có cờ xoay -> ảnh cắt và ảnh dò là CÙNG một ảnh đã xoay; ảnh thường -> giữ đường cũ
+    from PIL import Image
+    with tempfile.TemporaryDirectory() as td:
+        p_rot, p_ok = os.path.join(td, "r.jpg"), os.path.join(td, "n.jpg")
+        ex = Image.Exif(); ex[274] = 6
+        Image.new("RGB", (400, 300), "white").save(p_rot, exif=ex)
+        Image.new("RGB", (400, 300), "white").save(p_ok)
+        im, tmp = oriented_image(p_rot)
+        assert exif_orientation_of(p_rot) == 6 and im.size == (300, 400) and tmp and tmp.endswith(".png")
+        assert Image.open(tmp).size == (300, 400) and exif_orientation_of(tmp) == 1
+        os.remove(tmp)
+        im2, tmp2 = oriented_image(p_ok)
+        assert im2.size == (400, 300) and tmp2 is None and exif_orientation_of(p_ok) == 1
+    print("ocr exif fix OK", flush=True)
     assert sorted(ENGINES) == ["mock", "paddledet_vietocr", "paddleocr"]
     print("ocr SELFTEST OK", flush=True)
 
