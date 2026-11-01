@@ -10,8 +10,8 @@
 |---|---|---|---|
 | 1 | **R-EXIF**: kiểm cờ xoay EXIF có làm hỏng OCR cache ViTextVQA không — luật (README này) + `src/data/exif_audit.py` + notebook `25_exif_ocr_audit_vitextvqa.ipynb` (T4) | 3 h (≈ 1 h T4) | ✅ 01/11 — **L1 XÁC NHẬN · L2 > 1% · L3 ≤ 5%** |
 | 2 | Theo L2: sửa `ocr.py` + cache mới (notebook `26_ocr_cache_exiffix_vitextvqa.ipynb`, T4) + suy luận lại B3-full full test (notebook `27_b3full_exiffix_testfull_qwen25vl.ipynb`, L4). Không train lại (L3) | ≈ 5 h (≈ 0,4 h T4 + 3 h L4) | ✅ 01/11 — V1–V5 **hợp lệ**; B3-full EM 53,35 → 53,63 (độ nhạy) |
-| 3 | Prototype v2: ngưỡng thu nhỏ 2.048 → 6.000 px, so với cache đã sửa, R-OCR v2 / R-LIVE v2 (luật ghi trước) — gộp với bước 4 trong notebook `28_prototype_v2_live_demo_sh_qwen25vl.ipynb` (L4) | 3 h (≈ 1,3 h L4) | ⏳ code xong, chờ chạy |
-| 4 | Demo: ví dụ chọn bằng luật cố định (`src/prototype/demo_examples.py`), kịch bản `Demo_Script.md`, quay video trong lúc notebook 28 mở giao diện 30 phút | 2,5 h | ⏳ code + kịch bản xong, chờ quay |
+| 3 | Prototype v2: ngưỡng thu nhỏ 2.048 → 6.000 px, so với cache đã sửa, R-OCR v2 / R-LIVE v2 (luật ghi trước) — gộp với bước 4 trong notebook `28_prototype_v2_live_demo_sh_qwen25vl.ipynb` (L4) | 3 h (≈ 1,3 h L4) | ✅ 01/11 — **R-OCR v2 ĐẠT · R-LIVE v2 ĐẠT** (100% / 100%) |
+| 4 | Demo: ví dụ chọn bằng luật cố định (`src/prototype/demo_examples.py`), kịch bản `Demo_Script.md`, quay video trong lúc notebook 28 mở giao diện 30 phút | 2,5 h | ✅ ví dụ đã chọn (01/11) · ⏳ video |
 | 5 | Gói tái lập phần code: ghim phiên bản thư viện, script suy luận dòng lệnh, README chạy lại, manifest adapter | 3 h | ⏳ |
 | 6 | Đóng tuần: README + Team Report, dọn Downloads + `G:\My Drive\ViVQA-VLM` | 1,5 h | ⏳ |
 | | **Tổng** | **≈ 18 h** | |
@@ -160,6 +160,35 @@ Thêm nữa, cache ViTextVQA dùng ở W13 có lỗi EXIF (đã sửa ở bướ
 **Chỉ mô tả:** latency p50 / p95 (OCR / model / tổng), thời gian khởi động, VRAM, số câu có ảnh bị xoay / thu nhỏ, ảnh thật của nhóm (`W14_REAL_sh_realphotos_v2_bf16_L4`).
 
 **Hệ quả:** R-OCR v2 và R-LIVE v2 đạt → prototype v2 là bản dùng để bảo vệ. Không đạt → giữ bản v2 nhưng ghi rõ giới hạn; không đổi số đã báo cáo.
+
+## Kết quả bước 3 (notebook 28, 01/11/2026, L4): **R-OCR v2 ĐẠT · R-LIVE v2 ĐẠT**
+
+Nguồn: `../../experiments/W14_prototype_live_v2_L4_seed42/` (`prototype_live_summary.json` / `.md`, `demo/`), `../../experiments/W14_LIVE_sh_ocrlive_v2_sample200img_bf16_L4_seed42/` (`meta.json`, `direct_ocr.json`), `../../experiments/W14_REAL_sh_realphotos_v2_bf16_L4/`. Commit lúc chạy `5e48695`.
+
+| Tập | R-OCR v2: giao diện = đọc thẳng | So với cache T4 (chỉ mô tả) | R-LIVE v2: trùng W11 | EM giao diện / W11 |
+|---|---|---|---|---|
+| ViVQA (200 ảnh, 211 câu) | **100%** (0 khác) | 100% | **100%** | 75,83 / 75,83 |
+| ViTextVQA (200 ảnh, 259 câu; bỏ 2 câu ảnh xoay) | **100%** (0 khác) | 95,5% trùng hệt; 99,5% ảnh giống ≥ 0,9 (thấp nhất 0,821) | **100%** | 50,19 / 50,19 |
+
+- So với W13 (ViTextVQA: OCR = cache 87,5%, câu trả lời = W11 98,5%): khi bỏ bước thu nhỏ 2.048 px, **câu trả lời qua giao diện trùng 100%** với run eval. Phần còn lệch so với cache (9 ảnh, độ giống 0,82–1,00) là sai khác số học giữa L4 và T4. Phần này không làm đổi câu trả lời nào trong mẫu.
+- **Tốc độ (L4, 470 câu):**
+  - tổng p50 / p95 = 1,00 / 3,58 s;
+  - OCR p50 / p95 = 0,32 / 2,10 s (W13: p95 1,92 s; nay OCR trên ảnh nguyên độ phân giải);
+  - model p50 / p95 = 0,65 / 1,62 s.
+- **Tài nguyên:** khởi động 60,8 s; VRAM tiến trình chính 2,61 GB, tổng mọi tiến trình 4,78 GB.
+- **Khác:** mức tin cậy trên mẫu: Cao 144 · Trung bình 156 · Thấp 172. Ảnh xoay EXIF: 2 câu; ảnh bị thu nhỏ: 0 câu.
+- **Ảnh thật của nhóm (v2):** EM 14 / 20 (như W13).
+- **Prototype v2 là bản dùng để bảo vệ.**
+
+**Ví dụ demo (luật cố định, mục 6b):**
+- đọc chữ: `198.jpg`, `405.jpg` (đúng, mức Cao);
+- ảnh xoay EXIF: `1849.jpg` ("quận 5", mức Trung bình);
+- đếm: COCO `547307` ("hai", Cao);
+- màu: COCO `87598` ("màu tía", Trung bình; "tía" là dấu vết dịch máy của ViVQA, W12);
+- câu sai mức Thấp: `226.jpg`;
+- 5 ảnh thật.
+
+Ô **câu có/không trống**: mẫu ViVQA test không có câu có/không nào (đúng với W12: ViVQA không có câu dạng này). Video dùng một câu có/không **gõ tay** trên ảnh ví dụ đếm, và ghi rõ đây là câu gõ tay (`Demo_Script.md`, cảnh 5).
 
 ## Bước 4 — ví dụ demo + video
 

@@ -21,7 +21,7 @@
 | 2 | Chỉ lần lượt các vùng | "Bên trái: tải ảnh và nhập câu hỏi. Bên phải: câu trả lời, **mức tin cậy** Cao / Trung bình / Thấp, và **bằng chứng OCR**: các vùng chữ được đánh số theo thứ tự đọc, dòng nào khớp câu trả lời thì tô xanh." | 20 |
 | 3 | Bấm ví dụ `chu_trong_anh` #1 → Trả lời | "Câu hỏi cần đọc chữ trên biển hiệu. Model trả lời đúng, mức Cao. Ở khung OCR ta thấy dòng chữ chứa câu trả lời, tức là model dùng đúng phần chữ đọc được." | 30 |
 | 4 | Ví dụ `chu_trong_anh` #2 | "Một ví dụ chữ trong ảnh khác. Đây là điểm mạnh chính của đề tài: QLoRA nhận biết OCR giúp tăng 3,1 điểm EM trên ViTextVQA so với QLoRA thường." | 20 |
-| 5 | Ví dụ `co_khong` | "Câu có/không đi đường riêng. Ở W12 nhóm phát hiện adapter dùng chung trả lời 'có' quá nhiều. Prototype dùng ngưỡng τ* chọn trên tập hiệu chỉnh riêng, nên câu hỏi về vật không có trong ảnh được trả lời 'không'." | 25 |
+| 5 | Bấm ví dụ `dem` (ảnh COCO), **xoá câu hỏi**, gõ tay: *"Trong ảnh có con mèo không?"* (chọn một vật **không** có trong ảnh). Ô `co_khong` trống vì ViVQA test không có câu có/không | "Câu có/không đi đường riêng — câu này tôi gõ tay. Ở W12 nhóm phát hiện adapter dùng chung trả lời 'có' quá nhiều. Prototype dùng ngưỡng τ* chọn trên tập hiệu chỉnh riêng, nên câu hỏi về vật không có trong ảnh được trả lời 'không'." | 25 |
 | 6 | Ví dụ `dem` và `mau_sac` (nếu có) | "Hệ thống cũng trả lời câu đếm và câu về màu sắc trên ảnh đời thường của ViVQA." | 20 |
 | 7 | Ví dụ `anh_xoay_exif` | "Ảnh điện thoại chụp dọc có cờ xoay EXIF. Giao diện xoay ảnh đúng chiều rồi mới đọc chữ. Tuần 14 nhóm phát hiện và sửa đúng lỗi này trong dữ liệu đánh giá." | 20 |
 | 8 | Ví dụ `tra_loi_sai` | "Đây là một câu trả lời **sai**. Hệ thống báo mức tin cậy **Thấp** và hiện cảnh báo. Giao diện không hiện con số xác suất, vì model tự tin quá mức (ECE 0,198), nên chỉ hiện mức để người dùng không tin nhầm." | 25 |
@@ -31,6 +31,8 @@
 **Tổng ≈ 3 phút 40 giây.**
 
 ## Kiểm trước khi quay
+
+- [ ] Xem trước ảnh từng ví dụ (bảng mục 6b). Ví dụ nào có nội dung không phù hợp để chiếu trước hội đồng thì **bỏ qua cảnh đó** và ghi lý do ở cuối file này. Không thay bằng câu đúng khác, để giữ tinh thần "không chọn tay".
 
 - [ ] Notebook 28 mục 7 đã in khối gửi Claude (kết quả R-OCR v2 / R-LIVE v2 đã có).
 - [ ] Bảng `demo_examples.md` đã in ở mục 6b; biết trước câu nào đúng, câu nào sai.

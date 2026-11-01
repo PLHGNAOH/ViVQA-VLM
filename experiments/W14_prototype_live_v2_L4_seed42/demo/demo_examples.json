@@ -1,0 +1,319 @@
+[
+ {
+  "slot": "chu_trong_anh",
+  "label": "Đọc chữ trong ảnh (ViTextVQA): đúng, mức Cao",
+  "dataset": "vitextvqa_official",
+  "image": "198.jpg",
+  "question": "dòng chữ xuất hiện trên tấm bảng đỏ là gì ?",
+  "answers": [
+   "trẻ em phải đội mũ bảo hiểm khi đi xe máy"
+  ],
+  "prediction": "trẻ em phải đội mũ bảo hiểm khi đi xe máy",
+  "level": "Cao",
+  "mode": "open",
+  "rotated": false
+ },
+ {
+  "slot": "chu_trong_anh",
+  "label": "Đọc chữ trong ảnh (ViTextVQA): đúng, mức Cao",
+  "dataset": "vitextvqa_official",
+  "image": "405.jpg",
+  "question": "bức ảnh lấy nguồn từ đâu ?",
+  "answers": [
+   "nhà thổ"
+  ],
+  "prediction": "nhà thổ",
+  "level": "Cao",
+  "mode": "open",
+  "rotated": false
+ },
+ {
+  "slot": "anh_xoay_exif",
+  "label": "Ảnh điện thoại có cờ xoay EXIF: giao diện tự xoay rồi mới OCR",
+  "dataset": "vitextvqa_official",
+  "image": "1849.jpg",
+  "question": "cửa hàng trà sữa happy life nằm ở quận mấy ?",
+  "answers": [
+   "5"
+  ],
+  "prediction": "quận 5",
+  "level": "Trung bình",
+  "mode": "open",
+  "rotated": true
+ },
+ {
+  "slot": "co_khong",
+  "label": "Câu có/không (đi đường riêng, ngưỡng τ*)",
+  "missing": 1
+ },
+ {
+  "slot": "dem",
+  "label": "Câu đếm (bao nhiêu)",
+  "dataset": "vivqa",
+  "image": "COCO_train2014_000000547307.jpg",
+  "question": "bao nhiêu người đàn ông đang chia sẻ nụ hôn thân mật bên trong một tòa nhà",
+  "answers": [
+   "hai"
+  ],
+  "prediction": "hai",
+  "level": "Cao",
+  "mode": "open",
+  "rotated": false
+ },
+ {
+  "slot": "mau_sac",
+  "label": "Câu về màu sắc",
+  "dataset": "vivqa",
+  "image": "COCO_train2014_000000087598.jpg",
+  "question": "màu của áo là gì",
+  "answers": [
+   "màu đỏ"
+  ],
+  "prediction": "màu tía",
+  "level": "Trung bình",
+  "mode": "open",
+  "rotated": false
+ },
+ {
+  "slot": "tra_loi_sai",
+  "label": "Trả lời sai, mức Thấp: giới hạn của hệ thống",
+  "dataset": "vitextvqa_official",
+  "image": "226.jpg",
+  "question": "căn nhà sau cột đèn giao thông bán quạt như thể nào ?",
+  "answers": [
+   "cổ 4 cánh gỗ"
+  ],
+  "prediction": "cổ",
+  "level": "Thấp",
+  "mode": "open",
+  "rotated": false
+ },
+ {
+  "slot": "anh_that_01",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "xe_buyt_nha_khoa.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/xe_buyt_nha_khoa.jpg",
+  "question": "Trên xe buýt quảng cáo nha khoa nào?",
+  "answers": [
+   "nha khoa orion"
+  ]
+ },
+ {
+  "slot": "anh_that_02",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "bang_huong_dan_y_te.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/bang_huong_dan_y_te.jpg",
+  "question": "Ứng dụng được hướng dẫn cài đặt tên là gì?",
+  "answers": [
+   "công dân số tphcm"
+  ]
+ },
+ {
+  "slot": "anh_that_03",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "tui_cua_hang.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/tui_cua_hang.jpg",
+  "question": "Túi trong ảnh mang thương hiệu nào?",
+  "answers": [
+   "7-eleven",
+   "7 eleven"
+  ]
+ },
+ {
+  "slot": "anh_that_04",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "cua_hang_dac_san.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/cua_hang_dac_san.jpg",
+  "question": "Cửa hàng bán đặc sản của địa phương nào?",
+  "answers": [
+   "hà nội"
+  ]
+ },
+ {
+  "slot": "anh_that_05",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "bang_noi_quy_thang_may.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/bang_noi_quy_thang_may.jpg",
+  "question": "Thang máy có tải trọng tối đa bao nhiêu kg?",
+  "answers": [
+   "1150kg",
+   "1150 kg"
+  ]
+ },
+ {
+  "slot": "anh_that_06",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "binh_chua_chay.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/binh_chua_chay.jpg",
+  "question": "Trên thùng đựng bình có chữ gì?",
+  "answers": [
+   "tủ đựng bình pccc",
+   "tủ đựng bình pccc 114"
+  ]
+ },
+ {
+  "slot": "anh_that_07",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "may_anh_canon.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/may_anh_canon.jpg",
+  "question": "Máy ảnh trong hình có chữ Canon không?",
+  "answers": [
+   "có"
+  ]
+ },
+ {
+  "slot": "anh_that_08",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "chai_xit_con_trung.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/chai_xit_con_trung.jpg",
+  "question": "Bình xịt côn trùng có hương gì?",
+  "answers": [
+   "cam chanh",
+   "hương cam chanh"
+  ]
+ },
+ {
+  "slot": "anh_that_09",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "bia_sach.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/bia_sach.jpg",
+  "question": "Tên cuốn sách trong hình là gì?",
+  "answers": [
+   "khúc hát đêm thâu"
+  ]
+ },
+ {
+  "slot": "anh_that_10",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "bang_go_trang_tri.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/bang_go_trang_tri.jpg",
+  "question": "Trên bảng gỗ có dòng chữ lớn màu xanh nào?",
+  "answers": [
+   "làm đi"
+  ]
+ },
+ {
+  "slot": "anh_that_11",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "bang_thong_tin_duoi_uoi.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/bang_thong_tin_duoi_uoi.jpg",
+  "question": "Con đười ươi trên biển thông tin tên gì?",
+  "answers": [
+   "tèo"
+  ]
+ },
+ {
+  "slot": "anh_that_12",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "ga_metro.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/ga_metro.jpg",
+  "question": "Trong ảnh có chữ HCMC METRO không?",
+  "answers": [
+   "có"
+  ]
+ },
+ {
+  "slot": "anh_that_13",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "goi_khan_uot.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/goi_khan_uot.jpg",
+  "question": "Khăn ướt trong ảnh có thương hiệu nào?",
+  "answers": [
+   "lamy"
+  ]
+ },
+ {
+  "slot": "anh_that_14",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "hop_dien_thoai.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/hop_dien_thoai.jpg",
+  "question": "Trong ảnh có con chó thật không?",
+  "answers": [
+   "không"
+  ]
+ },
+ {
+  "slot": "anh_that_15",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "anh_meo_trong_khung.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/anh_meo_trong_khung.jpg",
+  "question": "Trong ảnh có con chó không?",
+  "answers": [
+   "không"
+  ]
+ },
+ {
+  "slot": "anh_that_16",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "moc_ao.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/moc_ao.jpg",
+  "question": "Vật kim loại treo trên cửa sổ là gì?",
+  "answers": [
+   "móc áo",
+   "móc treo quần áo"
+  ]
+ },
+ {
+  "slot": "anh_that_17",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "bo_ho_nuoc_ban_dem.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/bo_ho_nuoc_ban_dem.jpg",
+  "question": "Phía trước hồ nước là bề mặt gì?",
+  "answers": [
+   "cát",
+   "bãi cát"
+  ]
+ },
+ {
+  "slot": "anh_that_18",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "dan_meo_con.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/dan_meo_con.jpg",
+  "question": "Trong ảnh có bao nhiêu con mèo?",
+  "answers": [
+   "5",
+   "5 con"
+  ]
+ },
+ {
+  "slot": "anh_that_19",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "duong_pho_chieu_ta.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/duong_pho_chieu_ta.jpg",
+  "question": "Trong ảnh có con chó không?",
+  "answers": [
+   "không"
+  ]
+ },
+ {
+  "slot": "anh_that_20",
+  "label": "Ảnh thật của nhóm",
+  "dataset": "real",
+  "image": "canh_xe_dem.jpg",
+  "image_path": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/canh_xe_dem.jpg",
+  "question": "Trong ảnh có bao nhiêu chiếc ô tô?",
+  "answers": [
+   "1",
+   "một"
+  ]
+ }
+]

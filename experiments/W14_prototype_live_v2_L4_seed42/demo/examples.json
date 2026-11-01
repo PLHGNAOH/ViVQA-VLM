@@ -1,0 +1,106 @@
+[
+ {
+  "image": "/content/vitextvqa_images/st_images/198.jpg",
+  "question": "dòng chữ xuất hiện trên tấm bảng đỏ là gì ?"
+ },
+ {
+  "image": "/content/vitextvqa_images/st_images/405.jpg",
+  "question": "bức ảnh lấy nguồn từ đâu ?"
+ },
+ {
+  "image": "/content/vitextvqa_images/st_images/1849.jpg",
+  "question": "cửa hàng trà sữa happy life nằm ở quận mấy ?"
+ },
+ {
+  "image": "/content/vivqa_images/COCO_train2014_000000547307.jpg",
+  "question": "bao nhiêu người đàn ông đang chia sẻ nụ hôn thân mật bên trong một tòa nhà"
+ },
+ {
+  "image": "/content/vivqa_images/COCO_train2014_000000087598.jpg",
+  "question": "màu của áo là gì"
+ },
+ {
+  "image": "/content/vitextvqa_images/st_images/226.jpg",
+  "question": "căn nhà sau cột đèn giao thông bán quạt như thể nào ?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/xe_buyt_nha_khoa.jpg",
+  "question": "Trên xe buýt quảng cáo nha khoa nào?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/bang_huong_dan_y_te.jpg",
+  "question": "Ứng dụng được hướng dẫn cài đặt tên là gì?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/tui_cua_hang.jpg",
+  "question": "Túi trong ảnh mang thương hiệu nào?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/cua_hang_dac_san.jpg",
+  "question": "Cửa hàng bán đặc sản của địa phương nào?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/bang_noi_quy_thang_may.jpg",
+  "question": "Thang máy có tải trọng tối đa bao nhiêu kg?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/binh_chua_chay.jpg",
+  "question": "Trên thùng đựng bình có chữ gì?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/may_anh_canon.jpg",
+  "question": "Máy ảnh trong hình có chữ Canon không?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/chai_xit_con_trung.jpg",
+  "question": "Bình xịt côn trùng có hương gì?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/bia_sach.jpg",
+  "question": "Tên cuốn sách trong hình là gì?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/bang_go_trang_tri.jpg",
+  "question": "Trên bảng gỗ có dòng chữ lớn màu xanh nào?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/bang_thong_tin_duoi_uoi.jpg",
+  "question": "Con đười ươi trên biển thông tin tên gì?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/ga_metro.jpg",
+  "question": "Trong ảnh có chữ HCMC METRO không?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/goi_khan_uot.jpg",
+  "question": "Khăn ướt trong ảnh có thương hiệu nào?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/hop_dien_thoai.jpg",
+  "question": "Trong ảnh có con chó thật không?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/anh_meo_trong_khung.jpg",
+  "question": "Trong ảnh có con chó không?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/moc_ao.jpg",
+  "question": "Vật kim loại treo trên cửa sổ là gì?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/bo_ho_nuoc_ban_dem.jpg",
+  "question": "Phía trước hồ nước là bề mặt gì?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/dan_meo_con.jpg",
+  "question": "Trong ảnh có bao nhiêu con mèo?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/duong_pho_chieu_ta.jpg",
+  "question": "Trong ảnh có con chó không?"
+ },
+ {
+  "image": "/content/drive/MyDrive/ViVQA-VLM/data/real_photos_w13/canh_xe_dem.jpg",
+  "question": "Trong ảnh có bao nhiêu chiếc ô tô?"
+ }
+]
