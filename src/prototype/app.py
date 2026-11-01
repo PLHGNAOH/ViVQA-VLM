@@ -30,13 +30,15 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
-APP_VERSION = "prototype-app-v2"     # W14: MAX_SIDE 2048 -> 6000
+APP_VERSION = "prototype-app-v2.1"   # W14: MAX_SIDE 2048 -> 6000 (v2); ảnh bằng chứng thu nhỏ khi HIỂN THỊ (v2.1)
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SUMMARY_REL = "experiments/W13_prototype_check_L4_seed42/prototype_check_summary.json"
 OCR_SELECTION_REL = "experiments/W08_ocr_select_dev300_L4_seed42/ocr_selection.json"
 ECE_SHOW_NUMBER = 0.05          # luật R-CONF: chỉ hiện con số khi ECE ≤ 0,05
 MAX_SIDE = 6000                 # W14: ảnh dài hơn -> thu nhỏ. Mọi ảnh ViVQA / ViTextVQA (lớn nhất 5.770 px) đi nguyên file
 MAX_SIDE_W13 = 2048             # ngưỡng W13 (sai: 1.418 ảnh ViTextVQA lớn hơn) — giữ để tái lập run W13
+DISPLAY_MAX_SIDE = 1280         # W14 v2.1: ảnh bằng chứng OCR chỉ để XEM -> thu nhỏ + JPEG, gửi nhanh qua link share
+                                # (video W14: ảnh 4000×3000 PNG ~20 MB về chậm vài giây, giao diện hiện ảnh của câu TRƯỚC)
 MAX_QUESTION_CHARS = 300
 LEVELS = ("Cao", "Trung bình", "Thấp")
 LEVEL_COLORS = {"Cao": ("#0f5132", "#d1e7dd"), "Trung bình": ("#664d03", "#fff3cd"), "Thấp": ("#842029", "#f8d7da")}
@@ -161,7 +163,9 @@ def evidence_lines(answer: str, lines: List[Dict[str, Any]]) -> List[int]:
 
 
 def draw_ocr_boxes(image_path: str, lines: List[Dict[str, Any]], highlight: List[int]):
-    """Ảnh có khung + số thứ tự đọc cho từng dòng OCR (xanh = dòng khớp câu trả lời)."""
+    """Ảnh có khung + số thứ tự đọc cho từng dòng OCR (xanh = dòng khớp câu trả lời).
+    Vẽ trên ảnh gốc (toạ độ hộp OCR), rồi thu cạnh dài về DISPLAY_MAX_SIDE: chỉ ảnh HIỂN THỊ nhỏ đi,
+    model và OCR vẫn dùng ảnh nguyên độ phân giải."""
     from PIL import Image, ImageDraw, ImageFont
     im = Image.open(image_path).convert("RGB")
     d = ImageDraw.Draw(im)
@@ -180,6 +184,15 @@ def draw_ocr_boxes(image_path: str, lines: List[Dict[str, Any]], highlight: List
         ty = y0 - th - 2 * lw if y0 - th - 2 * lw >= 0 else y1
         d.rectangle([x0, ty, x0 + tw + 2 * lw, ty + th + 2 * lw], fill=col)
         d.text((x0 + lw, ty + lw - tb[1]), tag, fill=(255, 255, 255), font=font)
+    return display_copy(im)
+
+
+def display_copy(im):
+    """Bản để HIỂN THỊ: cạnh dài ≤ DISPLAY_MAX_SIDE (giữ tỉ lệ)."""
+    from PIL import Image
+    if max(im.size) > DISPLAY_MAX_SIDE:
+        im = im.copy()
+        im.thumbnail((DISPLAY_MAX_SIDE, DISPLAY_MAX_SIDE), Image.LANCZOS)
     return im
 
 
@@ -359,7 +372,7 @@ class Handler:
             r = self.backend.ask(used, q)
             out = render_result(r, info, self.settings, self.ocr_cfg)
             boxes = draw_ocr_boxes(used, r.get("ocr_lines") or [], out["evidence"]) if r.get("ocr_lines") \
-                else Image.open(used).convert("RGB")
+                else display_copy(Image.open(used).convert("RGB"))
             rec.update({"ok": True, "mode": r["mode"], "level": r["level"], "n_ocr_lines": len(r.get("ocr_lines") or []),
                         "ocr_truncated": out["truncated"], "sec_ocr": r.get("sec_ocr"), "sec_vlm": r.get("sec"),
                         "sec_total": r.get("sec_total")})
@@ -402,7 +415,7 @@ def build_demo(handler: Handler, examples: Optional[List[List[str]]] = None):
                 warn_out = gr.Markdown()
                 with gr.Accordion("Chữ đọc được trong ảnh (OCR) — bằng chứng", open=True):
                     ocr_img = gr.Image(type="pil", label="Vùng chữ, đánh số theo thứ tự đọc (xanh = khớp câu trả lời)",
-                                       interactive=False, height=300, format="png")
+                                       interactive=False, height=300, format="jpeg")
                     ocr_out = gr.HTML()
                 with gr.Accordion("Chi tiết kỹ thuật", open=False):
                     det_out = gr.Markdown()
@@ -465,6 +478,11 @@ def _selftest() -> None:
     assert used == p_phone and not info["resized"] and not info["reencoded"]
     used, info = prepare_image(p_phone, tmp, max_side=MAX_SIDE_W13)    # đường W13 vẫn tái lập được
     assert info["resized"] and max(Image.open(used).size) == MAX_SIDE_W13
+    ev = draw_ocr_boxes(p_phone, [{"text": "A", "box": [3000, 2000, 3900, 2900]}], [0])
+    assert max(ev.size) == DISPLAY_MAX_SIDE and ev.size == (1280, 960)      # chỉ ảnh hiển thị nhỏ đi
+    assert ev.getpixel((int(3000 / 3.15) + 2, int(2400 / 3.15)))[0] < 100         # khung xanh (R thấp) vẫn đúng chỗ sau thu nhỏ
+    assert ev.getpixel((int(3000 / 3.15) - 20, int(2400 / 3.15)))[0] > 200        # ngoài khung vẫn trắng
+    assert draw_ocr_boxes(p_ok, [], []).size == (640, 480)                    # ảnh nhỏ giữ nguyên
     p_big = os.path.join(tmp, "big.jpg")
     Image.new("RGB", (6400, 120), "white").save(p_big)
     used, info = prepare_image(p_big, tmp)

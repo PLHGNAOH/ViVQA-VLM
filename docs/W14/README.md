@@ -11,7 +11,7 @@
 | 1 | **R-EXIF**: kiểm cờ xoay EXIF có làm hỏng OCR cache ViTextVQA không — luật (README này) + `src/data/exif_audit.py` + notebook `25_exif_ocr_audit_vitextvqa.ipynb` (T4) | 3 h (≈ 1 h T4) | ✅ 01/11 — **L1 XÁC NHẬN · L2 > 1% · L3 ≤ 5%** |
 | 2 | Theo L2: sửa `ocr.py` + cache mới (notebook `26_ocr_cache_exiffix_vitextvqa.ipynb`, T4) + suy luận lại B3-full full test (notebook `27_b3full_exiffix_testfull_qwen25vl.ipynb`, L4). Không train lại (L3) | ≈ 5 h (≈ 0,4 h T4 + 3 h L4) | ✅ 01/11 — V1–V5 **hợp lệ**; B3-full EM 53,35 → 53,63 (độ nhạy) |
 | 3 | Prototype v2: ngưỡng thu nhỏ 2.048 → 6.000 px, so với cache đã sửa, R-OCR v2 / R-LIVE v2 (luật ghi trước) — gộp với bước 4 trong notebook `28_prototype_v2_live_demo_sh_qwen25vl.ipynb` (L4) | 3 h (≈ 1,3 h L4) | ✅ 01/11 — **R-OCR v2 ĐẠT · R-LIVE v2 ĐẠT** (100% / 100%) |
-| 4 | Demo: ví dụ chọn bằng luật cố định (`src/prototype/demo_examples.py`), kịch bản `Demo_Script.md`, quay video trong lúc notebook 28 mở giao diện 30 phút | 2,5 h | ✅ ví dụ đã chọn (01/11) · ⏳ video |
+| 4 | Demo: ví dụ chọn bằng luật cố định (`src/prototype/demo_examples.py`), kịch bản `Demo_Script.md`, quay video trong lúc notebook 28 mở giao diện 30 phút | 2,5 h | ✅ ví dụ đã chọn (01/11) · video lần 1 (01/11, 2 phút 50 giây) lộ lỗi hiển thị → sửa `prototype-app-v2.1`, ⏳ quay lại |
 | 5 | Gói tái lập phần code: ghim phiên bản thư viện, script suy luận dòng lệnh, README chạy lại, manifest adapter | 3 h | ⏳ |
 | 6 | Đóng tuần: README + Team Report, dọn Downloads + `G:\My Drive\ViVQA-VLM` | 1,5 h | ⏳ |
 | | **Tổng** | **≈ 18 h** | |
@@ -231,3 +231,20 @@ Kết quả ghi vào Drive `experiments/W14_exif_audit_vitextvqa/` (`exif_scan.j
 | `src/prototype/demo_examples.py` (mới) | chọn ví dụ demo bằng luật cố định → `examples.json` + `demo_examples.md` | `--selftest` |
 | `notebooks/28_prototype_v2_live_demo_sh_qwen25vl.ipynb` (mới) | L4: cài (như notebook 24) → kiểm (cache đã sửa + engine có `exif`) → chạy v2 → phán quyết → ảnh thật → ví dụ demo → khối gửi Claude → giao diện 30 phút → tự trả máy | — |
 | `docs/W14/Demo_Script.md` (mới) | kịch bản + cách quay video demo | — |
+
+## Bước 4 — video lần 1 + sửa hiển thị `prototype-app-v2.1` (01/11/2026)
+
+**Video lần 1** (`Screen_Recording_2026-11-01_234357.mp4`, 2 phút 50 giây, 1918×1078, không có tiếng).
+- Có các cảnh: đọc chữ `198.jpg`, ảnh xoay EXIF `1849.jpg`, 5 ảnh thật (cửa hàng đặc sản → "hà nội", túi → "eleven", bảng hướng dẫn → "công dân số tphcm", bãi cát mức Thấp, đếm mèo), mục "Về mức tin cậy", "Chi tiết kỹ thuật", các cảnh báo (OCR bị cắt 41/75 dòng, độ tin cậy thấp, không đọc được chữ).
+- Thiếu: câu có/không gõ tay (cảnh 5) và câu sai `226.jpg` (cảnh 8).
+
+**Lỗi hiển thị phát hiện qua video.** Ảnh bằng chứng OCR về **chậm** hơn câu trả lời vài giây. Trong lúc chờ, khung bằng chứng vẫn hiện ảnh và khung của câu **trước**:
+- câu bãi cát → hiện ảnh bảng hướng dẫn;
+- câu đếm mèo → hiện ảnh bãi cát;
+- câu `1849.jpg` → hiện ảnh `198.jpg`.
+
+Nguyên nhân: `draw_ocr_boxes` trả ảnh **nguyên độ phân giải**, mã hoá PNG (ảnh 4000×3000 ≈ 20 MB) rồi gửi qua link share. Bản v2 bỏ bước thu nhỏ 2.048 px nên lỗi này nặng thêm.
+
+**Sửa (`prototype-app-v2.1`):** vẽ khung trên ảnh gốc rồi thu cạnh dài về **1.280 px** (`DISPLAY_MAX_SIDE`), giao diện gửi JPEG. Chỉ ảnh **hiển thị** nhỏ đi; model và OCR vẫn nhận ảnh nguyên độ phân giải → không đụng R-PAR / R-OCR v2 / R-LIVE v2 (các luật này kiểm `prepare_image` và `Backend.ask`, không kiểm ảnh hiển thị). Selftest `app`: ảnh 4032×3024 → ảnh bằng chứng 1280×960, khung vẫn đúng chỗ.
+
+Notebook 28 chấp nhận `prototype-app-v2.x`. Chạy lại để quay video lần 2: phần kiểm (mục 4–5) và ảnh thật tự bỏ qua vì đã có kết quả.
