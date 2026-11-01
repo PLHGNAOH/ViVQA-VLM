@@ -30,12 +30,13 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
-APP_VERSION = "prototype-app-v1"
+APP_VERSION = "prototype-app-v2"     # W14: MAX_SIDE 2048 -> 6000
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SUMMARY_REL = "experiments/W13_prototype_check_L4_seed42/prototype_check_summary.json"
 OCR_SELECTION_REL = "experiments/W08_ocr_select_dev300_L4_seed42/ocr_selection.json"
 ECE_SHOW_NUMBER = 0.05          # luật R-CONF: chỉ hiện con số khi ECE ≤ 0,05
-MAX_SIDE = 2048                 # ảnh dài hơn -> thu nhỏ (ảnh ViVQA/ViTextVQA đều nhỏ hơn, nên đi nguyên file)
+MAX_SIDE = 6000                 # W14: ảnh dài hơn -> thu nhỏ. Mọi ảnh ViVQA / ViTextVQA (lớn nhất 5.770 px) đi nguyên file
+MAX_SIDE_W13 = 2048             # ngưỡng W13 (sai: 1.418 ảnh ViTextVQA lớn hơn) — giữ để tái lập run W13
 MAX_QUESTION_CHARS = 300
 LEVELS = ("Cao", "Trung bình", "Thấp")
 LEVEL_COLORS = {"Cao": ("#0f5132", "#d1e7dd"), "Trung bình": ("#664d03", "#fff3cd"), "Thấp": ("#842029", "#f8d7da")}
@@ -458,8 +459,14 @@ def _selftest() -> None:
     Image.new("RGB", (400, 300), "white").save(p_rot, exif=ex)
     used, info = prepare_image(p_rot, tmp)
     assert info["rotated"] and Image.open(used).size == (300, 400) and used.endswith(".png")
+    p_phone = os.path.join(tmp, "phone.jpg")                # ảnh điện thoại 12 MP như ảnh ViTextVQA -> đi nguyên file
+    Image.new("RGB", (4032, 3024), "white").save(p_phone)
+    used, info = prepare_image(p_phone, tmp)
+    assert used == p_phone and not info["resized"] and not info["reencoded"]
+    used, info = prepare_image(p_phone, tmp, max_side=MAX_SIDE_W13)    # đường W13 vẫn tái lập được
+    assert info["resized"] and max(Image.open(used).size) == MAX_SIDE_W13
     p_big = os.path.join(tmp, "big.jpg")
-    Image.new("RGB", (4032, 3024), "white").save(p_big)
+    Image.new("RGB", (6400, 120), "white").save(p_big)
     used, info = prepare_image(p_big, tmp)
     assert info["resized"] and max(Image.open(used).size) == MAX_SIDE
     p_bad = os.path.join(tmp, "bad.jpg")

@@ -10,8 +10,8 @@
 |---|---|---|---|
 | 1 | **R-EXIF**: kiểm cờ xoay EXIF có làm hỏng OCR cache ViTextVQA không — luật (README này) + `src/data/exif_audit.py` + notebook `25_exif_ocr_audit_vitextvqa.ipynb` (T4) | 3 h (≈ 1 h T4) | ✅ 01/11 — **L1 XÁC NHẬN · L2 > 1% · L3 ≤ 5%** |
 | 2 | Theo L2: sửa `ocr.py` + cache mới (notebook `26_ocr_cache_exiffix_vitextvqa.ipynb`, T4) + suy luận lại B3-full full test (notebook `27_b3full_exiffix_testfull_qwen25vl.ipynb`, L4). Không train lại (L3) | ≈ 5 h (≈ 0,4 h T4 + 3 h L4) | ✅ 01/11 — V1–V5 **hợp lệ**; B3-full EM 53,35 → 53,63 (độ nhạy) |
-| 3 | Prototype: sửa đường ảnh (OCR trên ảnh độ phân giải gốc, xử lý EXIF thống nhất với eval) + kiểm lại R-OCR / R-LIVE (luật ghi trước) | 3 h (≈ 1 h L4) | ⏳ |
-| 4 | Demo hoàn chỉnh: bộ ví dụ chọn sẵn, kịch bản demo, quay video dự phòng | 2,5 h | ⏳ |
+| 3 | Prototype v2: ngưỡng thu nhỏ 2.048 → 6.000 px, so với cache đã sửa, R-OCR v2 / R-LIVE v2 (luật ghi trước) — gộp với bước 4 trong notebook `28_prototype_v2_live_demo_sh_qwen25vl.ipynb` (L4) | 3 h (≈ 1,3 h L4) | ⏳ code xong, chờ chạy |
+| 4 | Demo: ví dụ chọn bằng luật cố định (`src/prototype/demo_examples.py`), kịch bản `Demo_Script.md`, quay video trong lúc notebook 28 mở giao diện 30 phút | 2,5 h | ⏳ code + kịch bản xong, chờ quay |
 | 5 | Gói tái lập phần code: ghim phiên bản thư viện, script suy luận dòng lệnh, README chạy lại, manifest adapter | 3 h | ⏳ |
 | 6 | Đóng tuần: README + Team Report, dọn Downloads + `G:\My Drive\ViVQA-VLM` | 1,5 h | ⏳ |
 | | **Tổng** | **≈ 18 h** | |
@@ -134,6 +134,45 @@ Nguồn: `../../experiments/W14_exif_fix/` (`ocr_cache_exiffix_manifest.json`, `
 3. B3-full đã học trên OCR rác ở 450 câu train. Không train lại theo L3.
 4. W13 ghi "ảnh ViVQA / ViTextVQA đều nhỏ hơn 2.048 px" là **sai**: 1.418 / 16.762 ảnh ViTextVQA lớn hơn 2.048 px (lớn nhất 5.770 px). Đây là nguyên nhân chính khiến R-OCR không đạt ở W13 → sửa ở bước 3.
 
+## Bước 3 — prototype v2: luật ghi trước (commit TRƯỚC notebook 28)
+
+**Vấn đề.** R-OCR không đạt ở W13 (ViTextVQA 87,5%). Hai nguyên nhân:
+- (a) giao diện thu nhỏ ảnh lớn hơn 2.048 px, trong khi 1.418 / 16.762 ảnh ViTextVQA lớn hơn ngưỡng này (W13 ghi nhầm là "đều nhỏ hơn");
+- (b) OCR trên L4 lệch nhẹ so với cache dựng trên T4, do sai khác số học giữa hai GPU.
+
+Thêm nữa, cache ViTextVQA dùng ở W13 có lỗi EXIF (đã sửa ở bước 2).
+
+**Sửa code:**
+- `src/prototype/app.py` (`prototype-app-v2`): `MAX_SIDE` 2.048 → **6.000 px**. Mọi ảnh ViVQA / ViTextVQA (lớn nhất 5.770 px) đi nguyên file như lúc eval; chỉ ảnh lớn hơn (vd ảnh điện thoại 48 MP) mới thu nhỏ. `MAX_SIDE_W13 = 2048` giữ lại để tái lập W13.
+- `src/eval/prototype_live.py` (`prototype-live-v2`, `--version v2` mặc định; `--version v1` tái lập đúng run W13): ghi cờ `rotated` / `resized` cho từng câu. Sau khi chạy hết mẫu, **cùng tiến trình OCR** đọc thẳng file gốc của từng ảnh → `direct_ocr.json`.
+
+**Mẫu:** đúng mẫu W13 (200 ảnh / tập, seed 42, mọi câu hỏi của các ảnh đó; ViVQA test, ViTextVQA test2000). Adapter SH trùng sha256 run W11. Cùng L4, cùng cấu hình OCR.
+
+**Luật:**
+
+| Luật | ĐẠT khi (từng tập) | Vì sao đổi so với W13 |
+|---|---|---|
+| **R-OCR v2** | văn bản OCR vào prompt (`lines_to_texts`, 600 ký tự) **qua giao diện** trùng hệt OCR **đọc thẳng file gốc** bằng cùng tiến trình OCR, cùng phiên, ở **≥ 98%** ảnh | Luật W13 so với cache dựng trên **T4**, nên trộn lỗi của giao diện với sai khác số học giữa GPU, mà phần sau không sửa được. v2 kiểm đúng điều giao diện chịu trách nhiệm (ảnh có bị biến đổi trên đường đi không). So với cache chỉ **mô tả**: % trùng hệt và độ giống chuỗi (difflib; ngưỡng mô tả 0,9) |
+| **R-LIVE v2** | câu trả lời qua giao diện trùng hệt run eval W11 của SH ở **≥ 97%** câu **và** EM không thấp hơn W11 quá **1,5** điểm. Bỏ câu có/không (như W13) và bỏ thêm câu của **ảnh có cờ xoay EXIF** | Giao diện xoay ảnh theo EXIF và đọc OCR đúng, còn run W11 dùng ảnh chưa xoay và cache cũ. Hai bên khác nhau có chủ đích, nên câu loại này chỉ mô tả |
+
+Đây là đổi luật **sau khi** biết kết quả W13 (R-OCR v1 không đạt). Vì vậy kết quả W13 giữ nguyên trong báo cáo (KHÔNG ĐẠT), và v2 được báo cáo là một lần kiểm mới với luật mới, kèm lý do ở bảng trên.
+
+**Chỉ mô tả:** latency p50 / p95 (OCR / model / tổng), thời gian khởi động, VRAM, số câu có ảnh bị xoay / thu nhỏ, ảnh thật của nhóm (`W14_REAL_sh_realphotos_v2_bf16_L4`).
+
+**Hệ quả:** R-OCR v2 và R-LIVE v2 đạt → prototype v2 là bản dùng để bảo vệ. Không đạt → giữ bản v2 nhưng ghi rõ giới hạn; không đổi số đã báo cáo.
+
+## Bước 4 — ví dụ demo + video
+
+- Ví dụ **không chọn tay**: `src/prototype/demo_examples.py` lấy câu đầu tiên (thứ tự mẫu seed 42, kết quả chạy thật của notebook 28) thoả từng ô:
+  - đọc chữ đúng mức Cao (2 câu);
+  - ảnh xoay EXIF;
+  - câu có/không;
+  - câu đếm;
+  - câu màu sắc;
+  - **một câu trả lời sai mức Thấp**;
+  - cộng toàn bộ ảnh thật của nhóm.
+- Kịch bản video: `Demo_Script.md` (≈ 3 phút 40 giây, có cách quay trên Windows 11). Video lưu ở Drive `demo/`, không lên GitHub.
+
 ## File mới (bước 1, 01/11/2026)
 
 | File | Nội dung | Kiểm |
@@ -153,3 +192,13 @@ Kết quả ghi vào Drive `experiments/W14_exif_audit_vitextvqa/` (`exif_scan.j
 | `notebooks/26_ocr_cache_exiffix_vitextvqa.ipynb` | T4: kiểm phán quyết notebook 25 → cài Paddle (bắt buộc GPU) → dựng cache mới → khối gửi Claude → tự trả máy | — |
 | `notebooks/27_b3full_exiffix_testfull_qwen25vl.ipynb` | L4: kiểm biên bản + adapter + 2 run tham chiếu → eval full test → 126 câu ảnh xoay → so ghép cặp → khối gửi Claude → tự trả máy | — |
 | `experiments/W14_exif_audit_vitextvqa/` | kết quả notebook 25 (chép từ Drive) | — |
+
+## File mới / đổi (bước 3 + 4, 01/11/2026)
+
+| File | Nội dung | Kiểm |
+|---|---|---|
+| `src/prototype/app.py` | `APP_VERSION = prototype-app-v2`, `MAX_SIDE` 6.000, `MAX_SIDE_W13` 2.048 | `--selftest`: ảnh 12 MP đi nguyên file; đường W13 vẫn thu nhỏ; ảnh 6.400 px thu về 6.000; dựng Gradio 6.31.0 |
+| `src/eval/prototype_live.py` | `VERSIONS` v1 / v2, `--version`; cờ `rotated` / `resized`; OCR đọc thẳng `direct_ocr.json`; R-OCR v2; R-LIVE v2 bỏ ảnh xoay; so cache đã sửa | `--selftest` thêm phần v2 |
+| `src/prototype/demo_examples.py` (mới) | chọn ví dụ demo bằng luật cố định → `examples.json` + `demo_examples.md` | `--selftest` |
+| `notebooks/28_prototype_v2_live_demo_sh_qwen25vl.ipynb` (mới) | L4: cài (như notebook 24) → kiểm (cache đã sửa + engine có `exif`) → chạy v2 → phán quyết → ảnh thật → ví dụ demo → khối gửi Claude → giao diện 30 phút → tự trả máy | — |
+| `docs/W14/Demo_Script.md` (mới) | kịch bản + cách quay video demo | — |
