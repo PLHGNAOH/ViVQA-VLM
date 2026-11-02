@@ -15,7 +15,8 @@ Hệ thống nhận **ảnh** + **câu hỏi tiếng Việt** → dùng **Vision
 ```text
 ViVQA-VLM/
 ├── README.md                 # file này
-├── requirements.txt          # pin dependencies
+├── requirements.txt          # thư viện cơ bản (chạy local, CPU)
+├── requirements-colab.txt    # thư viện GHIM để tái lập trên Colab L4 (W14)
 ├── docs/
 │   ├── 00_admin/             # đăng ký đề tài, form GVHD, timeline
 │   ├── 01_proposal/          # capstone proposal (docx/pdf)
@@ -23,22 +24,23 @@ ViVQA-VLM/
 │   ├── 03_report/            # thesis LaTeX (đồng bộ Overleaf) + R1..R7
 │   ├── 04_slides/            # slide theo milestone; cumulative/ = bộ slide cộng dồn (R1 → bảo vệ)
 │   ├── notes/ · templates/   # ghi chú & template nhóm
-│   ├── W01/ … W13/           # deliverable theo tuần
+│   ├── W01/ … W14/           # deliverable theo tuần (README = luật ghi trước + kết quả; Wxx_Team_Report.md)
+│   ├── REPRODUCE.md          # hướng dẫn tái lập mọi số chính thức + prototype (W14)
 │   ├── Glossary.md           # sổ tay thuật ngữ (ôn bảo vệ)
 │   ├── Review_W01-W04_and_Defense_Prep.md
 │   └── master_instruction.md
 ├── src/
-│   ├── data/                 # dataset loaders, OCR (vivqa_dataset.py, ocr.py)
+│   ├── data/                 # dataset, OCR + cache (ocr.py), kiểm EXIF (exif_audit.py)
 │   ├── models/               # VLM loader
 │   ├── prompting/            # prompt builder
 │   ├── baseline/             # baseline reproduce
-│   ├── adaptation/           # PEFT (LoRA/QLoRA)
-│   ├── eval/                 # metrics, run_eval
-│   └── prototype/            # web demo
-├── notebooks/                # notebook thử nghiệm (zero-shot baseline)
-├── configs/                  # cấu hình train/eval (qwen_lora.yaml, ...)
+│   ├── adaptation/           # PEFT: train_qlora.py (QLoRA 4-bit), lora_targets.py
+│   ├── eval/                 # run_baseline.py, metrics, so ghép cặp, ablation, POPE-vi, error analysis, repro_manifest.py
+│   └── prototype/            # app.py (Gradio), core.py, ocr_worker.py, infer.py (dòng lệnh), demo_examples.py
+├── notebooks/                # 00–28: mỗi notebook = 1 thí nghiệm, Run all trên Colab (xem docs/REPRODUCE.md)
+├── configs/                  # qwen_lora.yaml, pope_vi_objects.json, official_models.json (biên bản model chính thức)
 ├── data/                     # raw/processed/ocr/splits + ViVQA-X/
-├── adapters/                 # LoRA/QLoRA adapter weights
+├── adapters/                 # (trên Drive, không lên git) LoRA/QLoRA adapter — sha256 ở configs/official_models.json
 ├── experiments/              # run dir Wxx_<tên>
 └── _archive/                 # tài liệu/khảo sát cũ, code khóa Agentic-RAG (tham khảo)
 ```

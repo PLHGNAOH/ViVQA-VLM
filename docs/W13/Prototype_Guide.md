@@ -1,4 +1,12 @@
-# Hướng dẫn chạy prototype ViVQA-VLM (W13)
+# Hướng dẫn chạy prototype ViVQA-VLM (W13, cập nhật W14)
+
+> **Cập nhật W14 (02/11/2026): bản dùng để bảo vệ là `prototype-app-v2.1`, chạy bằng notebook 28.**
+> - Ngưỡng thu nhỏ ảnh 2.048 → 6.000 px.
+> - OCR sửa lỗi EXIF.
+> - Ảnh bằng chứng OCR chỉ thu nhỏ khi hiển thị.
+> - Kiểm lại: R-OCR v2 / R-LIVE v2 đạt 100% / 100%.
+>
+> Chi tiết ở `docs/W14/README.md`. Notebook 24 chỉ còn để tái lập run W13 (`--version v1`).
 
 > Người đọc: thành viên nhóm, GVHD, hội đồng. Mục tiêu: chạy được giao diện hỏi đáp ảnh tiếng Việt **đúng hệ thống đã đánh giá** (R-PAR, R-LIVE) và biết nó làm được gì, không làm được gì.
 
@@ -22,7 +30,7 @@ Người dùng tải một ảnh lên rồi gõ câu hỏi tiếng Việt. Giao 
 
 ### 2.1 Trên Colab L4 (khuyến nghị, cách đã kiểm)
 
-1. Mở `notebooks/24_prototype_live_ocr_latency_sh_qwen25vl.ipynb` từ GitHub trên Colab, chọn **Runtime → Change runtime type → L4**.
+1. Mở `notebooks/28_prototype_v2_live_demo_sh_qwen25vl.ipynb` (W14; bản W13 là notebook 24) từ GitHub trên Colab, chọn **Runtime → Change runtime type → L4**. **Buổi bảo vệ:** bấm Run all khoảng **30 phút trước** giờ trình bày (link hiện sau khoảng 25 phút) và đặt `UI_MINUTES = 90` ở mục 1 để giao diện không tắt giữa buổi.
 2. Ở cell mục 1, đặt `UI_MINUTES = 20` (số phút mở giao diện).
 3. Bấm **Runtime → Run all**. Mục 2 cài thư viện (6–8 phút). Mục 4–6 tự bỏ qua hoặc chạy nhanh nếu kết quả đã có trên Drive.
 4. Ở mục 7, notebook in ra `Running on public URL: https://….gradio.live`. Mở link đó trên điện thoại hoặc máy tính.
@@ -30,7 +38,9 @@ Người dùng tải một ảnh lên rồi gõ câu hỏi tiếng Việt. Giao 
 
 Chi phí khoảng 1 CU cho 20 phút giao diện, gồm cả cài đặt.
 
-**Chạy tay** (khi đã cài thư viện như mục 2 của notebook 24):
+**Dòng lệnh, không cần giao diện (W14):** `python -m src.prototype.infer --official sh --drive_root /content/drive/MyDrive/ViVQA-VLM --image anh.jpg --question "…"`. Lệnh này đi đúng đường của giao diện và xuất JSONL.
+
+**Chạy tay** (khi đã cài thư viện như mục 2 của notebook 24 / 28):
 ```bash
 python -m src.prototype.app \
   --adapter /content/drive/MyDrive/ViVQA-VLM/adapters/W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42/epoch_1 \
@@ -70,8 +80,10 @@ Trên Windows, đặt `PYTHONIOENCODING=utf-8` trước khi chạy.
 | R-YB v3: ngưỡng τ\* sửa thiên lệch "có" của SH | ΔF1 so với B1-ocr +1,1 đến +1,8; yes-ratio 41–45% | `experiments/W13_yesno_calib_v3_L4_seed42/` |
 | R-LIVE: trả lời qua đường giao diện (OCR trực tiếp) = eval W11 | ViVQA 100%, ViTextVQA 98,5% (ΔEM +0,38) — **ĐẠT** | `experiments/W13_prototype_live_L4_seed42/` |
 | R-OCR: OCR trực tiếp = cache | ViVQA 100%, ViTextVQA **87,5% — KHÔNG ĐẠT** (giao diện thu nhỏ ảnh > 2.048 px; khác GPU) | như trên |
+| **W14 · R-OCR v2:** OCR qua giao diện = OCR đọc thẳng file, cùng phiên L4 | **100% / 100% — ĐẠT** (so với cache T4: ViTextVQA 95,5% trùng hệt, phần lệch chỉ do khác GPU) | `experiments/W14_prototype_live_v2_L4_seed42/` |
+| **W14 · R-LIVE v2:** trả lời qua giao diện = eval W11 (bỏ câu ảnh xoay EXIF) | **100% / 100% — ĐẠT** (EM 75,83 / 50,19 không đổi) | như trên |
 
-Tốc độ trên L4: tổng **p50 0,98 s, p95 3,30 s** mỗi câu (ViTextVQA p95 3,65 s). Khởi động 60 s. VRAM 2,6 GB (Qwen) + 1,9 GB (OCR).
+Tốc độ trên L4: tổng **p50 0,98 s, p95 3,30 s** mỗi câu (ViTextVQA p95 3,65 s). Khởi động 60 s. VRAM 2,6 GB (Qwen) + 1,9 GB (OCR). **W14 (v2, ảnh nguyên độ phân giải):** p50 1,00 s, p95 3,58 s; VRAM tổng 4,78 GB.
 
 ## 4. Giới hạn cần nói rõ khi demo
 
@@ -81,7 +93,7 @@ Tốc độ trên L4: tổng **p50 0,98 s, p95 3,30 s** mỗi câu (ViTextVQA p9
   - VietOCR có thể sinh chữ tiếng Anh vô nghĩa trên vùng không phải chữ.
 - **Câu trả lời thường ngắn hơn đáp án** (vd "orion" thay vì "nha khoa orion"): EM chấm sai, nhưng người đọc thấy đúng ý.
 - **Đếm số lượng và nhận đồ vật hiếm** còn sai (ảnh thật: đếm 6 thay vì 5 con mèo; "dây" thay vì "móc áo").
-- **Ảnh lớn hơn 2.048 px bị thu nhỏ** trước khi xử lý. Ảnh dataset đều đi nguyên file, trừ khoảng 9% ảnh ViTextVQA lớn hơn ngưỡng này.
+- **Ảnh lớn hơn 6.000 px bị thu nhỏ** trước khi xử lý (W14; bản W13 là 2.048 px). Mọi ảnh dataset (lớn nhất 5.770 px) đi nguyên file. Ảnh có cờ xoay EXIF được xoay đúng chiều trước khi đọc chữ.
 - Ảnh HEIC (iPhone) chưa hỗ trợ: chụp ở chế độ "Tương thích nhất" (JPG).
 - Link `*.gradio.live` là **công khai** trong lúc giao diện mở: không chia sẻ link. Giao diện không lưu ảnh hay câu hỏi; log (nếu bật) chỉ ghi số đo.
 
@@ -93,4 +105,5 @@ Tốc độ trên L4: tổng **p50 0,98 s, p95 3,30 s** mỗi câu (ViTextVQA p9
 | `❌ engine OCR khác engine đã dựng cache` | Sai phiên bản `paddleocr` / model. Cài đúng `paddleocr==3.7.0` như mục 2 |
 | `❌ adapter … ≠ adapter đã kiểm` | Adapter trên Drive bị đổi. Dùng đúng thư mục `W11_SH_…/epoch_1` |
 | Giao diện báo "Không đọc được ảnh" | Ảnh HEIC hoặc file hỏng → đổi sang JPG / PNG |
+| Thông báo đỏ `Error · Could not parse server response: SyntaxError: Unexpected token '<'` (gặp 1 lần trong video W14) | Đường truyền của link `gradio.live` chập chờn: trình duyệt nhận trang lỗi HTML thay vì kết quả. Bấm **Trả lời** lại. Lặp lại nhiều lần thì chạy lại cell mục 8 để lấy link mới, hoặc chuyển sang video dự phòng |
 | Mất link `gradio.live` | Chạy lại cell mục 7 (model nạp lại khoảng 1 phút) |

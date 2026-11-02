@@ -4,6 +4,20 @@
 > **Phạm vi (Hoàng, 01/11/2026):** tuần này chỉ làm phần **code**: xử lý dữ liệu, prototype web, bản demo hoàn chỉnh. Thesis, slide và sửa theo góp ý Review 2 **dời sang tuần sau**. Deck đang lưu trên Canva: khi nào làm slide, Hoàng tải về rồi Claude cập nhật và lưu đúng chỗ.
 > Colab đầu tuần: đọc ở **Colab → Resources** khi mở notebook 25 và ghi vào đây.
 
+## Tổng kết W14 (02/11/2026)
+
+**Phần code của đồ án đã xong:** dữ liệu sạch hơn, prototype đúng hệ thống đã đánh giá, có video demo dự phòng, và có gói tái lập.
+
+| Kết quả | Chi tiết |
+|---|---|
+| **Lỗi EXIF trong OCR cache** (phát hiện qua W13) | Xác nhận theo luật: 164/165 ảnh có cờ xoay có OCR rác, 0/200 ảnh đối chứng. Ảnh hưởng 1,256% câu test, 1,28% câu train ViTextVQA. Đã sửa `ocr.py` và dựng cache mới (cache cũ giữ nguyên) |
+| **Số chính thức không đổi** (luật L3) | B3-full EM 53,35. Dòng độ nhạy với OCR đã sửa: **53,63** (+0,28 [+0,17; +0,41]); 126 câu bị lỗi: 26,98 → 49,21; 9.902 câu còn lại trùng 100%. B2 → B3-full: +3,09 → +3,37 EM |
+| **Prototype v2.1 = đúng hệ thống đã đánh giá** | R-OCR v2 và R-LIVE v2 đạt 100% / 100% (W13: R-OCR không đạt 87,5%). p50 / p95 = 1,00 / 3,58 s mỗi câu trên L4; VRAM 4,78 GB |
+| **Demo** | Ví dụ chọn bằng luật cố định, có cả câu sai; kịch bản `Demo_Script.md`; video lần 2 (10 phút 28 giây) trên Drive `demo/` |
+| **Gói tái lập** (master §10) | `docs/REPRODUCE.md`, `requirements-colab.txt` (ghim, khớp log), `configs/official_models.json` (6 model chính thức; 4/4 adapter trên Drive trùng sha256), `python -m src.prototype.infer` |
+
+Báo cáo tuần: [`W14_Team_Report.md`](W14_Team_Report.md). Tuần sau (theo Hoàng): góp ý Review 2, slide (deck cộng dồn, Part C cho hội đồng cấp Khoa), thesis bản tiếng Việt.
+
 ## Việc trong tuần
 
 | # | Việc | Ước tính | Trạng thái |
@@ -11,9 +25,9 @@
 | 1 | **R-EXIF**: kiểm cờ xoay EXIF có làm hỏng OCR cache ViTextVQA không — luật (README này) + `src/data/exif_audit.py` + notebook `25_exif_ocr_audit_vitextvqa.ipynb` (T4) | 3 h (≈ 1 h T4) | ✅ 01/11 — **L1 XÁC NHẬN · L2 > 1% · L3 ≤ 5%** |
 | 2 | Theo L2: sửa `ocr.py` + cache mới (notebook `26_ocr_cache_exiffix_vitextvqa.ipynb`, T4) + suy luận lại B3-full full test (notebook `27_b3full_exiffix_testfull_qwen25vl.ipynb`, L4). Không train lại (L3) | ≈ 5 h (≈ 0,4 h T4 + 3 h L4) | ✅ 01/11 — V1–V5 **hợp lệ**; B3-full EM 53,35 → 53,63 (độ nhạy) |
 | 3 | Prototype v2: ngưỡng thu nhỏ 2.048 → 6.000 px, so với cache đã sửa, R-OCR v2 / R-LIVE v2 (luật ghi trước) — gộp với bước 4 trong notebook `28_prototype_v2_live_demo_sh_qwen25vl.ipynb` (L4) | 3 h (≈ 1,3 h L4) | ✅ 01/11 — **R-OCR v2 ĐẠT · R-LIVE v2 ĐẠT** (100% / 100%) |
-| 4 | Demo: ví dụ chọn bằng luật cố định (`src/prototype/demo_examples.py`), kịch bản `Demo_Script.md`, quay video trong lúc notebook 28 mở giao diện 30 phút | 2,5 h | ✅ ví dụ đã chọn (01/11) · video lần 1 (01/11, 2 phút 50 giây) lộ lỗi hiển thị → sửa `prototype-app-v2.1`, ⏳ quay lại |
+| 4 | Demo: ví dụ chọn bằng luật cố định (`src/prototype/demo_examples.py`), kịch bản `Demo_Script.md`, quay video trong lúc notebook 28 mở giao diện 30 phút | 2,5 h | ✅ 02/11 — video lần 2 (10 phút 28 giây, v2.1) trên Drive `demo/`; lỗi ảnh bằng chứng đã hết |
 | 5 | Gói tái lập phần code: ghim phiên bản thư viện, script suy luận dòng lệnh, README chạy lại, manifest adapter | 3 h | ✅ 02/11 — `docs/REPRODUCE.md`, `requirements-colab.txt`, `configs/official_models.json`, `src/prototype/infer.py` |
-| 6 | Đóng tuần: README + Team Report, dọn Downloads + `G:\My Drive\ViVQA-VLM` | 1,5 h | ⏳ |
+| 6 | Đóng tuần: README + Team Report, dọn Downloads + `G:\My Drive\ViVQA-VLM` | 1,5 h | ✅ 02/11 |
 | | **Tổng** | **≈ 18 h** | |
 
 ## R-EXIF — luật ghi trước (commit TRƯỚC khi chạy notebook 25)
@@ -269,3 +283,22 @@ Notebook 28 chấp nhận `prototype-app-v2.x`. Chạy lại để quay video l�
 | `README.md` (gốc) | trỏ tới phần tái lập; sửa dòng môi trường cho đúng thực tế | — |
 
 **Adapter** không lên git (mỗi adapter khoảng 30 MB, nằm trên Drive `adapters/`). Khi nộp gói tái lập thì chia sẻ thư mục Drive; sha256 trong `configs/official_models.json` dùng để người nhận tự kiểm.
+
+## Bước 4 — video lần 2 (02/11/2026, `prototype-app-v2.1`)
+
+- **File** (Drive `demo/`, không lên git):
+  - `ViVQA-VLM_demo_W14_1080p.mp4` (1918×1078, 664 MB, bản gốc);
+  - `ViVQA-VLM_demo_W14.mp4` (1282×720, H.264 CRF 26, 17 MB);
+  - `ViVQA-VLM_demo_W14_contact_sheet.jpg`.
+- **Thời lượng** 10 phút 28 giây, không lời thoại (kênh âm thanh im lặng). Khi làm slide sẽ cắt bản rút gọn khoảng 4 phút từ video này.
+- **Có đủ các cảnh của kịch bản:**
+  - đọc chữ `198.jpg` (mức Cao) và `405.jpg`;
+  - ảnh xoay EXIF `1849.jpg` ("quận 5");
+  - đếm (COCO, "hai");
+  - màu ("màu tía");
+  - **câu sai `226.jpg`** ("cổ", mức Thấp, có cảnh báo);
+  - **câu có/không** trên ảnh thật (vd "Máy ảnh trong hình có chữ Canon không?" → "có", "Trong ảnh có chữ HCMC METRO không?" → "có", "Trong ảnh có con chó thật không?" → "không");
+  - khoảng 15 ảnh thật;
+  - "Chi tiết kỹ thuật", "Về mức tin cậy".
+- **Lỗi hiển thị của video lần 1 đã hết:** khi câu trả lời hiện ra, ảnh bằng chứng là ảnh của câu đang hỏi (vd `1849.jpg` ở 1:10, ảnh thuyền ở 2:30). Trong lúc chờ, Gradio làm mờ kết quả cũ, đó là hành vi bình thường.
+- **Một lần lỗi đường truyền ở khoảng 1:50:** thông báo `Could not parse server response: SyntaxError: Unexpected token '<'`, tức link `gradio.live` trả về trang HTML thay vì kết quả. Bấm lại thì chạy bình thường. Cách xử lý đã ghi vào `docs/W13/Prototype_Guide.md`. Đây cũng là lý do cần video dự phòng.
