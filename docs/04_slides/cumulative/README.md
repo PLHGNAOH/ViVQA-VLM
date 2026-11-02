@@ -6,8 +6,8 @@ One slide deck that grows at every milestone, so the final defense deck already 
 |---|---|---|
 | A | Review 1 — problem scope; slides 2–12 | draft for Review 2 (22/10/2026) |
 | B | Review 2 — Existing System + Methodology; slides 13–29; appendix 30–37 | Review 2 version (24/10/2026), presented 29/10/2026 |
-| C | Review 3 / faculty review (W13) | to add |
-| D | Final defense (W15) | to add |
+| C | Review 3 / faculty review (W13) | to add (W15 session, from 02/11/2026) |
+| D | Final defense (W15) | to add (W15 session, from 02/11/2026) |
 
 Files
 
@@ -32,3 +32,4 @@ Rules
 - 27/10/2026: the Review 1 baseline slide was removed (it duplicated the architecture slide); baseline + reproduction now live only in Review 2 (slides 15–17: architecture with reasons for the choice, R0, B1). Existing System order: architecture → R0 → B1 → data processing → evaluation protocol.
 - 27/10/2026: illustrations added to slides 5–8 and 19. Model outputs shown are real B1 zero-shot predictions from `experiments/W07_B1_zeroshot_qwen25vl_vivqa_test_bf16_L4_seed42/predictions.json` (test_1439 'bus and car'; a code-mixed answer containing '镜子'; a verbose answer for 'ảnh đen trắng cho thấy gì'); the POPE-style dog/cat and bike/car panels illustrate the question format only (not model outputs); normalization/ANLS examples are outputs of `src/eval/metrics` (ANLS('cửa hàng điện thoai', 'cửa hàng điện thoại') = 0.947).
 - 27/10/2026 (evening): slide 20 adds B1 zero-shot as the first of five steps; slide 22 error chart redrawn with full labels from `src.eval.answer_format.error_buckets` on `experiments/W07_B2_eval_qlora_r16_ep1_vitextvqa_testfull_bf16_L4_seed42` (4,988 errors: other 47.4%, near-miss 16.8%, extended 13.6%, truncated 13.2%, tone 9.0%); slide 23 pipeline shows the real sample ViTextVQA train_48788 (16267.jpg): OCR boxes/lines from cache `paddledet_vietocr`, prompt = `build_prompt(mode='ocr', template v1)`, answer = gold. The earlier prompt example 'NHÀ THUỐC TÂM AN | 0919 467 868' was not a real sample and was removed.
+- 02/11/2026: the deck as actually presented at Review 2 (Canva export, 27 slides, TV + EN, notes restored) is frozen in `../review2/`. That Canva version, not this file, is the starting point of the final cumulative deck (Parts A–D), because it carries Hoàng's last edits before the talk. Review 2 feedback: `docs/W15/Review2_Feedback.md`.
