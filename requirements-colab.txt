@@ -1,0 +1,29 @@
+# ViVQA-VLM — thư viện để TÁI LẬP trên Google Colab (L4), ghim theo môi trường đã chạy.
+# Nguồn: log từng run (train_log.json / metrics.json: torch, transformers, peft, paddleocr, paddlepaddle)
+#        + ảnh chụp môi trường prototype W14: experiments/W14_env_freeze_L4.txt (pip freeze, 02/11/2026,
+#          NVIDIA L4, driver 580.82.07, Python 3.13.16). Xem docs/REPRODUCE.md mục 1.
+#
+# torch: DÙNG BẢN COLAB CÀI SẴN. Mọi run chính thức ghi torch 2.11.0+cu130. Nếu Colab đổi bản mặc định:
+#   pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu130
+#
+# Cài:  pip install -r requirements-colab.txt     (các dòng OCR ở cuối file cài RIÊNG, theo hướng dẫn)
+
+transformers==5.17.0            # mọi run chính thức
+peft==0.21.2                    # B3-full, SH (W10–W11); B2 / C3 (W07–W09) train bằng 0.21.1 — adapter đọc được bằng 0.21.2
+bitsandbytes==0.50.2            # 4-bit NF4 (W04 env + W14 freeze)
+accelerate==1.15.0              # W04 env + W14 freeze
+qwen-vl-utils==0.0.14
+huggingface_hub
+pyyaml
+gradio==6.31.0                  # prototype (W13–W14)
+pandas
+requests
+tqdm
+openpyxl
+
+# ---- OCR: KHÔNG cài bằng -r. Cài theo đúng quy trình notebook 19 / 24 / 28 (mục 2), vì paddlepaddle-gpu
+# ---- ghi đè NCCL của torch (W08). Phiên bản = phiên bản đã dựng OCR cache:
+# paddleocr==3.7.0
+# paddlepaddle-gpu==3.3.1   -i https://www.paddlepaddle.org.cn/packages/stable/cu126/
+# vietocr==0.3.13           (pip install --no-deps vietocr==0.3.13 && pip install gdown einops)
+# Pillow 11.3.0 là bản Colab; KHÔNG để vietocr hạ xuống 10.2.0.

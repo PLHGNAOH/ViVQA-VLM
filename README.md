@@ -53,7 +53,9 @@ pip install -r requirements.txt
 ```
 
 Stack: Python · PyTorch · HuggingFace `transformers` / `peft` / `bitsandbytes` · PaddleOCR / VietOCR · Gradio.
-Môi trường mục tiêu: **Google Colab Pro/Premium** hoặc **GPU server trường**.
+Môi trường thực tế: **Google Colab Pro** (L4 cho train / eval / prototype, T4 cho OCR cache); trường không có GPU server (W06).
+
+**Tái lập kết quả (gói tái lập, master §10):** [`docs/REPRODUCE.md`](docs/REPRODUCE.md) · thư viện ghim: [`requirements-colab.txt`](requirements-colab.txt) · model chính thức + sha256 adapter: [`docs/W14/official_models.md`](docs/W14/official_models.md) · suy luận dòng lệnh: `python -m src.prototype.infer --official sh --image … --question …`
 
 ## 👥 Phân công (4 SV)
 
@@ -72,6 +74,6 @@ Môi trường mục tiêu: **Google Colab Pro/Premium** hoặc **GPU server tr�
 
 ## 📌 Bắt đầu từ đâu
 
-1. Đọc `docs/master_instruction.md`.
+1. Đọc `docs/master_instruction.md`, rồi `docs/REPRODUCE.md` (chạy lại mọi số chính thức + prototype).
 2. Tuần 2: `docs/W02/` (index + `WEEK2_STATUS.md`). Tuần 1: `docs/W01/`. Scaffold W03–W15: `_archive/docs_weekly_legacy_2026-09-16/`.
 3. Đặt dataset vào `data/`; viết code vào `src/{data,baseline,adaptation,eval,prototype}`.

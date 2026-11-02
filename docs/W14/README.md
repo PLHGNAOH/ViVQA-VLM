@@ -12,7 +12,7 @@
 | 2 | Theo L2: sửa `ocr.py` + cache mới (notebook `26_ocr_cache_exiffix_vitextvqa.ipynb`, T4) + suy luận lại B3-full full test (notebook `27_b3full_exiffix_testfull_qwen25vl.ipynb`, L4). Không train lại (L3) | ≈ 5 h (≈ 0,4 h T4 + 3 h L4) | ✅ 01/11 — V1–V5 **hợp lệ**; B3-full EM 53,35 → 53,63 (độ nhạy) |
 | 3 | Prototype v2: ngưỡng thu nhỏ 2.048 → 6.000 px, so với cache đã sửa, R-OCR v2 / R-LIVE v2 (luật ghi trước) — gộp với bước 4 trong notebook `28_prototype_v2_live_demo_sh_qwen25vl.ipynb` (L4) | 3 h (≈ 1,3 h L4) | ✅ 01/11 — **R-OCR v2 ĐẠT · R-LIVE v2 ĐẠT** (100% / 100%) |
 | 4 | Demo: ví dụ chọn bằng luật cố định (`src/prototype/demo_examples.py`), kịch bản `Demo_Script.md`, quay video trong lúc notebook 28 mở giao diện 30 phút | 2,5 h | ✅ ví dụ đã chọn (01/11) · video lần 1 (01/11, 2 phút 50 giây) lộ lỗi hiển thị → sửa `prototype-app-v2.1`, ⏳ quay lại |
-| 5 | Gói tái lập phần code: ghim phiên bản thư viện, script suy luận dòng lệnh, README chạy lại, manifest adapter | 3 h | ⏳ |
+| 5 | Gói tái lập phần code: ghim phiên bản thư viện, script suy luận dòng lệnh, README chạy lại, manifest adapter | 3 h | ✅ 02/11 — `docs/REPRODUCE.md`, `requirements-colab.txt`, `configs/official_models.json`, `src/prototype/infer.py` |
 | 6 | Đóng tuần: README + Team Report, dọn Downloads + `G:\My Drive\ViVQA-VLM` | 1,5 h | ⏳ |
 | | **Tổng** | **≈ 18 h** | |
 
@@ -248,3 +248,24 @@ Nguyên nhân: `draw_ocr_boxes` trả ảnh **nguyên độ phân giải**, mã 
 **Sửa (`prototype-app-v2.1`):** vẽ khung trên ảnh gốc rồi thu cạnh dài về **1.280 px** (`DISPLAY_MAX_SIDE`), giao diện gửi JPEG. Chỉ ảnh **hiển thị** nhỏ đi; model và OCR vẫn nhận ảnh nguyên độ phân giải → không đụng R-PAR / R-OCR v2 / R-LIVE v2 (các luật này kiểm `prepare_image` và `Backend.ask`, không kiểm ảnh hiển thị). Selftest `app`: ảnh 4032×3024 → ảnh bằng chứng 1280×960, khung vẫn đúng chỗ.
 
 Notebook 28 chấp nhận `prototype-app-v2.x`. Chạy lại để quay video lần 2: phần kiểm (mục 4–5) và ảnh thật tự bỏ qua vì đã có kết quả.
+
+## Bước 5 — gói tái lập phần code (02/11/2026)
+
+**Vấn đề.** Master §10 bắt buộc nộp gói tái lập gồm: source code, adapter, config, script suy luận, README chạy lại và log thí nghiệm. Trước W14 các phần này nằm rải rác:
+- số liệu ở khoảng 80 thư mục `experiments/`;
+- adapter trên Drive;
+- `requirements.txt` không ghim `torch`, `transformers`;
+- không có script suy luận dòng lệnh;
+- README gốc còn từ W02.
+
+| File | Nội dung | Kiểm |
+|---|---|---|
+| `src/eval/repro_manifest.py` (mới) | `--build`: đọc log đã có → biên bản 6 model chính thức (R0, B1, B2, C3, B3-full + dòng độ nhạy EXIF, SH): số, run eval, adapter + sha256, notebook, siêu tham số, phiên bản thư viện. `--check_adapters <Drive>`: adapter trên Drive trùng sha256 | `--selftest`: số khớp báo cáo (B3-full 53,35 · C3 76,64 · B2 50,26), adapter C3 đúng epoch 2, kiểm sha256 |
+| `configs/official_models.json`, `docs/W14/official_models.md` | biên bản sinh tự động (không gõ tay) | dựng lại bằng `--build` |
+| `src/prototype/infer.py` (mới) | suy luận dòng lệnh, đúng đường của prototype (`prepare_image` → OCR tiến trình riêng → `Backend.ask`); `--official sh` tự lấy adapter + kiểm sha256; xuất JSONL; `--mock` để thử không cần GPU | `--selftest` |
+| `requirements-colab.txt` (mới) | ghim theo log + `pip freeze` môi trường prototype W14 (L4, driver 580.82.07, Python 3.13.16): torch 2.11.0+cu130 (bản Colab), transformers 5.17.0, peft 0.21.2, bitsandbytes 0.50.2, accelerate 1.15.0, gradio 6.31.0, Pillow 11.3.0; OCR (paddleocr 3.7.0, paddlepaddle-gpu 3.3.1, vietocr 0.3.13) cài riêng theo quy trình notebook 19 / 24 / 28 | — |
+| `experiments/W14_env_freeze_L4.txt` | toàn bộ `pip freeze` của phiên notebook 28 (02/11) | — |
+| `docs/REPRODUCE.md` (mới) | hướng dẫn tái lập: môi trường, dữ liệu, OCR cache, bảng *số chính thức ↔ notebook ↔ run*, phân tích, prototype, kiểm nhanh, giới hạn | — |
+| `README.md` (gốc) | trỏ tới phần tái lập; sửa dòng môi trường cho đúng thực tế | — |
+
+**Adapter** không lên git (mỗi adapter khoảng 30 MB, nằm trên Drive `adapters/`). Khi nộp gói tái lập thì chia sẻ thư mục Drive; sha256 trong `configs/official_models.json` dùng để người nhận tự kiểm.

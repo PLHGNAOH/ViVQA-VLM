@@ -1,0 +1,503 @@
+{
+ "format": "vivqa-vlm/official-models/v1",
+ "what": "Model chính thức của khoá luận ViVQA-VLM — sinh từ experiments/ bằng src/eval/repro_manifest.py (không gõ tay). Adapter nằm trên Drive, không lên git.",
+ "base_model": "Qwen/Qwen2.5-VL-3B-Instruct",
+ "models": [
+  {
+   "id": "r0",
+   "role": "tái lập baseline",
+   "label": "R0 — Qwen2.5-VL-3B zero-shot trên TextVQA val (so số công bố 79,3)",
+   "notebooks": [
+    "06_r0_textvqa_repro_qwen25vl.ipynb"
+   ],
+   "train_run": null,
+   "evals": {
+    "textvqa_val": {
+     "run": "W07_R0_textvqa_val_qwen25vl3b_paper_bf16_L4",
+     "metrics_pct": {
+      "vqa_accuracy": 79.6
+     },
+     "n": 5000,
+     "data_file": null,
+     "data_file_sha256": null,
+     "git_commit": "fefa9ed",
+     "finished_utc": "2026-10-09T06:48:49.770934+00:00",
+     "sec_per_sample": 0.585,
+     "peak_vram_gb": 10.9,
+     "prompting_mode": null,
+     "gpu": null,
+     "verdict": "TÁI LẬP ĐƯỢC: 79.60 so với 79.3 (chênh +0.30, ngưỡng ±2.0)"
+    }
+   },
+   "adapter": null
+  },
+  {
+   "id": "b1",
+   "role": "baseline",
+   "label": "B1 — zero-shot Qwen2.5-VL-3B-Instruct (4-bit NF4)",
+   "notebooks": [
+    "02_run_baseline_qwen25vl.ipynb",
+    "08_fulltest_vitextvqa_b1_b2.ipynb"
+   ],
+   "train_run": null,
+   "evals": {
+    "vivqa_test": {
+     "run": "W07_B1_zeroshot_qwen25vl_vivqa_test_bf16_L4_seed42",
+     "metrics_pct": {
+      "exact_match": 22.09,
+      "vqa_accuracy": 22.09,
+      "anls": 28.61,
+      "token_f1": 38.05
+     },
+     "n": 3001,
+     "data_file": "data/vivqa/test.json",
+     "data_file_sha256": "0a09f7bac471ce7359eda5b965d94821ae78fd151217f84cf9a59b14b6ccb787",
+     "git_commit": "c96e3f3",
+     "finished_utc": "2026-10-08T13:20:11+00:00",
+     "sec_per_sample": 0.51,
+     "peak_vram_gb": null,
+     "prompting_mode": "zero_shot",
+     "gpu": [
+      "NVIDIA L4"
+     ]
+    },
+    "vitextvqa_testfull": {
+     "run": "W07_B1_zeroshot_qwen25vl_vitextvqa_testfull_bf16_L4_seed42",
+     "metrics_pct": {
+      "exact_match": 29.12,
+      "vqa_accuracy": 29.12,
+      "anls": 47.6,
+      "token_f1": 53.89
+     },
+     "n": 10028,
+     "data_file": "data/vitextvqa_official/test.json",
+     "data_file_sha256": "956da0ae2a6a8f57fbfb52cbbdc6626e677be857417145bc3e1d25bb45f00f08",
+     "git_commit": "884d964",
+     "finished_utc": "2026-10-10T09:13:18+00:00",
+     "sec_per_sample": 0.876,
+     "peak_vram_gb": 2.54,
+     "prompting_mode": "zero_shot",
+     "gpu": [
+      "NVIDIA L4"
+     ]
+    }
+   },
+   "adapter": null
+  },
+  {
+   "id": "b2_vitextvqa",
+   "role": "bước thích nghi",
+   "label": "B2 — QLoRA r16, ViTextVQA train đầy đủ, 1 epoch, không OCR",
+   "notebooks": [
+    "04_qlora_qwen25vl.ipynb",
+    "08_fulltest_vitextvqa_b1_b2.ipynb"
+   ],
+   "train_run": "W07_B2_qlora_r16_qwen25vl_vitextvqa_ep1_bf16_L4_seed42",
+   "evals": {
+    "vitextvqa_testfull": {
+     "run": "W07_B2_eval_qlora_r16_ep1_vitextvqa_testfull_bf16_L4_seed42",
+     "metrics_pct": {
+      "exact_match": 50.26,
+      "vqa_accuracy": 50.26,
+      "anls": 72.02,
+      "token_f1": 71.16
+     },
+     "n": 10028,
+     "data_file": "data/vitextvqa_official/test.json",
+     "data_file_sha256": "956da0ae2a6a8f57fbfb52cbbdc6626e677be857417145bc3e1d25bb45f00f08",
+     "git_commit": "884d964",
+     "finished_utc": "2026-10-10T12:01:03+00:00",
+     "sec_per_sample": 1.001,
+     "peak_vram_gb": 2.57,
+     "prompting_mode": "zero_shot",
+     "gpu": [
+      "NVIDIA L4"
+     ]
+    }
+   },
+   "adapter": {
+    "drive_path": "adapters/W07_B2_qlora_r16_qwen25vl_vitextvqa_ep1_bf16_L4_seed42/epoch_1",
+    "weights_sha256": "2e7b17d18b32b0f248b130dab4717b9b408b1da68e4fea5c3f5d6baaf9dcf863",
+    "config_sha256": "1ba81042eee2d9be37162536ef1ab53083fcc718679b62cfdb3d9b82b21aca94",
+    "weights_mb": 29.53
+   },
+   "train": {
+    "data_file": "data/vitextvqa_official/train.json",
+    "data_file_sha256": "dec0acc1ca998272ddbf76ba97087d9f6b1d3f96f4000274e41483c02fbde46c",
+    "num_samples": 35159,
+    "seed": 42,
+    "lora": {
+     "r": 16,
+     "lora_alpha": 32,
+     "lora_dropout": 0.05,
+     "bias": "none",
+     "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj"
+     ]
+    },
+    "trainable_params": 7372800,
+    "trainable_pct": 0.196,
+    "training": {
+     "epochs": 1.0,
+     "per_device_batch_size": 2,
+     "gradient_accumulation_steps": 8,
+     "learning_rate": 0.0002,
+     "warmup_ratio": 0.03
+    },
+    "prompting_mode": "zero_shot",
+    "quantization": {
+     "enabled": true,
+     "load_in_4bit": true,
+     "bnb_4bit_quant_type": "nf4",
+     "bnb_4bit_use_double_quant": true,
+     "bnb_4bit_compute_dtype": "bfloat16"
+    },
+    "max_pixels": 401408,
+    "train_hours": 11.99,
+    "peak_vram_gb": 6.88,
+    "gpu": "NVIDIA L4",
+    "git_commit": "22b44a3",
+    "versions": {
+     "transformers": "5.17.0",
+     "torch": "2.11.0+cu130",
+     "peft": "0.21.1"
+    },
+    "epoch_adapters": [
+     "epoch_1"
+    ],
+    "official_epoch": "epoch_1"
+   }
+  },
+  {
+   "id": "c3_vivqa",
+   "role": "chính thức ViVQA",
+   "label": "C3 — QLoRA r16, ViVQA train, lịch 2 epoch, adapter sau epoch 2",
+   "notebooks": [
+    "16_qlora_vivqa_2epoch_select_qwen25vl.ipynb"
+   ],
+   "train_run": "W09_B2_qlora_r16_qwen25vl_vivqa_ep2_bf16_L4_seed42",
+   "evals": {
+    "vivqa_test": {
+     "run": "W09_C3_eval_qlora_r16_vivqa_test_bf16_L4_seed42",
+     "metrics_pct": {
+      "exact_match": 76.64,
+      "vqa_accuracy": 76.64,
+      "anls": 78.03,
+      "token_f1": 78.84
+     },
+     "n": 3001,
+     "data_file": "data/vivqa/test.json",
+     "data_file_sha256": "0a09f7bac471ce7359eda5b965d94821ae78fd151217f84cf9a59b14b6ccb787",
+     "git_commit": "1777b08",
+     "finished_utc": "2026-10-16T22:25:35+00:00",
+     "sec_per_sample": 0.571,
+     "peak_vram_gb": 2.57,
+     "prompting_mode": "zero_shot",
+     "gpu": [
+      "NVIDIA L4"
+     ]
+    }
+   },
+   "adapter": {
+    "drive_path": "adapters/W09_B2_qlora_r16_qwen25vl_vivqa_ep2_bf16_L4_seed42/epoch_2",
+    "weights_sha256": "3ceff2f7f9610cf88a0a9dc8e9c17f1d3065e5b4da1559cc77d83ecca8f73a4d",
+    "config_sha256": "4cacecf893b23be805e48d0b78b227b11124a978d7f4f071bd2b214454cfa489",
+    "weights_mb": 29.53
+   },
+   "train": {
+    "data_file": "data/vivqa/train.json",
+    "data_file_sha256": "892243fa732fc7fb5b9a3bd8d2f28c85d7e9f99bb0e617efd193e7303cee96ec",
+    "num_samples": 10799,
+    "seed": 42,
+    "lora": {
+     "r": 16,
+     "lora_alpha": 32,
+     "lora_dropout": 0.05,
+     "bias": "none",
+     "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj"
+     ]
+    },
+    "trainable_params": 7372800,
+    "trainable_pct": 0.196,
+    "training": {
+     "epochs": 2.0,
+     "per_device_batch_size": 2,
+     "gradient_accumulation_steps": 8,
+     "learning_rate": 0.0002,
+     "warmup_ratio": 0.03
+    },
+    "prompting_mode": "zero_shot",
+    "quantization": {
+     "enabled": true,
+     "load_in_4bit": true,
+     "bnb_4bit_quant_type": "nf4",
+     "bnb_4bit_use_double_quant": true,
+     "bnb_4bit_compute_dtype": "bfloat16"
+    },
+    "max_pixels": 401408,
+    "train_hours": 6.07,
+    "peak_vram_gb": 6.62,
+    "gpu": "NVIDIA L4",
+    "git_commit": "1777b08",
+    "versions": {
+     "transformers": "5.17.0",
+     "torch": "2.11.0+cu130",
+     "peft": "0.21.1"
+    },
+    "epoch_adapters": [
+     "epoch_1",
+     "epoch_2"
+    ],
+    "official_epoch": "epoch_2"
+   }
+  },
+  {
+   "id": "b3full",
+   "role": "chính thức ViTextVQA (đóng góp chính)",
+   "label": "B3-full — QLoRA nhận biết OCR (VietOCR · v1 · 600), ViTextVQA train đầy đủ, 1 epoch",
+   "notebooks": [
+    "18_qlora_ocr_b3full_vs_b2_qwen25vl.ipynb"
+   ],
+   "train_run": "W10_B3full_qlora_ocr_vietocr_v1_r16_qwen25vl_vitextvqa_full_ep1_bf16_L4_seed42",
+   "evals": {
+    "vitextvqa_testfull": {
+     "run": "W10_B3full_eval_qlora_ocr_vietocr_v1_r16_full_ep1_vitextvqa_testfull_bf16_L4_seed42",
+     "metrics_pct": {
+      "exact_match": 53.35,
+      "vqa_accuracy": 53.35,
+      "anls": 73.89,
+      "token_f1": 73.73
+     },
+     "n": 10028,
+     "data_file": "data/vitextvqa_official/test.json",
+     "data_file_sha256": "956da0ae2a6a8f57fbfb52cbbdc6626e677be857417145bc3e1d25bb45f00f08",
+     "git_commit": "530e957",
+     "finished_utc": "2026-10-20T20:28:31+00:00",
+     "sec_per_sample": 0.996,
+     "peak_vram_gb": 2.61,
+     "prompting_mode": "ocr",
+     "gpu": [
+      "NVIDIA L4"
+     ],
+     "ocr": {
+      "backend": "paddledet_vietocr",
+      "cache_file": "paddledet_vietocr.json",
+      "template": "v1",
+      "max_chars": 600,
+      "min_conf": 0.0
+     }
+    },
+    "vitextvqa_testfull_exiffix (độ nhạy W14)": {
+     "run": "W14_B3full_eval_exiffix_qlora_ocr_vietocr_v1_r16_full_ep1_vitextvqa_testfull_bf16_L4_seed42",
+     "metrics_pct": {
+      "exact_match": 53.63,
+      "vqa_accuracy": 53.63,
+      "anls": 74.07,
+      "token_f1": 73.96
+     },
+     "n": 10028,
+     "data_file": "data/vitextvqa_official/test.json",
+     "data_file_sha256": "956da0ae2a6a8f57fbfb52cbbdc6626e677be857417145bc3e1d25bb45f00f08",
+     "git_commit": "cded8d9",
+     "finished_utc": "2026-11-01T14:28:22+00:00",
+     "sec_per_sample": 1.0,
+     "peak_vram_gb": 2.61,
+     "prompting_mode": "ocr",
+     "gpu": [
+      "NVIDIA L4"
+     ],
+     "ocr": {
+      "backend": "paddledet_vietocr",
+      "cache_file": "paddledet_vietocr_exiffix.json",
+      "template": "v1",
+      "max_chars": 600,
+      "min_conf": 0.0
+     }
+    }
+   },
+   "adapter": {
+    "drive_path": "adapters/W10_B3full_qlora_ocr_vietocr_v1_r16_qwen25vl_vitextvqa_full_ep1_bf16_L4_seed42/epoch_1",
+    "weights_sha256": "c1eb9c2b4baf40ca768adb5168c78f118950992a75689bad12280438d2df0b4f",
+    "config_sha256": "56fceba44fb79afdb25319af61876f51221081768e9b89f89793761044a5a3ed",
+    "weights_mb": 29.53
+   },
+   "train": {
+    "data_file": "data/vitextvqa_official/train.json",
+    "data_file_sha256": "dec0acc1ca998272ddbf76ba97087d9f6b1d3f96f4000274e41483c02fbde46c",
+    "num_samples": 35159,
+    "seed": 42,
+    "lora": {
+     "r": 16,
+     "lora_alpha": 32,
+     "lora_dropout": 0.05,
+     "bias": "none",
+     "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj"
+     ]
+    },
+    "trainable_params": 7372800,
+    "trainable_pct": 0.196,
+    "training": {
+     "epochs": 1.0,
+     "per_device_batch_size": 2,
+     "gradient_accumulation_steps": 8,
+     "learning_rate": 0.0002,
+     "warmup_ratio": 0.03
+    },
+    "prompting_mode": "ocr",
+    "quantization": {
+     "enabled": true,
+     "load_in_4bit": true,
+     "bnb_4bit_quant_type": "nf4",
+     "bnb_4bit_use_double_quant": true,
+     "bnb_4bit_compute_dtype": "bfloat16"
+    },
+    "max_pixels": 401408,
+    "train_hours": 12.75,
+    "peak_vram_gb": 8.38,
+    "gpu": "NVIDIA L4",
+    "git_commit": "530e957",
+    "versions": {
+     "transformers": "5.17.0",
+     "torch": "2.11.0+cu130",
+     "peft": "0.21.2"
+    },
+    "epoch_adapters": [
+     "epoch_1"
+    ],
+    "official_epoch": "epoch_1"
+   }
+  },
+  {
+   "id": "sh",
+   "role": "prototype (adapter dùng chung)",
+   "label": "SH — QLoRA nhận biết OCR dùng chung (ViVQA + ViTextVQA 8k), 1 epoch; prototype dùng τ* = +4,85",
+   "notebooks": [
+    "20_qlora_shared_adapter_qwen25vl.ipynb",
+    "28_prototype_v2_live_demo_sh_qwen25vl.ipynb"
+   ],
+   "train_run": "W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42",
+   "evals": {
+    "vivqa_test": {
+     "run": "W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vivqa_test_bf16_L4_seed42",
+     "metrics_pct": {
+      "exact_match": 73.51,
+      "vqa_accuracy": 73.51,
+      "anls": 75.45,
+      "token_f1": 76.09
+     },
+     "n": 3001,
+     "data_file": "data/vivqa/test.json",
+     "data_file_sha256": "0a09f7bac471ce7359eda5b965d94821ae78fd151217f84cf9a59b14b6ccb787",
+     "git_commit": "72286c4",
+     "finished_utc": "2026-10-21T14:20:31+00:00",
+     "sec_per_sample": 0.574,
+     "peak_vram_gb": 2.6,
+     "prompting_mode": "ocr",
+     "gpu": [
+      "NVIDIA L4"
+     ],
+     "ocr": {
+      "backend": "paddledet_vietocr",
+      "cache_file": "paddledet_vietocr.json",
+      "template": "v1",
+      "max_chars": 600,
+      "min_conf": 0.0
+     }
+    },
+    "vitextvqa_test2000": {
+     "run": "W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vitextvqa_test2000_bf16_L4_seed42",
+     "metrics_pct": {
+      "exact_match": 49.5,
+      "vqa_accuracy": 49.5,
+      "anls": 71.12,
+      "token_f1": 70.09
+     },
+     "n": 2000,
+     "data_file": "data/vitextvqa_official/test_subset2000_seed42.json",
+     "data_file_sha256": "69a8b35c64fb505147fbd7904b19dce3853d7b63a24bb888359bdff61b30f68e",
+     "git_commit": "72286c4",
+     "finished_utc": "2026-10-21T14:54:19+00:00",
+     "sec_per_sample": 1.002,
+     "peak_vram_gb": 2.61,
+     "prompting_mode": "ocr",
+     "gpu": [
+      "NVIDIA L4"
+     ],
+     "ocr": {
+      "backend": "paddledet_vietocr",
+      "cache_file": "paddledet_vietocr.json",
+      "template": "v1",
+      "max_chars": 600,
+      "min_conf": 0.0
+     }
+    }
+   },
+   "adapter": {
+    "drive_path": "adapters/W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42/epoch_1",
+    "weights_sha256": "c9791e961aaa58fdcd7d9baafede3bd7bd8c902acc9cc43917306f1e0fecc354",
+    "config_sha256": "5e5bae40c27b5905ccdd0189cad597f2ecf0727bbbabafe6685f489c31624553",
+    "weights_mb": 29.53
+   },
+   "train": {
+    "data_file": null,
+    "data_file_sha256": "e5a441a756f5da38868a6cdfda67a564232d3e94baf5cc1c2372bff3602e17db",
+    "num_samples": 18799,
+    "seed": 42,
+    "lora": {
+     "r": 16,
+     "lora_alpha": 32,
+     "lora_dropout": 0.05,
+     "bias": "none",
+     "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj"
+     ]
+    },
+    "trainable_params": 7372800,
+    "trainable_pct": 0.196,
+    "training": {
+     "epochs": 1.0,
+     "per_device_batch_size": 2,
+     "gradient_accumulation_steps": 8,
+     "learning_rate": 0.0002,
+     "warmup_ratio": 0.03
+    },
+    "prompting_mode": "ocr",
+    "quantization": {
+     "enabled": true,
+     "load_in_4bit": true,
+     "bnb_4bit_quant_type": "nf4",
+     "bnb_4bit_use_double_quant": true,
+     "bnb_4bit_compute_dtype": "bfloat16"
+    },
+    "max_pixels": 401408,
+    "train_hours": 6.07,
+    "peak_vram_gb": 8.15,
+    "gpu": "NVIDIA L4",
+    "git_commit": "72286c4",
+    "versions": {
+     "transformers": "5.17.0",
+     "torch": "2.11.0+cu130",
+     "peft": "0.21.2"
+    },
+    "epoch_adapters": [
+     "epoch_1"
+    ],
+    "official_epoch": "epoch_1"
+   }
+  }
+ ]
+}
