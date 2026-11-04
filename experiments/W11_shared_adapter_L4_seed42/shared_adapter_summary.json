@@ -1,0 +1,178 @@
+{
+  "rule": {
+    "margin_pts": 1.5,
+    "alpha": 0.05,
+    "doc": "docs/W11/README.md — Luật adapter dùng chung — SH"
+  },
+  "main": {
+    "vivqa": {
+      "ref": "C1",
+      "em_a": 0.7377540819726758,
+      "em_b": 0.7350883038987004,
+      "em_diff": -0.002665778073975389,
+      "n_only_a": 91,
+      "n_only_b": 83,
+      "p_value": 0.5957764574073551,
+      "anls_diff": -0.00208165524726671,
+      "anls_ci95": [
+        -0.009937909104853456,
+        0.00601568171544846
+      ],
+      "n": 3001,
+      "em_diff_pts": -0.2665778073975389,
+      "em_diff_ci95_pts": [
+        -1.13295568143952,
+        0.5998000666444518
+      ],
+      "anls_a": 0.7565609600514632,
+      "anls_b": 0.7544793048041966,
+      "verdict": "KHÔNG KÉM"
+    },
+    "vitextvqa_test2000": {
+      "ref": "B3",
+      "em_a": 0.4925,
+      "em_b": 0.495,
+      "em_diff": 0.0025000000000000022,
+      "n_only_a": 75,
+      "n_only_b": 80,
+      "p_value": 0.7481109519787563,
+      "anls_diff": 0.007319109524019678,
+      "anls_ci95": [
+        -0.0032767201365000455,
+        0.01763964975620055
+      ],
+      "n": 2000,
+      "em_diff_pts": 0.2500000000000002,
+      "em_diff_ci95_pts": [
+        -0.95,
+        1.4500000000000002
+      ],
+      "anls_a": 0.7038322141490067,
+      "anls_b": 0.7111513236730264,
+      "verdict": "KHÔNG KÉM"
+    }
+  },
+  "verdict": "ADAPTER DÙNG CHUNG ĐẠT",
+  "descriptive_vs_official": {
+    "vivqa_C3_to_SH": {
+      "em_a": 0.7664111962679107,
+      "em_b": 0.7350883038987004,
+      "em_diff": -0.031322892369210265,
+      "n_only_a": 168,
+      "n_only_b": 74,
+      "p_value": 1.4137064360330624e-09,
+      "anls_diff": -0.025853563482687105,
+      "anls_ci95": [
+        -0.03559971536479367,
+        -0.01624718907291383
+      ],
+      "n": 3001,
+      "em_diff_pts": -3.1322892369210265,
+      "em_diff_ci95_pts": [
+        -4.131956014661779,
+        -2.1326224591802734
+      ],
+      "anls_a": 0.7803328682868836,
+      "anls_b": 0.7544793048041966
+    },
+    "vitextvqa_test2000_B3full_to_SH": {
+      "em_a": 0.5385,
+      "em_b": 0.495,
+      "em_diff": -0.04349999999999998,
+      "n_only_a": 156,
+      "n_only_b": 69,
+      "p_value": 6.44149881984326e-09,
+      "anls_diff": -0.03506993616804413,
+      "anls_ci95": [
+        -0.04683313878817691,
+        -0.023335673453499104
+      ],
+      "n": 2000,
+      "em_diff_pts": -4.349999999999998,
+      "em_diff_ci95_pts": [
+        -5.800000000000001,
+        -2.9000000000000004
+      ],
+      "anls_a": 0.7462212598410705,
+      "anls_b": 0.7111513236730264
+    }
+  },
+  "vivqa_by_ocr_line": {
+    "no_ocr_line": {
+      "em_a": 0.735803945008966,
+      "em_b": 0.7298266586969516,
+      "em_diff": -0.005977286312014329,
+      "n_only_a": 58,
+      "n_only_b": 48,
+      "p_value": 0.3821258105292198,
+      "anls_diff": -0.0060610837658058225,
+      "anls_ci95": [
+        -0.017083588855854245,
+        0.004970653640707436
+      ],
+      "n": 1673,
+      "em_diff_pts": -0.5977286312014329,
+      "em_diff_ci95_pts": [
+        -1.7931858936043037,
+        0.5977286312014346
+      ],
+      "anls_a": 0.756542957275175,
+      "anls_b": 0.750481873509369
+    },
+    "with_ocr_line": {
+      "em_a": 0.740210843373494,
+      "em_b": 0.7417168674698795,
+      "em_diff": 0.001506024096385561,
+      "n_only_a": 33,
+      "n_only_b": 35,
+      "p_value": 0.9035973456835125,
+      "anls_diff": 0.002931585649959144,
+      "anls_ci95": [
+        -0.008699163537265946,
+        0.014632773518315685
+      ],
+      "n": 1328,
+      "em_diff_pts": 0.1506024096385561,
+      "em_diff_ci95_pts": [
+        -1.0542168674698795,
+        1.355421686746988
+      ],
+      "anls_a": 0.7565836397538205,
+      "anls_b": 0.7595152254037797
+    }
+  },
+  "vivqa_ocr_copy": {
+    "C1": {
+      "n_with_ocr": 1328,
+      "n_wrong_copied_from_ocr": 3,
+      "pct_wrong_copied_from_ocr": 0.22590361445783133
+    },
+    "SH": {
+      "n_with_ocr": 1328,
+      "n_wrong_copied_from_ocr": 4,
+      "pct_wrong_copied_from_ocr": 0.30120481927710846
+    }
+  },
+  "runs": {
+    "SH_train": "W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42",
+    "SH_vivqa": "W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vivqa_test_bf16_L4_seed42",
+    "SH_vitext": "W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vitextvqa_test2000_bf16_L4_seed42",
+    "C1_train": "W07_B2_qlora_r16_qwen25vl_vivqa_ep1_bf16_L4_seed42",
+    "B3_train": "W08_B3_qlora_ocr_vietocr_v1_r16_qwen25vl_vitextvqa_sub8k_ep1_bf16_L4_seed42",
+    "C1": "W07_B2_eval_qlora_r16_ep1_vivqa_test_bf16_L4_seed42",
+    "B3": "W08_B3_eval_qlora_ocr_vietocr_v1_r16_sub8k_ep1_vitextvqa_test2000_bf16_L4_seed42",
+    "C3": "W09_C3_eval_qlora_r16_vivqa_test_bf16_L4_seed42",
+    "B3full": "W10_B3full_eval_qlora_ocr_vietocr_v1_r16_full_ep1_vitextvqa_testfull_bf16_L4_seed42"
+  },
+  "cost": {
+    "SH_train_h": 6.07,
+    "C1_plus_B3_train_h": 6.01,
+    "SH_sec_per_step": 18.582,
+    "SH_peak_vram_gb": 8.15,
+    "SH_steps": 1175,
+    "SH_resumed_from": null,
+    "n_adapters_prototype_if_pass": 1,
+    "n_adapters_otherwise": 2
+  },
+  "validity_checks": "passed"
+}

@@ -1,0 +1,18 @@
+{
+  "what": "Tập con TRAIN cố định cho B3 (QLoRA + OCR) và B2-sub (QLoRA, không OCR) — chỉ khác yếu tố OCR",
+  "why": "1 epoch full ViTextVQA train ≈ 12 h L4; quyết định 12/10/2026 (docs/W08/README.md)",
+  "dataset": "vitextvqa_official",
+  "method": "theo ảnh: sắp tên ảnh, xáo bằng seed, lấy dần tới khi >= n_questions câu",
+  "seed": 42,
+  "n_questions_target": 8000,
+  "n_questions": 8000,
+  "n_images": 2670,
+  "source_file": "data/vitextvqa_official/train.json",
+  "source_sha256": "dec0acc1ca998272ddbf76ba97087d9f6b1d3f96f4000274e41483c02fbde46c",
+  "source_n_questions": 35159,
+  "source_n_images": 11733,
+  "output_file": "data/vitextvqa_official/train_subset8000_byimage_seed42.json",
+  "output_sha256": "093ab061edbbdcb1eae7abe1f45884eee462cfedb82b7864e6854bf3f0e847d9",
+  "ids_file": "data/vitextvqa_official/train_subset8000_byimage_seed42_ids.json",
+  "pct_of_train_questions": 22.75
+}

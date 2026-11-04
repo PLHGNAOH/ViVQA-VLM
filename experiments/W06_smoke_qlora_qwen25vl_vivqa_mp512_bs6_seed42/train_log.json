@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "run_name": "W06_smoke_qlora_qwen25vl_vivqa_mp512_bs6_seed42",
+    "finished_utc": "2026-09-29T09:21:38+00:00",
+    "dataset": "vivqa",
+    "data_file": "data/vivqa/train.json",
+    "data_file_sha256": "892243fa732fc7fb5b9a3bd8d2f28c85d7e9f99bb0e617efd193e7303cee96ec",
+    "num_samples": 200,
+    "num_dropped": 0,
+    "answer_policy": "đáp án đầu tiên trong trường answers",
+    "prompting_mode": "zero_shot",
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "max_pixels": 401408,
+    "min_pixels": 200704,
+    "torch_dtype": "float32",
+    "quantization": {
+      "enabled": true,
+      "load_in_4bit": true,
+      "bnb_4bit_quant_type": "nf4",
+      "bnb_4bit_use_double_quant": true,
+      "bnb_4bit_compute_dtype": "float32"
+    },
+    "lora": {
+      "r": 16,
+      "lora_alpha": 32,
+      "lora_dropout": 0.05,
+      "bias": "none",
+      "target_modules": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj"
+      ]
+    },
+    "training": {
+      "epochs": 3,
+      "per_device_batch_size": 6,
+      "gradient_accumulation_steps": 3,
+      "learning_rate": 0.0002,
+      "warmup_ratio": 0.03,
+      "weight_decay": 0.0,
+      "logging_steps": 10,
+      "save_strategy": "epoch",
+      "gradient_checkpointing": true,
+      "max_steps": 10,
+      "limit": 200,
+      "steps_per_epoch": 12,
+      "total_steps": 10,
+      "warmup_steps": 1,
+      "unsupported_training_args": []
+    },
+    "peft_only": true,
+    "trainable_params": 7372800,
+    "total_params": 3761995776,
+    "trainable_pct": 0.196,
+    "param_count_method": "peft.get_nb_trainable_parameters (4-bit aware)",
+    "seed": 42,
+    "git_commit": "d22595c",
+    "config_file": "configs/qwen_lora.yaml",
+    "hardware": {
+      "gpu": "Tesla T4",
+      "bf16_supported": true,
+      "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+    },
+    "cost": {
+      "train_runtime_sec": 917.1,
+      "steps": 10,
+      "sec_per_step": 91.711,
+      "peak_vram_gb": 11.6,
+      "final_loss": 1.5753
+    },
+    "adapter_dir": "/content/drive/MyDrive/ViVQA-VLM/adapters/W06_smoke_qlora_qwen25vl_vivqa_mp512_bs6_seed42",
+    "versions": {
+      "transformers": "5.17.0",
+      "torch": "2.11.0+cu128",
+      "peft": "0.20.0"
+    }
+  },
+  "log_history": [
+    {
+      "loss": 1.5753128051757812,
+      "grad_norm": 1.9157423973083496,
+      "learning_rate": 2.2222222222222223e-05,
+      "epoch": 0.8823529411764706,
+      "step": 10
+    },
+    {
+      "train_runtime": 917.1145,
+      "train_samples_per_second": 0.196,
+      "train_steps_per_second": 0.011,
+      "total_flos": 1886679651188736.0,
+      "train_loss": 1.5753128051757812,
+      "epoch": 0.8823529411764706,
+      "step": 10
+    }
+  ]
+}

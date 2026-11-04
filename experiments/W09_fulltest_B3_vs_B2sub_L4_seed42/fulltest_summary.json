@@ -1,0 +1,199 @@
+{
+  "what": "W09 Phần B: B3 và B2-sub seed 42 trên ViTextVQA full test 10.028 câu",
+  "rule": "docs/W09/README.md mục Luật full test",
+  "ocr_config": {
+    "backend": "paddledet_vietocr",
+    "template": "v1",
+    "max_chars": 600,
+    "min_conf": 0.0,
+    "max_chars_needs_review": false
+  },
+  "table": [
+    {
+      "run": "B1 zero-shot (W07)",
+      "EM": 29.118468288791384,
+      "ANLS": 47.599094143625635,
+      "F1 (phụ)": 53.891930706934964
+    },
+    {
+      "run": "B2 full train (W07)",
+      "EM": 50.25927403270841,
+      "ANLS": 72.02041338874653,
+      "F1 (phụ)": 71.16324131007207
+    },
+    {
+      "run": "B3 (8k + OCR)",
+      "EM": 49.102512963701635,
+      "ANLS": 70.46678624881301,
+      "F1 (phụ)": 70.03408178229603,
+      "s/câu": 0.983,
+      "giờ suy luận": 2.74
+    },
+    {
+      "run": "B2-sub (8k, không OCR)",
+      "EM": 46.559633027522935,
+      "ANLS": 68.90152437593345,
+      "F1 (phụ)": 67.82768625474456,
+      "s/câu": 0.983,
+      "giờ suy luận": 2.74
+    },
+    {
+      "run": "ViTextBLIP-2 (paper, Table 6)",
+      "EM": 25.48,
+      "F1 (phụ)": 53.95
+    }
+  ],
+  "determinism_vs_test2000": {
+    "B3": {
+      "n": 2000,
+      "identical_pct": 100.0,
+      "EM_subset_run": 49.25,
+      "pass": true
+    },
+    "B2sub": {
+      "n": 2000,
+      "identical_pct": 100.0,
+      "EM_subset_run": 45.55,
+      "pass": true
+    }
+  },
+  "vs_vitextblip2": {
+    "B3": {
+      "reference": {
+        "what": "Table 6, ViTextBLIP-2 (SOTA của paper), full test",
+        "em": 25.48,
+        "f1": 53.95,
+        "note": "Table 10/12 cùng paper ghi 24,83 EM / 52,51 F1 cho mô hình đầy đủ; paper không giải thích"
+      },
+      "source": "Nguyen et al., ViTextVQA, Expert Systems with Applications 2025, arXiv:2404.10652v5",
+      "EM": {
+        "ours_pct": 49.1,
+        "ours_ci95_pct": [
+          48.11,
+          50.07
+        ],
+        "published_pct": 25.48,
+        "diff_points": 23.62,
+        "n": 10028,
+        "verdict": "CAO HƠN số công bố"
+      },
+      "F1": {
+        "ours_pct": 70.03,
+        "ours_ci95_pct": [
+          69.3,
+          70.78
+        ],
+        "published_pct": 53.95,
+        "diff_points": 16.08,
+        "n": 10028,
+        "verdict": "CAO HƠN số công bố"
+      },
+      "rule": "CAO HƠN nếu cận dưới CI95 bootstrap > số công bố (xét riêng EM và F1)"
+    },
+    "B2sub": {
+      "reference": {
+        "what": "Table 6, ViTextBLIP-2 (SOTA của paper), full test",
+        "em": 25.48,
+        "f1": 53.95,
+        "note": "Table 10/12 cùng paper ghi 24,83 EM / 52,51 F1 cho mô hình đầy đủ; paper không giải thích"
+      },
+      "source": "Nguyen et al., ViTextVQA, Expert Systems with Applications 2025, arXiv:2404.10652v5",
+      "EM": {
+        "ours_pct": 46.56,
+        "ours_ci95_pct": [
+          45.57,
+          47.53
+        ],
+        "published_pct": 25.48,
+        "diff_points": 21.08,
+        "n": 10028,
+        "verdict": "CAO HƠN số công bố"
+      },
+      "F1": {
+        "ours_pct": 67.83,
+        "ours_ci95_pct": [
+          67.08,
+          68.6
+        ],
+        "published_pct": 53.95,
+        "diff_points": 13.88,
+        "n": 10028,
+        "verdict": "CAO HƠN số công bố"
+      },
+      "rule": "CAO HƠN nếu cận dưới CI95 bootstrap > số công bố (xét riêng EM và F1)"
+    }
+  },
+  "reference": {
+    "what": "Table 6, ViTextBLIP-2 (SOTA của paper), full test",
+    "em": 25.48,
+    "f1": 53.95,
+    "note": "Table 10/12 cùng paper ghi 24,83 EM / 52,51 F1 cho mô hình đầy đủ; paper không giải thích"
+  },
+  "source": "Nguyen et al., ViTextVQA, Expert Systems with Applications 2025, arXiv:2404.10652v5",
+  "paired": {
+    "B2sub_vs_B3_full": {
+      "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W09_B2sub_eval_qlora_r16_sub8k_ep1_vitextvqa_testfull_bf16_L4_seed42",
+      "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W09_B3_eval_qlora_ocr_vietocr_v1_r16_sub8k_ep1_vitextvqa_testfull_bf16_L4_seed42",
+      "label_a": "B2sub",
+      "label_b": "B3",
+      "n": 10028,
+      "n_both_correct": 4252,
+      "n_only_a": 417,
+      "n_only_b": 672,
+      "n_both_wrong": 4687,
+      "b": 417,
+      "c": 672,
+      "p_value": 1.0589815657823601e-14,
+      "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+      "em_a": 0.46559633027522934,
+      "em_b": 0.49102512963701633,
+      "em_diff": 0.02542879936178699,
+      "anls_threshold": 0.5,
+      "anls_a": 0.689015243759332,
+      "anls_b": 0.7046678624881277,
+      "anls_diff": 0.01565261872879579,
+      "anls_ci95": [
+        0.010571755525229494,
+        0.020755069322783683
+      ],
+      "bootstrap": {
+        "n_resamples": 10000,
+        "seed": 42,
+        "method": "paired percentile"
+      }
+    },
+    "B2_vs_B3_full_info": {
+      "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B2_eval_qlora_r16_ep1_vitextvqa_testfull_bf16_L4_seed42",
+      "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W09_B3_eval_qlora_ocr_vietocr_v1_r16_sub8k_ep1_vitextvqa_testfull_bf16_L4_seed42",
+      "label_a": "B2",
+      "label_b": "B3",
+      "n": 10028,
+      "n_both_correct": 4256,
+      "n_only_a": 784,
+      "n_only_b": 668,
+      "n_both_wrong": 4320,
+      "b": 784,
+      "c": 668,
+      "p_value": 0.002532969300464991,
+      "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+      "em_a": 0.5025927403270841,
+      "em_b": 0.49102512963701633,
+      "em_diff": -0.011567610690067787,
+      "anls_threshold": 0.5,
+      "anls_a": 0.7202041338874611,
+      "anls_b": 0.7046678624881277,
+      "anls_diff": -0.015536271399333338,
+      "anls_ci95": [
+        -0.021450651194758023,
+        -0.009800986259788452
+      ],
+      "bootstrap": {
+        "n_resamples": 10000,
+        "seed": 42,
+        "method": "paired percentile"
+      }
+    }
+  },
+  "verdict_main_full": "TÁI LẬP TRÊN FULL TEST",
+  "gpu": "NVIDIA L4"
+}

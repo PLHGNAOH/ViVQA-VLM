@@ -1,0 +1,371 @@
+{
+  "check": "prototype-check-v1",
+  "rules": {
+    "parity_min": 0.99,
+    "split_seed": 42,
+    "n_bins": 15,
+    "ece_show_number": 0.05,
+    "em_drop_max": 1.5,
+    "tau_star_sh": 4.85,
+    "detector": "yesno-detector-v1"
+  },
+  "errors": [],
+  "parity": {
+    "vivqa": {
+      "n": 3001,
+      "identical": 1.0,
+      "n_mismatch": 0,
+      "mismatches": [],
+      "em_backend": 73.50883038987004,
+      "em_w11": 73.50883038987004
+    },
+    "vitextvqa_official": {
+      "n": 2000,
+      "identical": 1.0,
+      "n_mismatch": 0,
+      "mismatches": [],
+      "em_backend": 49.5,
+      "em_w11": 49.5
+    }
+  },
+  "confidence": {
+    "cuts_open": [
+      0.8393393371447103,
+      0.9581924825031203
+    ],
+    "n_A": 2496,
+    "n_B": 2505,
+    "B_pooled": {
+      "Cao": {
+        "n": 790,
+        "acc": 0.920253164556962
+      },
+      "Trung bình": {
+        "n": 823,
+        "acc": 0.6962332928311057
+      },
+      "Thấp": {
+        "n": 892,
+        "acc": 0.3419282511210762
+      }
+    },
+    "B_by_dataset": {
+      "vivqa": {
+        "Cao": {
+          "n": 610,
+          "acc": 0.9491803278688524
+        },
+        "Trung bình": {
+          "n": 444,
+          "acc": 0.7657657657657657
+        },
+        "Thấp": {
+          "n": 454,
+          "acc": 0.4251101321585903
+        }
+      },
+      "vitextvqa_official": {
+        "Cao": {
+          "n": 180,
+          "acc": 0.8222222222222222
+        },
+        "Trung bình": {
+          "n": 379,
+          "acc": 0.6147757255936676
+        },
+        "Thấp": {
+          "n": 438,
+          "acc": 0.2557077625570776
+        }
+      }
+    },
+    "ece_B_pooled": 0.19795453948929206,
+    "ece_B_by_dataset": {
+      "vivqa": 0.1251093004060382,
+      "vitextvqa_official": 0.30813570351892783
+    },
+    "reliability_B_pooled": [
+      {
+        "bin": [
+          0.067,
+          0.133
+        ],
+        "n": 1,
+        "mean_conf": 0.1284643300937861,
+        "acc": 0.0
+      },
+      {
+        "bin": [
+          0.133,
+          0.2
+        ],
+        "n": 2,
+        "mean_conf": 0.17426482651910682,
+        "acc": 0.0
+      },
+      {
+        "bin": [
+          0.2,
+          0.267
+        ],
+        "n": 15,
+        "mean_conf": 0.24350705827290692,
+        "acc": 0.0
+      },
+      {
+        "bin": [
+          0.267,
+          0.333
+        ],
+        "n": 19,
+        "mean_conf": 0.2961353712052617,
+        "acc": 0.0
+      },
+      {
+        "bin": [
+          0.333,
+          0.4
+        ],
+        "n": 44,
+        "mean_conf": 0.36566370404799514,
+        "acc": 0.18181818181818182
+      },
+      {
+        "bin": [
+          0.4,
+          0.467
+        ],
+        "n": 59,
+        "mean_conf": 0.4324915567919353,
+        "acc": 0.0847457627118644
+      },
+      {
+        "bin": [
+          0.467,
+          0.533
+        ],
+        "n": 72,
+        "mean_conf": 0.5003357795247767,
+        "acc": 0.1111111111111111
+      },
+      {
+        "bin": [
+          0.533,
+          0.6
+        ],
+        "n": 86,
+        "mean_conf": 0.5664781539006271,
+        "acc": 0.2558139534883721
+      },
+      {
+        "bin": [
+          0.6,
+          0.667
+        ],
+        "n": 99,
+        "mean_conf": 0.631350601197264,
+        "acc": 0.3939393939393939
+      },
+      {
+        "bin": [
+          0.667,
+          0.733
+        ],
+        "n": 146,
+        "mean_conf": 0.7033663929878169,
+        "acc": 0.3767123287671233
+      },
+      {
+        "bin": [
+          0.733,
+          0.8
+        ],
+        "n": 196,
+        "mean_conf": 0.7685404417171134,
+        "acc": 0.45918367346938777
+      },
+      {
+        "bin": [
+          0.8,
+          0.867
+        ],
+        "n": 295,
+        "mean_conf": 0.8374904085130489,
+        "acc": 0.5457627118644067
+      },
+      {
+        "bin": [
+          0.867,
+          0.933
+        ],
+        "n": 419,
+        "mean_conf": 0.9028778307983163,
+        "acc": 0.6873508353221957
+      },
+      {
+        "bin": [
+          0.933,
+          1.0
+        ],
+        "n": 1052,
+        "mean_conf": 0.9729827340620995,
+        "acc": 0.8830798479087453
+      }
+    ],
+    "ui_shows_number": false
+  },
+  "detector": {
+    "vivqa": {
+      "n": 3001,
+      "fired": 1,
+      "em_greedy": 73.50883038987004,
+      "em_hybrid": 73.47550816394535,
+      "drop": 0.03332222592469236,
+      "examples": [
+        {
+          "question": "điều này có một giấc ngủ ngắn trên một chiếc ghế dài chữ l không",
+          "answers": [
+            "con chó"
+          ],
+          "greedy": "con chó",
+          "yesno": "có"
+        }
+      ]
+    },
+    "vitextvqa_official": {
+      "n": 2000,
+      "fired": 0,
+      "em_greedy": 49.5,
+      "em_hybrid": 49.5,
+      "drop": 0.0,
+      "examples": []
+    }
+  },
+  "verdicts": {
+    "R-PAR": "ĐẠT",
+    "R-CONF": "ĐẠT",
+    "R-YB-det": "ĐẠT"
+  },
+  "yesno_confidence": {
+    "cuts_yn": [
+      0.97547745352307,
+      0.9986890811837571
+    ],
+    "popevi_by_level": {
+      "Cao": {
+        "n": 952,
+        "acc": 0.9821428571428571
+      },
+      "Trung bình": {
+        "n": 1722,
+        "acc": 0.9558652729384437
+      },
+      "Thấp": {
+        "n": 2311,
+        "acc": 0.7706620510601471
+      }
+    },
+    "calib_acc": 0.926338102808691,
+    "ece_popevi": 0.050451190282630815
+  },
+  "t3": {
+    "SH_tau_star_t3": {
+      "random": {
+        "f1": 0.8579689194073004,
+        "yes_ratio": 0.42233333333333334,
+        "false_alarm": 0.05333333333333334
+      },
+      "popular": {
+        "f1": 0.8460441910192446,
+        "yes_ratio": 0.43533333333333335,
+        "false_alarm": 0.07933333333333334
+      },
+      "adversarial": {
+        "f1": 0.8306508047585726,
+        "yes_ratio": 0.45266666666666666,
+        "false_alarm": 0.114
+      }
+    },
+    "SH_tau0_t3": {
+      "random": {
+        "f1": 0.8115702479338843,
+        "yes_ratio": 0.71,
+        "false_alarm": 0.438
+      },
+      "popular": {
+        "f1": 0.777513855898654,
+        "yes_ratio": 0.763,
+        "false_alarm": 0.544
+      },
+      "adversarial": {
+        "f1": 0.7467680608365019,
+        "yes_ratio": 0.815,
+        "false_alarm": 0.648
+      }
+    },
+    "SH_tau_star_t1": {
+      "random": {
+        "f1": 0.8514202476329207,
+        "yes_ratio": 0.41533333333333333,
+        "false_alarm": 0.051333333333333335
+      },
+      "popular": {
+        "f1": 0.8332145402708482,
+        "yes_ratio": 0.43533333333333335,
+        "false_alarm": 0.09133333333333334
+      },
+      "adversarial": {
+        "f1": 0.816911250873515,
+        "yes_ratio": 0.454,
+        "false_alarm": 0.12866666666666668
+      }
+    },
+    "B1_ocr_greedy_t1": {
+      "random": {
+        "f1": 0.8339008702232312,
+        "yes_ratio": 0.381,
+        "false_alarm": 0.027333333333333334
+      },
+      "popular": {
+        "f1": 0.8199404761904763,
+        "yes_ratio": 0.396,
+        "false_alarm": 0.05733333333333333
+      },
+      "adversarial": {
+        "f1": 0.8058500914076784,
+        "yes_ratio": 0.4116666666666667,
+        "false_alarm": 0.08866666666666667
+      }
+    }
+  },
+  "runs": {
+    "vivqa": {
+      "sec_per_sample": 0.5447,
+      "peak_vram_gb": 2.6,
+      "n_yesno_detected": 1,
+      "hardware": {
+        "gpus_seen": [
+          "NVIDIA L4"
+        ]
+      },
+      "versions": {
+        "torch": "2.11.0+cu130",
+        "transformers": "5.17.0"
+      }
+    },
+    "vitextvqa_official": {
+      "sec_per_sample": 0.9542,
+      "peak_vram_gb": 2.61,
+      "n_yesno_detected": 0,
+      "hardware": {
+        "gpus_seen": [
+          "NVIDIA L4"
+        ]
+      },
+      "versions": {
+        "torch": "2.11.0+cu130",
+        "transformers": "5.17.0"
+      }
+    }
+  }
+}

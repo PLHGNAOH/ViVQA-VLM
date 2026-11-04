@@ -1,0 +1,70 @@
+{
+  "what": "OCR cache VietOCR cho ViVQA train + test (W11, adapter dùng chung S2) — file cache nằm trên Drive",
+  "created_utc": "2026-10-21T06:10:22",
+  "cache_file": "data/vivqa/ocr/paddledet_vietocr.json",
+  "sha256": "3f2605808c38474b4fe795f3cb4d36925bfc6c23806dc8f5893c05283917f3d9",
+  "backend": "paddledet_vietocr",
+  "engine_info": {
+    "engine": "PaddleOCR TextDetection + VietOCR",
+    "paddleocr": "3.7.0",
+    "paddlepaddle": "3.3.1",
+    "lang": "vi",
+    "device": "gpu",
+    "det_model": "PP-OCRv6_medium_det",
+    "rec_model": "vietocr/vgg_transformer",
+    "vietocr_config": "vgg_transformer, beamsearch=False"
+  },
+  "reference_engine_vitextvqa_w10": {
+    "engine": "PaddleOCR TextDetection + VietOCR",
+    "paddleocr": "3.7.0",
+    "paddlepaddle": "3.3.1",
+    "lang": "vi",
+    "device": "gpu",
+    "det_model": "PP-OCRv6_medium_det",
+    "rec_model": "vietocr/vgg_transformer",
+    "vietocr_config": "vgg_transformer, beamsearch=False"
+  },
+  "engine_must_match": [
+    "paddleocr",
+    "det_model",
+    "rec_model",
+    "vietocr_config",
+    "lang"
+  ],
+  "device": "gpu",
+  "n_images": 9770,
+  "n_errors": 0,
+  "pct_images_with_text": 44.35,
+  "images_needed": {
+    "train": 8255,
+    "test": 2789
+  },
+  "questions": {
+    "train": 10799,
+    "test": 3001
+  },
+  "prompt_stats_v1_600_0": {
+    "train": {
+      "n_samples": 10799,
+      "n_images": 8255,
+      "n_ocr_errors": 0,
+      "pct_samples_with_text": 44.77,
+      "pct_samples_truncated": 0.04,
+      "mean_chars": 8.0,
+      "subset_sha256": "cd1ad47f78e0befab7965c5065b97bafc6b3a30e98c530a086606c6300fb5f20"
+    },
+    "test": {
+      "n_samples": 3001,
+      "n_images": 2789,
+      "n_ocr_errors": 0,
+      "pct_samples_with_text": 44.25,
+      "pct_samples_truncated": 0.1,
+      "mean_chars": 7.9,
+      "subset_sha256": "606d8dfdc2977aa39875ce2126e8ecefaefd52154c8da08908d01334f5ec3646"
+    }
+  },
+  "timing": {
+    "images": 9770,
+    "sec": 1046.1
+  }
+}
