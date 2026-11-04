@@ -19,5 +19,7 @@ Mọi số liệu phải gắn run log: split, seed, hardware, time.
 | `yesno_calib.py` (W13) | Thiên lệch "có" của SH: điểm token đầu (max mỗi phía) + repetition penalty như `generate()` (v3), AUC, tập calibration rời POPE-vi, ngưỡng τ lúc suy luận, phán quyết R-YB (`docs/W13/README.md`) | `--selftest` |
 | `prototype_check.py` (W13) | Backend prototype trên test của SH: parity với eval W11 (R-PAR), độ tin cậy theo mức + ECE (R-CONF), detector có/không (R-YB-det), mẫu câu 3 (`docs/W13/README.md`) | `--selftest` |
 | `prototype_live.py` (W13) | Prototype chạy thật (OCR trực tiếp ở tiến trình riêng + model, đúng đường giao diện): OCR trực tiếp = cache (R-OCR), câu trả lời = eval W11 (R-LIVE), latency p50/p95, VRAM, ảnh thật của nhóm (`docs/W13/README.md`) | `--selftest` |
+| `token_budget.py` (W15) | Ngân sách token mỗi câu (ảnh / câu hỏi / dòng OCR / đáp án) theo đúng đường processor của Qwen; so context window + KV cache; kèm token ảnh nếu không chặn / chặn 1.280. Kiểm chứng 150 câu mỗi tập bằng đường processor đầy đủ (góp ý Review 2 G1, notebook 29) | `--selftest` |
+| `metric_tokenization.py` (W15) | Thang chuẩn hoá S0→S6 (EM ở từng bậc, % gold bị đổi) + token-F1 theo âm tiết vs theo từ (tách từ pyvi), ΔF1 CI95, thứ hạng run (góp ý Review 2 G2–G3). Chạy từ `predictions.json` trong repo, không cần GPU | `--selftest` |
 
 Duyệt tay (W07): `python -m src.data.make_audit_sheet` tạo `audit/W07/W07_audit_400.xlsx` + ảnh trên Drive (data_audit 200 dòng train, error_audit 200 câu B2 sai).

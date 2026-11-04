@@ -20,6 +20,7 @@ pandas
 requests
 tqdm
 openpyxl
+pyvi==0.1.1                     # tách từ tiếng Việt — chỉ dùng cho phân tích metric W15 (src/eval/metric_tokenization.py)
 
 # ---- OCR: KHÔNG cài bằng -r. Cài theo đúng quy trình notebook 19 / 24 / 28 (mục 2), vì paddlepaddle-gpu
 # ---- ghi đè NCCL của torch (W08). Phiên bản = phiên bản đã dựng OCR cache:

@@ -19,9 +19,30 @@ Bắt đầu: 02/11/2026 (tuần thực 9). Mốc thật phía trước: hội �
 | Việc | Trạng thái |
 |---|---|
 | Đặt deck Review 2 (bản trình bày) vào repo | xong khi commit setup W15 |
-| Danh sách góp ý Review 2 | bản nháp — Hoàng nghe lại các mục "cần nghe lại" |
+| Danh sách góp ý Review 2 | dùng bản chép lời (Hoàng duyệt 04/11: làm theo bản nghe được, ưu tiên G1 token) |
 | Checklist AI_Capstone_Review123 sheet Review2 + mail | chưa |
 | Deck TV hoàn chỉnh | chưa |
 | Deck EN | chưa |
+| Code góp ý Review 2 (G1 token, G2–G3 chuẩn hoá/tách từ) | G2–G3 xong · G1 chờ chạy notebook 29 |
 | Code + demo cuối | chưa |
 | Thesis TV | chưa |
+
+## Code trả lời góp ý Review 2
+
+| Góp ý | Script | Chạy ở đâu | Kết quả |
+|---|---|---|---|
+| G1 — số token ảnh / câu hỏi / OCR so với sức chứa model | `src/eval/token_budget.py` + `notebooks/29_token_budget_qwen25vl.ipynb` | Colab **CPU** | `experiments/W15_token_budget/` (Cursor chép từ Drive) |
+| G5 — vì sao 512 token ảnh, vì sao bf16 | (không chạy mới) | — | đã có: `experiments/W06_ablation_config_dev300_seed42/`, `experiments/W07_config_freeze_L4_seed42/` |
+| G2 — tên kỹ thuật chuẩn hoá + định lượng | `src/eval/metric_tokenization.py` | máy bất kỳ (đọc `predictions.json`) | `experiments/W15_metric_tokenization/` |
+| G3 — từ ghép / tách từ khi tính metric | `src/eval/metric_tokenization.py` (pyvi) | như trên | như trên |
+
+**G1 — cách đo:** token ảnh theo đúng đường suy luận (`qwen_vl_utils.fetch_image` → image processor của Qwen, min 200.704 px / max 401.408 px = 256 / 512 token, công thức (H/14)·(W/14)/4); token chữ bằng tokenizer Qwen trên chuỗi chat template thật; token đáp án như `train_qlora`. 150 câu ngẫu nhiên mỗi tập × mode (seed 42) chạy lại bằng nguyên `processor(text, images)`; lệch thì script tự đo lại bằng processor. Context window và KV cache đọc từ `config.json` (revision `66285546…` như W07). Đây là phép **đo mô tả**, không có giả thuyết hay luật quyết định.
+
+**G5 — bằng chứng có sẵn (không chạy thêm):**
+- W06 (dev300, zero-shot, fp32, T4): 512 token EM 33,3 / ANLS 46,5 · 1.280 token EM 36,0 / ANLS 50,4; McNemar p = 0,13 (EM không khác biệt), ΔANLS +3,9 [+1,2; +6,6]; suy luận chậm 1,46×.
+- W07 (L4, bf16): train ViTextVQA 1.280 token chậm 1,91× (11,1 → 21,2 giờ/epoch), VRAM 6,71 → 10,84 GB → chọn 512 theo luật (chọn 1.280 nếu ≤ 1,5×). ViVQA: chỉ 1% ảnh vượt 512 token (ảnh COCO nhỏ).
+- bf16 vs fp16 vs fp32 (probe 73 câu, L4): fp16 tràn số 23/73 câu hỏng; bf16 0 câu hỏng, nhanh hơn fp32 1,71×, thoái lui 1/50 câu đối chứng.
+
+**G2–G3 — kết quả** (`experiments/W15_metric_tokenization/summary.md`):
+- Chuẩn hoá áp **đối xứng** cho dự đoán và gold, giữ dấu thanh. Bậc có tác dụng lớn nhất: ViTextVQA = regex bỏ dấu câu + gộp khoảng trắng (25,7% gold đổi: gold viết tách dấu câu kiểu "0983 . 651 888"); ViVQA = bỏ tiền tố "màu " (20,9% gold) và số chữ → chữ số (14,8%). Model QLoRA gần như không phụ thuộc chuẩn hoá (C3: EM 76,64 ở mọi bậc; B3-full 51,80 → 53,35); zero-shot phụ thuộc nhiều (B1 ViVQA 1,70 → 22,09).
+- 41,8% đáp án gold ViTextVQA và 20,9% ViVQA có từ ghép (pyvi). EM không đổi khi tách từ (so cả chuỗi); ANLS theo ký tự. token-F1 theo từ thấp hơn theo âm tiết 1–3 điểm nhưng **mọi chênh lệch giữ nguyên**: B2 → B3-full +2,57 [+2,11; +3,02] (âm tiết) vs +2,60 [+2,12; +3,06] (từ); thứ hạng B1 < B2 < B3-full không đổi.
