@@ -1,0 +1,66 @@
+[
+  {
+    "split": "vivqa_test",
+    "mode": "zero_shot",
+    "n_checked": 150,
+    "n_mismatch": 0,
+    "examples": [],
+    "method": "fast"
+  },
+  {
+    "split": "vivqa_test",
+    "mode": "ocr",
+    "n_checked": 150,
+    "n_mismatch": 0,
+    "examples": [],
+    "method": "fast"
+  },
+  {
+    "split": "vivqa_train",
+    "mode": "zero_shot",
+    "n_checked": 150,
+    "n_mismatch": 0,
+    "examples": [],
+    "method": "fast"
+  },
+  {
+    "split": "vivqa_train",
+    "mode": "ocr",
+    "n_checked": 150,
+    "n_mismatch": 0,
+    "examples": [],
+    "method": "fast"
+  },
+  {
+    "split": "vitextvqa_test",
+    "mode": "zero_shot",
+    "n_checked": 150,
+    "n_mismatch": 0,
+    "examples": [],
+    "method": "fast"
+  },
+  {
+    "split": "vitextvqa_test",
+    "mode": "ocr",
+    "n_checked": 150,
+    "n_mismatch": 0,
+    "examples": [],
+    "method": "fast"
+  },
+  {
+    "split": "vitextvqa_train",
+    "mode": "zero_shot",
+    "n_checked": 150,
+    "n_mismatch": 0,
+    "examples": [],
+    "method": "fast"
+  },
+  {
+    "split": "vitextvqa_train",
+    "mode": "ocr",
+    "n_checked": 150,
+    "n_mismatch": 0,
+    "examples": [],
+    "method": "fast"
+  }
+]
