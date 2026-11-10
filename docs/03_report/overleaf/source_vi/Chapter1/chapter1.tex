@@ -1,0 +1,303 @@
+%!TEX root = ../thesis.tex
+%*******************************************************************************
+%*********************************** Chương 1 **********************************
+%*******************************************************************************
+
+\chapter{GIỚI THIỆU}
+\label{chap:intro}
+
+\ifpdf
+    \graphicspath{{Chapter1/Figs/Raster/}{Chapter1/Figs/PDF/}{Chapter1/Figs/}}
+\else
+    \graphicspath{{Chapter1/Figs/Vector/}{Chapter1/Figs/}}
+\fi
+
+% ------------------------------ Từ viết tắt -----------------------------------
+% Các mục dưới đây tự gom vào "Danh mục từ viết tắt" (nhóm Z).
+\nomenclature[z-VQA]{VQA}{Visual Question Answering: hỏi đáp trên ảnh}
+\nomenclature[z-VLM]{VLM}{Vision-Language Model: mô hình nhận cả ảnh và văn bản, sinh văn bản}
+\nomenclature[z-OCR]{OCR}{Optical Character Recognition: nhận dạng chữ trong ảnh}
+\nomenclature[z-PEFT]{PEFT}{Parameter-Efficient Fine-Tuning: chỉ huấn luyện một phần rất nhỏ các tham số}
+\nomenclature[z-LoRA]{LoRA}{Low-Rank Adaptation: thêm hai ma trận hạng thấp vào các lớp tuyến tính và chỉ huấn luyện chúng}
+\nomenclature[z-QLoRA]{QLoRA}{LoRA trên mô hình nền đã lượng tử hóa 4-bit (NF4)}
+\nomenclature[z-NF4]{NF4}{4-bit NormalFloat: kiểu lượng tử hóa 4-bit}
+\nomenclature[z-EM]{EM}{Exact Match: câu trả lời trùng khít với đáp án sau chuẩn hóa}
+\nomenclature[z-VQA-Acc]{VQA-Acc}{VQA Accuracy: min(số đáp án gold trùng / 3, 1)}
+\nomenclature[z-ANLS]{ANLS}{Average Normalized Levenshtein Similarity: độ giống theo ký tự}
+\nomenclature[z-POPE]{POPE}{Polling-based Object Probing Evaluation: đo hallucination bằng câu hỏi có/không}
+\nomenclature[z-SOTA]{SOTA}{State of the art: kết quả tốt nhất đã công bố}
+
+%********************************** Mục 1.1 ************************************
+\section{Bối cảnh và động lực}
+\label{sec:intro-background}
+
+\subsection{Hỏi đáp trên ảnh và vision-language model}
+
+Visual Question Answering (VQA) yêu cầu hệ thống trả lời một câu hỏi bằng ngôn
+ngữ tự nhiên dựa trên nội dung ảnh~\cite{antol2015vqa}. Khác với phân loại ảnh
+hay phát hiện vật thể, VQA cần hiểu đồng thời ảnh, ngữ nghĩa câu hỏi và đôi khi
+cả chữ xuất hiện trong ảnh~\cite{singh2019textvqa,biten2019stvqa}. Các hệ thống
+VQA ban đầu ghép một bộ mã hóa ảnh (CNN) với một bộ mã hóa câu hỏi (LSTM) và
+chọn đáp án từ một tập cố định. Các vision-language model (VLM) gần đây như
+BLIP-2~\cite{li2023blip2}, LLaVA~\cite{liu2023llava},
+Florence-2~\cite{xiao2024florence2} và Qwen2.5-VL~\cite{bai2025qwen25vl} thay
+đổi cách tiếp cận: một bộ mã hóa ảnh biến ảnh thành chuỗi token, một mô hình
+ngôn ngữ lớn đọc chuỗi đó cùng câu hỏi và sinh câu trả lời tự do. Các VLM này
+trả lời được câu hỏi mở và đọc được chữ trong ảnh ở mức zero-shot.
+
+\subsection{Tiếng Việt với các VLM thiên tiếng Anh}
+
+Phần lớn VLM mã nguồn mở được tiền huấn luyện chủ yếu trên dữ liệu tiếng Anh và
+tiếng Trung. Khi dùng cho tiếng Việt, nhóm quan sát bốn vấn đề riêng, ký hiệu
+V1--V4 và dùng xuyên suốt khóa luận:
+
+\begin{description}
+  \item[V1, đọc chữ có dấu trong ảnh.] Dấu thanh là nét rất nhỏ; đọc sai một
+  dấu là đổi nghĩa (``BÁNH MÌ'' đọc thành ``banh mi'').
+  \item[V2, sai ngôn ngữ hoặc sai định dạng.] Mô hình trả lời bằng tiếng Anh,
+  chen chữ Trung, hoặc trả lời cả câu dài trong khi đáp án chỉ vài từ.
+  \item[V3, thứ tự chữ và ranh giới từ.] Khoảng trắng trong tiếng Việt tách âm
+  tiết, không tách từ; đọc sai thứ tự các vùng chữ là vỡ từ (``cửa hàng điện
+  thoại'' thành ``cửa điện hàng thoại'').
+  \item[V4, hallucination.] Câu trả lời trôi chảy nhưng nói về vật hoặc chữ
+  không có trong ảnh.
+\end{description}
+
+Với dữ liệu tiếng Việt, khoảng cách giữa máy và người còn lớn: trên
+ViTextVQA~\cite{nguyen2024vitextvqa}, kết quả công bố tốt nhất trước khóa luận
+này là EM 25,48, trong khi người đạt 88,00.
+
+\subsection{Ràng buộc tài nguyên}
+
+Huấn luyện lại toàn bộ một VLM vài tỉ tham số (full fine-tuning) cần nhiều GPU
+dung lượng lớn, vượt quá điều kiện của một nhóm sinh viên. Trường không có máy
+chủ GPU cho đề tài, nên mọi thí nghiệm chạy trên Google Colab. Đề tài vì vậy đặt
+hiệu quả thành một ràng buộc thiết kế tường minh: chỉ dùng parameter-efficient
+fine-tuning (LoRA~\cite{hu2022lora}, QLoRA~\cite{dettmers2023qlora}) và báo cáo
+kèm thời gian huấn luyện, thời gian suy luận và bộ nhớ GPU cho mọi kết quả.
+
+%********************************** Mục 1.2 ************************************
+\section{Phát biểu bài toán}
+\label{sec:intro-problem}
+
+Cho ảnh $I$ và câu hỏi tiếng Việt $q$, hệ thống sinh câu trả lời tiếng Việt
+$\hat{a} = f(I, q)$. Câu trả lời được so với đáp án gold $a$ sau cùng một bước
+chuẩn hóa văn bản. Hai bộ dữ liệu đặt ra hai yêu cầu khác nhau:
+
+\begin{itemize}
+  \item \textbf{ViVQA}~\cite{tran2021vivqa}: câu hỏi chung về ảnh (màu sắc, số
+  lượng, vật thể, vị trí); 99,83\% đáp án dài không quá 3 từ, nên EM và VQA-Acc
+  là thước đo phù hợp.
+  \item \textbf{ViTextVQA}~\cite{nguyen2024vitextvqa}: đáp án là chữ đọc được
+  trong ảnh, trung bình 4,18 từ; ANLS~\cite{biten2019stvqa} được dùng thêm vì
+  chịu được lỗi đọc nhỏ ở mức ký tự.
+\end{itemize}
+
+Với ví dụ của ViVQA, câu hỏi ``màu của xe đạp là gì?'' có đáp án ``màu đỏ''. Với
+ví dụ của ViTextVQA, câu hỏi ``cửa hàng có biển màu vàng là nơi nào?'' có đáp án
+``đại lý xổ số miền Bắc'', chữ lấy trực tiếp từ biển hiệu.
+
+%********************************** Mục 1.3 ************************************
+\section{Khoảng trống nghiên cứu}
+\label{sec:intro-gaps}
+
+Từ khảo sát tài liệu ở Chương~\ref{chap:related}, nhóm xác định bốn khoảng
+trống:
+
+\begin{description}
+  \item[G1.] Tiền huấn luyện thiên lệch tiếng Anh: mô hình zero-shot trả lời bằng
+  tiếng Anh và sai định dạng khi gặp câu hỏi tiếng Việt.
+  \item[G2.] VQA tiếng Việt còn yếu, nhất là với scene-text: SOTA ViTextVQA là EM
+  25,48 so với 88,00 của người.
+  \item[G3.] Thích nghi VLM cho VQA tiếng Việt bằng PEFT chưa được nghiên cứu:
+  các công trình VQA tiếng Việt trong nhóm khảo sát đều huấn luyện mô hình riêng
+  hoặc dùng mô hình đóng băng, không dùng LoRA/QLoRA trên VLM lớn.
+  \item[G4.] Chưa có cách đo hallucination cho VQA tiếng Việt: chưa có benchmark
+  kiểu POPE~\cite{li2023pope} bằng tiếng Việt.
+\end{description}
+
+Khóa luận tập trung vào G3 và dùng G2, G4 làm nơi kiểm chứng.
+
+%********************************** Mục 1.4 ************************************
+\section{Mục tiêu}
+\label{sec:intro-objectives}
+
+Mục tiêu tổng quát là thích nghi một VLM mã nguồn mở cho VQA tiếng Việt dưới
+ngân sách tham số nghiêm ngặt và kiểm chứng bằng thực nghiệm ít nhất một cải
+tiến so với baseline đã tái lập. Mục tiêu này được chia thành các mục tiêu cụ
+thể trong Bảng~\ref{tab:objectives}, mỗi mục tiêu có tiêu chí đo lường.
+
+\begin{table}[htbp]
+\caption{Mục tiêu và tiêu chí hoàn thành}
+\label{tab:objectives}
+\centering
+\small
+\begin{tabular}{p{0.30\textwidth}p{0.60\textwidth}}
+\toprule
+\textbf{Mục tiêu} & \textbf{Tiêu chí hoàn thành} \\
+\midrule
+Tái lập đúng một baseline &
+Chạy lại Qwen2.5-VL-3B-Instruct trên một benchmark có số công bố và đạt sai lệch
+nhỏ (TextVQA val: nhóm đạt 79,60 so với 79,3 công bố) \\
+Đo baseline zero-shot trên dữ liệu tiếng Việt &
+EM, VQA-Acc, ANLS trên toàn bộ test ViVQA và ViTextVQA, cùng một giao thức \\
+Thích nghi chỉ bằng PEFT &
+QLoRA 4-bit, số tham số huấn luyện $<1\%$, chạy trên một GPU Colab \\
+Đề xuất và kiểm chứng $\geq 1$ cải tiến &
+Cải tiến so với baseline dưới điều kiện y hệt, có kiểm định thống kê ghép cặp và
+ablation \\
+Phân tích lỗi và hallucination &
+Phân rã lỗi theo loại câu hỏi và loại lỗi; đo hallucination kiểu POPE cho tiếng
+Việt \\
+Prototype web &
+Tải ảnh, hỏi tiếng Việt, nhận câu trả lời kèm chữ OCR và mức tin cậy; cho cùng
+kết quả với đường đánh giá \\
+Tái lập được &
+Mọi run ghi lại split, seed, phần cứng, siêu tham số, thời gian; gói tái lập gồm
+code, adapter, config, script suy luận \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%********************************** Mục 1.5 ************************************
+\section{Câu hỏi nghiên cứu và giả thuyết}
+\label{sec:intro-rq}
+
+\begin{description}
+  \item[RQ1.] Zero-shot đạt bao nhiêu trên ViVQA và ViTextVQA, và lỗi tiếng Việt
+  nào chiếm ưu thế?
+  \item[RQ2.] QLoRA cải thiện bao nhiêu so với zero-shot, khi không dùng full
+  fine-tuning?
+  \item[RQ3.] Chữ OCR có dấu, đúng thứ tự đọc, có giúp mô hình đọc chữ trong ảnh
+  không, và có cộng hưởng với QLoRA không?
+  \item[RQ4.] Sau khi thích nghi bằng QLoRA, mô hình bịa nội dung nhiều hơn hay
+  ít hơn?
+\end{description}
+
+Mỗi giả thuyết trong Bảng~\ref{tab:hypotheses} có ngưỡng định lượng được ghi lại
+trước khi chạy thí nghiệm tương ứng.
+
+\begin{table}[htbp]
+\caption{Giả thuyết và câu hỏi nghiên cứu tương ứng}
+\label{tab:hypotheses}
+\centering
+\small
+\begin{tabular}{p{0.06\textwidth}p{0.64\textwidth}p{0.18\textwidth}}
+\toprule
+\textbf{ID} & \textbf{Giả thuyết} & \textbf{Trả lời} \\
+\midrule
+H1 & QLoRA trên Qwen2.5-VL-3B tăng EM ít nhất 5 điểm so với chính mô hình đó ở
+chế độ zero-shot. & RQ2; V1--V3 \\
+H2 & Chữ OCR có dấu, sắp xếp từ trái-trên đến phải-dưới, đưa vào prompt tăng
+ANLS ít nhất 3 điểm trên ViTextVQA; kết hợp với QLoRA cho kết quả cao nhất. &
+RQ3; V1, V3 \\
+H3 & Prompt định dạng tiếng Việt (trả lời ngắn, có dấu) tăng EM ít nhất 3 điểm
+và giảm câu trả lời sai ngôn ngữ hoặc mất dấu. & RQ1; V2 \\
+H4 & QLoRA không làm tăng tỉ lệ hallucination so với zero-shot. & RQ4; V4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%********************************** Mục 1.6 ************************************
+\section{Đóng góp}
+\label{sec:intro-contrib}
+
+Nhóm chọn Qwen2.5-VL-3B-Instruct~\cite{bai2025qwen25vl} làm baseline, tái lập
+baseline này trước, rồi thích nghi nó cho tiếng Việt chỉ bằng QLoRA. Mô hình nền
+3 tỉ tham số được lượng tử hóa 4-bit và giữ nguyên; nhóm chỉ huấn luyện 7,37
+triệu tham số adapter, tức 0,196\% tổng số tham số, trên một GPU NVIDIA L4. Các
+đóng góp của khóa luận gồm:
+
+\begin{enumerate}
+  \item \textbf{QLoRA nhận biết OCR.} Văn bản đọc được trong ảnh bằng VietOCR
+  (giữ dấu, sắp theo thứ tự đọc) được đưa vào prompt ngay trong lúc huấn luyện,
+  để adapter học cách dùng nó. Trên toàn bộ tập test ViTextVQA (10.028 câu),
+  cách này đạt EM 53,35 so với 50,26 của QLoRA thông thường với cùng dữ liệu
+  ($+3{,}09$ EM, kiểm định McNemar $p = 6{,}7\times10^{-21}$), và cao hơn kết quả
+  công bố tốt nhất trên cùng tập test (ViTextBLIP-2, EM
+  25,48~\cite{nguyen2024vitextvqa}).
+  \item \textbf{Một cơ chế được tách bạch.} Thí nghiệm $2\times2$ cho thấy OCR
+  chỉ có ích khi được dùng cả lúc huấn luyện lẫn lúc suy luận: đưa OCR vào prompt
+  của một mô hình chưa từng thấy OCR không cải thiện kết quả.
+  \item \textbf{Kết quả trên VQA tiếng Việt tổng quát.} Trên ViVQA, QLoRA nâng
+  EM từ 22,09 (zero-shot) lên 76,64.
+  \item \textbf{Bộ đo hallucination tiếng Việt.} POPE-vi, gồm 4.985 câu hỏi
+  có/không trên 500 ảnh chưa thấy khi huấn luyện.
+  \item \textbf{Phân tích và prototype đã kiểm chứng.} Ablation cho từng thành
+  phần, phân tích lỗi tự động và duyệt tay, và một prototype web đã được kiểm
+  chứng cho ra cùng câu trả lời với đường đánh giá chính thức.
+\end{enumerate}
+
+\subsection{Ý nghĩa của đề tài}
+
+\paragraph{Ý nghĩa khoa học.} Khóa luận cung cấp một nghiên cứu có hệ thống về
+PEFT cho VLM trên VQA tiếng Việt, gồm baseline tái lập, ablation cho từng thành
+phần và kiểm định thống kê ghép cặp. Kết quả chính không chỉ là một con số cao
+hơn mà còn là một cơ chế được tách bạch: lợi ích của OCR đến từ việc huấn luyện
+mô hình dùng OCR, không đến từ việc thêm OCR vào prompt. Nhóm cũng đưa ra bộ
+POPE tiếng Việt để đo hallucination và một phân tích có số đo cho từng vấn đề
+V1--V4.
+
+\paragraph{Ý nghĩa thực tiễn.} Hệ thống đọc và trả lời câu hỏi về biển hiệu,
+nhãn hàng, bảng giá, thực đơn và biểu mẫu tiếng Việt. Đây là chức năng nền cho
+công nghệ hỗ trợ người khiếm thị và cho các ứng dụng tra cứu thông tin từ ảnh. Vì
+chỉ cần một GPU và một adapter 29,5~MB, cách làm có thể áp dụng cho các nhóm hoặc
+tổ chức có tài nguyên hạn chế.
+
+\paragraph{Ý nghĩa phương pháp.} Mọi kết luận trong khóa luận dựa trên luật
+quyết định được ghi lại trước khi chạy, kiểm định ghép cặp trên cùng tập test,
+và log đầy đủ (split, seed, GPU, thời gian). Quy trình này giúp tránh việc chọn
+kết quả sau khi đã thấy số liệu, và cho phép người khác chạy lại từng con số từ
+mã nguồn công khai.
+
+%********************************** Mục 1.7 ************************************
+\section{Phạm vi và giới hạn}
+\label{sec:intro-scope}
+
+\begin{table}[htbp]
+\caption{Trong và ngoài phạm vi}
+\label{tab:scope}
+\centering
+\small
+\begin{tabular}{p{0.45\textwidth}p{0.45\textwidth}}
+\toprule
+\textbf{Trong phạm vi} & \textbf{Ngoài phạm vi} \\
+\midrule
+Hai bộ dữ liệu ViVQA và ViTextVQA, split cố định &
+Xây bộ dữ liệu huấn luyện mới hoặc tăng cường dữ liệu \\
+Một baseline Qwen2.5-VL-3B-Instruct; các VLM khác chỉ để tham khảo &
+So sánh nhiều backbone như baseline chính \\
+Thích nghi chỉ bằng PEFT (QLoRA 4-bit); chữ OCR làm đầu vào phụ &
+Full fine-tuning; huấn luyện VLM từ đầu \\
+Metric EM, VQA-Acc, ANLS (token-F1 làm chỉ số phụ); ablation, phân tích lỗi,
+hallucination & Retrieval-augmented VQA với tri thức ngoài \\
+Prototype web chạy trên Colab với một GPU &
+Triển khai sản phẩm quy mô lớn, ứng dụng di động \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Giả định.} Nhóm giả định rằng split chính thức của hai bộ dữ liệu
+đại diện cho phân bố câu hỏi thực tế của từng bộ, rằng đáp án gold là đúng ở đa
+số câu (phần gold sai được đo và báo cáo riêng ở Chương~\ref{chap:results}), và
+rằng GPU L4 trên Colab cho kết quả ổn định giữa các phiên khi cố định seed và
+cấu hình.
+
+\paragraph{Giới hạn biết trước.} Kết quả bị giới hạn bởi một mô hình nền 3 tỉ
+tham số ở 4-bit và bởi chất lượng OCR; mọi thí nghiệm chính chạy với một seed,
+riêng phần so sánh OCR được kiểm thêm trên ba seed. EM là thước đo khắt khe với
+câu trả lời đúng ý nhưng khác cách viết, nên nhóm bổ sung ANLS và duyệt tay. Các
+giới hạn này được phân tích lại ở Chương~\ref{chap:discussion} và
+Chương~\ref{chap:conclusion}.
+
+%********************************** Mục 1.8 ************************************
+\section{Cấu trúc khóa luận}
+\label{sec:intro-outline}
+
+Chương~\ref{chap:related} tổng quan VQA, vision-language model, parameter-efficient
+fine-tuning và các nghiên cứu VQA tiếng Việt. Chương~\ref{chap:methods} trình bày
+dữ liệu, baseline, phương pháp QLoRA nhận biết OCR và giao thức đánh giá.
+Chương~\ref{chap:results} báo cáo kết quả chính và các ablation.
+Chương~\ref{chap:discussion} thảo luận phân tích lỗi, hallucination và giới hạn.
+Chương~\ref{chap:conclusion} kết luận. Phụ lục~\ref{appendix:pm} trình bày kế
+hoạch quản lý dự án.

@@ -1,0 +1,355 @@
+% ******************************* Appendix A ***********************************
+
+\chapter{Project Management Plan}
+\label{appendix:pm}
+
+This appendix describes how the team organised the 15 weeks of the project:
+scope, milestones, risks, quality assurance, responsibilities, communication
+and configuration management. Because the project is a research study, the plan
+is built around experiments: every conclusion in this thesis must be traceable
+to a logged run with a fixed seed and configuration.
+
+% ------------------------------------------------------------------------------
+\section{Scope and Estimation}
+
+The work was divided into eight work packages (Table~\ref{tab:pm-wbs}). Time is
+counted in working weeks W01--W15 of the 15-week plan;
+Section~\ref{sec:pm-process} explains how these weeks map to the calendar.
+
+\begin{table}[htbp]
+\caption{Work breakdown}
+\label{tab:pm-wbs}
+\centering
+\small
+\begin{tabular}{p{0.22\textwidth}p{0.42\textwidth}p{0.13\textwidth}p{0.13\textwidth}}
+\toprule
+\textbf{Work package} & \textbf{Main content} & \textbf{Weeks} & \textbf{Owner} \\
+\midrule
+1. Survey and orientation & Paper reviews per area, literature matrix, research gaps, research questions, hypotheses & W01--W03 & Whole team \\
+2. Data & ViVQA and ViTextVQA from official sources, fixed splits, train/test leakage checks, OCR cache & W02, W05, W08, W14 & SV2 \\
+3. Baseline & Zero-shot Qwen2.5-VL-3B-Instruct (B1), reproduction of a published TextVQA score (R0), frozen inference configuration & W04--W07 & SV1 \\
+4. QLoRA adaptation & QLoRA training pipeline; models B2, B3, B3-full, C3 and the shared adapter SH; LoRA configuration ablations & W06--W11 & SV3 \\
+5. Evaluation & EM, VQA-Acc, ANLS, F1; paired McNemar tests; seed stability; full evaluation table & W05--W11 & SV4 \\
+6. Analysis & Error analysis, question-type breakdown, POPE-vi hallucination, token budget, effect of normalization and word segmentation on metrics & W07, W11--W12, W15 & SV4, SV3 \\
+7. Prototype & Web demo, yes/no threshold calibration, parity check against the evaluated system, demo video & W13--W14 & SV4 \\
+8. Reporting and defence & Weekly reports, review slides, reproducibility package, thesis & Weekly, W15 & Whole team, coordinated by the leader \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The initial estimate in W01 assumed access to a university GPU server. In W06
+the team confirmed that no such server was available, and costs were
+re-estimated in Google Colab compute units (CU). From W08, before every GPU job
+the team estimated GPU hours and CU (about 1.54 CU per hour on an L4 and 1.2 CU
+per hour on a T4) and compared the estimate with the actual reading in Colab.
+One full QLoRA training run on ViTextVQA takes about 12 L4 hours (B2: 11.99 h;
+B3-full: 12.75 h), so the number of full training runs was the main constraint
+of the plan.
+
+% ------------------------------------------------------------------------------
+\section{Management Objectives}
+
+\begin{itemize}
+  \item \textbf{Reproducibility:} every run logs split, seed, hardware,
+  hyperparameters, training time and inference time.
+  \item \textbf{No result selection after the fact:} the decision rule of every
+  main experiment is committed to git before the experiment is run.
+  \item \textbf{Resource constraint:} QLoRA only; every experiment runs on a
+  single Colab GPU (T4 or L4).
+  \item \textbf{Milestones:} the main research is finished before Review~2 and
+  the faculty council.
+\end{itemize}
+
+By the end of W14, the \path{experiments/} directory contains 141 runs, each
+with a log. Six official models are listed in
+\path{configs/official_models.json}, which is generated automatically from
+the logs, and all four adapters stored on Google Drive match their recorded
+SHA-256 checksums.
+
+% ------------------------------------------------------------------------------
+\section{Risks}
+
+The W01 plan listed eight risks (model too large, insufficient GPU, faulty data,
+baseline hard to reproduce, poor OCR, training not converging, demo hard to
+deploy, slow training). Table~\ref{tab:pm-risks} records the risks that actually
+occurred and how the team handled them.
+
+\begin{table}[htbp]
+\caption{Risks that occurred and how they were handled}
+\label{tab:pm-risks}
+\centering
+\small
+\begin{tabular}{p{0.24\textwidth}p{0.08\textwidth}p{0.09\textwidth}p{0.48\textwidth}}
+\toprule
+\textbf{Risk} & \textbf{Week} & \textbf{Level} & \textbf{Response} \\
+\midrule
+No university GPU server & W06 & High & All training moved to Colab; upgraded to Colab Pro on 7 October 2026 to use the L4 \\
+fp16 on the T4 corrupts answers & W06 & High & Dtype probe on 73 questions: 23 corrupted in fp16; switched to bf16 on the L4 (0/73 corrupted) \\
+Data from the wrong source & W05 & High & The local data were ViVQA-X, not ViVQA, and ViTextVQA came from an unofficial mirror. ViVQA was downloaded again from the original repository, access to the gated ViTextVQA repository was requested, and the answers in \path{test_gt.json} were used \\
+A full training run takes about 12 hours & W08 & Medium & The main comparison was first run on an 8,000-question subset (B3 versus B2-sub); the full B3-full run followed in W10 once the subset result was clear \\
+Library API change & W06 & Low & \texttt{transformers} 5.17.0 removed \path{warmup_ratio}; replaced by \path{warmup_steps}, and library versions are logged \\
+GPU PaddleOCR conflicts with PyTorch in the prototype & W13 & Medium & OCR runs in a separate process (\path{src/prototype/ocr_worker.py}) \\
+The shared adapter is biased towards ``yes'' & W12--W13 & Medium & A threshold on the first-token logit, chosen on a calibration set disjoint from POPE-vi \\
+EXIF rotation flags corrupt the OCR cache & W14 & Medium & Pre-registered audit (164 of 165 rotated images mismatched); \path{ocr.py} fixed, 167 images re-read, B3-full re-evaluated (EM 53.35 $\rightarrow$ 53.63) \\
+Review schedule changed & W10 & Low & Review~2 moved to 29 October 2026; one cumulative slide deck is updated instead of rebuilt \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------------------------
+\section{Project Process}
+\label{sec:pm-process}
+
+The team works in weekly cycles. Each working week goes through five steps:
+
+\begin{enumerate}
+  \item \textbf{Plan:} choose the questions of the week from the overall plan and
+  the previous week's results, and record them in the week's README.
+  \item \textbf{Pre-register:} for each main experiment, write the decision rule
+  (threshold, statistical test, dataset) and commit it to git before running.
+  \item \textbf{Run:} code is written and self-tested on a local machine, then
+  pushed to GitHub; Colab notebooks clone the repository and run on a GPU; logs
+  and results are stored on Google Drive.
+  \item \textbf{Verify:} numbers are recomputed from the raw prediction files
+  instead of being copied by hand, and the repository is cloned again to verify
+  each commit.
+  \item \textbf{Close:} update the README, the week's team report and the
+  related chapter drafts.
+\end{enumerate}
+
+Working weeks W01--W15 are numbered by the content of the 15-week plan, not by
+the calendar. The team worked ahead of the calendar: on 2 November 2026
+(calendar week~9) the team had reached W15. Calendar weeks start on Monday
+7 September 2026. Table~\ref{tab:pm-weeks} maps the two.
+
+\begin{table}[htbp]
+\caption{Working weeks and calendar dates (2026)}
+\label{tab:pm-weeks}
+\centering
+\small
+\begin{tabular}{p{0.12\textwidth}p{0.55\textwidth}p{0.22\textwidth}}
+\toprule
+\textbf{Week} & \textbf{Main content} & \textbf{Calendar dates} \\
+\midrule
+W01--W02 & Orientation, 15-week plan, literature matrix, data analysis & 07--16 Sep \\
+W03 & Review~1 package & 17 Sep (Review~1: 24 Sep) \\
+W04 & First zero-shot baseline; baseline switched to Qwen2.5-VL-3B & 18--21 Sep \\
+W05 & Official data; zero-shot baseline on both datasets & 22--27 Sep \\
+W06 & fp16 diagnosis; QLoRA pipeline & 28--29 Sep \\
+W07 & Configuration frozen on the L4; official B1; B2; R0 reproduction & 30 Sep--12 Oct \\
+W08 & OCR-enhanced prompting; B3 on a subset & 12--14 Oct \\
+W09 & Seed stability; $2\times2$ table; ViVQA with 2 epochs & 15--17 Oct \\
+W10 & LoRA configuration ablations; B3-full & 19--21 Oct \\
+W11 & Full evaluation table; shared adapter & 21--22 Oct \\
+W12 & POPE-vi hallucination; error analysis & 23--24 Oct \\
+W13 & Web prototype & 26--31 Oct \\
+W14 & Code completion, demo video, reproducibility package & 01--02 Nov \\
+W15 & Review~2 feedback, defence slides, thesis & from 02 Nov \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The faculty milestones follow the calendar (Table~\ref{tab:pm-milestones}). The
+thesis grade consists of 50\% for the process, for which the team submits seven
+reports to the supervisors, and 50\% for the defence.
+
+\begin{table}[htbp]
+\caption{Faculty milestones}
+\label{tab:pm-milestones}
+\centering
+\small
+\begin{tabular}{p{0.20\textwidth}p{0.24\textwidth}p{0.32\textwidth}p{0.14\textwidth}}
+\toprule
+\textbf{Milestone} & \textbf{Date} & \textbf{Content} & \textbf{Status} \\
+\midrule
+Review~1 & 24 Sep 2026 (calendar week 3) & Problem, gaps, research questions, plan; two lecturers other than the supervisors review & Done, 10 comments \\
+Review~2 & 29 Oct 2026 (calendar week 8) & Reproduced baseline, method, preliminary results & Done \\
+Faculty council & 30 Nov--06 Dec 2026 (calendar week 13) & Three members, 60 minutes per team & Upcoming \\
+University council & 14--20 Dec 2026 (calendar week 15) & Five members & Upcoming \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------------------------
+\section{Quality Management}
+
+In this project, quality first means that the numbers can be trusted. The team
+used five measures:
+
+\begin{itemize}
+  \item \textbf{Pre-registered rules:} the threshold and conclusion rule of every
+  main experiment are committed before results exist, for example the rule for
+  the shared adapter (commit \texttt{324caeb}, W11) and the hallucination rule
+  for H4 (commit \texttt{9209170}, W12).
+  \item \textbf{Paired tests:} every comparison of two models on the same test
+  set uses McNemar's test per question for EM and a paired bootstrap 95\%
+  confidence interval for ANLS; the main result is repeated with seeds 42, 43
+  and 44.
+  \item \textbf{Recomputation from raw data:} the final results table
+  (\path{src/eval/full_eval_table.py}) reads the \path{predictions.json}
+  files directly instead of copying numbers from weekly reports.
+  \item \textbf{Self-tests:} the main modules have a \texttt{--selftest} mode that
+  runs on CPU, on both Windows and Linux, to catch errors before GPU time is
+  spent.
+  \item \textbf{Checksums and run signatures:} adapters, the OCR cache, data files
+  and slides are recorded with SHA-256 checksums; each run carries a
+  configuration signature, so results of a different configuration are never
+  appended to the same run directory.
+\end{itemize}
+
+% ------------------------------------------------------------------------------
+\section{Training Plan}
+
+The project needs knowledge in four different areas. In W01 each member read at
+least three papers in their own area and answered ten fixed questions for each
+paper, including the mandatory question ``what can we use for our project?''
+(Table~\ref{tab:pm-papers}).
+
+\begin{table}[htbp]
+\caption{Foundation papers by area}
+\label{tab:pm-papers}
+\centering
+\small
+\begin{tabular}{p{0.32\textwidth}p{0.58\textwidth}}
+\toprule
+\textbf{Area} & \textbf{Papers} \\
+\midrule
+SV1: VLM / Baseline & BLIP-2, Florence-2, Qwen2.5-VL \\
+SV2: Dataset / OCR & ViVQA, ViTextVQA, TextVQA (LoRRA) \\
+SV3: PEFT / Training & LoRA, QLoRA, VL-Adapter, LLaVA-1.5 \\
+SV4: Evaluation / Deployment & POPE, VQAv2, survey of vision-language models (TPAMI 2024) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The remaining skills were learned during the project: QLoRA training with PEFT
+and bitsandbytes, PaddleOCR and VietOCR, McNemar's test, and the workflow between
+local machines, GitHub, Colab and Google Drive. A bilingual glossary
+(\path{docs/Glossary.md}) was maintained throughout.
+
+% ------------------------------------------------------------------------------
+\section{Deliverables}
+
+Table~\ref{tab:pm-deliverables} lists the deliverables required by the project
+outline, including the reproducibility package (status as of 10 November 2026).
+
+\begin{table}[htbp]
+\caption{Deliverables}
+\label{tab:pm-deliverables}
+\centering
+\small
+\begin{tabular}{p{0.38\textwidth}p{0.36\textwidth}p{0.16\textwidth}}
+\toprule
+\textbf{Deliverable} & \textbf{Location} & \textbf{Status} \\
+\midrule
+Source code: 46 Python modules (data, training, evaluation, prototype) & \path{src/} on GitHub (PLHGNAOH/ViVQA-VLM) & Done \\
+30 Colab notebooks & \path{notebooks/} & Done \\
+Logs of 141 runs & \path{experiments/} & Done \\
+QLoRA adapters of the official models & Google Drive; checksums in \path{configs/official_models.json} & Done \\
+Reproducibility package: guide, library versions, inference script & \path{docs/REPRODUCE.md}, \path{requirements-colab.txt}, \path{src/prototype/infer.py} & Done \\
+Web prototype and demo video (10 min 28 s) & \path{src/prototype/}, Google Drive & Done \\
+Weekly reports W01--W15 & \path{docs/W01/} to \path{docs/W15/} & W15 in progress \\
+Review~1 and Review~2 slides (English, Vietnamese) & \path{docs/W03/}, \path{docs/04_slides/} & Done; defence slides in progress \\
+Thesis & Overleaf & In progress \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------------------------
+\section{Responsibilities}
+
+The team has four students, each responsible for one technical area of the
+project outline (Table~\ref{tab:pm-roles}). Pham Le Huy Hoang is the team
+leader: in addition to PEFT and training, he coordinates progress and integrates
+the results of all areas. Cross-area work, for example B3, which needs the OCR
+cache of SV2 and the training pipeline of SV3, is owned by the member who
+produces the main result and reviewed by the leader. Individual contributions
+per week are recorded in the weekly team reports.
+
+\begin{table}[htbp]
+\caption{Roles and responsibilities}
+\label{tab:pm-roles}
+\centering
+\small
+\begin{tabular}{p{0.20\textwidth}p{0.18\textwidth}p{0.32\textwidth}p{0.20\textwidth}}
+\toprule
+\textbf{Member} & \textbf{Role} & \textbf{Main responsibilities} & \textbf{Main directories} \\
+\midrule
+Ho Dac Toan (SE183249) & SV1: VLM / Baseline & Qwen2.5-VL architecture, zero-shot baseline reproduction, comparison with published scores & \path{src/models/}, \path{src/eval/run_baseline.py} \\
+Tran Quoc Huan (SE193642) & SV2: Dataset / OCR & Official data, splits, leakage checks, OCR cache with PaddleOCR and VietOCR & \path{data/}, \path{src/data/} \\
+Pham Le Huy Hoang (SE182670) & SV3: PEFT / Training; team leader & QLoRA training, LoRA configuration ablations, shared adapter; coordination and integration & \path{src/adaptation/}, \path{configs/}, \path{adapters/} \\
+Van Quang Truong (SE182458) & SV4: Evaluation / Deployment & Metrics, statistical tests, hallucination, prototype and demo & \path{src/eval/}, \path{src/prototype/} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------------------------
+\section{Communication}
+
+\begin{table}[htbp]
+\caption{Communication channels}
+\label{tab:pm-comm}
+\centering
+\small
+\begin{tabular}{p{0.26\textwidth}p{0.48\textwidth}p{0.16\textwidth}}
+\toprule
+\textbf{Channel} & \textbf{Purpose} & \textbf{Frequency} \\
+\midrule
+Meetings with the supervisors & Confirm major decisions, for example the choice of Qwen2.5-VL-3B as baseline on 7 October 2026 & At milestones and when needed \\
+Reviews with external lecturers & External feedback; after each review the team fills in the AI\_Capstone\_Review123 checklist, emails it to the supervisors and reviewers, and uploads it to the shared folder & Twice \\
+Weekly reports (README and team report in \path{docs/Wxx/}) & Work done, results, decisions and postponed items & Every working week \\
+GitHub & Source code, small logs, documents; every commit has a description & Continuous \\
+Google Drive & Images, adapters, OCR cache, demo video, review recordings & Continuous \\
+Department email & Review dates, announced only during the review week & At milestones \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------------------------
+\section{Configuration Management}
+
+\paragraph{Documents.} Weekly documents live in \path{docs/W01} to
+\path{docs/W15}; each folder has a README that indexes the week and a team
+report. Cross-week documents live in numbered folders: \path{00_admin}
+(conventions, checklists), \path{01_proposal} (project outline),
+\path{02_references} (literature matrix, reading notes), \path{03_report}
+(chapter drafts) and \path{04_slides} (review slides). Each document has a
+single live copy; weekly folders link to it instead of copying it. Old documents
+are moved to \path{_archive/} instead of being deleted.
+
+\paragraph{Source code.} Source code is managed with git in the public
+repository \path{github.com/PLHGNAOH/ViVQA-VLM}, working on the
+\texttt{main} branch; an \texttt{ai-context} branch is generated by a GitHub
+Action to collect reports. Data, images and adapter weights are not committed
+(blocked by \path{.gitignore}) but stored on Google Drive; their locations and
+checksums are recorded in the logs and in \path{configs/official_models.json}.
+Run names follow \path{docs/00_admin/CONVENTIONS.md} and encode the week,
+method, model, dataset, number format, GPU and seed, for example
+\path{W07_B2_qlora_r16_qwen25vl_vitextvqa_ep1_bf16_L4_seed42}. The
+base model is pinned to a fixed HuggingFace revision.
+
+\begin{table}[htbp]
+\caption{Tools and infrastructure}
+\label{tab:pm-tools}
+\centering
+\small
+\begin{tabular}{p{0.26\textwidth}p{0.64\textwidth}}
+\toprule
+\textbf{Category} & \textbf{Tools} \\
+\midrule
+Languages and libraries & Python, PyTorch, HuggingFace Transformers, PEFT, bitsandbytes, \path{qwen_vl_utils} \\
+OCR and Vietnamese text & PaddleOCR, VietOCR; pyvi for word segmentation \\
+Training and evaluation & Google Colab Pro: NVIDIA L4 for training and inference, Tesla T4 for OCR (free T4 in W04--W06) \\
+Local machines & Windows 11, 4 GB GPU: development, self-tests, preprocessing, error analysis \\
+Storage & Google Drive (data, adapters, large logs); GitHub (code, small logs, documents) \\
+Prototype & Gradio \\
+Code and writing & Cursor IDE; AI assistants (Claude, Gemini) for code and drafting, with every number checked against the logs \\
+Slides and thesis & Canva, PowerPoint, Google Docs, Overleaf \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The Colab budget was tracked in CU and recorded in the weekly reports. Remaining
+CU read in Colab: 146.75 (13 Oct), 86.52 (19 Oct), 49.3 (21 Oct), 34.96
+(23 Oct) and 17.38 (31 Oct). W10 alone, with the LoRA configuration ablations
+and B3-full, used about 37 CU.

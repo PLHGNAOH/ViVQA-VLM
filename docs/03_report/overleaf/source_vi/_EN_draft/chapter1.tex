@@ -1,0 +1,298 @@
+%!TEX root = ../thesis.tex
+%*******************************************************************************
+%*********************************** First Chapter *****************************
+%*******************************************************************************
+
+\chapter{INTRODUCTION}  %Title of the First Chapter
+\label{chap:intro}
+
+\ifpdf
+    \graphicspath{{Chapter1/Figs/Raster/}{Chapter1/Figs/PDF/}{Chapter1/Figs/}}
+\else
+    \graphicspath{{Chapter1/Figs/Vector/}{Chapter1/Figs/}}
+\fi
+
+% ------------------------------ Abbreviations ---------------------------------
+% Entries are collected into the Nomenclature list (group Z = acronyms).
+\nomenclature[z-VQA]{VQA}{Visual Question Answering}
+\nomenclature[z-VLM]{VLM}{Vision-Language Model}
+\nomenclature[z-OCR]{OCR}{Optical Character Recognition}
+\nomenclature[z-PEFT]{PEFT}{Parameter-Efficient Fine-Tuning}
+\nomenclature[z-LoRA]{LoRA}{Low-Rank Adaptation}
+\nomenclature[z-QLoRA]{QLoRA}{Quantized Low-Rank Adaptation (LoRA on a 4-bit NF4 base model)}
+\nomenclature[z-NF4]{NF4}{4-bit NormalFloat quantization}
+\nomenclature[z-EM]{EM}{Exact Match}
+\nomenclature[z-VQA-Acc]{VQA-Acc}{VQA Accuracy}
+\nomenclature[z-ANLS]{ANLS}{Average Normalized Levenshtein Similarity}
+\nomenclature[z-POPE]{POPE}{Polling-based Object Probing Evaluation}
+\nomenclature[z-SOTA]{SOTA}{State of the art}
+
+%********************************** Section 1.1 ********************************
+\section{Background and Motivation}
+\label{sec:intro-background}
+
+\subsection{Visual question answering and vision-language models}
+
+Visual Question Answering (VQA) asks a system to answer a natural-language
+question about the content of an image~\cite{antol2015vqa}. Unlike image
+classification or object detection, VQA requires joint understanding of the
+image, the meaning of the question and, in many cases, the text that appears
+in the image~\cite{singh2019textvqa,biten2019stvqa}. Early VQA systems combined
+a convolutional image encoder with a recurrent question encoder and selected the
+answer from a fixed vocabulary. Recent vision-language models (VLMs) such as
+BLIP-2~\cite{li2023blip2}, LLaVA~\cite{liu2023llava},
+Florence-2~\cite{xiao2024florence2} and Qwen2.5-VL~\cite{bai2025qwen25vl} take a
+different approach: a vision encoder turns the image into a sequence of tokens,
+and a large language model reads these tokens together with the question and
+generates a free-form answer. These models answer open questions and read text
+in images without task-specific training.
+
+\subsection{Vietnamese and English-centric VLMs}
+
+Most open-source VLMs are pretrained mainly on English and Chinese data. When
+they are applied to Vietnamese, we observe four recurring problems, labelled
+V1--V4 and used throughout this thesis:
+
+\begin{description}
+  \item[V1, reading accented text in images.] Vietnamese tone marks are small
+  strokes, and misreading one changes the meaning of a word
+  (\vi{``BÁNH MÌ''} read as ``banh mi'').
+  \item[V2, wrong language or wrong format.] The model answers in English,
+  inserts Chinese characters, or returns a full sentence when the reference
+  answer is a few words long.
+  \item[V3, reading order and word boundaries.] Spaces in Vietnamese separate
+  syllables, not words; reading text regions in the wrong order breaks words
+  (\vi{``cửa hàng điện thoại''} becomes \vi{``cửa điện hàng thoại''}).
+  \item[V4, hallucination.] The answer is fluent but refers to objects or text
+  that are not in the image.
+\end{description}
+
+The gap between machines and humans on Vietnamese data is still large. On
+ViTextVQA~\cite{nguyen2024vitextvqa}, the best published result before this work
+is an exact match (EM) of 25.48, while human performance is 88.00.
+
+\subsection{Resource constraints}
+
+Full fine-tuning of a VLM with several billion parameters requires multiple
+large GPUs, which is beyond the means of a student team. The university does
+not provide a GPU server for this project, so all experiments run on Google
+Colab. We therefore make efficiency an explicit design constraint: we use only
+parameter-efficient fine-tuning (LoRA~\cite{hu2022lora} and
+QLoRA~\cite{dettmers2023qlora}), and every result is reported together with its
+training time, inference time and GPU memory.
+
+%********************************** Section 1.2 ********************************
+\section{Problem Statement}
+\label{sec:intro-problem}
+
+Given an image $I$ and a Vietnamese question $q$, the system generates a
+Vietnamese answer $\hat{a} = f(I, q)$. The answer is compared with the reference
+answer $a$ after the same text normalization step. The two datasets used in
+this thesis pose different requirements:
+
+\begin{itemize}
+  \item \textbf{ViVQA}~\cite{tran2021vivqa}: general questions about everyday
+  images (colour, counting, objects, position). 99.83\% of the reference answers
+  have at most three words, so EM and VQA accuracy are suitable measures.
+  \item \textbf{ViTextVQA}~\cite{nguyen2024vitextvqa}: the answer is text read
+  from the image, with an average length of 4.18 words. We also report
+  ANLS~\cite{biten2019stvqa}, which tolerates small character-level reading
+  errors.
+\end{itemize}
+
+For example, the ViVQA question \vi{``màu của xe đạp là gì?''} (``what colour
+is the bicycle?'') has the answer \vi{``màu đỏ''} (``red''). The ViTextVQA
+question \vi{``cửa hàng có biển màu vàng là nơi nào?''} (``what is the shop with
+the yellow sign?'') has the answer \vi{``đại lý xổ số miền bắc''} (``northern
+lottery agency''), copied directly from the sign.
+
+%********************************** Section 1.3 ********************************
+\section{Research Gaps}
+\label{sec:intro-gaps}
+
+From the literature review in Chapter~\ref{chap:related}, we identify four gaps:
+
+\begin{description}
+  \item[G1. English-centric pretraining.] Zero-shot models answer Vietnamese
+  questions partly in English and in the wrong format.
+  \item[G2. Weak Vietnamese VQA, especially for scene text.] The state of the art
+  on ViTextVQA is 25.48 EM, compared with 88.00 for humans.
+  \item[G3. PEFT for Vietnamese VQA with VLMs is unexplored.] The Vietnamese VQA
+  studies we reviewed either train task-specific models or use frozen models;
+  none applies LoRA or QLoRA to a large VLM.
+  \item[G4. No hallucination benchmark for Vietnamese VQA.] There is no
+  POPE-style~\cite{li2023pope} benchmark in Vietnamese.
+\end{description}
+
+This thesis focuses on G3 and uses G2 and G4 as the settings in which the
+proposed method is tested.
+
+%********************************** Section 1.4 ********************************
+\section{Objectives}
+\label{sec:intro-objectives}
+
+The overall objective is to adapt an open-source VLM to Vietnamese VQA under a
+strict parameter budget, and to verify experimentally at least one improvement
+over a reproduced baseline. Table~\ref{tab:objectives} breaks this objective
+into measurable sub-objectives.
+
+\begin{table}[htbp]
+\caption{Objectives and completion criteria}
+\label{tab:objectives}
+\centering
+\small
+\begin{tabular}{p{0.30\textwidth}p{0.62\textwidth}}
+\toprule
+\textbf{Objective} & \textbf{Completion criterion} \\
+\midrule
+Reproduce exactly one baseline &
+Re-run Qwen2.5-VL-3B-Instruct on a benchmark with a published score and obtain a
+small difference (TextVQA val: 79.60 versus 79.3 published) \\
+Measure the zero-shot baseline on Vietnamese data &
+EM, VQA-Acc and ANLS on the full ViVQA and ViTextVQA test sets under one
+protocol \\
+Adapt with PEFT only &
+4-bit QLoRA, fewer than 1\% trainable parameters, one Colab GPU \\
+Propose and verify at least one improvement &
+Improvement over the baseline under identical conditions, with a paired
+statistical test and ablations \\
+Analyse errors and hallucination &
+Errors broken down by question type and error type; POPE-style hallucination
+measurement in Vietnamese \\
+Web prototype &
+Upload an image, ask in Vietnamese, receive the answer with OCR text and a
+confidence score; same answers as the evaluation pipeline \\
+Reproducibility &
+Every run logs split, seed, hardware, hyperparameters and time; a package with
+code, adapters, configurations and an inference script \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%********************************** Section 1.5 ********************************
+\section{Research Questions and Hypotheses}
+\label{sec:intro-rq}
+
+\begin{description}
+  \item[RQ1.] What does zero-shot inference achieve on ViVQA and ViTextVQA, and
+  which Vietnamese-specific errors dominate?
+  \item[RQ2.] How much does QLoRA improve over zero-shot inference, without full
+  fine-tuning?
+  \item[RQ3.] Does accented OCR text in reading order help the model read text in
+  images, and does it interact with QLoRA?
+  \item[RQ4.] After QLoRA adaptation, does the model hallucinate more or less?
+\end{description}
+
+Each hypothesis in Table~\ref{tab:hypotheses} has a quantitative threshold that
+was recorded before the corresponding experiment was run.
+
+\begin{table}[htbp]
+\caption{Hypotheses and the research questions they answer}
+\label{tab:hypotheses}
+\centering
+\small
+\begin{tabular}{p{0.06\textwidth}p{0.66\textwidth}p{0.18\textwidth}}
+\toprule
+\textbf{ID} & \textbf{Hypothesis} & \textbf{Answers} \\
+\midrule
+H1 & QLoRA on Qwen2.5-VL-3B increases EM by at least 5 points over the same model
+in zero-shot mode. & RQ2; V1--V3 \\
+H2 & Accented OCR text ordered from top-left to bottom-right, added to the
+prompt, increases ANLS on ViTextVQA by at least 3 points; combined with QLoRA it
+gives the best result. & RQ3; V1, V3 \\
+H3 & A Vietnamese format prompt (short, accented answer) increases EM by at
+least 3 points and reduces wrong-language or unaccented answers. & RQ1; V2 \\
+H4 & QLoRA does not increase the hallucination rate compared with zero-shot
+inference. & RQ4; V4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%********************************** Section 1.6 ********************************
+\section{Contributions}
+\label{sec:intro-contrib}
+
+We use Qwen2.5-VL-3B-Instruct~\cite{bai2025qwen25vl} as the baseline, reproduce
+it first, and then adapt it to Vietnamese with QLoRA only. The 3-billion-parameter
+base model is quantized to 4 bits and kept frozen; we train 7.37 million adapter
+parameters, 0.196\% of all parameters, on a single NVIDIA L4 GPU. The
+contributions of this thesis are:
+
+\begin{enumerate}
+  \item \textbf{OCR-aware QLoRA.} Text read from the image by VietOCR (accents
+  preserved, sorted in reading order) is inserted into the prompt during
+  training, so that the adapter learns to use it. On the full ViTextVQA test set
+  (10,028 questions), this reaches 53.35 EM versus 50.26 for plain QLoRA on the
+  same data ($+3.09$ EM, McNemar test $p = 6.7\times10^{-21}$), above the best
+  published result on the same test set (ViTextBLIP-2, 25.48
+  EM~\cite{nguyen2024vitextvqa}).
+  \item \textbf{A separated mechanism.} A $2\times2$ experiment shows that OCR
+  helps only when it is used both during training and at inference: adding OCR
+  to the prompt of a model that never saw OCR does not improve results.
+  \item \textbf{A strong Vietnamese general-VQA result.} On ViVQA, QLoRA raises
+  EM from 22.09 (zero-shot) to 76.64.
+  \item \textbf{A Vietnamese hallucination benchmark.} POPE-vi, a POPE-style
+  benchmark with 4,985 yes/no questions on 500 images not seen during training.
+  \item \textbf{Analysis and a verified prototype.} Ablations for each component,
+  automatic and manual error analysis, and a web prototype verified to produce
+  the same answers as the official evaluation pipeline.
+\end{enumerate}
+
+All conclusions rest on decision rules recorded before the experiments, paired
+tests on the same test set, and complete logs (split, seed, GPU, time), so every
+number can be re-run from the public repository.
+
+%********************************** Section 1.7 ********************************
+\section{Scope and Limitations}
+\label{sec:intro-scope}
+
+\begin{table}[htbp]
+\caption{In scope and out of scope}
+\label{tab:scope}
+\centering
+\small
+\begin{tabular}{p{0.45\textwidth}p{0.45\textwidth}}
+\toprule
+\textbf{In scope} & \textbf{Out of scope} \\
+\midrule
+ViVQA and ViTextVQA with fixed splits &
+Building new training datasets or data augmentation \\
+One baseline, Qwen2.5-VL-3B-Instruct; other VLMs for reference only &
+Comparing several backbones as main baselines \\
+Adaptation with PEFT only (4-bit QLoRA); OCR text as an auxiliary input &
+Full fine-tuning; training a VLM from scratch \\
+EM, VQA-Acc, ANLS (token F1 as a secondary metric); ablations, error and
+hallucination analysis &
+Retrieval-augmented VQA with external knowledge \\
+Web prototype running on Colab with one GPU &
+Large-scale deployment or mobile applications \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Assumptions.} We assume that the official splits of both datasets
+represent the question distribution of each dataset, that the reference answers
+are correct for the large majority of questions (incorrect references are
+measured and reported separately in Chapter~\ref{chap:results}), and that an L4
+GPU on Colab gives stable results across sessions when the seed and
+configuration are fixed.
+
+\paragraph{Known limitations.} Results are bounded by a 3-billion-parameter
+base model at 4 bits and by OCR quality. Main experiments use one seed; the OCR
+comparison is additionally checked on three seeds. EM is strict towards answers
+that are correct in meaning but written differently, so we add ANLS and manual
+review. These limitations are revisited in Chapters~\ref{chap:discussion}
+and~\ref{chap:conclusion}.
+
+%********************************** Section 1.8 ********************************
+\section{Thesis Outline}
+\label{sec:intro-outline}
+
+Chapter~\ref{chap:related} reviews VQA, vision-language models,
+parameter-efficient fine-tuning and prior work on Vietnamese VQA.
+Chapter~\ref{chap:methods} describes the datasets, the baseline, the proposed
+OCR-aware QLoRA method and the evaluation protocol. Chapter~\ref{chap:results}
+reports the main results and ablations. Chapter~\ref{chap:discussion} discusses
+error analysis, hallucination and limitations. Chapter~\ref{chap:conclusion}
+concludes the thesis. Appendix~\ref{appendix:pm} presents the project management
+plan.

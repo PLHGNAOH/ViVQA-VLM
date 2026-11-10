@@ -1,5 +1,7 @@
 # 03_report — Báo cáo / Thesis
 
+> **Từ 10/11/2026:** khoá luận chính viết trên **Overleaf** theo template 6 chương của mentor (xem `overleaf/README.md`). Các file R1–R7 trong thư mục này là bản nháp nguồn để soạn từng chương.
+
 Báo cáo (thesis) được **viết trên Overleaf** (LaTeX). Folder này là **bản đồng bộ local**:
 
 - Giữ bản `.tex` đồng bộ từ Overleaf (source of truth vẫn là project Overleaf).
