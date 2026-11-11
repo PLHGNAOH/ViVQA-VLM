@@ -50,14 +50,16 @@ trả lời, hàm chấm điểm) được giữ cố định, để chênh lệ
 gây ra. Hình~\ref{fig:met-pipeline} minh họa quy trình, còn
 Bảng~\ref{tab:met-runs} liệt kê các lần chạy được nhắc tới trong khóa luận.
 
-\begin{sidewaysfigure}
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textheight]{met_pipeline.jpg}
+\includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_pipeline.jpg}
 \caption{Quy trình tám bước. Bước 3 (OCR) chỉ chạy với ViTextVQA; dòng chữ OCR
 được lưu cache rồi ghép vào prompt ở bước 5. B1, B2 và B3 đi qua cùng quy trình, chỉ
 khác ở bước 3 và bước 6.}
 \label{fig:met-pipeline}
-\end{sidewaysfigure}
+\end{figure}
+\end{landscape}
 
 \begin{table}[htbp]
 \caption{Các lần chạy chính và vai trò của chúng}
@@ -234,16 +236,18 @@ Qwen2.5-VL-3B-Instruct gồm ba khối:
 Hình~\ref{fig:met-arch} cho thấy đường đi của dữ liệu qua ba khối này, cùng vị trí
 gắn adapter LoRA (mục~\ref{sec:met-qlora}).
 
-\begin{sidewaysfigure}
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textheight]{met_architecture.jpg}
+\includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_architecture.jpg}
 \caption{Qwen2.5-VL-3B-Instruct trong khóa luận: ảnh đi qua Conv3D, vision encoder
 và MLP merger thành token ảnh; câu hỏi và chữ OCR đi qua tokenizer thành token chữ;
 LM decoder (4-bit, đóng băng, gắn LoRA) đọc cả chuỗi và sinh câu trả lời. Khung bên
 trái là cấu trúc một khối của vision encoder. Sơ đồ vẽ lại, phỏng theo Hình 1
 trong báo cáo kỹ thuật của Bai và cộng sự~\cite{bai2025qwen25vl}.}
 \label{fig:met-arch}
-\end{sidewaysfigure}
+\end{figure}
+\end{landscape}
 
 \subsection{Tiền xử lý ảnh}
 \label{sec:met-image}
@@ -265,14 +269,16 @@ Trên tập test, ảnh ViVQA có trung vị 345 token (tối đa 506; chỉ 1,5
 trần), còn ảnh ViTextVQA có trung vị 480 token và 57,7\% ảnh chạm trần 512.
 Hình~\ref{fig:met-image} minh họa các bước và hai ví dụ trên.
 
-\begin{sidewaysfigure}
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textheight]{met_image_tokens.jpg}
+\includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_image_tokens.jpg}
 \caption{Tiền xử lý ảnh: từ file ảnh đến lưới token ảnh, với một ví dụ ViVQA (chỉ
 làm tròn cạnh) và một ví dụ ViTextVQA (thu nhỏ vì vượt trần 512 token). Lưới trên
 ảnh ViTextVQA chỉ để minh họa.}
 \label{fig:met-image}
-\end{sidewaysfigure}
+\end{figure}
+\end{landscape}
 
 \paragraph{Vì sao trần 512 token.} Nhóm đặt luật trước khi đo: chọn 1.280 token
 nếu thời gian huấn luyện tăng không quá 1,5 lần. Bảng~\ref{tab:met-res} cho thấy
@@ -466,14 +472,16 @@ Cache phủ 15.352 ảnh ViTextVQA (toàn bộ train, test và dev300). Ảnh kh
 chữ nào thì không có dòng OCR, và prompt trùng hệt prompt không OCR.
 Hình~\ref{fig:met-ocr} minh họa sáu bước trên một ảnh thật.
 
-\begin{sidewaysfigure}
+\begin{landscape}
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textheight]{met_ocr.jpg}
+\includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_ocr.jpg}
 \caption{Đường OCR trên ảnh ViTextVQA 16267.jpg: 13 hộp chữ được dò, đọc và nối thành
 dòng OCR. Chữ OCR còn nhiễu (``SÓ'', ``MIẾN'' thay vì ``SỐ'', ``MIỀN''), trong khi đáp
 án gold là ``đại lý xổ số miền bắc''.}
 \label{fig:met-ocr}
-\end{sidewaysfigure}
+\end{figure}
+\end{landscape}
 
 \subsection{Chọn cấu hình OCR}
 

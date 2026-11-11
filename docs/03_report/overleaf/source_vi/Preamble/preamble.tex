@@ -61,6 +61,7 @@
 % *************************** Graphics and figures *****************************
 
 \usepackage{rotating} % sidewaysfigure cho hình khổ ngang
+\usepackage{pdflscape} % trang ngang: trình xem PDF tự xoay cho chữ thuận chiều
 %\usepackage{wrapfig}
 
 % Uncomment the following two lines to force Latex to place the figure.
@@ -196,6 +197,8 @@
 \ifthesisvi
   \usepackage[T1,T5]{fontenc}          % T5 (Vietnamese) is the default encoding
   \usepackage[english,vietnamese]{babel}
+  % Tên mục viết bằng ký tự Unicode trực tiếp để bookmark PDF hiện đủ dấu
+  \addto\captionsvietnamese{\renewcommand{\listtablename}{Danh sách bảng}\renewcommand{\bibname}{Tài liệu tham khảo}}
   \newcommand{\vi}[1]{#1}
   % Vietnamese names for headings that the class hard-codes in English
   \usepackage{etoolbox}
