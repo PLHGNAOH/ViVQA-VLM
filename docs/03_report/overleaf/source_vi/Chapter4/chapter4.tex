@@ -1,6 +1,6 @@
 %!TEX root = ../thesis.tex
 %*******************************************************************************
-%****************************** Chương 4 **************************************
+%****************************** Chương 4 ***************************************
 %*******************************************************************************
 
 \chapter{KẾT QUẢ}
@@ -12,5 +12,537 @@
     \graphicspath{{Chapter4/Figs/Vector/}{Chapter4/Figs/}}
 \fi
 
-% TODO (ViVQA-VLM): chương này chưa viết.
-\textit{[Chưa viết. Nội dung dự kiến: tái lập baseline; kết quả zero-shot; kết quả QLoRA; kết quả QLoRA nhận biết OCR; ablation; hiệu quả (thời gian, bộ nhớ, token).]}
+Chương này báo cáo kết quả theo thứ tự của các câu hỏi nghiên cứu.
+Mục~\ref{sec:res-repro} trình bày việc tái lập baseline và kết quả zero-shot
+(RQ1). Mục~\ref{sec:res-qlora} báo cáo QLoRA (RQ2), mục~\ref{sec:res-ocr} báo cáo
+phương pháp đề xuất QLoRA nhận biết OCR (RQ3). Mục~\ref{sec:res-ablation} trình
+bày các ablation, mục~\ref{sec:res-qtype} kết quả theo loại câu hỏi,
+mục~\ref{sec:res-cost} chi phí tính toán, mục~\ref{sec:res-exif} một phân tích độ
+nhạy, và mục~\ref{sec:res-proto} kiểm chứng prototype. Mục~\ref{sec:res-hyp} tổng
+hợp kết luận cho từng giả thuyết. Kết quả về hallucination (RQ4) và phân tích lỗi
+nằm ở Chương~\ref{chap:discussion}.
+
+Trừ khi ghi khác, mọi số liệu được đo trên toàn bộ tập test (ViVQA 3.001 câu,
+ViTextVQA 10.028 câu), một GPU NVIDIA L4, bf16, mô hình nền 4-bit NF4, seed 42.
+Số liệu được viết theo thang phần trăm.
+
+%********************************** Mục 4.1 ************************************
+\section{Tái lập baseline và kết quả zero-shot}
+\label{sec:res-repro}
+
+\subsection{Tái lập số đã công bố (R0)}
+
+Bảng~\ref{tab:res-r0} so sánh kết quả của nhóm với số trong báo cáo kỹ thuật của
+Qwen2.5-VL~\cite{bai2025qwen25vl} trên toàn bộ 5.000 câu TextVQA val. Với cấu
+hình gốc của paper (bf16, không giới hạn độ phân giải), nhóm đạt VQA-Acc 79,60 so
+với 79,3 công bố, chênh $+0{,}3$ điểm. Đường suy luận của nhóm vì vậy được coi là
+đúng. Cấu hình tiết kiệm dùng cho mọi thí nghiệm sau (4-bit NF4, tối đa 512 token
+ảnh) đạt 75,21, tức giữ 94,5\% độ chính xác trong khi VRAM khi suy luận giảm từ
+10,9~GB xuống 2,5~GB (giảm 77\%).
+
+\begin{table}[htbp]
+\caption{Tái lập Qwen2.5-VL-3B-Instruct trên TextVQA val (5.000 câu)}
+\label{tab:res-r0}
+\centering
+\small
+\begin{tabular}{p{0.45\textwidth}rr}
+\toprule
+\textbf{Cấu hình} & \textbf{VQA-Acc} & \textbf{VRAM suy luận} \\
+\midrule
+Báo cáo gốc~\cite{bai2025qwen25vl} & 79,3 & --- \\
+R0: nhóm chạy lại, cấu hình gốc (bf16) & 79,60 & 10,9 GB \\
+R0b: cấu hình tiết kiệm (4-bit, $\leq$ 512 token ảnh) & 75,21 & 2,5 GB \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Zero-shot trên dữ liệu tiếng Việt (B1)}
+
+Bảng~\ref{tab:res-b1} trình bày kết quả zero-shot. Mô hình nền đạt EM 22,09 trên
+ViVQA và 29,12 trên ViTextVQA. Riêng trên ViTextVQA, B1 đã cao hơn kết quả công
+bố tốt nhất trước đây (ViTextBLIP-2, EM 25,48~\cite{nguyen2024vitextvqa}), cho
+thấy mô hình nền hiện đại đã đọc chữ tốt hơn các hệ thống trước.
+
+\begin{table}[htbp]
+\caption{Kết quả zero-shot (B1) trên toàn bộ tập test}
+\label{tab:res-b1}
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Tập test} & \textbf{EM} & \textbf{ANLS} & \textbf{F1 (phụ)} \\
+\midrule
+ViVQA (3.001 câu) & 22,09 & 28,61 & 38,05 \\
+ViTextVQA (10.028 câu) & 29,12 & 47,60 & 53,89 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{EM thấp chủ yếu vì sai định dạng.} Câu trả lời zero-shot dài hơn đáp án
+gold: trung bình 2,9 từ so với 1,6 từ trên ViVQA, và 5,4 từ so với 3,7 từ trên
+ViTextVQA. 18\% câu ViTextVQA có câu trả lời chứa đúng đáp án nhưng vẫn trượt EM
+vì thừa chữ. Hai ví dụ: câu hỏi ``đây là bảo tàng gì?'' được trả lời ``Bảo tàng
+Lịch sử Quốc gia.'' trong khi gold là ``lịch sử quốc gia''; câu hỏi ``màu của
+chiếc tàu là gì'' được trả lời ``Đỏ và trắng'' trong khi gold là ``màu đỏ''.
+
+\paragraph{Theo loại câu hỏi ViVQA.} EM zero-shot khác nhau rất xa giữa các loại:
+số lượng 69,1 (444 câu), màu sắc 44,8 (625 câu), vật thể 5,7 (1.247 câu) và vị trí
+0,7 (685 câu). Với câu hỏi vật thể và vị trí, gold chỉ là một danh từ (``phòng''),
+còn mô hình trả lời cả cụm (``trong phòng khách'').
+
+\paragraph{Ngôn ngữ và dấu thanh.} Ở lần chạy baseline đầu tiên (cấu hình ban đầu,
+trước khi chốt bf16), khoảng 90 câu trả lời bằng tiếng Anh dù câu hỏi bằng tiếng
+Việt. Trên test2000 ViTextVQA, EM với đáp án tiếng Việt có dấu (22,4) thấp hơn hẳn
+EM với đáp án chỉ gồm chữ Latin không dấu (39,4).
+Đây là bằng chứng định lượng cho vấn đề V1 và V2 ở Chương~\ref{chap:intro}.
+
+\paragraph{Các cách không cần huấn luyện.} Nhóm thử thêm ba cách không huấn
+luyện. (i) Prompt few-shot với 5 ví dụ chỉ gồm chữ, để mô hình thấy định dạng đáp
+án, làm EM giảm 2,1 điểm trên ViVQA và 1,2 điểm trên ViTextVQA. (ii) Thêm dòng
+OCR vào prompt khi suy luận không cải thiện có ý nghĩa
+(mục~\ref{sec:res-promptonly}). (iii) Một VLM lớn hơn, Qwen2-VL-7B~\cite{wang2024qwen2vl},
+ở chế độ zero-shot chỉ đạt EM 16,7 trên test2000, chủ yếu vì trả lời dài. Không
+cách nào trong số này sửa được vấn đề định dạng, nên cần huấn luyện.
+
+%********************************** Mục 4.2 ************************************
+\section{QLoRA}
+\label{sec:res-qlora}
+
+Bảng~\ref{tab:res-qlora} so sánh zero-shot với QLoRA. Chỉ với 0,196\% tham số
+được huấn luyện, QLoRA tăng EM thêm 21,1 điểm trên ViTextVQA (29,12 lên 50,26) và
+51,7 điểm trên ViVQA sau một epoch (22,09 lên 73,78). Trên ViTextVQA, 2.543 câu
+chỉ B2 trả lời đúng so với 423 câu chỉ B1 trả lời đúng; kiểm định McNemar cho $p$
+gần bằng 0 trên cả hai bộ dữ liệu.
+
+\begin{table}[htbp]
+\caption{Zero-shot so với QLoRA trên toàn bộ tập test}
+\label{tab:res-qlora}
+\centering
+\small
+\begin{tabular}{p{0.38\textwidth}rrrr}
+\toprule
+\textbf{Mô hình} & \textbf{Epoch} & \textbf{EM} & \textbf{ANLS} & \textbf{F1 (phụ)} \\
+\midrule
+\multicolumn{5}{l}{\textit{ViVQA (3.001 câu)}} \\
+B1 · zero-shot & --- & 22,09 & 28,61 & 38,05 \\
+C1 · QLoRA & 1 & 73,78 & 75,66 & 76,20 \\
+\textbf{C3 · QLoRA (chính thức)} & 2 & \textbf{76,64} & \textbf{78,03} & \textbf{78,84} \\
+\midrule
+\multicolumn{5}{l}{\textit{ViTextVQA (10.028 câu)}} \\
+B1 · zero-shot & --- & 29,12 & 47,60 & 53,89 \\
+B2 · QLoRA & 1 & 50,26 & 72,02 & 71,16 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Chọn số epoch cho ViVQA.} Lịch hai epoch được so với một epoch trên val
+sạch (688 câu, ảnh không có trong train) theo luật ghi trước: C1 đạt 73,11, adapter
+sau epoch 1 của lịch hai epoch đạt 71,51, adapter sau epoch 2 (C3) đạt 77,03
+($p = 1{,}4\times10^{-4}$ so với C1). Sau khi chọn, tập test chỉ được chạy một lần:
+C3 hơn C1 2,86 điểm EM (65 câu chỉ C1 đúng so với 151 câu chỉ C3 đúng,
+$p = 4{,}6\times10^{-9}$) và 2,4 điểm ANLS. C3 là mô hình chính thức cho ViVQA,
+tăng 54,6 điểm EM so với zero-shot.
+
+\paragraph{Mức tăng không do rò rỉ ảnh.} Vì khoảng một nửa ảnh test ViVQA có trong
+train (mục~\ref{sec:met-quality}), nhóm kiểm lại trên test sạch 1.219 câu (ảnh
+chưa thấy khi huấn luyện): QLoRA một epoch nâng EM từ 25,0 lên 69,1, tức
+$+44{,}1$ điểm (CI95 [+41; +47]). Mức tăng từ C1 lên C3 cũng bằng nhau trên ảnh đã
+thấy và ảnh chưa thấy ($+2{,}9$ và $+2{,}9$ điểm). C3 đạt 77,66 trên ảnh đã thấy
+và 75,67 trên ảnh chưa thấy; trên tập con nghiêm ngặt hơn (ảnh chưa thấy và cặp
+hỏi--đáp chưa có trong train, 1.118 câu) C3 đạt 71,74. Phần thổi phồng do trùng
+ảnh vì vậy nhỏ, khoảng 2 điểm.
+
+%********************************** Mục 4.3 ************************************
+\section{QLoRA nhận biết OCR}
+\label{sec:res-ocr}
+
+Bảng~\ref{tab:res-ocr} là kết quả chính của khóa luận trên ViTextVQA. Phương pháp
+đề xuất B3-full đạt EM 53,35, ANLS 73,89 và F1 73,73. Hình~\ref{fig:res-main} tóm tắt
+EM của các mô hình chính trên cả hai bộ dữ liệu.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{res_main.pdf}
+\caption{EM trên toàn bộ tập test. Màu xám: mốc so sánh (zero-shot và kết quả công
+bố); xanh: QLoRA; cam: phương pháp đề xuất QLoRA nhận biết OCR.}
+\label{fig:res-main}
+\end{figure}
+
+\begin{table}[htbp]
+\caption{Kết quả trên toàn bộ tập test ViTextVQA (10.028 câu)}
+\label{tab:res-ocr}
+\centering
+\small
+\begin{tabular}{p{0.34\textwidth}p{0.13\textwidth}crrr}
+\toprule
+\raggedright \textbf{Mô hình} & \raggedright \textbf{Dữ liệu train} & \raggedright \textbf{OCR} & \raggedright \textbf{EM} & \raggedright \textbf{ANLS} & \raggedright \textbf{F1} \tabularnewline
+\midrule
+\raggedright ViTextBLIP-2~\cite{nguyen2024vitextvqa} & \raggedright 100\% & \raggedright có & \raggedright 25,48 & \raggedright --- & \raggedright 53,95 \tabularnewline
+\raggedright B1 · zero-shot & \raggedright --- & \raggedright không & \raggedright 29,12 & \raggedright 47,60 & \raggedright 53,89 \tabularnewline
+\raggedright B2-sub · QLoRA & \raggedright 23\% & \raggedright không & \raggedright 46,56 & \raggedright 68,90 & \raggedright 67,83 \tabularnewline
+\raggedright B3 · QLoRA nhận biết OCR & \raggedright 23\% & \raggedright có & \raggedright 49,10 & \raggedright 70,47 & \raggedright 70,03 \tabularnewline
+\raggedright B2 · QLoRA & \raggedright 100\% & \raggedright không & \raggedright 50,26 & \raggedright 72,02 & \raggedright 71,16 \tabularnewline
+\raggedright \textbf{B3-full · QLoRA nhận biết OCR} & \raggedright 100\% & \raggedright có & \raggedright \textbf{53,35} & \raggedright \textbf{73,89} & \raggedright \textbf{73,73} \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{So sánh có kiểm soát.} Mỗi cặp so sánh chỉ khác nhau ở dòng OCR:
+\begin{itemize}
+  \item Tập con 8.000 câu: B3 hơn B2-sub 2,54 điểm EM (417 câu chỉ B2-sub đúng so
+  với 672 câu chỉ B3 đúng, $p = 1{,}1\times10^{-14}$); $\Delta$ANLS $+1{,}57$, CI95
+  [+1,06; +2,08].
+  \item Toàn bộ dữ liệu: B3-full hơn B2 3,09 điểm EM (395 so với 705 câu,
+  $p = 6{,}7\times10^{-21}$); $\Delta$ANLS $+1{,}87$, CI95 [+1,38; +2,36].
+\end{itemize}
+
+Với tập con, B3 vẫn thấp hơn B2 dùng toàn bộ dữ liệu 1,16 điểm EM
+($p = 0{,}0025$). Như vậy với 23\% dữ liệu và khoảng 25\% thời gian huấn luyện,
+dòng OCR bù được khoảng 69\% khoảng cách EM do cắt dữ liệu; khi đủ dữ liệu, QLoRA
+nhận biết OCR vượt QLoRA thường.
+
+\paragraph{So với kết quả công bố.} B3-full có EM 53,35 (CI95 [52,39; 54,33]) và
+F1 73,73 (CI95 [73,02; 74,45]); cận dưới CI95 cao hơn số công bố của
+ViTextBLIP-2 ở cả hai thước đo. Bài báo ViTextVQA không công bố hàm chuẩn hóa đáp
+án, nên so sánh tuyệt đối chỉ mang tính tham khảo; nhóm công khai hàm chấm điểm
+của mình. Mức chênh có thể tách thành ba phần: mô hình nền tốt hơn (B1 29,12 đã
+hơn 25,48), QLoRA ($+21{,}1$ EM) và OCR ($+3{,}1$ EM).
+
+\paragraph{Thước đo không phụ thuộc cách tách từ.} Vì token-F1 phụ thuộc cách
+tách đơn vị, nhóm tính lại F1 sau khi tách từ bằng pyvi. F1 theo từ thấp hơn F1
+theo âm tiết 1--3 điểm (B1 51,83; B2 69,07; B3-full 71,67), nhưng mức tăng từ B2
+lên B3-full gần như không đổi ($+2{,}57$ theo âm tiết, $+2{,}60$ theo từ) và thứ
+hạng B1 < B2 < B3-full giữ nguyên. EM và ANLS so cả chuỗi và theo ký tự nên không
+phụ thuộc tách từ.
+
+%********************************** Mục 4.4 ************************************
+\section{Ablation}
+\label{sec:res-ablation}
+
+Các ablation dưới đây chạy trên test2000 (2.000 câu ViTextVQA) và tập con
+train8k, trừ khi ghi khác.
+
+\subsection{Chỉ thêm OCR khi suy luận}
+\label{sec:res-promptonly}
+
+Bảng~\ref{tab:res-promptonly} cho thấy đưa dòng OCR vào prompt của một mô hình
+chưa từng được huấn luyện cùng OCR không cải thiện có ý nghĩa, dù đó là mô hình
+zero-shot hay mô hình đã QLoRA.
+
+\begin{table}[htbp]
+\caption{Thêm dòng OCR chỉ lúc suy luận (test2000)}
+\label{tab:res-promptonly}
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Mô hình} & \textbf{EM không OCR} & \textbf{EM có OCR} & \textbf{McNemar $p$} \\
+\midrule
+B1 · zero-shot & 28,80 & 29,35 & 0,55 \\
+B2 · QLoRA không OCR & 49,70 & 50,70 & 0,24 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{OCR lúc huấn luyện $\times$ OCR lúc suy luận}
+
+Để tách cơ chế, nhóm chạy thí nghiệm giai thừa $2\times2$ trên cùng tập con 8.000
+câu (Bảng~\ref{tab:res-2x2}). Chỉ thêm OCR lúc suy luận làm EM giảm 0,65 điểm
+($p = 0{,}49$); chỉ huấn luyện cùng OCR rồi suy luận không OCR giảm 0,55 điểm
+($p = 0{,}35$). Chỉ khi có OCR ở cả hai lúc, EM mới tăng: 49,25 so với 44,90
+($p = 2{,}2\times10^{-8}$). Hiệu ứng tương tác bằng $+4{,}90$ điểm EM, CI95
+[+3,20; +6,60], và $+3{,}62$ điểm ANLS, CI95 [+2,25; +5,03].
+
+\begin{table}[htbp]
+\caption{EM theo OCR lúc huấn luyện và lúc suy luận (test2000, train8k)}
+\label{tab:res-2x2}
+\centering
+\small
+\begin{tabular}{lrr}
+\toprule
+ & \textbf{Suy luận không OCR} & \textbf{Suy luận có OCR} \\
+\midrule
+Huấn luyện không OCR (B2-sub) & 45,55 & 44,90 \\
+Huấn luyện có OCR (B3) & 45,00 & \textbf{49,25} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.68\textwidth]{res_2x2.pdf}
+\caption{Hiệu ứng tương tác giữa OCR lúc huấn luyện và OCR lúc suy luận (test2000,
+train8k). Hai đường cắt nhau: OCR chỉ giúp khi có ở cả hai lúc.}
+\label{fig:res-2x2}
+\end{figure}
+
+Kết quả này (Hình~\ref{fig:res-2x2}) cho thấy lợi ích đến từ việc \emph{dạy mô hình dùng dòng OCR}, không
+đến từ việc thêm OCR vào prompt. Nó cũng cho thấy B3 phụ thuộc OCR: bỏ OCR lúc
+suy luận, EM của B3 giảm từ 49,25 xuống 45,00 ($p = 3{,}8\times10^{-9}$), ngang
+mức B2-sub. Prototype vì vậy luôn chạy OCR trước khi hỏi mô hình.
+
+\subsection{Lượng dữ liệu $\times$ OCR}
+
+Bảng~\ref{tab:res-data} so sánh lợi ích của OCR ở hai lượng dữ liệu, trên toàn
+bộ tập test. Lợi ích của OCR không giảm khi tăng dữ liệu ($+2{,}54$ lên $+3{,}09$
+EM); hiệu ứng tương tác dữ liệu $\times$ OCR bằng $+0{,}55$, CI95 [$-0{,}20$;
+$+1{,}29$], tức hai yếu tố cộng gộp.
+
+\begin{table}[htbp]
+\caption{EM theo lượng dữ liệu và OCR (toàn bộ test ViTextVQA)}
+\label{tab:res-data}
+\centering
+\small
+\begin{tabular}{lrrp{0.26\textwidth}}
+\toprule
+\textbf{Dữ liệu train} & \textbf{Không OCR} & \textbf{Có OCR} & \textbf{Lợi ích của OCR} \\
+\midrule
+23\% (8.000 câu) & 46,56 & 49,10 & $+2{,}54$ ($p = 1{,}1\times10^{-14}$) \\
+100\% (35.159 câu) & 50,26 & 53,35 & $+3{,}09$ ($p = 6{,}7\times10^{-21}$) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Độ ổn định theo seed}
+
+Vì B3-full chỉ chạy với một seed, nhóm kiểm độ ổn định của so sánh B3 với B2-sub
+trên ba seed huấn luyện (Bảng~\ref{tab:res-seed}). Mức tăng $+3{,}57 \pm 0{,}76$
+điểm EM và có ý nghĩa thống kê ở cả ba seed. $\Delta$ANLS bằng
+$+1{,}55 \pm 0{,}40$; ở seed 44 cận dưới CI95 của $\Delta$ANLS sát 0.
+
+\begin{table}[htbp]
+\caption{B3 so với B2-sub theo seed (test2000, train8k)}
+\label{tab:res-seed}
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Seed} & \textbf{EM B2-sub} & \textbf{EM B3} & \textbf{$\Delta$EM} & \textbf{McNemar $p$} \\
+\midrule
+42 & 45,55 & 49,25 & $+3{,}70$ & $1{,}7\times10^{-6}$ \\
+43 & 44,75 & 49,00 & $+4{,}25$ & $4{,}0\times10^{-8}$ \\
+44 & 46,05 & 48,80 & $+2{,}75$ & $1{,}4\times10^{-4}$ \\
+\midrule
+Trung bình $\pm$ độ lệch chuẩn & $45{,}45 \pm 0{,}66$ & $49{,}02 \pm 0{,}23$ & $+3{,}57 \pm 0{,}76$ & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Cấu hình LoRA}
+
+Hai ablation cấu hình dùng công thức B3 (Bảng~\ref{tab:res-lora}). A1 gắn LoRA vào
+cả các lớp MLP của mô hình ngôn ngữ, với rank 4 để giữ gần bằng số tham số
+(lệch 1,5\%); kết quả không tốt hơn và huấn luyện chậm hơn 17,5\%. QLoRA
+paper~\cite{dettmers2023qlora} khuyên gắn mọi lớp tuyến tính nhưng cũng nêu tổng
+số tham số LoRA là yếu tố quan trọng nhất; ở đây tổng đó được giữ bằng nhau. A2
+tăng rank lên 64: EM tăng 1,05 điểm nhưng không có ý nghĩa thống kê ($p = 0{,}071$;
+CI95 vẫn chứa mức tăng tới 2,15 nên kết luận này yếu), trong khi adapter nặng gấp
+bốn. Nhóm giữ cấu hình $r = 16$ trên q, k, v, o.
+
+\begin{table}[htbp]
+\caption{Ablation cấu hình LoRA (test2000, công thức B3)}
+\label{tab:res-lora}
+\centering
+\footnotesize
+\begin{tabular}{p{0.07\textwidth}p{0.17\textwidth}rrrp{0.17\textwidth}rr}
+\toprule
+\raggedright \textbf{} & \raggedright \textbf{Lớp gắn LoRA} & \raggedright \textbf{$r/\alpha$} & \raggedright \textbf{Tham số} & \raggedright \textbf{EM} & \raggedright \textbf{$\Delta$EM (CI95), $p$} & \raggedright \textbf{s/bước} & \raggedright \textbf{MB} \tabularnewline
+\midrule
+\raggedright B3 & \raggedright q, k, v, o & \raggedright 16/32 & \raggedright 7.372.800 & \raggedright 49,25 & \raggedright --- & \raggedright 21,48 & \raggedright 28,2 \tabularnewline
+\raggedright A1 & \raggedright q, k, v, o, gate, up, down & \raggedright 4/8 & \raggedright 7.483.392 & \raggedright 48,70 & \raggedright $-0{,}55$ [$-1{,}60$; $+0{,}45$], 0,34 & \raggedright 25,24 & \raggedright 28,6 \tabularnewline
+\raggedright A2 & \raggedright q, k, v, o & \raggedright 64/128 & \raggedright 29.491.200 & \raggedright 50,30 & \raggedright $+1{,}05$ [$-0{,}05$; $+2{,}15$], 0,071 & \raggedright 20,85 & \raggedright 112,5 \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Một adapter cho hai bộ dữ liệu}
+\label{sec:res-sh}
+
+Adapter SH được huấn luyện trên 10.799 câu ViVQA và 8.000 câu ViTextVQA, mọi câu
+dùng prompt có OCR (ảnh không có chữ thì prompt trùng prompt không OCR), siêu tham
+số y hệt C1 và B3. Luật ghi trước coi SH là ``không kém'' nếu cận dưới CI95 của
+$\Delta$EM lớn hơn $-1{,}5$ trên từng bộ dữ liệu. Bảng~\ref{tab:res-sh} cho thấy
+SH đạt luật trên cả hai bộ: một adapter 29,5~MB phục vụ cả hai loại câu hỏi mà
+không mất độ chính xác so với adapter chuyên biệt cùng ngân sách. Không có bằng
+chứng chuyển giao dương giữa hai bộ dữ liệu.
+
+\begin{table}[htbp]
+\caption{Adapter dùng chung (SH) so với adapter chuyên biệt cùng ngân sách}
+\label{tab:res-sh}
+\centering
+\small
+\begin{tabular}{p{0.22\textwidth}p{0.18\textwidth}p{0.20\textwidth}rp{0.12\textwidth}}
+\toprule
+\raggedright \textbf{Tập test} & \raggedright \textbf{Mốc $\to$ SH (EM)} & \raggedright \textbf{$\Delta$EM (CI95)} & \raggedright \textbf{$p$} & \raggedright \textbf{Kết luận} \tabularnewline
+\midrule
+\raggedright ViVQA (3.001) & \raggedright C1 73,78 $\to$ 73,51 & \raggedright $-0{,}27$ [$-1{,}13$; $+0{,}60$] & \raggedright 0,60 & \raggedright không kém \tabularnewline
+\raggedright ViTextVQA test2000 & \raggedright B3 49,25 $\to$ 49,50 & \raggedright $+0{,}25$ [$-0{,}95$; $+1{,}45$] & \raggedright 0,75 & \raggedright không kém \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+Trên ViVQA, 44\% câu có dòng OCR, phần lớn là chữ tiếng Anh trên ảnh COCO mà
+VietOCR đọc thành chuỗi vô nghĩa; đáp án gold không nằm trong OCR ở câu nào. Trên
+nhóm câu này, $\Delta$EM bằng $+0{,}15$ [$-1{,}05$; $+1{,}36$] và tỉ lệ chép chữ
+OCR sai vào câu trả lời chỉ 0,30\% (C1: 0,23\%): mô hình học được cách bỏ qua dòng
+OCR không liên quan. SH vẫn thấp hơn các mô hình chính thức (C3 cao hơn 3,13 điểm,
+B3-full cao hơn 4,35 điểm trên cùng tập) vì chỉ dùng một epoch ViVQA và 23\% dữ
+liệu ViTextVQA; đây là phiên bản rẻ đã ghi trước. Bảng kết quả chính vẫn dùng C3
+và B3-full; SH chỉ dùng cho prototype.
+
+%********************************** Mục 4.5 ************************************
+\section{Kết quả theo loại câu hỏi ViTextVQA}
+\label{sec:res-qtype}
+
+Bảng~\ref{tab:res-qtype} chia EM trên toàn bộ test ViTextVQA theo 9 loại câu hỏi
+của bộ phân loại \texttt{qt-v1} (mục~\ref{sec:met-quality}). Ba loại đánh dấu
+$\dagger$ có độ chính xác nhãn dưới 80\% nên kém tin cậy.
+
+\begin{table}[htbp]
+\caption{EM theo loại câu hỏi trên toàn bộ test ViTextVQA}
+\label{tab:res-qtype}
+\centering
+\small
+\begin{tabular}{p{0.26\textwidth}rrrrr}
+\toprule
+\textbf{Loại câu hỏi} & \textbf{n} & \textbf{B1} & \textbf{B2} & \textbf{B3-full} & \textbf{$\Delta$ B2$\to$B3-full} \\
+\midrule
+Nguồn (source) & 661 & 24,5 & 57,2 & 58,1 & $+0{,}9$ \\
+Liên hệ (contact) & 641 & 47,9 & 55,5 & 64,1 & $+8{,}6$ \\
+Số, thời gian & 1.041 & 41,2 & 55,7 & 58,8 & $+3{,}1$ \\
+Người (person) & 420 & 40,7 & 54,8 & 61,2 & $+6{,}4$ \\
+Địa điểm (location) & 969 & 25,3 & 44,0 & 47,0 & $+3{,}0$ \\
+Tên (name)$^\dagger$ & 1.971 & 34,9 & 55,7 & 57,6 & $+1{,}9$ \\
+Nội dung chữ$^\dagger$ & 777 & 27,4 & 48,6 & 51,1 & $+2{,}5$ \\
+Sản phẩm, dịch vụ & 1.144 & 16,5 & 42,5 & 44,1 & $+1{,}6$ \\
+Khác$^\dagger$ & 2.404 & 21,5 & 46,1 & 49,6 & $+3{,}5$ \\
+\midrule
+Tất cả & 10.028 & 29,1 & 50,3 & 53,4 & $+3{,}1$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+OCR giúp nhiều nhất ở các loại phải chép đúng từng ký tự: số liên hệ (số điện
+thoại, website) tăng 8,6 điểm và tên người tăng 6,4 điểm. OCR giúp ít nhất ở loại
+nguồn ($+0{,}9$), thường là watermark nhỏ ở góc ảnh. Sau B3-full, các loại khó
+nhất là câu cần suy ra từ chữ thay vì chép lại chữ: sản phẩm, dịch vụ (44,1) và
+địa điểm (47,0).
+
+%********************************** Mục 4.6 ************************************
+\section{Chi phí tính toán}
+\label{sec:res-cost}
+
+Bảng~\ref{tab:res-cost} tổng hợp chi phí của các lần huấn luyện. Mọi lần chạy dùng
+một GPU L4 24~GB và có VRAM đỉnh không quá 8,4~GB, tức chạy được trên Colab Pro,
+đúng ràng buộc hiệu quả của đề tài. Mô hình chính thức cho ViTextVQA (B3-full) cần
+12,75 giờ huấn luyện và khoảng 1 giây suy luận mỗi câu.
+
+\begin{table}[htbp]
+\caption{Chi phí huấn luyện và suy luận (một GPU L4)}
+\label{tab:res-cost}
+\centering
+\footnotesize
+\begin{tabular}{p{0.19\textwidth}p{0.11\textwidth}rrrrp{0.11\textwidth}}
+\toprule
+\raggedright \textbf{Lần chạy} & \raggedright \textbf{Dữ liệu} & \raggedright \textbf{Câu train} & \raggedright \textbf{Giờ train} & \raggedright \textbf{s/bước} & \raggedright \textbf{VRAM} & \raggedright \textbf{Suy luận (s/câu)} \tabularnewline
+\midrule
+\raggedright B1 · zero-shot & \raggedright cả hai & \raggedright --- & \raggedright --- & \raggedright --- & \raggedright --- & \raggedright 0,876 / 0,510 \tabularnewline
+\raggedright C1 · QLoRA & \raggedright ViVQA & \raggedright 10.799 & \raggedright 3,03 & \raggedright 16,17 & \raggedright 6,62 GB & \raggedright 0,571 \tabularnewline
+\raggedright C3 · QLoRA (2 epoch) & \raggedright ViVQA & \raggedright 10.799 & \raggedright 6,07 & \raggedright 16,20 & \raggedright 6,62 GB & \raggedright 0,571 \tabularnewline
+\raggedright B2 · QLoRA & \raggedright ViTextVQA & \raggedright 35.159 & \raggedright 11,99 & \raggedright 19,63 & \raggedright 6,88 GB & \raggedright 1,001 \tabularnewline
+\raggedright B3-full · QLoRA + OCR & \raggedright ViTextVQA & \raggedright 35.159 & \raggedright 12,75 & \raggedright 20,89 & \raggedright 8,38 GB & \raggedright 0,996 \tabularnewline
+\raggedright SH · dùng chung & \raggedright cả hai & \raggedright 18.799 & \raggedright 6,07 & \raggedright 18,58 & \raggedright 8,15 GB & \raggedright 0,574 / 1,002 \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ở mọi lần chạy chính, số tham số huấn luyện là 7.372.800 (0,196\%) và adapter nặng
+29,5~MB; SH thay hai adapter bằng một. Dòng OCR làm VRAM khi huấn luyện tăng
+khoảng 1,5~GB và thời gian mỗi bước tăng 6--8\% vì prompt dài hơn, còn thời gian
+suy luận gần như không đổi. OCR chạy một lần cho mỗi ảnh và được cache: khoảng
+0,72--0,85 giây mỗi ảnh ViTextVQA và 0,11 giây mỗi ảnh ViVQA (ít chữ) trên T4.
+
+%********************************** Mục 4.7 ************************************
+\section{Phân tích độ nhạy: ảnh có cờ xoay EXIF}
+\label{sec:res-exif}
+
+Khi kiểm thử prototype, nhóm phát hiện một số ảnh có chữ OCR vô nghĩa trong cache
+dù ảnh đọc được rõ. Nguyên nhân là ảnh có cờ xoay EXIF: thư viện dò chữ (OpenCV)
+tự xoay ảnh theo cờ, còn thư viện cắt ảnh cho VietOCR (PIL) thì không, nên vùng
+chữ được dò trên ảnh đã xoay nhưng lại cắt trên ảnh chưa xoay. Theo luật ghi
+trước, nhóm xác nhận: 164/165 ảnh có cờ xoay cho chữ OCR rác, so với 0/200 ảnh đối
+chứng. Lỗi ảnh hưởng 1,256\% câu test ViTextVQA (126 câu trên 41 ảnh), 1,28\% câu
+train và không ảnh hưởng ViVQA.
+
+Sau khi sửa (xoay ảnh trước khi dò và cắt) và OCR lại 167 ảnh, EM của B3-full
+trên 126 câu bị ảnh hưởng tăng từ 26,98 lên 49,21, và trên toàn tập test tăng từ
+53,35 lên 53,63; mức hơn B2 tăng từ $+3{,}09$ lên $+3{,}37$ điểm EM và
+$\Delta$ANLS từ $+1{,}87$ lên $+2{,}05$. Theo luật đã ghi, số chính thức của
+khóa luận vẫn là số trước khi sửa (53,35); số sau khi sửa được báo như phân tích
+độ nhạy. Kết luận không đổi, và lỗi này nếu có thì làm phương pháp đề xuất bị đánh
+giá thấp đi chứ không thổi phồng nó.
+
+%********************************** Mục 4.8 ************************************
+\section{Kiểm chứng prototype}
+\label{sec:res-proto}
+
+Prototype phải cho đúng câu trả lời như đường đánh giá, nếu không các số trong
+khóa luận không còn đúng cho bản demo. Nhóm đặt năm luật trước khi kiểm
+(Bảng~\ref{tab:res-proto}); cả năm đều đạt sau khi sửa ngưỡng thu nhỏ ảnh ở phiên
+bản 2.
+
+\begin{table}[htbp]
+\caption{Kiểm chứng prototype theo luật đặt trước}
+\label{tab:res-proto}
+\centering
+\small
+\begin{tabular}{p{0.38\textwidth}p{0.16\textwidth}p{0.36\textwidth}}
+\toprule
+\raggedright \textbf{Luật} & \raggedright \textbf{Kết quả} & \raggedright \textbf{Ý nghĩa} \tabularnewline
+\midrule
+\raggedright R-PAR: backend trùng đường đánh giá & \raggedright 100\% & \raggedright Cùng câu trả lời với lần đánh giá chính thức \tabularnewline
+\raggedright R-LIVE: qua giao diện, OCR trực tiếp & \raggedright 100\% / 100\% & \raggedright 200 ảnh mỗi bộ ViVQA / ViTextVQA \tabularnewline
+\raggedright R-OCR: OCR qua giao diện bằng OCR đọc thẳng & \raggedright 100\% / 100\% & \raggedright Sau khi nâng ngưỡng ảnh lên 6.000 điểm ảnh mỗi cạnh \tabularnewline
+\raggedright R-CONF: mức tin cậy có ý nghĩa & \raggedright Đạt & \raggedright EM giảm dần theo mức Cao, Trung bình, Thấp \tabularnewline
+\raggedright R-YB: sửa thiên lệch ``có'' & \raggedright Đạt & \raggedright $\tau^* = 4{,}85$; tỉ lệ trả lời ``có'' 41--45\% \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+Trên Colab L4, độ trễ trung vị là 1,00 giây và phân vị 95 là 3,58 giây mỗi câu,
+VRAM 4,78~GB. Trên 20 ảnh tự chụp của nhóm, prototype trả lời đúng 14 câu, trong đó
+đúng cả 5 câu có/không. Phiên bản đầu tiên không đạt luật R-OCR (87,5\% trên
+ViTextVQA) vì giao diện thu nhỏ ảnh lớn hơn 2.048 điểm ảnh trước khi OCR, trong khi
+1.418 ảnh ViTextVQA vượt ngưỡng này; nâng ngưỡng lên 6.000 điểm ảnh sửa được lỗi.
+Một video demo 10 phút 28 giây được ghi lại làm phương án dự phòng.
+
+%********************************** Mục 4.9 ************************************
+\section{Tổng hợp theo giả thuyết}
+\label{sec:res-hyp}
+
+Bảng~\ref{tab:res-hyp} đối chiếu kết quả với luật quyết định của từng giả thuyết
+ở Bảng~\ref{tab:hypotheses}. Bằng chứng cho H4 được trình bày ở
+mục~\ref{sec:dis-halluc}.
+
+\begin{table}[htbp]
+\caption{Kết luận cho từng giả thuyết}
+\label{tab:res-hyp}
+\centering
+\small
+\begin{tabular}{p{0.07\textwidth}p{0.62\textwidth}p{0.17\textwidth}}
+\toprule
+\raggedright \textbf{ID} & \raggedright \textbf{Bằng chứng} & \raggedright \textbf{Kết luận} \tabularnewline
+\midrule
+\raggedright H1 & \raggedright QLoRA tăng EM 51,7 điểm (ViVQA, một epoch) và 21,1 điểm (ViTextVQA), $p$ gần 0; ngưỡng là 5 điểm. & \raggedright Ủng hộ \tabularnewline
+\raggedright H2 & \raggedright Tương tác OCR huấn luyện $\times$ suy luận $+4{,}9$ EM; đủ dữ liệu B3-full hơn B2 $+3{,}09$ EM ($p = 6{,}7\times10^{-21}$), ổn định trên ba seed. Nhưng $\Delta$ANLS chỉ $+1{,}87$, dưới ngưỡng 3 điểm (trên ngưỡng bác bỏ 1 điểm). & \raggedright Ủng hộ một phần \tabularnewline
+\raggedright H3 & \raggedright Dạng đã thử là prompt few-shot định dạng: EM giảm 2,1 (ViVQA) và 1,2 (ViTextVQA). & \raggedright Không được ủng hộ \tabularnewline
+\raggedright H4 & \raggedright POPE-vi: B3-full không tăng hallucination theo F1; C3 không kết luận được vì không trả lời dạng có/không; tỉ lệ báo sai của B3-full tăng ở cách chọn adversarial. & \raggedright Ủng hộ một phần \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+Về câu hỏi nghiên cứu: RQ1 được trả lời bởi B1 (EM 22,09 và 29,12; lỗi chủ yếu là
+định dạng và ngôn ngữ). RQ2 được trả lời bởi B2 và C3 (tăng 21,1 và 54,6 điểm EM
+chỉ với 0,196\% tham số). RQ3 được trả lời bởi B3-full và thí nghiệm $2\times2$:
+OCR có ích, nhưng chỉ khi mô hình được huấn luyện cùng OCR. RQ4 được thảo luận ở
+Chương~\ref{chap:discussion}.

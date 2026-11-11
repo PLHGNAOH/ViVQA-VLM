@@ -4,16 +4,19 @@ Bản khoá luận CHÍNH được viết trên Overleaf (project riêng của H
 Google Doc "ViVQA-VLM Thesis (TV)" chỉ còn là bản lưu trữ của Chương I–II, không sửa tiếp.
 
 ## Cấu trúc (theo template của mentor: 6 chương)
-| Template | Nội dung | Trạng thái 10/11/2026 |
+| Template | Nội dung | Trạng thái 11/11/2026 |
 |---|---|---|
 | Chapter 1 | Giới thiệu | Đã viết (VI) |
-| Chapter 2 | Các nghiên cứu liên quan | Chưa viết |
-| Chapter 3 | Dữ liệu và phương pháp | Chưa viết |
-| Chapter 4 | Kết quả | Chưa viết |
-| Chapter 5 | Thảo luận | Chưa viết |
-| Chapter 6 | Kết luận | Chưa viết |
+| Chapter 2 | Các nghiên cứu liên quan | Đã viết (VI) |
+| Chapter 3 | Dữ liệu và phương pháp | Đã viết (VI) |
+| Chapter 4 | Kết quả | Đã viết (VI) |
+| Chapter 5 | Thảo luận | Đã viết (VI) |
+| Chapter 6 | Kết luận | Đã viết (VI) |
 | Appendix A | Kế hoạch quản lý dự án | Đã viết (VI) |
-| Appendix B | Gói tái lập | Chưa viết |
+| Appendix B | Gói tái lập | Đã viết (VI) |
+- Tóm tắt (Abstract) đã viết (VI). Trang Dedication đang tắt trong thesis.tex (template còn chữ mẫu).
+- Hình: Chapter3/Figs (4 hình khổ ngang, sidewaysfigure, cần gói rotating đã bật trong preamble), Chapter4/Figs (2 biểu đồ PDF).
+- Snapshot hiện tại: v2 (11/11/2026), biên dịch 94 trang, 0 lỗi.
 
 ## Ngôn ngữ
 - Viết tiếng Việt trước. Preamble/preamble.tex: `\thesisvitrue` = tiếng Việt, `\thesisvifalse` = tiếng Anh.

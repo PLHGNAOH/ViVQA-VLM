@@ -1,6 +1,6 @@
 %!TEX root = ../thesis.tex
 %*******************************************************************************
-%****************************** Chương 2 **************************************
+%****************************** Chương 2 ***************************************
 %*******************************************************************************
 
 \chapter{CÁC NGHIÊN CỨU LIÊN QUAN}
@@ -12,5 +12,292 @@
     \graphicspath{{Chapter2/Figs/Vector/}{Chapter2/Figs/}}
 \fi
 
-% TODO (ViVQA-VLM): chương này chưa viết.
-\textit{[Chưa viết. Nội dung dự kiến: VQA và scene-text VQA; các vision-language model (BLIP-2, LLaVA, Florence-2, Qwen2.5-VL); parameter-efficient fine-tuning (LoRA, QLoRA); VQA tiếng Việt (ViVQA, ViTextVQA, ViTextBLIP-2); đo hallucination (POPE).]}
+\nomenclature[z-OCR-VQA]{Scene-text VQA}{VQA mà câu trả lời phải đọc từ chữ xuất hiện trong ảnh}
+\nomenclature[z-Q-Former]{Q-Former}{Querying Transformer: bộ nối ảnh--ngôn ngữ của BLIP-2}
+
+Chương này tổng quan năm nhóm công trình mà khóa luận dựa vào: bài toán VQA và
+VQA đọc chữ trong ảnh (mục~\ref{sec:rel-vqa}), các vision-language model
+(mục~\ref{sec:rel-vlm}), các phương pháp parameter-efficient fine-tuning
+(mục~\ref{sec:rel-peft}), các nghiên cứu VQA tiếng Việt
+(mục~\ref{sec:rel-vivqa}) và cách đo hallucination (mục~\ref{sec:rel-halluc}).
+Mục~\ref{sec:rel-summary} tổng hợp các khoảng trống G1--G4 đã nêu ở
+Chương~\ref{chap:intro} và chỉ ra khóa luận giải quyết khoảng trống nào.
+
+%********************************** Mục 2.1 ************************************
+\section{Hỏi đáp trên ảnh và VQA đọc chữ trong ảnh}
+\label{sec:rel-vqa}
+
+\subsection{Bài toán VQA}
+
+Antol và cộng sự~\cite{antol2015vqa} đặt bài toán VQA dưới dạng mở: cho một ảnh và một câu hỏi
+tự nhiên, hệ thống trả lời bằng một từ hoặc cụm từ ngắn. Bộ dữ liệu VQA của họ
+thu mười câu trả lời của người cho mỗi câu hỏi và định nghĩa thước đo VQA
+Accuracy: một câu trả lời được tính đúng hoàn toàn nếu ít nhất ba người cũng trả
+lời như vậy, tức $\mathrm{Acc}(a) = \min(\#\{\text{người trả lời } a\}/3,\ 1)$.
+Các hệ thống thời kỳ này ghép một mạng CNN mã hóa ảnh với một mạng LSTM mã hóa
+câu hỏi, rồi \emph{phân loại} câu trả lời trên một tập đáp án thường gặp cố định.
+Cách đặt bài toán phân loại này hiệu quả với câu trả lời ngắn và lặp lại (màu
+sắc, số lượng, có/không), nhưng không thể sinh một câu trả lời chưa từng có trong
+tập đáp án lúc huấn luyện.
+
+\subsection{VQA đọc chữ trong ảnh}
+
+Nhiều câu hỏi thực tế chỉ trả lời được bằng cách đọc chữ trong ảnh: tên cửa hàng,
+giá tiền, số điện thoại. Singh và cộng sự~\cite{singh2019textvqa} giới thiệu bộ TextVQA cho
+loại câu hỏi này và cho thấy các mô hình VQA thông thường gần như không trả lời
+được; mô hình LoRRA của họ đưa thêm các từ OCR vào mô hình và cho phép
+\emph{chép} một từ OCR làm câu trả lời. Biten và cộng sự~\cite{biten2019stvqa} xây bộ ST-VQA với
+cùng mục tiêu và đề xuất thước đo ANLS (Average Normalized Levenshtein
+Similarity), tính độ giống theo ký tự giữa câu trả lời và đáp án để không phạt
+nặng những lỗi đọc nhỏ do OCR. M4C~\cite{hu2020m4c} mở rộng ý tưởng chép bằng một
+transformer đa phương thức sinh câu trả lời từng bước, mỗi bước chọn giữa một từ
+trong từ điển và một từ OCR.
+
+Bài học chung của nhóm công trình này là: với VQA đọc chữ, chất lượng câu trả lời
+bị chặn bởi chất lượng chữ đọc được. Nếu OCR đọc sai hoặc sắp sai thứ tự các vùng
+chữ, mô hình không thể chép ra đáp án đúng. Đây là lý do khóa luận đo riêng chất
+lượng OCR tiếng Việt và thứ tự đọc (Chương~\ref{chap:methods}).
+
+%********************************** Mục 2.2 ************************************
+\section{Vision-language model}
+\label{sec:rel-vlm}
+
+Vision-language model (VLM) hiện nay có chung một khuôn: một bộ mã hóa ảnh biến
+ảnh thành chuỗi vector, một bộ nối chuyển các vector đó sang không gian của mô
+hình ngôn ngữ, và một mô hình ngôn ngữ lớn (LLM) đọc chuỗi token ảnh cùng câu hỏi
+để sinh câu trả lời. Khác biệt giữa các VLM nằm ở bộ nối, ở cách xử lý độ phân
+giải ảnh và ở dữ liệu huấn luyện. Bảng~\ref{tab:rel-vlm} so sánh bốn VLM mà đề
+cương cho phép chọn làm baseline.
+
+\paragraph{BLIP-2.} Li và cộng sự~\cite{li2023blip2} giữ nguyên (đóng băng) cả bộ mã hóa ảnh
+lẫn LLM và chỉ huấn luyện một mô-đun nhỏ ở giữa là Q-Former. Q-Former dùng một
+số ít query học được để rút thông tin từ ảnh thành một chuỗi token cố định đưa
+vào LLM. Cách làm này rẻ về huấn luyện, nhưng số token ảnh cố định và nhỏ khiến
+mô hình khó giữ chi tiết nhỏ như chữ trong ảnh.
+
+\paragraph{LLaVA và LLaVA-1.5.} Liu và cộng sự~\cite{liu2023llava} nối bộ mã hóa ảnh với LLM
+chỉ bằng một lớp chiếu và huấn luyện trên dữ liệu hội thoại về ảnh (visual
+instruction tuning). LLaVA-1.5~\cite{liu2024llava15} thay lớp chiếu bằng một MLP,
+tăng độ phân giải ảnh và thêm một câu nhắc yêu cầu trả lời ngắn; riêng câu nhắc
+này đã đủ để mô hình trả lời đúng kiểu ngắn mà các bộ VQA cần. LLaVA-1.5 cũng
+công bố cả bản fine-tune toàn bộ và bản LoRA (mục~\ref{sec:rel-peft}).
+
+\paragraph{Florence-2.} Xiao và cộng sự~\cite{xiao2024florence2} xây một mô hình thị giác hợp
+nhất kiểu encoder--decoder, nhận yêu cầu bằng văn bản và sinh kết quả cho các tác
+vụ chú thích ảnh, phát hiện vật thể, định vị và OCR. Mô hình rất nhỏ (0,23 và 0,77
+tỉ tham số) nên dễ huấn luyện, nhưng không phải mô hình hội thoại đa ngôn ngữ và
+không được huấn luyện cho hỏi đáp mở bằng tiếng Việt.
+
+\paragraph{Qwen2.5-VL.} Bai và cộng sự~\cite{bai2025qwen25vl} dùng một bộ mã hóa ViT nhận ảnh ở
+độ phân giải gốc (native dynamic resolution): ảnh được cắt thành các ô 14×14 điểm
+ảnh, rồi bộ nối gộp mỗi nhóm 2×2 ô thành một token, nên số token ảnh tỉ lệ với
+kích thước ảnh. Mô hình ngôn ngữ là Qwen2.5, đa ngôn ngữ, và mô hình được huấn
+luyện nhiều trên dữ liệu tài liệu và chữ trong ảnh; bản 3 tỉ tham số đạt 79,3
+trên TextVQA theo báo cáo của tác giả. Khóa luận chọn Qwen2.5-VL-3B-Instruct làm
+baseline; kiến trúc chi tiết và lý do chọn được trình bày ở
+Chương~\ref{chap:methods}.
+
+\begin{table}[htbp]
+\caption{So sánh bốn VLM trong phạm vi đề cương}
+\label{tab:rel-vlm}
+\centering
+\small
+\begin{tabular}{p{0.13\textwidth}p{0.25\textwidth}p{0.24\textwidth}p{0.26\textwidth}}
+\toprule
+\textbf{Mô hình} & \textbf{Bộ nối ảnh--ngôn ngữ} & \textbf{Điểm mạnh với đề tài} & \textbf{Hạn chế với đề tài} \\
+\midrule
+BLIP-2 & Q-Former, số token ảnh cố định; ảnh và LLM đóng băng & Rẻ khi huấn luyện; là nền của ViTextBLIP-2 & Ít token ảnh, dễ mất chi tiết chữ nhỏ \\
+LLaVA-1.5 & MLP chiếu từng patch sang LLM & Kiến trúc đơn giản; có bằng chứng LoRA ngang fine-tune toàn bộ & Chủ yếu tiếng Anh; độ phân giải ảnh cố định \\
+Florence-2 & Encoder--decoder hợp nhất, yêu cầu bằng văn bản & Rất nhỏ; có tác vụ OCR riêng & Không phải mô hình hội thoại đa ngôn ngữ \\
+Qwen2.5-VL & ViT độ phân giải gốc, gộp 2×2 ô thành một token & Đa ngôn ngữ; đọc chữ trong ảnh tốt; có bản 3B & Số token ảnh tăng theo kích thước ảnh, tốn bộ nhớ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%********************************** Mục 2.3 ************************************
+\section{Parameter-efficient fine-tuning}
+\label{sec:rel-peft}
+
+\subsection{Vì sao cần PEFT}
+
+Fine-tune toàn bộ một mô hình lớn cho mỗi bài toán nghĩa là cập nhật và lưu một
+bản sao của mọi tham số. Với GPT-3 175 tỉ tham số, mỗi bản sao chiếm khoảng 350~GB
+ở 16-bit, và lúc huấn luyện còn phải giữ thêm gradient và trạng thái của bộ tối
+ưu~\cite{hu2022lora}. Parameter-efficient fine-tuning (PEFT) giữ nguyên trọng số
+gốc và chỉ huấn luyện một phần rất nhỏ tham số thêm vào. Các hướng sớm gồm
+adapter~\cite{houlsby2019adapter}, chèn các lớp nhỏ vào giữa các lớp của mạng, và
+prefix-tuning~\cite{li2021prefix}, học một đoạn vector đặt trước chuỗi đầu vào.
+Adapter làm tăng độ trễ khi suy luận vì thêm lớp tuần tự; prefix-tuning chiếm
+một phần độ dài chuỗi và khó tối ưu.
+
+\subsection{LoRA}
+
+Hu và cộng sự~\cite{hu2022lora} giả định rằng phần thay đổi của trọng số khi thích nghi có hạng
+thấp. Với một ma trận trọng số $W_0 \in \mathbb{R}^{d \times k}$, LoRA giữ $W_0$
+cố định và học hai ma trận nhỏ $B \in \mathbb{R}^{d \times r}$,
+$A \in \mathbb{R}^{r \times k}$ với $r \ll \min(d, k)$:
+\begin{equation}
+  h = W_0 x + \frac{\alpha}{r} B A x .
+  \label{eq:lora}
+\end{equation}
+$B$ được khởi tạo bằng 0 nên lúc bắt đầu mô hình giữ nguyên hành vi gốc. Sau khi
+huấn luyện, $BA$ có thể cộng thẳng vào $W_0$, nên suy luận không chậm hơn. Trên
+GPT-3, LoRA đạt kết quả ngang hoặc hơn fine-tune toàn bộ với số tham số huấn
+luyện ít hơn khoảng 10.000 lần và bộ nhớ GPU giảm khoảng 3 lần.
+
+\subsection{QLoRA}
+
+LoRA giảm số tham số phải học nhưng vẫn phải giữ trọng số gốc ở 16-bit trong bộ
+nhớ. Dettmers và cộng sự~\cite{dettmers2023qlora} lượng tử hóa trọng số gốc xuống 4-bit và huấn
+luyện LoRA ở trên, với ba kỹ thuật: kiểu số 4-bit NormalFloat (NF4) được thiết
+kế cho trọng số có phân phối gần chuẩn; lượng tử hóa kép (double quantization)
+nén cả các hằng số lượng tử hóa; và bộ tối ưu phân trang (paged optimizer) để
+tránh tràn bộ nhớ khi có đỉnh tiêu thụ. Nhờ đó, một LLM 65 tỉ tham số được
+fine-tune trên một GPU 48~GB, trong khi kết quả khớp với fine-tune 16-bit trên các
+thí nghiệm của tác giả. Bài báo cũng khuyến nghị gắn LoRA lên mọi lớp tuyến tính
+để bù sai số lượng tử hóa. Khóa luận dùng QLoRA vì đây là cách duy nhất để
+fine-tune một VLM vài tỉ tham số trên một GPU Colab; lựa chọn gắn LoRA chỉ vào các
+ma trận attention hay vào mọi lớp tuyến tính được kiểm tra bằng ablation ở
+Chương~\ref{chap:results}.
+
+\subsection{PEFT cho vision-language model}
+
+Sung và cộng sự~\cite{sung2022vladapter} so sánh có kiểm soát các phương pháp PEFT trên các bài
+toán ảnh--ngôn ngữ, trong đó có VQA, và cho thấy một adapter dùng chung chỉ với
+4,18\% tham số huấn luyện đạt kết quả gần bằng fine-tune toàn bộ. LLaVA-1.5 cho
+bằng chứng tương tự ở quy mô lớn hơn: với mô hình 13 tỉ tham số, bản LoRA đạt
+80,0 trên VQAv2 (bằng bản fine-tune toàn bộ), 60,2 so với 61,3 trên TextVQA, và
+86,7 so với 85,9 F1 trên POPE~\cite{liu2024llava15}. Bảng~\ref{tab:rel-peft} tóm
+tắt các cách thích nghi.
+
+\begin{table}[htbp]
+\caption{Các cách thích nghi một mô hình lớn}
+\label{tab:rel-peft}
+\centering
+\small
+\begin{tabular}{p{0.20\textwidth}p{0.22\textwidth}p{0.20\textwidth}p{0.26\textwidth}}
+\toprule
+\textbf{Cách} & \textbf{Tham số huấn luyện} & \textbf{Độ trễ suy luận} & \textbf{Bộ nhớ khi huấn luyện} \\
+\midrule
+Fine-tune toàn bộ & Toàn bộ & Không đổi & Rất lớn: trọng số, gradient, trạng thái tối ưu \\
+Adapter & Vài phần trăm & Tăng (thêm lớp) & Giữ trọng số 16-bit \\
+Prefix-tuning & Rất ít & Tăng nhẹ (chuỗi dài hơn) & Giữ trọng số 16-bit \\
+LoRA & Dưới 1\% & Không đổi sau khi gộp & Giữ trọng số 16-bit \\
+QLoRA & Dưới 1\% & Không đổi sau khi gộp & Trọng số 4-bit; nhỏ nhất \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Tuy vậy, các bằng chứng trên đều đến từ tiếng Anh. Trong các công trình nhóm khảo
+sát, chưa có nghiên cứu nào kiểm chứng LoRA hoặc QLoRA trên VLM cho VQA tiếng Việt
+hay cho VQA đọc chữ tiếng Việt. Đây là khoảng trống G3 mà khóa luận tập trung.
+
+%********************************** Mục 2.4 ************************************
+\section{VQA tiếng Việt}
+\label{sec:rel-vivqa}
+
+\subsection{Bộ dữ liệu}
+
+\paragraph{ViVQA.} Tran và cộng sự~\cite{tran2021vivqa} công bố bộ dữ liệu VQA tiếng Việt đầu
+tiên, gồm 10.328 ảnh và 15.000 cặp câu hỏi--câu trả lời. Câu trả lời ngắn, phần
+lớn chỉ một đến ba từ, nên bài toán thường được đặt dưới dạng phân loại.
+
+\paragraph{OpenViVQA.} Nguyen và cộng sự~\cite{nguyen2023openvivqa} xây bộ dữ liệu với câu trả lời
+mở, dài hơn và đòi hỏi sinh câu trả lời thay vì chọn từ một tập cố định; khoảng
+một nửa số mẫu có liên quan tới chữ trong ảnh~\cite{nguyen2024vitextvqa}.
+
+\paragraph{ViTextVQA.} Nguyen và cộng sự~\cite{nguyen2024vitextvqa} công bố bộ dữ liệu VQA đọc chữ
+tiếng Việt quy mô lớn đầu tiên, gồm 16.762 ảnh và 50.342 câu hỏi, chia train, dev,
+test theo tỉ lệ 7:1:2. Câu trả lời thường là chữ chép từ ảnh như tên cửa hàng,
+khẩu hiệu, giá tiền. Người đạt 88,00 EM và 96,42 F1 trên bộ này. Các tác giả cũng
+cho thấy sắp xếp chữ OCR theo thứ tự từ trái sang phải, từ trên xuống dưới giúp
+các mô hình trả lời tốt hơn. Khóa luận dùng ViVQA và ViTextVQA; thống kê chi tiết
+được trình bày ở Chương~\ref{chap:methods}.
+
+\subsection{Phương pháp}
+
+Bảng~\ref{tab:rel-vivqa} tóm tắt các phương pháp tiêu biểu theo thời gian.
+
+\begin{table}[htbp]
+\caption{Các nghiên cứu VQA tiếng Việt tiêu biểu}
+\label{tab:rel-vivqa}
+\centering
+\small
+\begin{tabular}{p{0.21\textwidth}p{0.33\textwidth}p{0.16\textwidth}p{0.20\textwidth}}
+\toprule
+\textbf{Nghiên cứu} & \textbf{Cách làm} & \textbf{Kết quả công bố} & \textbf{Hạn chế} \\
+\midrule
+ViVQA~\cite{tran2021vivqa}, 2021 & LSTM, Bi-LSTM với nhiều kiểu word embedding; Hierarchical Co-Attention; chọn đáp án trong tập cố định & Acc 34,96 trên ViVQA & Đặc trưng rời rạc; không đọc được chữ \\
+Bi-directional Cross-Attention~\cite{nguyentran2022bica}, 2022 & Bộ mã hóa đã tiền huấn luyện, cross-attention hai chiều giữa ảnh và câu hỏi & Vượt baseline ViVQA & Vẫn là bài toán phân loại \\
+PAT~\cite{nguyen2023pat}, 2023 & Parallel Attention Transformer, trích đặc trưng câu hỏi theo tầng & Acc 60,55 trên ViVQA & Phân loại; không đọc chữ \\
+BARTPhoBEiT~\cite{tran2023bartphobeit}, 2023 & BARTpho cho tiếng Việt kết hợp bộ mã hóa ảnh kiểu BEiT & Acc 68,58 trên ViVQA & Phân loại; không đọc chữ \\
+AViVQA-TranConI~\cite{nguyen2024tranconi}, 2024 & BLIP-2 (đặc trưng toàn cục) và EfficientNet (đặc trưng cục bộ), BARTpho, trộn bằng BEiT-3; phân loại trên 353 đáp án & Acc 71,04 trên ViVQA & Không sinh được đáp án mới; không có OCR \\
+ViTextBLIP-2~\cite{nguyen2024vitextvqa}, 2025 & SwinTextSpotter đọc chữ, Q-Former nối ảnh và chữ OCR, ViT5 đóng băng sinh câu trả lời & EM 25,48; F1 53,95 trên ViTextVQA & Phụ thuộc OCR ngoài; cách xa người (88,00 EM) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Các nghiên cứu trên đi theo một lộ trình rõ: từ đặc trưng rời rạc kết hợp
+attention (2021), sang bộ mã hóa đã tiền huấn luyện và mô-đun trộn đa phương thức
+(2022--2024), rồi tới mô hình sinh dựa trên BLIP-2 cho dữ liệu có chữ (2025). Có
+hai vướng mắc lặp lại. Thứ nhất, phần lớn các công trình trên ViVQA coi VQA là
+phân loại trên tập đáp án cố định, nên không trả lời được những đáp án chưa thấy
+khi huấn luyện, điều bắt buộc với câu hỏi đọc chữ. Thứ hai, đọc chữ tiếng Việt có
+dấu trong ảnh vẫn là điểm yếu: ViTextBLIP-2 dựa vào một bộ OCR bên ngoài được giữ
+cố định khi huấn luyện, nên lỗi đọc chữ của OCR truyền thẳng vào câu trả lời.
+
+Cần lưu ý khi so sánh: Accuracy của các phương pháp phân loại trên ViVQA được tính
+trên tập đáp án cố định, không cùng cách chấm với EM của mô hình sinh tự do mà
+khóa luận dùng. Vì vậy các con số trên ViVQA ở Bảng~\ref{tab:rel-vivqa} chỉ để
+tham khảo. Trên ViTextVQA, khóa luận so trực tiếp với ViTextBLIP-2 vì cùng tập
+test và cùng thước đo EM, F1 (Chương~\ref{chap:results}).
+
+%********************************** Mục 2.5 ************************************
+\section{Hallucination và cách đo}
+\label{sec:rel-halluc}
+
+Hallucination trong VLM là hiện tượng mô hình sinh nội dung trôi chảy nhưng không
+có trong ảnh, ví dụ nhắc tới một vật không xuất hiện. Rohrbach và cộng sự~\cite{rohrbach2018chair}
+đo hiện tượng này trên chú thích ảnh bằng thước đo CHAIR, đếm tỉ lệ vật được nhắc
+tới mà không có trong nhãn của ảnh. Cách đo này phụ thuộc vào việc tách tên vật ra
+khỏi câu văn và vào độ dài câu.
+
+POPE~\cite{li2023pope} đổi sang dạng câu hỏi có/không: với mỗi ảnh, hỏi ``Trong
+ảnh có \emph{vật X} không?'' cho cả vật có thật và vật không có. Vật không có được
+chọn theo ba cách: ngẫu nhiên, vật phổ biến trong toàn bộ dữ liệu, và vật hay xuất
+hiện cùng các vật trong ảnh (adversarial). Kết quả báo cáo bằng Accuracy,
+Precision, Recall, F1 và tỉ lệ trả lời ``có''. Vì câu trả lời chỉ là có hoặc
+không, POPE không cần phân tích câu văn và dễ áp dụng cho ngôn ngữ khác. Tuy vậy,
+chưa có bộ đo kiểu POPE nào bằng tiếng Việt (khoảng trống G4). Khóa luận xây bộ
+POPE-vi theo đúng giao thức này để kiểm tra giả thuyết H4
+(Chương~\ref{chap:discussion}).
+
+%********************************** Mục 2.6 ************************************
+\section{Tổng kết và khoảng trống nghiên cứu}
+\label{sec:rel-summary}
+
+Bảng~\ref{tab:rel-gaps} nối mỗi khoảng trống nêu ở Chương~\ref{chap:intro} với
+bằng chứng từ các công trình trên và với cách khóa luận xử lý.
+
+\begin{table}[htbp]
+\caption{Khoảng trống, bằng chứng và cách khóa luận xử lý}
+\label{tab:rel-gaps}
+\centering
+\small
+\begin{tabular}{p{0.20\textwidth}p{0.36\textwidth}p{0.34\textwidth}}
+\toprule
+\textbf{Khoảng trống} & \textbf{Bằng chứng} & \textbf{Khóa luận xử lý} \\
+\midrule
+G1. Tiền huấn luyện thiên tiếng Anh & Các VLM chủ yếu huấn luyện trên tiếng Anh; LLaVA-1.5 chỉ có khả năng đa ngôn ngữ nổi lên, không được huấn luyện riêng & Chọn baseline đa ngôn ngữ; đo lỗi sai ngôn ngữ, sai định dạng ở chế độ zero-shot \\
+G2. VQA tiếng Việt yếu, nhất là đọc chữ & ViTextBLIP-2 đạt 25,48 EM so với 88,00 của người; các phương pháp trên ViVQA là phân loại, không đọc chữ & Sinh câu trả lời tự do; đưa chữ OCR có dấu, đúng thứ tự vào prompt \\
+G3. Chưa có PEFT cho VLM tiếng Việt & LoRA, QLoRA, VL-Adapter, LLaVA-1.5 chỉ kiểm chứng trên tiếng Anh & QLoRA trên Qwen2.5-VL-3B; QLoRA nhận biết OCR là đóng góp chính \\
+G4. Chưa có bộ đo hallucination tiếng Việt & POPE và CHAIR chỉ có cho tiếng Anh & Xây POPE-vi; kiểm tra QLoRA có làm tăng hallucination không \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Tóm lại, các công trình trước cho thấy VLM đọc được chữ trong ảnh, PEFT đủ để
+thích nghi VLM, và thứ tự chữ OCR quan trọng với VQA tiếng Việt. Điều còn thiếu là
+một nghiên cứu ghép ba ý này cho tiếng Việt dưới ngân sách tài nguyên nhỏ, có
+baseline tái lập, ablation và đo hallucination. Chương~\ref{chap:methods} trình
+bày cách khóa luận làm điều đó.

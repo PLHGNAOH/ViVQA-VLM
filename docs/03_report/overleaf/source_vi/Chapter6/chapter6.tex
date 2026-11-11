@@ -1,6 +1,6 @@
 %!TEX root = ../thesis.tex
 %*******************************************************************************
-%****************************** Chương 6 **************************************
+%****************************** Chương 6 ***************************************
 %*******************************************************************************
 
 \chapter{KẾT LUẬN}
@@ -12,5 +12,111 @@
     \graphicspath{{Chapter6/Figs/Vector/}{Chapter6/Figs/}}
 \fi
 
-% TODO (ViVQA-VLM): chương này chưa viết.
-\textit{[Chưa viết. Nội dung dự kiến: trả lời RQ1--RQ4; tóm tắt đóng góp; hướng phát triển.]}
+%********************************** Mục 6.1 ************************************
+\section{Tóm tắt}
+\label{sec:con-summary}
+
+Khóa luận nghiên cứu cách thích nghi một vision-language model mã nguồn mở cho
+hỏi đáp trên ảnh tiếng Việt dưới ràng buộc tài nguyên chặt: chỉ dùng
+parameter-efficient fine-tuning và chỉ một GPU Colab. Nhóm chọn
+Qwen2.5-VL-3B-Instruct làm baseline, tái lập nó trên TextVQA val (79,60 so với
+79,3 công bố), đo baseline zero-shot trên ViVQA và ViTextVQA, rồi thích nghi bằng
+QLoRA với 7,37 triệu tham số huấn luyện, tức 0,196\% tổng số tham số.
+
+Cải tiến đề xuất là QLoRA nhận biết OCR: chữ trong ảnh được đọc bằng VietOCR,
+sắp theo thứ tự đọc và đưa vào prompt ngay trong lúc huấn luyện. Trên toàn bộ
+10.028 câu test ViTextVQA, phương pháp này đạt EM 53,35, hơn QLoRA thông thường
+với cùng dữ liệu 3,09 điểm ($p = 6{,}7\times10^{-21}$) và cao hơn kết quả công bố
+tốt nhất trước đây (EM 25,48). Trên ViVQA, QLoRA nâng EM từ 22,09 lên 76,64.
+
+%********************************** Mục 6.2 ************************************
+\section{Trả lời các câu hỏi nghiên cứu}
+\label{sec:con-rq}
+
+\begin{description}
+  \item[RQ1.] \textit{Zero-shot đạt bao nhiêu, và lỗi tiếng Việt nào chiếm ưu thế?}
+  Zero-shot đạt EM 22,09 trên ViVQA và 29,12 trên ViTextVQA. Lỗi chiếm ưu thế là
+  sai định dạng: mô hình trả lời dài hơn đáp án (2,9 so với 1,6 từ trên ViVQA) và
+  đôi khi trả lời bằng tiếng Anh. Đáp án có dấu thanh khó hơn rõ rệt so với đáp
+  án chỉ gồm chữ Latin. Prompt few-shot định dạng không sửa được các lỗi này
+  (H3 không được ủng hộ).
+
+  \item[RQ2.] \textit{QLoRA cải thiện bao nhiêu khi không dùng full fine-tuning?}
+  QLoRA tăng EM thêm 21,1 điểm trên ViTextVQA và 54,6 điểm trên ViVQA (mô hình
+  chính thức C3), chỉ với 0,196\% tham số, một GPU L4, tối đa 12,75 giờ huấn luyện
+  và VRAM đỉnh dưới 8,4~GB. Mức tăng chủ yếu đến từ việc học đúng định dạng đáp án
+  và không do rò rỉ ảnh: trên tập test sạch, mức tăng vẫn là 44,1 điểm (H1 được
+  ủng hộ).
+
+  \item[RQ3.] \textit{Chữ OCR có giúp, và có cộng hưởng với QLoRA không?}
+  Có, nhưng chỉ khi mô hình được huấn luyện cùng OCR. Thêm OCR vào prompt của một
+  mô hình chưa từng thấy OCR không cải thiện; huấn luyện cùng OCR cho hiệu ứng tương
+  tác $+4{,}9$ điểm EM, ổn định trên ba seed, và lợi ích không giảm khi tăng dữ
+  liệu. Mức tăng ANLS ($+1{,}87$) thấp hơn ngưỡng 3 điểm đặt trước, nên H2 được
+  ủng hộ một phần: OCR giúp trả lời đúng nguyên chuỗi nhiều hơn là giúp gần đúng
+  theo ký tự.
+
+  \item[RQ4.] \textit{Sau khi thích nghi, mô hình bịa nội dung nhiều hơn hay ít hơn?}
+  Trên POPE-vi, B3-full không tăng hallucination theo luật đặt trước ($\Delta$F1
+  từ $+2{,}5$ đến $+5{,}5$), nhưng tỉ lệ báo sai vật thể tăng ở cách chọn
+  adversarial. C3 không đo được vì đã quên cách trả lời có/không. Duyệt tay cho
+  thấy hallucination chỉ chiếm khoảng 2,3\% (B3-full) và 3,7\% (C3) mọi câu trả
+  lời. H4 được ủng hộ một phần.
+\end{description}
+
+%********************************** Mục 6.3 ************************************
+\section{Đóng góp}
+\label{sec:con-contrib}
+
+\begin{enumerate}
+  \item \textbf{QLoRA nhận biết OCR cho VQA tiếng Việt}, với cơ chế được tách bạch
+  bằng thí nghiệm $2\times2$: lợi ích đến từ việc dạy mô hình dùng OCR, không đến
+  từ việc thêm OCR vào prompt.
+  \item \textbf{Thích nghi hiệu quả và tái lập được.} Kết quả trên ViTextVQA cao
+  hơn kết quả công bố trước đây với 0,196\% tham số trên một GPU; mọi con số có
+  log, seed và cấu hình, kèm gói tái lập gồm mã nguồn, adapter, cấu hình, script
+  suy luận và hướng dẫn chạy lại.
+  \item \textbf{Đo các vấn đề riêng của tiếng Việt.} Bốn vấn đề V1--V4 đều có số
+  đo cụ thể; POPE-vi là bộ đo hallucination tiếng Việt gồm 4.985 câu trên 500 ảnh
+  chưa thấy khi huấn luyện.
+  \item \textbf{Phân tích lỗi hai tầng.} Phân tích tự động theo kiểu lỗi và trạng
+  thái OCR, đối chiếu với duyệt tay mù, cho thấy EM đánh giá thấp mô hình và ước
+  lượng phần còn có thể cải thiện nhờ OCR tốt hơn (khoảng 17 điểm EM).
+  \item \textbf{Prototype đã kiểm chứng.} Ứng dụng web trả lời kèm chữ OCR và mức
+  tin cậy, được kiểm cho cùng câu trả lời với đường đánh giá chính thức, với độ
+  trễ trung vị khoảng 1 giây trên một GPU L4.
+\end{enumerate}
+
+%********************************** Mục 6.4 ************************************
+\section{Giới hạn}
+\label{sec:con-limits}
+
+Các giới hạn chính đã được phân tích ở mục~\ref{sec:dis-validity}: mô hình chính
+chỉ chạy một seed; EM quá khắt khe với câu trả lời đúng ý nhưng khác cách viết;
+chất lượng OCR tiếng Việt cho chữ cảnh là nút thắt; ngưỡng ANLS của H2 chưa đạt;
+F1 trên POPE-vi che mất tỉ lệ báo sai; so sánh với kết quả công bố phụ thuộc cách
+chuẩn hóa đáp án của bài báo; và lần duyệt tay cuối chỉ có một người gán.
+
+%********************************** Mục 6.5 ************************************
+\section{Hướng phát triển}
+\label{sec:con-future}
+
+\begin{enumerate}
+  \item \textbf{Nâng cấp OCR tiếng Việt cho chữ cảnh}: fine-tune VietOCR trên chữ
+  cảnh và cải tiến thứ tự đọc. Đây là hướng có trần cải thiện lớn nhất theo phân
+  tích lỗi.
+  \item \textbf{OCR có vị trí}: đưa tọa độ và thứ tự các hộp chữ vào mô hình theo
+  hướng của M4C~\cite{hu2020m4c}, để giảm lỗi cắt sai ranh giới cụm chữ.
+  \item \textbf{Đánh giá có người chấm và thước đo chấp nhận đồng nghĩa}, vì hơn
+  một nửa lỗi EM là đúng ý.
+  \item \textbf{Cân bằng câu hỏi có/không khi huấn luyện} để tránh quên định dạng
+  như C3, và đo hallucination chữ trên ảnh có chữ, không chỉ hallucination vật thể.
+  \item \textbf{Hiệu chỉnh độ tin cậy} (ví dụ temperature scaling) để prototype có
+  thể hiện xác suất thay cho mức.
+  \item \textbf{Thêm seed cho mô hình chính} và thử các mô hình nền mới hơn dưới
+  cùng giao thức đánh giá.
+\end{enumerate}
+
+Kết quả của khóa luận cho thấy một nhóm có tài nguyên hạn chế vẫn có thể thích
+nghi một VLM lớn cho tiếng Việt và đạt kết quả vượt các công trình trước, miễn là
+mỗi thay đổi được đo dưới cùng điều kiện và mỗi kết luận được kiểm định.

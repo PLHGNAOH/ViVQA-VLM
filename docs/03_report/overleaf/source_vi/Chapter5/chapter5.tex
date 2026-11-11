@@ -1,6 +1,6 @@
 %!TEX root = ../thesis.tex
 %*******************************************************************************
-%****************************** Chương 5 **************************************
+%****************************** Chương 5 ***************************************
 %*******************************************************************************
 
 \chapter{THẢO LUẬN}
@@ -12,5 +12,438 @@
     \graphicspath{{Chapter5/Figs/Vector/}{Chapter5/Figs/}}
 \fi
 
-% TODO (ViVQA-VLM): chương này chưa viết.
-\textit{[Chưa viết. Nội dung dự kiến: phân tích lỗi theo loại câu hỏi; hallucination (POPE-vi); các vấn đề tiếng Việt V1--V4; giới hạn; khía cạnh đạo đức.]}
+Chương~\ref{chap:results} cho biết các mô hình đạt bao nhiêu. Chương này trả lời
+vì sao, và lỗi còn lại nằm ở đâu. Mục~\ref{sec:dis-qlora} phân tích QLoRA sửa
+được loại lỗi nào. Mục~\ref{sec:dis-ocr} xem xét cơ chế của QLoRA nhận biết OCR,
+mục~\ref{sec:dis-remaining} và~\ref{sec:dis-audit} phân tích nguồn lỗi còn lại
+bằng phân tích tự động và duyệt tay, mục~\ref{sec:dis-vivqa} xem xét lỗi trên
+ViVQA. Mục~\ref{sec:dis-halluc} trả lời RQ4 về hallucination. Mục~\ref{sec:dis-v}
+đối chiếu với bốn vấn đề tiếng Việt V1--V4, mục~\ref{sec:dis-examples} nêu ví dụ
+định tính, mục~\ref{sec:dis-validity} bàn về giới hạn và tính hợp lệ, và
+mục~\ref{sec:dis-ethics} bàn về khía cạnh đạo đức.
+
+Mọi số trong chương chỉ dùng để mô tả, không dùng để chọn mô hình. Định nghĩa
+kiểu lỗi và trạng thái OCR được ghi lại trước khi chạy phân tích
+(mục~\ref{sec:met-error}).
+
+%********************************** Mục 5.1 ************************************
+\section{QLoRA sửa loại lỗi nào}
+\label{sec:dis-qlora}
+
+Bảng~\ref{tab:dis-buckets} phân loại các câu sai EM theo kiểu lỗi. Ở chế độ
+zero-shot, lỗi thừa chữ (gold nằm trong câu trả lời) chiếm 25,7\% số lỗi trên
+ViTextVQA và 21,3\% trên ViVQA. Sau QLoRA, tỉ lệ này giảm còn 13,6\% (B2) và 3,9\%
+(C3). Như vậy phần lớn mức tăng của QLoRA đến từ việc mô hình học đúng định dạng
+đáp án của bộ dữ liệu: ngắn, đúng cách viết. Kết luận này khớp với vấn đề V2 và
+với phân tích zero-shot ở mục~\ref{sec:res-repro}. Sau QLoRA, lỗi còn lại dịch về
+phía đọc sai ký tự (lệch vài ký tự, sai dấu) và sai nội dung.
+
+\begin{table}[htbp]
+\caption{Kiểu lỗi trên các câu sai EM (\% số câu sai của từng mô hình)}
+\label{tab:dis-buckets}
+\centering
+\small
+\begin{tabular}{p{0.21\textwidth}p{0.08\textwidth}p{0.08\textwidth}p{0.08\textwidth}p{0.08\textwidth}p{0.10\textwidth}p{0.07\textwidth}}
+\toprule
+\textbf{Mô hình} & \textbf{Tỉ lệ sai} & \textbf{Sai dấu} & \textbf{Thiếu chữ} & \textbf{Thừa chữ} & \textbf{Lệch $\leq$ 2 ký tự} & \textbf{Khác} \\
+\midrule
+ViTextVQA · B1 & 70,9 & 3,3 & 5,0 & \textbf{25,7} & 8,0 & 57,9 \\
+ViTextVQA · B2 & 49,7 & 9,0 & 13,2 & 13,6 & 16,8 & 47,4 \\
+ViTextVQA · B3-full & 46,6 & 9,6 & 15,5 & 14,5 & 16,5 & 43,9 \\
+\midrule
+ViVQA · B1 & 77,9 & 0,0 & 3,6 & \textbf{21,3} & 6,4 & 68,6 \\
+ViVQA · C1 & 26,2 & 0,5 & 2,8 & 3,2 & 15,1 & 78,4 \\
+ViVQA · C3 & 23,4 & 0,0 & 2,3 & 3,9 & 16,0 & 77,9 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%********************************** Mục 5.2 ************************************
+\section{Cơ chế của QLoRA nhận biết OCR}
+\label{sec:dis-ocr}
+
+Thí nghiệm $2\times2$ (Bảng~\ref{tab:res-2x2}) cho thấy OCR chỉ có ích khi mô hình
+được huấn luyện cùng OCR. Một cách giải thích phù hợp: mô hình chưa thấy OCR khi
+huấn luyện không biết dòng OCR đáng tin đến đâu, nên dùng nó không phân biệt và
+sửa bao nhiêu câu thì cũng làm hỏng bấy nhiêu câu (16 và 16 trên dev300). Khi được
+huấn luyện cùng OCR, adapter học được khi nào chép từ OCR và khi nào dựa vào ảnh.
+
+Bảng~\ref{tab:dis-flips} chia các câu thay đổi từ B2 sang B3-full theo trạng thái
+OCR. Hiệu số 705 câu được sửa trừ 395 câu bị làm hỏng bằng 310 câu, đúng bằng mức
+tăng 3,09 điểm EM. Lợi ích tập trung ở các câu mà OCR chứa nguyên văn đáp án (sửa
+326, hỏng 116). Ở các câu OCR không chứa đáp án, sửa và hỏng gần cân bằng (289 và
+211).
+
+\begin{table}[htbp]
+\caption{Thay đổi từ B2 sang B3-full theo trạng thái OCR (toàn bộ test ViTextVQA)}
+\label{tab:dis-flips}
+\centering
+\small
+\begin{tabular}{p{0.34\textwidth}rrrrr}
+\toprule
+\textbf{Trạng thái OCR} & \textbf{n} & \textbf{Sửa được} & \textbf{Làm hỏng} & \textbf{Cùng đúng} & \textbf{Cùng sai} \\
+\midrule
+OCR chứa nguyên văn đáp án & 3.321 & \textbf{326} & 116 & 2.105 & 774 \\
+OCR đúng chữ nhưng sai dấu & 1.149 & 90 & 68 & 506 & 485 \\
+OCR có chữ, không chứa đáp án & 5.526 & 289 & 211 & 2.023 & 3.003 \\
+OCR không đọc ra chữ & 32 & 0 & 0 & 11 & 21 \\
+\midrule
+Tất cả & 10.028 & 705 & 395 & 4.645 & 4.283 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+OCR cũng có thể làm mô hình phân tâm. Trong 138 câu (34,9\% số câu bị làm hỏng,
+khoảng 1,4\% tập test), B2 trả lời đúng nhưng B3-full trả lời bằng một cụm khác
+lấy từ dòng OCR. Đây là cái giá của việc đưa thêm chữ vào prompt, và là một lý do
+prototype hiển thị chữ OCR để người dùng tự kiểm tra.
+
+%********************************** Mục 5.3 ************************************
+\section{Lỗi còn lại của B3-full: do OCR hay do mô hình}
+\label{sec:dis-remaining}
+
+Với mỗi câu ViTextVQA, nhóm xét đúng phần chữ OCR đã vào prompt. Chỉ 33,1\% câu có
+đáp án gold nằm nguyên văn trong OCR; 11,5\% câu chỉ khớp khi bỏ dấu (OCR đọc đúng
+chữ nhưng sai dấu); 55,1\% câu OCR có chữ nhưng không chứa nguyên văn đáp án; và
+0,3\% câu OCR không đọc ra chữ nào. Đáng chú ý, EM của B3-full (53,35) cao hơn
+nhiều so với tỉ lệ 33,1\%, nghĩa là ở nhiều câu mô hình tự đọc ảnh đúng mà OCR
+không giúp được.
+
+Bảng~\ref{tab:dis-source} xếp 4.678 câu sai của B3-full theo nguồn lỗi tự động.
+
+\begin{table}[htbp]
+\caption{Nguồn lỗi tự động của B3-full (4.678 câu sai)}
+\label{tab:dis-source}
+\centering
+\small
+\begin{tabular}{p{0.46\textwidth}rp{0.30\textwidth}}
+\toprule
+\raggedright \textbf{Nguồn lỗi} & \raggedright \textbf{\%} & \raggedright \textbf{Kiểu lỗi nhiều nhất} \tabularnewline
+\midrule
+\raggedright OCR không đưa nguyên văn đáp án vào prompt & \raggedright 81,0 & \raggedright khác 1.816; lệch ký tự 682; thiếu chữ 537 \tabularnewline
+\raggedright OCR có đáp án, mô hình chép sai đoạn & \raggedright 10,5 & \raggedright thừa chữ 193; thiếu chữ 190 \tabularnewline
+\raggedright OCR có đáp án, câu trả lời nằm ngoài OCR & \raggedright 8,5 & \raggedright khác 143; thừa chữ 123 \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+Con số 81\% cần được đọc thận trọng. Đây là cận trên của lỗi do OCR, vì nhóm ``OCR
+không chứa đáp án'' gồm cả những câu cần suy luận (đáp án không được viết nguyên
+văn trong ảnh) và những câu có gold nhiễu; mục~\ref{sec:dis-audit} tách các trường
+hợp này bằng duyệt tay. Khi OCR có đáp án mà mô hình vẫn sai, lỗi chủ yếu là cắt
+sai ranh giới cụm chữ: 383 trong 492 câu lấy thiếu hoặc thừa từ. Sai dấu từ OCR là
+thách thức riêng của tiếng Việt: 393 trong 450 lỗi sai dấu của B3-full nằm ở
+nhóm OCR không đưa nguyên văn đáp án. Theo loại câu hỏi, tỉ lệ lỗi do OCR cao nhất
+ở loại liên hệ (90,9\%) và nội dung chữ (87,6\%), thấp nhất ở loại số và thời gian
+(72,5\%).
+
+%********************************** Mục 5.4 ************************************
+\section{Duyệt tay 150 lỗi}
+\label{sec:dis-audit}
+
+Bảng~\ref{tab:dis-audit} tổng hợp kết quả duyệt tay mù 100 lỗi EM của B3-full và
+50 lỗi EM của C3 (thiết kế ở mục~\ref{sec:met-error}). Cột cuối là tham chiếu từ
+lần duyệt 200 lỗi của B2 ở giai đoạn trước, chỉ để mô tả: khác người gán, khác mô
+hình và các khoảng tin cậy chồng nhau.
+
+\begin{table}[htbp]
+\caption{Kết quả duyệt tay lỗi EM (CI95 Wilson trong ngoặc)}
+\label{tab:dis-audit}
+\centering
+\small
+\begin{tabular}{p{0.32\textwidth}p{0.20\textwidth}p{0.20\textwidth}p{0.17\textwidth}}
+\toprule
+ & \textbf{B3-full (100 lỗi)} & \textbf{C3 (50 lỗi)} & \textbf{Tham chiếu B2 (ViTextVQA / ViVQA)} \\
+\midrule
+Lỗi EM thật ra đúng ý & \textbf{55,0} [45,2; 64,4] & \textbf{64,0} [50,1; 75,9] & 46 / 62 \\
+Lỗi là hallucination & 5,0 [2,2; 11,2] & 16,0 [8,3; 28,5] & 9 / 5 \\
+EM $\to$ độ đúng theo người đọc & 53,35 $\to$ \textbf{79,01} & 76,64 $\to$ \textbf{91,59} & \\
+Hallucination trên mọi câu trả lời & 2,33\% & 3,74\% & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Kiểu lỗi theo nhãn tay (\% số lỗi đã duyệt)}
+\label{tab:dis-audit-types}
+\centering
+\small
+\begin{tabular}{p{0.46\textwidth}rr}
+\toprule
+\textbf{Kiểu lỗi} & \textbf{B3-full} & \textbf{C3} \\
+\midrule
+Định dạng, độ dài (ý đúng) & \textbf{40,0} & --- \\
+Đồng nghĩa, khác từ (ý đúng) & 4,0 & \textbf{36,0} \\
+Đọc chữ sai & 29,0 & --- \\
+Sai dấu thanh & 7,0 & --- \\
+Sai vùng hoặc không có trong ảnh & 15,0 & 28,0 \\
+Gold sai hoặc nhiễu & 5,0 & \textbf{28,0} \\
+Đếm sai & --- & 6,0 \\
+Khác & --- & 2,0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Có bốn nhận xét.
+
+\paragraph{EM đánh giá thấp mô hình rất nhiều.} Hơn một nửa số lỗi EM của B3-full
+thật ra đúng ý, nên độ đúng theo người đọc khoảng 79\% so với EM 53,35\%. Kiểu lỗi
+lớn nhất là định dạng và độ dài (40\%): câu trả lời và gold cùng nội dung nhưng
+khác cách viết, ví dụ ``combo 3'' so với gold ``3'', hoặc khoảng trắng quanh dấu
+chấm trong địa chỉ email. Với C3, 36\% lỗi là đồng nghĩa, nên độ đúng theo người
+đọc khoảng 92\%.
+
+\paragraph{81\% lỗi ``do OCR'' không có nghĩa 81\% lỗi do OCR.} Trong 78 câu thuộc
+nhóm OCR không chứa đáp án, chỉ 34 câu (43,6\%, CI95 [33,1; 54,6]) là lỗi đọc chữ
+thật (đọc sai 27, sai dấu 7), còn 28 câu (35,9\%) là đúng ý. Tính trên cả mẫu, lỗi
+đọc chữ thật chiếm 36\% (CI95 [27,3; 45,8]) số lỗi của B3-full, tức khoảng 17 điểm
+EM. Đây là ước lượng thô cho phần mà một OCR tiếng Việt tốt hơn có thể sửa được.
+
+\paragraph{Lỗi cắt sai ranh giới phần lớn được người đọc chấp nhận.} Trong 14 câu
+mô hình chép sai đoạn từ OCR, 11 câu là định dạng hoặc độ dài với ý đúng.
+
+\paragraph{Gold ViVQA nhiễu.} 28\% lỗi của C3 là do gold sai hoặc nhiễu, khớp với
+các câu hỏi dịch máy khó hiểu ở mục~\ref{sec:dis-examples}.
+
+Giới hạn của lần duyệt này: chỉ một người gán nên không tính được độ đồng thuận
+$\kappa$ (bộ nhãn này đã đo $\kappa = 0{,}62$ giữa hai người ở lần duyệt trước);
+50 câu ViVQA cho khoảng tin cậy rộng; và ``đúng ý'' là đánh giá chủ quan.
+
+%********************************** Mục 5.5 ************************************
+\section{Lỗi trên ViVQA}
+\label{sec:dis-vivqa}
+
+Với C3, lỗi phân bố theo loại câu hỏi như sau:
+
+\begin{itemize}
+  \item \textbf{Số lượng} (444 câu, sai 23,0\%): toàn bộ lỗi là đếm lệch, chủ yếu
+  lệch một (bốn thành ba 11 câu, ba thành bốn 10 câu, một thành hai 10 câu).
+  \item \textbf{Màu sắc} (625 câu, sai 15,7\%): nhầm màu gần nhau (nâu thành đen
+  5 câu, đỏ thành cam 5 câu). Có 4 câu gold ``đỏ'' bị trả lời ``tía'', đúng lỗi
+  dịch máy ``purple'' thành ``tía'' đã gặp khi duyệt dữ liệu.
+  \item \textbf{Vật thể} (1.247 câu, sai 23,3\%): nhiều cặp đồng nghĩa hoặc khác
+  mức chi tiết (máy tính và laptop, hải âu và con chim, tủ lạnh và tủ đá).
+  \item \textbf{Vị trí} (685 câu, sai 30,7\%, khó nhất): lệch mức chi tiết (phòng
+  và phòng ngủ, nhà vệ sinh và phòng tắm).
+\end{itemize}
+
+Phần lớn các lỗi vật thể và vị trí là đúng ý, như duyệt tay ở
+mục~\ref{sec:dis-audit} xác nhận. Một thước đo chấp nhận đồng nghĩa sẽ phản ánh
+tốt hơn chất lượng thật của mô hình trên ViVQA.
+
+%********************************** Mục 5.6 ************************************
+\section{Hallucination}
+\label{sec:dis-halluc}
+
+Bảng~\ref{tab:dis-pope} trình bày kết quả trên POPE-vi (thiết kế ở
+mục~\ref{sec:met-pope}).
+
+\begin{table}[htbp]
+\caption{Kết quả POPE-vi (500 ảnh chưa thấy khi huấn luyện, 4.985 câu)}
+\label{tab:dis-pope}
+\centering
+\small
+\begin{tabular}{p{0.27\textwidth}p{0.08\textwidth}p{0.08\textwidth}p{0.08\textwidth}p{0.10\textwidth}p{0.10\textwidth}}
+\toprule
+\textbf{Cấu hình} & \textbf{F1 random} & \textbf{F1 pop.} & \textbf{F1 adv.} & \textbf{Tỉ lệ ``có''} & \textbf{Không đọc được} \\
+\midrule
+B1 · zero-shot, prompt thường & 84,60 & 83,17 & 81,19 & 40--43\% & 0,00\% \\
+B1-ocr · zero-shot, prompt OCR & 83,39 & 81,99 & 80,59 & 38--41\% & 0,00\% \\
+C3 & --- & --- & --- & --- & 91,43\% \\
+\textbf{B3-full} & \textbf{88,89} & \textbf{85,65} & \textbf{83,06} & 48--55\% & 0,00\% \\
+SH (adapter của prototype) & 77,70 & 72,83 & 71,17 & 77--89\% & 0,16\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Kết luận theo luật}
+
+Luật ghi trước so mỗi mô hình với mô hình nền zero-shot dùng cùng dạng prompt và
+coi mô hình ``không tăng hallucination'' nếu cận dưới CI95 của $\Delta$F1 lớn hơn
+$-2$ ở cả ba cách chọn.
+
+\begin{itemize}
+  \item \textbf{B3-full}: $\Delta$F1 $+5{,}50$ / $+3{,}65$ / $+2{,}47$ (random /
+  popular / adversarial) so với B1-ocr: \emph{không tăng hallucination}.
+  \item \textbf{C3}: 91,43\% câu trả lời không phải ``có'' hay ``không'', vượt
+  ngưỡng hợp lệ 5\%: \emph{chưa kết luận được}.
+  \item \textbf{SH}: $\Delta$F1 $-5{,}69$ / $-9{,}16$ / $-9{,}42$, cận trên CI95
+  dưới $-2$: \emph{tăng hallucination}. SH không thuộc H4 vì là adapter của
+  prototype, nhưng kết quả này là một kiểm tra an toàn bắt buộc trước khi dùng.
+\end{itemize}
+
+Với B3-full đạt và C3 không đo được, H4 được kết luận là ủng hộ một phần.
+
+\subsection{Phân tích sau, ngoài luật}
+
+\paragraph{F1 che mất việc B3-full báo sai nhiều hơn.} Tỉ lệ báo sai (câu ``không''
+bị trả lời ``có'') của B1-ocr là 2,7\% / 5,7\% / 8,9\%, còn của B3-full là 8,7\% /
+16,1\% / 22,4\%. F1 của B3-full tăng vì recall tăng (73,5\% lên 86,9\%), bù cho
+precision giảm. Nếu đo hallucination vật thể theo nghĩa hẹp, tức ``nói có vật khi
+vật không có'', thì B3-full bịa nhiều hơn zero-shot, khoảng 2,5 lần ở cách chọn
+adversarial. Một phần là vì mô hình zero-shot vốn dè dặt (tỉ lệ trả lời ``có''
+khoảng 40\%, dưới mức 50\% của thiết kế POPE). Đây là một giới hạn phương pháp:
+F1, thước đo được chọn từ đầu theo cách báo cáo của LLaVA-1.5, không đủ để kết
+luận về hallucination; cần báo kèm tỉ lệ báo sai và tỉ lệ trả lời ``có''.
+
+\paragraph{C3 quên cách trả lời có/không.} ViVQA không có câu hỏi có/không. Sau
+QLoRA hai epoch, C3 trả lời câu có/không bằng danh từ (``bức ảnh'' 525 lần, ``cái
+ghế'' 434 lần), chỉ 372 trên 4.985 câu là ``không''. Đây là một dạng quên kỹ năng
+làm theo chỉ dẫn khi huấn luyện trên một tập đáp án hẹp.
+
+\paragraph{SH thiên lệch ``có''.} SH trả lời ``có'' ở 3.773 trên 4.985 câu, tỉ lệ
+báo sai 55--79\%. Đếm trong dữ liệu cho thấy cả train ViTextVQA lẫn train ViVQA
+không có đáp án ``có'' nào, nên giả thuyết ``học lệch từ dữ liệu có/không'' bị
+bác; nguyên nhân chưa rõ. Nhóm sửa ở lúc suy luận bằng ngưỡng $\tau^* = 4{,}85$
+trên hiệu log xác suất giữa ``có'' và ``không'' (mục~\ref{sec:met-proto}), chọn
+trên một tập hiệu chỉnh tách biệt với POPE-vi. Sau khi sửa, tỉ lệ trả lời ``có''
+của SH về 41--45\% và SH đạt luật R-YB, không cần huấn luyện lại. Tỉ lệ báo sai
+của SH sau khi sửa vẫn cao hơn B1-ocr khoảng 2--4 điểm.
+
+\paragraph{Chen tiếng Anh.} B3-full trả lời bằng chữ tiếng Anh ``no'' ở 881 trên
+4.985 câu (17,7\%), và gần như luôn đúng (802 câu ở câu có đáp án ``không'').
+
+\paragraph{Vật bị báo sai nhiều nhất} ở mọi cấu hình là cốc, rồi đến ghế, bát và
+chai. Một phần có thể do chú thích COCO thiếu nhãn, một giới hạn đã ghi trước.
+
+\paragraph{Đối chiếu với duyệt tay.} Hallucination chiếm 5,0\% lỗi EM của B3-full
+và 16,0\% lỗi của C3 (Bảng~\ref{tab:dis-audit}), tức khoảng 2,3\% và 3,7\% mọi
+câu trả lời. Hai cách đo cùng cho thấy hallucination không phải loại lỗi chính
+của các mô hình đã thích nghi trên VQA tiếng Việt.
+
+%********************************** Mục 5.7 ************************************
+\section{Bốn vấn đề tiếng Việt}
+\label{sec:dis-v}
+
+Bảng~\ref{tab:dis-v} đối chiếu bốn vấn đề V1--V4 nêu ở Chương~\ref{chap:intro} với
+số đo cụ thể của khóa luận.
+
+\begin{table}[htbp]
+\caption{Bốn vấn đề tiếng Việt và số đo tương ứng}
+\label{tab:dis-v}
+\centering
+\small
+\begin{tabular}{p{0.20\textwidth}p{0.70\textwidth}}
+\toprule
+\raggedright \textbf{Vấn đề} & \raggedright \textbf{Số đo} \tabularnewline
+\midrule
+V1 · Dấu thanh khi đọc chữ &
+OCR giữ đúng dấu: PaddleOCR 27,0\% so với VietOCR 37,7\% ($p = 0{,}0008$); 9,0\%
+lỗi của B2 chỉ sai dấu; 11,5\% câu có OCR đúng chữ nhưng sai dấu; zero-shot EM
+22,4 với đáp án có dấu so với 39,4 với đáp án Latin không dấu. \\
+V2 · Sai ngôn ngữ, sai định dạng &
+Zero-shot trả lời dài: 2,9 so với 1,6 từ (ViVQA), 5,4 so với 3,7 từ (ViTextVQA);
+lỗi thừa chữ giảm từ 25,7\% xuống 13,6\% số lỗi sau QLoRA; B3-full trả lời ``no''
+tiếng Anh ở 17,7\% câu có/không. \\
+V3 · Thứ tự chữ, ranh giới cụm &
+Nhầm vùng chữ chiếm 23\% lỗi của B2; 383/492 lỗi khi OCR có đáp án là cắt sai
+ranh giới cụm; F1 theo từ thấp hơn F1 theo âm tiết 1--3 điểm. \\
+V4 · Hallucination &
+2,3\% câu trả lời của B3-full; POPE-vi $\Delta$F1 từ $+2{,}5$ đến $+5{,}5$, nhưng
+tỉ lệ báo sai tăng ở cách chọn adversarial. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+V2 được QLoRA sửa phần lớn. V1 và V3 là lý do chọn QLoRA nhận biết OCR, và cũng là
+nơi còn nhiều lỗi nhất: khoảng 17 điểm EM của B3-full là lỗi đọc chữ thật. V4 được
+đo riêng bằng POPE-vi và duyệt tay.
+
+%********************************** Mục 5.8 ************************************
+\section{Ví dụ định tính}
+\label{sec:dis-examples}
+
+Bảng~\ref{tab:dis-examples} nêu các ví dụ được rút tất định (seed 42) từ các nhóm
+lỗi, minh họa những hiện tượng đã đo ở trên.
+
+\begin{table}[htbp]
+\caption{Ví dụ định tính trên test ViTextVQA và ViVQA}
+\label{tab:dis-examples}
+\centering
+\footnotesize
+\begin{tabular}{p{0.14\textwidth}p{0.20\textwidth}p{0.12\textwidth}p{0.12\textwidth}p{0.12\textwidth}p{0.10\textwidth}}
+\toprule
+\raggedright \textbf{Hiện tượng} & \raggedright \textbf{Câu hỏi} & \raggedright \textbf{Gold} & \raggedright \textbf{B2} & \raggedright \textbf{B3-full} & \raggedright \textbf{Ghi chú} \tabularnewline
+\midrule
+\raggedright OCR sửa đúng tên riêng & \raggedright trạm xăng này có tên là gì? & \raggedright mipec & \raggedright mipeo & \raggedright \textbf{mipec} & \raggedright chép đúng từng ký tự \tabularnewline
+\raggedright OCR sửa đúng số & \raggedright bức hình được chụp vào năm nào? & \raggedright 2016 & \raggedright 2017 & \raggedright \textbf{2016} & \raggedright số dễ đọc nhầm \tabularnewline
+\raggedright OCR sửa cả chữ lẫn độ dài & \raggedright trường thpt này mang tên gọi là gì? & \raggedright đào duy từ & \raggedright thành phố đào duy trì & \raggedright \textbf{đào duy từ} & \tabularnewline
+\raggedright OCR làm phân tâm & \raggedright \ldots\ liên hệ với người nào? & \raggedright cô tuyết & \raggedright \textbf{cô tuyết} & \raggedright có tuyết & \raggedright OCR sai dấu \tabularnewline
+\raggedright Cắt sai ranh giới & \raggedright món cơm gà hải nam làm theo nước nào? & \raggedright kiểu singapore & \raggedright \textbf{kiểu singapore} & \raggedright singapore & \raggedright đúng ý \tabularnewline
+\raggedright Sai dấu thanh & \raggedright di tích lịch sử này tên gì? & \raggedright nhà tù hòa bình & \raggedright nhà từ hòa bình & \raggedright nhà tu hòa bình & \raggedright cả hai sai \tabularnewline
+\raggedright Định dạng & \raggedright máy mài góc \ldots\ thuộc combo nào? & \raggedright 3 & \raggedright combo 3 & \raggedright combo 3 & \raggedright đúng ý \tabularnewline
+\raggedright Chuỗi dài & \raggedright địa chỉ email của công ty là gì? & \raggedright tnhhanphat\-vn@gmail . com & \raggedright tnhanhphat\-vn@\ldots & \raggedright tnhphanhat\-vn@\ldots & \raggedright lệch vài ký tự \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+Trên ViVQA, câu hỏi ``đồng hồ và tranh cũ dòng những gì'' với gold ``tường'' là
+một ví dụ câu hỏi dịch máy khó hiểu: cả B1 (``đồng hồ và tranh cũ dòng những bức
+tranh'') lẫn C3 (``con chim'') đều trả lời sai. Câu hỏi ``màu của nho là gì'' với
+gold ``màu đỏ'' được C3 trả lời ``màu tía''; ranh giới giữa đỏ, tía và đen của
+nho vốn mơ hồ.
+
+%********************************** Mục 5.9 ************************************
+\section{Giới hạn và tính hợp lệ}
+\label{sec:dis-validity}
+
+\paragraph{Một seed cho mô hình chính.} B3-full và C3 chỉ chạy với seed 42 vì mỗi
+lần huấn luyện B3-full mất gần 13 giờ GPU. Độ ổn định theo seed chỉ được kiểm trên
+tập con 8.000 câu (ba seed, $+3{,}57 \pm 0{,}76$ EM). Với $p = 6{,}7\times10^{-21}$
+trên 10.028 câu, khả năng kết luận B3-full hơn B2 đảo chiều theo seed là thấp,
+nhưng độ lớn chính xác của mức tăng có thể dao động.
+
+\paragraph{EM quá khắt khe.} Duyệt tay cho thấy 55\% lỗi EM của B3-full và 64\%
+lỗi của C3 thật ra đúng ý. EM vì vậy đánh giá thấp chất lượng thật; nhóm bổ sung
+ANLS và duyệt tay, nhưng chưa có đánh giá người quy mô lớn.
+
+\paragraph{So sánh với kết quả công bố.} Bài báo ViTextVQA không công bố hàm chuẩn
+hóa đáp án. Mức chênh với ViTextBLIP-2 lớn đến mức khó do chuẩn hóa gây ra, nhưng
+con số tuyệt đối chỉ mang tính tham khảo.
+
+\paragraph{H2 về ANLS chưa đạt ngưỡng.} OCR giúp trả lời đúng nguyên chuỗi (EM) rõ
+hơn là giúp gần đúng theo ký tự (ANLS $+1{,}87$ so với ngưỡng 3). Ngưỡng được đặt
+trước khi có số liệu và nhóm giữ nguyên.
+
+\paragraph{Phụ thuộc OCR.} B3 phụ thuộc vào OCR: bỏ OCR lúc suy luận thì về mức
+không OCR. Chất lượng OCR tiếng Việt cho chữ cảnh là nút thắt chính, và lỗi
+EXIF (mục~\ref{sec:res-exif}) cho thấy đường OCR cần được kiểm chặt.
+
+\paragraph{Dữ liệu.} Câu hỏi ViVQA được dịch máy và một phần gold nhiễu; khoảng một
+nửa ảnh test ViVQA có trong train. Nhóm đo và báo cáo các vấn đề này, đồng thời
+kiểm trên tập sạch, nhưng không sửa dữ liệu để giữ khả năng so sánh. Bộ phân loại
+câu hỏi \texttt{qt-v1} có độ chính xác 80,7\%, nên bảng theo loại câu hỏi chỉ mang
+tính mô tả.
+
+\paragraph{POPE-vi.} Chú thích COCO có thể thiếu nhãn vật thể, và mô hình nền có
+thể đã thấy ảnh COCO khi tiền huấn luyện. POPE-vi chỉ đo hallucination vật thể
+trên ảnh đời thường, chưa đo hallucination chữ trên ảnh có chữ.
+
+\paragraph{Người gán nhãn.} Lần duyệt tay cuối chỉ có một người gán.
+
+\paragraph{Độ mạnh kiểm định trên test2000.} Các ablation trên 2.000 câu chỉ phát
+hiện được chênh lệch từ khoảng 1,7 điểm EM; vì vậy kết luận ``không khác biệt'' ở
+ablation cấu hình LoRA là kết luận yếu.
+
+%********************************** Mục 5.10 ***********************************
+\section{Khía cạnh đạo đức và sử dụng có trách nhiệm}
+\label{sec:dis-ethics}
+
+\paragraph{Quyền riêng tư.} Ảnh người dùng tải lên có thể chứa khuôn mặt, giấy tờ
+hoặc thông tin cá nhân. Prototype không lưu ảnh hay câu hỏi, chỉ ghi thời gian xử
+lý.
+
+\paragraph{Thiên lệch ngôn ngữ.} Mô hình nền được tiền huấn luyện thiên về tiếng
+Anh. Khóa luận đo được thiên lệch này (chênh 17 điểm EM giữa đáp án có dấu và
+không dấu ở zero-shot; mô hình chen tiếng Anh) và giảm nó bằng thích nghi, nhưng
+không loại bỏ hoàn toàn.
+
+\paragraph{Hallucination và độ tin cậy.} Câu trả lời trôi chảy nhưng sai là rủi ro
+chính. Prototype hiển thị chữ OCR và mức tin cậy để người dùng tự kiểm tra, và
+chỉ hiện mức (Cao, Trung bình, Thấp) vì độ tin cậy chưa được hiệu chỉnh tốt
+(ECE 0,198). Hệ thống không nên được dùng cho các tình huống nhạy cảm như y tế
+hoặc pháp lý khi chưa có người kiểm tra.
+
+\paragraph{Giấy phép dữ liệu.} ViTextVQA được dùng qua kho có kiểm soát truy cập,
+theo giấy phép CC BY-NC 3.0 chỉ cho mục đích nghiên cứu phi thương mại; tập test
+có đáp án không được phát tán lại.

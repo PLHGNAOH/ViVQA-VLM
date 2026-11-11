@@ -1,5 +1,39 @@
 % ************************** Tóm tắt *****************************
 % Dùng tùy chọn `abstract' trong document class để chỉ in trang bìa và tóm tắt.
 \begin{abstract}
-[Viết sau cùng, khi các chương đã chốt.]
+
+Hỏi đáp trên ảnh tiếng Việt (Vietnamese Visual Question Answering) đòi hỏi mô hình
+vừa hiểu ảnh vừa đọc được chữ tiếng Việt có dấu trong ảnh, trong khi các
+vision-language model (VLM) mã nguồn mở chủ yếu được huấn luyện thiên về tiếng Anh
+và việc fine-tune toàn bộ mô hình vượt quá tài nguyên của một nhóm sinh viên. Khóa
+luận này nghiên cứu cách thích nghi một VLM cho tiếng Việt chỉ bằng
+parameter-efficient fine-tuning trên một GPU Google Colab.
+
+Nhóm chọn Qwen2.5-VL-3B-Instruct làm baseline, tái lập nó trên TextVQA val (VQA
+Accuracy 79,60 so với 79,3 công bố), rồi đo zero-shot trên hai bộ dữ liệu tiếng
+Việt: ViVQA (ảnh đời thường) và ViTextVQA (ảnh có chữ). Zero-shot chỉ đạt Exact
+Match (EM) 22,09 và 29,12, chủ yếu do trả lời sai định dạng và sai ngôn ngữ. QLoRA
+4-bit với 0,196\% tham số huấn luyện nâng EM lên 76,64 trên ViVQA và 50,26 trên
+ViTextVQA.
+
+Cải tiến đề xuất là \textbf{QLoRA nhận biết OCR}: chữ trong ảnh được đọc bằng
+PaddleOCR và VietOCR, sắp theo thứ tự đọc và đưa vào prompt ngay trong lúc huấn
+luyện. Trên toàn bộ 10.028 câu test ViTextVQA, phương pháp đạt EM 53,35 và ANLS
+73,89, hơn QLoRA thông thường cùng dữ liệu 3,09 điểm EM (kiểm định McNemar
+$p = 6{,}7\times10^{-21}$), ổn định trên ba seed, và cao hơn kết quả công bố tốt nhất
+trước đây (EM 25,48). Thí nghiệm giai thừa $2\times2$ cho thấy lợi ích chỉ xuất hiện
+khi OCR có mặt cả lúc huấn luyện lẫn lúc suy luận (tương tác $+4{,}9$ EM): đóng góp
+nằm ở việc dạy mô hình dùng OCR, không ở việc thêm OCR vào prompt.
+
+Khóa luận có ablation, phân tích lỗi tự động đối chiếu với duyệt tay mù, và đo
+hallucination bằng POPE-vi, một bộ 4.985 câu hỏi tiếng Việt do nhóm xây. Kết quả cho
+thấy EM đánh giá thấp mô hình (khoảng 55\% lỗi EM là đúng ý), lỗi đọc chữ tiếng Việt
+còn chiếm khoảng 17 điểm EM, và hallucination chỉ chiếm khoảng 2--4\% câu trả lời.
+Mọi lần chạy dùng một GPU L4 với VRAM dưới 8,4~GB, có log và gói tái lập. Hệ thống
+được đóng gói thành một prototype web trả lời kèm chữ OCR làm bằng chứng.
+
+\vspace{1em}
+\noindent\textbf{Từ khóa:} Vietnamese VQA, vision-language model, QLoRA,
+parameter-efficient fine-tuning, OCR, scene text, hallucination.
+
 \end{abstract}

@@ -2,6 +2,160 @@
 
 \chapter{Gói tái lập}
 \label{appendix:repro}
+\sloppy
 
-\textit{[Chưa viết. Nội dung dự kiến: cấu trúc repo, môi trường, các mô hình
-chính thức và mã băm adapter, lệnh chạy lại từng bảng kết quả.]}
+Phụ lục này giúp một người không thuộc nhóm dựng lại mọi số chính thức của khóa
+luận và chạy được prototype, chỉ từ kho mã và thư mục dữ liệu trên Google Drive.
+Hướng dẫn đầy đủ nằm trong file \path{docs/REPRODUCE.md} của kho mã
+\path{github.com/PLHGNAOH/ViVQA-VLM}.
+
+\section{Thành phần}
+
+\begin{table}[htbp]
+\caption{Thành phần của gói tái lập}
+\label{tab:repro-parts}
+\centering
+\small
+\begin{tabular}{p{0.22\textwidth}p{0.68\textwidth}}
+\toprule
+\textbf{Thành phần} & \textbf{Vị trí} \\
+\midrule
+Mã nguồn & \path{src/} (data, adaptation, eval, prompting, prototype) \\
+Adapter LoRA & Drive \path{ViVQA-VLM/adapters/<run>/epoch_N/}, khoảng 30~MB mỗi adapter, không đưa lên git; mã băm SHA-256 ghi trong \path{configs/official_models.json} \\
+Cấu hình & \path{configs/qwen_lora.yaml} (mô hình, lượng tử hóa, LoRA, huấn luyện, đánh giá); \path{configs/pope_vi_objects.json}; cấu hình OCR đóng băng trong \path{experiments/W08_ocr_select_dev300_L4_seed42/} \\
+Script suy luận & \texttt{python -m src.prototype.infer} (dòng lệnh) và \texttt{python -m src.prototype.app} (giao diện Gradio) \\
+Log thí nghiệm & \path{experiments/<run>/}: \path{metrics.json}, \path{predictions.json}, \path{run_signature.json}, \path{train_log.json} \\
+Môi trường & \path{requirements-colab.txt} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Môi trường}
+
+Mọi lần chạy dùng Google Colab Pro: GPU L4 24~GB cho huấn luyện, đánh giá và
+prototype; GPU T4 cho dựng cache OCR. Thư viện chính: PyTorch 2.11.0 (CUDA 13.0,
+bản Colab cài sẵn), Transformers 5.17.0, PEFT 0.21.2, bitsandbytes 0.50.2,
+Accelerate 1.15.0, qwen-vl-utils 0.0.14 và Gradio 6.31.0. Hai lưu ý khi cài đặt:
+
+\begin{itemize}
+  \item \textbf{PaddleOCR GPU cài chung với PyTorch} có thể ghi đè thư viện NCCL
+  của PyTorch làm \texttt{import torch} hỏng. Các notebook có sẵn quy trình bốn
+  bước: ghi lại các gói \texttt{nvidia-*} của PyTorch, cài Paddle, cài lại NCCL
+  của PyTorch, rồi kiểm cả hai trong tiến trình riêng.
+  \item \textbf{VietOCR} cài bằng \texttt{pip install --no-deps vietocr==0.3.13},
+  vì bản trên PyPI khóa phiên bản Pillow cũ.
+\end{itemize}
+
+Mỗi notebook được mở từ GitHub trên Colab, chọn đúng loại GPU ghi ở đầu notebook
+rồi chạy toàn bộ. Notebook tự kiểm mã băm của dữ liệu, cache OCR và adapter trước
+khi dùng GPU.
+
+\section{Dữ liệu}
+
+\begin{itemize}
+  \item \textbf{ViVQA}: \texttt{python -m src.data.prepare\_vivqa}, cho 10.799 câu
+  train, 1.200 câu val và 3.001 câu test cùng ảnh COCO.
+  \item \textbf{ViTextVQA}: kho Hugging Face có kiểm soát truy cập
+  \path{minhquan6203/ViTextVQA} (người tái lập cần tự xin quyền), dựng bằng
+  notebook \path{00_data_vitextvqa_official.ipynb}; kết quả gồm 35.159 câu train,
+  5.155 câu dev và 10.028 câu test, đáp án test lấy từ
+  \path{ViTextVQA_test_gt.json}.
+  \item \textbf{Cache OCR}: notebook \path{10_ocr_cache_vitextvqa.ipynb} trên T4;
+  biên bản kèm mã băm nằm ở
+  \path{experiments/W10_ocr_cache_fulltrain/ocr_cache_manifest.json}.
+\end{itemize}
+
+File dữ liệu dựng lại phải trùng mã băm \texttt{data\_file\_sha256} ghi cho từng
+lần chạy trong \path{configs/official_models.json}.
+
+\section{Các mô hình chính thức}
+
+Bảng~\ref{tab:repro-models} liệt kê các mô hình chính thức, notebook tái lập và mã
+băm adapter (12 ký tự đầu của SHA-256 file trọng số). Bảng gốc được sinh tự động từ
+thư mục \path{experiments/} bằng \texttt{python -m src.eval.repro\_manifest --build},
+không gõ tay.
+
+\begin{table}[htbp]
+\caption{Mô hình chính thức và notebook tái lập}
+\label{tab:repro-models}
+\centering
+\footnotesize
+\begin{tabular}{p{0.19\textwidth}p{0.24\textwidth}p{0.28\textwidth}p{0.16\textwidth}}
+\toprule
+\textbf{Mô hình} & \textbf{Kết quả chính thức} & \textbf{Notebook (L4)} & \textbf{SHA-256 adapter} \\
+\midrule
+R0 · tái lập & TextVQA val: VQA-Acc 79,60 & \path{06_r0_textvqa_repro_qwen25vl} & --- \\
+B1 · zero-shot & ViVQA EM 22,09; ViTextVQA EM 29,12 & \path{02_run_baseline_qwen25vl}, \path{08_fulltest_vitextvqa_b1_b2} & --- \\
+B2 · QLoRA & ViTextVQA EM 50,26 & \path{04_qlora_qwen25vl}, \path{08_fulltest_vitextvqa_b1_b2} & \texttt{2e7b17d18b32} \\
+C3 · QLoRA ViVQA & ViVQA EM 76,64 & \path{16_qlora_vivqa_2epoch_select_qwen25vl} & \texttt{3ceff2f7f961} \\
+B3-full · QLoRA nhận biết OCR & ViTextVQA EM 53,35 & \path{18_qlora_ocr_b3full_vs_b2_qwen25vl} & \texttt{c1eb9c2b4baf} \\
+SH · dùng chung (prototype) & ViVQA EM 73,51; ViTextVQA test2000 EM 49,50 & \path{20_qlora_shared_adapter_qwen25vl} & \texttt{c9791e961aaa} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Lệnh chạy}
+
+Mọi notebook gọi hai lệnh nền dưới đây với tham số ghi sẵn. Ví dụ cho B3-full:
+
+\begin{small}
+\begin{verbatim}
+python -m src.adaptation.train_qlora --dataset vitextvqa_official \
+    --run_name <run> --epochs 1 --save_steps 100 \
+    --mode ocr --ocr_backend paddledet_vietocr --ocr_template v1 \
+    --ocr_max_chars 600 --ocr_min_conf 0.0
+
+python -m src.eval.run_baseline --dataset vitextvqa_official \
+    --data_file <.../test.json> --run_name <run_eval> --chunk 500 \
+    --adapter <Drive>/adapters/<run>/epoch_1 \
+    --mode ocr --ocr_backend paddledet_vietocr --ocr_template v1 \
+    --ocr_max_chars 600 --ocr_min_conf 0.0
+\end{verbatim}
+\end{small}
+
+Bỏ các tham số OCR (\texttt{--mode ocr} và \texttt{--ocr\_*}) thì thành B2 hoặc C3;
+bỏ \texttt{--adapter} thì thành B1. Cấu hình chung (bf16, 4-bit NF4, tối đa 401.408
+điểm ảnh, greedy, tối đa 32 token sinh, seed 42, LoRA $r = 16$ trên q, k, v, o) nằm
+trong \path{configs/qwen_lora.yaml}. File \path{run_signature.json} ngăn việc chạy
+tiếp một lần chạy dở bằng cấu hình khác.
+
+Các phân tích (bảng đánh giá đầy đủ, kiểm định ghép cặp, ba seed, thí nghiệm
+$2\times2$, ablation LoRA, POPE-vi, phân tích lỗi, kiểm tra EXIF) chỉ cần CPU và đọc
+lại \path{predictions.json}; lệnh và notebook tương ứng được liệt kê trong
+\path{docs/REPRODUCE.md}, mục 5.
+
+\section{Prototype}
+
+Giao diện chạy bằng notebook \path{28_prototype_v2_live_demo_sh_qwen25vl.ipynb} trên
+L4; notebook kiểm lại các luật R-OCR và R-LIVE rồi mở đường dẫn Gradio. Có thể chạy
+bằng dòng lệnh:
+
+\begin{small}
+\begin{verbatim}
+python -m src.prototype.infer --official sh \
+    --drive_root /content/drive/MyDrive/ViVQA-VLM \
+    --image image.jpg --question "<cau hoi>" --out result.jsonl
+\end{verbatim}
+\end{small}
+
+Tham số \texttt{--official sh} tự lấy adapter SH và kiểm mã băm; thêm
+\texttt{--mock} để thử mà không cần GPU.
+
+\section{Độ tất định và giới hạn đã biết}
+
+Đánh giá dùng greedy và chạy từng câu. Chạy lại trên cùng loại GPU (L4) cho dự đoán
+trùng 100\% (ví dụ 9.902/9.902 câu ở lần kiểm tra tuần 14). Đổi loại GPU (T4 và L4)
+có thể làm OCR lệch nhẹ ở vài ảnh, nên cần dùng đúng loại GPU ghi trong notebook.
+Các giới hạn đã biết:
+
+\begin{enumerate}
+  \item Một số thư viện (bitsandbytes, Accelerate, qwen-vl-utils) không được ghi vào
+  log của từng lần chạy mà chỉ có trong ảnh chụp môi trường; hai lần ghi khớp nhau.
+  \item PyTorch là bản Colab cài sẵn; nếu Colab đổi bản mặc định, cần cài đúng phiên
+  bản ghi trong log.
+  \item Cache OCR chính thức có lỗi EXIF ở 1,256\% câu test ViTextVQA; số chính thức
+  giữ nguyên, kết quả sau khi sửa được báo như phân tích độ nhạy
+  (mục~\ref{sec:res-exif}). Muốn tái lập đúng cache chính thức, dùng mã nguồn trước
+  khi sửa (commit \texttt{b9f7fd4}).
+  \item ViTextVQA có kiểm soát truy cập: người tái lập phải tự xin quyền.
+\end{enumerate}
