@@ -1,4 +1,5 @@
-# Khoá luận trên Overleaf
+#- Máy mới: chạy `miktex packages install ieeetran` một lần trước khi build Full (bibtex không tự cài .bst).
+ Khoá luận trên Overleaf
 
 Bản khoá luận CHÍNH được viết trên Overleaf (project riêng của Hoàng, tạo từ template của mentor, ngày 10/11/2026).
 Google Doc "ViVQA-VLM Thesis (TV)" chỉ còn là bản lưu trữ của Chương I–II, không sửa tiếp.
