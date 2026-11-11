@@ -34,7 +34,7 @@ Google Doc "ViVQA-VLM Thesis (TV)" chỉ còn là bản lưu trữ của Chươn
 - Nếu vẫn hết giờ thì dùng preview PDF trong thư mục này.
 
 ## Viết trên máy (Cursor + MiKTeX)
-- Máy mới: chạy `miktex packages install ieeetran` một lần trước khi build Full (bibtex không tự cài .bst).
+- Trích dẫn hiện [?] hoặc thiếu Tài liệu tham khảo: sidebar TeX → Clean up auxiliary files, rồi Build with recipe → Full. (Nguyên nhân thường gặp: .aux dở dang do lượt build trước bị ngắt.)
 - `Ctrl+S` = build Nhanh (1 vòng pdflatex).
 - Sidebar TeX → Build with recipe → Full khi thêm `\cite`/`\label`/chương mới.
 - `Ctrl+Alt+J` và Ctrl+click để nhảy giữa source và PDF.
