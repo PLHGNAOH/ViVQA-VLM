@@ -32,3 +32,10 @@ Google Doc "ViVQA-VLM Thesis (TV)" chỉ còn là bản lưu trữ của Chươn
 - Lần đầu biên dịch lần lượt từng dòng `\includeonly` (bỏ `%` ở đúng một dòng mỗi lần).
 - Sau đó comment lại cả 3 dòng để biên dịch bản đầy đủ.
 - Nếu vẫn hết giờ thì dùng preview PDF trong thư mục này.
+
+## Viết trên máy (Cursor + MiKTeX)
+- `Ctrl+S` = build Nhanh (1 vòng pdflatex).
+- Sidebar TeX → Build with recipe → Full khi thêm `\cite`/`\label`/chương mới.
+- `Ctrl+Alt+J` và Ctrl+click để nhảy giữa source và PDF.
+- Chốt mốc = chép `thesis.pdf` thành preview có ngày rồi commit.
+- Overleaf gói miễn phí giới hạn 10 giây nên không còn dùng để build bản đầy đủ.

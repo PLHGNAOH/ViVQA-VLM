@@ -1,0 +1,39 @@
+{
+  "latex-workshop.latex.tools": [
+    {
+      "name": "pdflatex",
+      "command": "pdflatex",
+      "args": ["-synctex=1", "-interaction=nonstopmode", "-file-line-error", "-enable-installer", "%DOCFILE%"]
+    },
+    {
+      "name": "bibtex",
+      "command": "bibtex",
+      "args": ["%DOCFILE%"]
+    },
+    {
+      "name": "makeindex",
+      "command": "makeindex",
+      "args": ["%DOCFILE%.idx"]
+    },
+    {
+      "name": "nomencl",
+      "command": "makeindex",
+      "args": ["%DOCFILE%.nlo", "-s", "nomencl.ist", "-o", "%DOCFILE%.nls"]
+    }
+  ],
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "Nhanh (1 vòng)",
+      "tools": ["pdflatex"]
+    },
+    {
+      "name": "Full (4 vòng)",
+      "tools": ["pdflatex", "bibtex", "makeindex", "nomencl", "pdflatex", "nomencl", "pdflatex", "pdflatex"]
+    }
+  ],
+  "latex-workshop.latex.recipe.default": "first",
+  "latex-workshop.latex.autoBuild.run": "onSave",
+  "latex-workshop.view.pdf.viewer": "tab",
+  "latex-workshop.latex.autoClean.run": "never",
+  "latex-workshop.message.warning.show": false
+}
