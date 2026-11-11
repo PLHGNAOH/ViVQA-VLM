@@ -574,7 +574,7 @@ supported!}
   \RequirePackage[T1]{fontenc}
   
   % If building with PDFLaTeX, use microtype spacing adjustments
-  \RequirePackage[final]{microtype}
+  \RequirePackage[final,expansion=false]{microtype} % tắt font expansion để biên dịch nhanh hơn (gói Overleaf miễn phí)
   
   \input{glyphtounicode}
   \pdfglyphtounicode{f_f}{FB00}

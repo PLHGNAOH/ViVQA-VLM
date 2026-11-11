@@ -16,14 +16,19 @@ Google Doc "ViVQA-VLM Thesis (TV)" chỉ còn là bản lưu trữ của Chươn
 | Appendix B | Gói tái lập | Đã viết (VI) |
 - Tóm tắt (Abstract) đã viết (VI). Trang Dedication đang tắt trong thesis.tex (template còn chữ mẫu).
 - Hình: Chapter3/Figs (4 hình khổ ngang, sidewaysfigure, cần gói rotating đã bật trong preamble), Chapter4/Figs (2 biểu đồ PDF).
-- Snapshot hiện tại: v2 (11/11/2026), biên dịch 94 trang, 0 lỗi.
+- Snapshot hiện tại: v3 (11/11/2026): tắt microtype expansion, ảnh Ch3 2600 px, thêm 3 dòng %\includeonly; biên dịch nhanh hơn trên Overleaf gói miễn phí.
 
 ## Ngôn ngữ
 - Viết tiếng Việt trước. Preamble/preamble.tex: `\thesisvitrue` = tiếng Việt, `\thesisvifalse` = tiếng Anh.
 - Bản tiếng Anh đã có của các phần đã duyệt nằm trong source_vi/_EN_draft/ (không được biên dịch).
 
 ## Thư mục này
-- source_vi/: snapshot mã nguồn LaTeX tải từ Overleaf (Menu → Download → Download as source (.zip)).
+- source_vi/ = bản VI v3 (11/11/2026): tắt microtype expansion, ảnh Ch3 2600 px, thêm 3 dòng %\includeonly.
 - *_preview.pdf: bản PDF biên dịch thử tại thời điểm snapshot.
 - Cập nhật snapshot: tải source zip mới từ Overleaf, giải nén đè source_vi/, commit.
 - Template gốc của mentor: G:\My Drive\ViVQA-VLM\thesis\template_original\ (không đưa lên repo).
+
+## Biên dịch trên Overleaf gói miễn phí
+- Lần đầu biên dịch lần lượt từng dòng `\includeonly` (bỏ `%` ở đúng một dòng mỗi lần).
+- Sau đó comment lại cả 3 dòng để biên dịch bản đầy đủ.
+- Nếu vẫn hết giờ thì dùng preview PDF trong thư mục này.
