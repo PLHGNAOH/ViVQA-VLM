@@ -24,19 +24,19 @@ Google Doc "ViVQA-VLM Thesis (TV)" chỉ còn là bản lưu trữ của Chươn
 
 ## Thư mục này
 - source_vi/ = bản VI v3 (11/11/2026): tắt microtype expansion, ảnh Ch3 2600 px, thêm 3 dòng %\includeonly.
-- *_preview.pdf: bản PDF biên dịch thử tại thời điểm snapshot.
+- ViVQA-VLM_Thesis_VI.pdf: bản PDF đầy đủ MỚI NHẤT của luận văn (chỉ giữ 1 file; bản cũ xem trong lịch sử git).
 - Cập nhật snapshot: tải source zip mới từ Overleaf, giải nén đè source_vi/, commit.
 - Template gốc của mentor: G:\My Drive\ViVQA-VLM\thesis\template_original\ (không đưa lên repo).
 
 ## Biên dịch trên Overleaf gói miễn phí
 - Lần đầu biên dịch lần lượt từng dòng `\includeonly` (bỏ `%` ở đúng một dòng mỗi lần).
 - Sau đó comment lại cả 3 dòng để biên dịch bản đầy đủ.
-- Nếu vẫn hết giờ thì dùng preview PDF trong thư mục này.
+- Nếu vẫn hết giờ thì dùng ViVQA-VLM_Thesis_VI.pdf trong thư mục này.
 
 ## Viết trên máy (Cursor + MiKTeX)
 - Trích dẫn hiện [?] hoặc thiếu Tài liệu tham khảo: sidebar TeX → Clean up auxiliary files, rồi Build with recipe → Full. (Nguyên nhân thường gặp: .aux dở dang do lượt build trước bị ngắt.)
 - `Ctrl+S` = build Nhanh (1 vòng pdflatex).
 - Sidebar TeX → Build with recipe → Full khi thêm `\cite`/`\label`/chương mới.
 - `Ctrl+Alt+J` và Ctrl+click để nhảy giữa source và PDF.
-- Chốt mốc = chép `thesis.pdf` thành preview có ngày rồi commit.
+- Sau mỗi lần sửa: build Full rồi GHI ĐÈ `thesis.pdf` lên `../ViVQA-VLM_Thesis_VI.pdf` và commit. Không tạo bản PDF có ngày.
 - Overleaf gói miễn phí giới hạn 10 giây nên không còn dùng để build bản đầy đủ.
