@@ -27,7 +27,97 @@
 \nomenclature[z-POPE]{POPE}{Polling-based Object Probing Evaluation: đo hallucination bằng câu hỏi có/không}
 \nomenclature[z-SOTA]{SOTA}{State of the art: kết quả tốt nhất đã công bố}
 
+Chương này giới thiệu đề tài theo thứ tự từ vấn đề đến giải pháp.
+Mục~\ref{sec:intro-overview} nêu thông tin chung và hình dung tổng quát về hệ
+thống. Mục~\ref{sec:intro-background} trình bày bối cảnh: hỏi đáp trên ảnh, nhu
+cầu đọc chữ tiếng Việt trong ảnh, những khó khăn riêng của tiếng Việt và ràng buộc
+tài nguyên. Mục~\ref{sec:intro-problem} phát biểu bài toán và tách nó thành các
+bài toán con. Các mục~\ref{sec:intro-gaps} đến~\ref{sec:intro-significance} nêu
+khoảng trống nghiên cứu, mục tiêu, câu hỏi nghiên cứu, giả thuyết, đóng góp và ý
+nghĩa của đề tài. Mục~\ref{sec:intro-scope} xác định phạm vi và giới hạn. Các
+mục~\ref{sec:intro-team} và~\ref{sec:intro-pm} tóm tắt cách nhóm tổ chức và quản
+lý dự án; chi tiết nằm ở Phụ lục~\ref{appendix:pm}.
+
 %********************************** Mục 1.1 ************************************
+\section{Tổng quan}
+\label{sec:intro-overview}
+
+\subsection{Thông tin đề tài}
+
+\begin{itemize}
+  \item \textbf{Tên đề tài:} Nghiên cứu hệ thống hỏi đáp trực quan tiếng Việt hiệu
+  quả sử dụng mô hình Vision-Language.
+  \item \textbf{Tên tiếng Anh:} Efficient Vietnamese Visual Question Answering
+  using Vision-Language Models.
+  \item \textbf{Tên viết tắt:} ViVQA-VLM.
+  \item \textbf{Mã đề tài:} FA26AI29. \textbf{Mã nhóm:} GFA26AI35.
+  \item \textbf{Học phần:} AIP491, khóa luận tốt nghiệp ngành Trí tuệ nhân tạo,
+  Trường Đại học FPT.
+  \item \textbf{Thời gian thực hiện:} 15 tuần, từ ngày 07/09/2026 đến tháng
+  12/2026.
+  \item \textbf{Thành viên:}
+  \begin{itemize}
+    \item Phạm Lê Huy Hoàng (SE182670), trưởng nhóm, phụ trách PEFT / Training;
+    \item Hồ Đắc Toàn (SE183249), phụ trách VLM / Baseline;
+    \item Trần Quốc Huân (SE193642), phụ trách Dataset / OCR;
+    \item Văn Quang Trường (SE182458), phụ trách Evaluation / Deployment.
+  \end{itemize}
+  \item \textbf{Giảng viên hướng dẫn:} PGS. Đặng Ngọc Minh Đức và thầy Phạm Minh
+  Trí.
+\end{itemize}
+
+\subsection{Tổng quan đề tài}
+
+Ảnh chụp bằng điện thoại ngày càng trở thành một cách tra cứu thông tin: người
+dùng chụp một biển hiệu, một hộp thuốc hay một tờ thực đơn rồi muốn hỏi ngay
+``cửa hàng này tên gì?'', ``số điện thoại là bao nhiêu?''. Bài toán đứng sau nhu
+cầu đó là hỏi đáp trên ảnh (Visual Question Answering, VQA). Các vision-language
+model (VLM) mã nguồn mở hiện nay giải bài toán này khá tốt với tiếng Anh, nhưng
+với tiếng Việt chúng thường trả lời bằng tiếng Anh, trả lời dài dòng, đọc mất dấu
+hoặc nói về những thứ không có trong ảnh.
+
+Đề tài này nghiên cứu cách thích nghi một VLM mã nguồn mở cho hỏi đáp trên ảnh
+tiếng Việt với chi phí nhỏ: chỉ huấn luyện thêm một adapter rất nhỏ, mô hình nền
+giữ nguyên, và mọi thí nghiệm chạy trên một GPU Google Colab. Hệ thống làm được
+bốn việc chính:
+
+\begin{itemize}
+  \item trả lời câu hỏi tiếng Việt về nội dung chung của ảnh (màu sắc, số lượng,
+  vật thể, vị trí) bằng câu trả lời ngắn, đúng định dạng;
+  \item đọc chữ tiếng Việt có dấu trên biển hiệu, nhãn hàng, bảng giá để trả lời
+  câu hỏi cần đọc chữ;
+  \item hiển thị kèm dòng chữ OCR đọc được từ ảnh và mức tin cậy, để người dùng
+  tự kiểm tra câu trả lời;
+  \item chạy trên một GPU với bộ nhớ dưới 8,4~GB khi huấn luyện và dưới 5~GB khi
+  dùng prototype.
+\end{itemize}
+
+Hình~\ref{fig:intro-overview} cho thấy hệ thống từ góc nhìn người dùng. Đầu vào
+là một ảnh và một câu hỏi tiếng Việt. Nếu ảnh có chữ, PaddleOCR~\cite{du2020ppocr}
+dò các vùng chữ và VietOCR~\cite{vietocr} đọc chúng, giữ nguyên dấu; dòng chữ này
+được ghép vào prompt cùng ảnh và câu hỏi. Mô hình nền
+Qwen2.5-VL-3B-Instruct~\cite{bai2025qwen25vl} được nén 4-bit và đóng băng; nhóm
+chỉ huấn luyện một adapter LoRA chiếm 0,196\% số tham số. Đầu ra là câu trả lời
+tiếng Việt ngắn, kèm chữ OCR làm bằng chứng khi có.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{intro_overview.png}
+\caption{Tổng quan hệ thống ViVQA-VLM với một ví dụ của mỗi bộ dữ liệu. Cột phải
+là đáp án gold của hai câu hỏi; ô màu cam là chữ OCR thật của ảnh ViTextVQA
+16267.jpg, vẫn còn lỗi dấu. Chi tiết từng bước nằm ở Chương~\ref{chap:methods}.}
+\label{fig:intro-overview}
+\end{figure}
+
+Đề tài được định hướng là một nghiên cứu có thể tái lập, không phải một ứng dụng
+demo. Vì vậy, trước khi cải tiến, nhóm tái lập baseline trên một benchmark có số
+đã công bố; mọi cải tiến đều được so với baseline dưới cùng điều kiện, có kiểm
+định thống kê, ablation, phân tích lỗi và đo hallucination. Sản phẩm của đề tài
+gồm ba phần: mô hình đã thích nghi cho tiếng Việt, một prototype web đã được kiểm
+chứng cho cùng câu trả lời với đường đánh giá, và khóa luận kèm gói tái lập (mã
+nguồn, adapter, cấu hình, script suy luận, log của mọi lần chạy).
+
+%********************************** Mục 1.2 ************************************
 \section{Bối cảnh và động lực}
 \label{sec:intro-background}
 
@@ -38,12 +128,35 @@ ngữ tự nhiên dựa trên nội dung ảnh~\cite{antol2015vqa}. Khác với 
 hay phát hiện vật thể, VQA cần hiểu đồng thời ảnh, ngữ nghĩa câu hỏi và đôi khi
 cả chữ xuất hiện trong ảnh~\cite{singh2019textvqa,biten2019stvqa}. Các hệ thống
 VQA ban đầu ghép một bộ mã hóa ảnh (CNN) với một bộ mã hóa câu hỏi (LSTM) và
-chọn đáp án từ một tập cố định. Các vision-language model (VLM) gần đây như
-BLIP-2~\cite{li2023blip2}, LLaVA~\cite{liu2023llava},
-Florence-2~\cite{xiao2024florence2} và Qwen2.5-VL~\cite{bai2025qwen25vl} thay
-đổi cách tiếp cận: một bộ mã hóa ảnh biến ảnh thành chuỗi token, một mô hình
-ngôn ngữ lớn đọc chuỗi đó cùng câu hỏi và sinh câu trả lời tự do. Các VLM này
-trả lời được câu hỏi mở và đọc được chữ trong ảnh ở mức zero-shot.
+chọn đáp án từ một tập cố định. Cách này hợp với câu hỏi như ``có mấy con mèo?''
+nhưng không hợp với câu hỏi cần đọc chữ: tên một cửa hàng chưa từng xuất hiện
+trong tập huấn luyện sẽ không bao giờ có trong tập đáp án.
+
+Nhánh VQA đọc chữ trong ảnh (scene-text VQA) ra đời để giải quyết vấn đề này.
+TextVQA~\cite{singh2019textvqa} và ST-VQA~\cite{biten2019stvqa} đưa ra các câu
+hỏi mà đáp án phải đọc từ chữ trong ảnh, còn M4C~\cite{hu2020m4c} cho phép mô
+hình sao chép từ ngữ trong kết quả OCR vào câu trả lời. Các vision-language model
+gần đây như BLIP-2~\cite{li2023blip2}, LLaVA~\cite{liu2023llava},
+Florence-2~\cite{xiao2024florence2} và Qwen2.5-VL~\cite{bai2025qwen25vl} thay đổi
+cách tiếp cận: một bộ mã hóa ảnh biến ảnh thành chuỗi token, một mô hình ngôn ngữ
+lớn đọc chuỗi đó cùng câu hỏi và sinh câu trả lời tự do. Các VLM này trả lời được
+câu hỏi mở và đọc được chữ trong ảnh ngay ở mức zero-shot, tức là không cần huấn
+luyện thêm cho tác vụ cụ thể.
+
+\subsection{Nhu cầu đọc chữ tiếng Việt trong ảnh}
+
+Chữ tiếng Việt xuất hiện khắp nơi trong ảnh đời thường: biển hiệu cửa hàng, bảng
+giá, thực đơn, nhãn hàng hóa, biển chỉ đường, giấy tờ. Nhiều câu hỏi người dùng
+đặt ra về những ảnh này chỉ trả lời được bằng cách đọc đúng chữ: tên cửa hàng,
+địa chỉ, số điện thoại, giá tiền, hạn sử dụng. Với những câu hỏi này, câu trả lời
+gần đúng thường là sai: một chữ số sai trong số điện thoại hay một dấu thanh sai
+trong tên riêng làm câu trả lời mất giá trị.
+
+Một hệ thống hỏi đáp trên ảnh tiếng Việt đáng tin cậy có thể làm nền cho nhiều
+ứng dụng: công nghệ hỗ trợ người khiếm thị đọc thông tin xung quanh, tra cứu
+nhanh thông tin từ ảnh chụp, và số hóa nội dung từ ảnh. Các ứng dụng này cần hệ
+thống không chỉ hiểu ảnh mà còn đọc đúng chữ có dấu và trả lời bằng tiếng Việt
+tự nhiên.
 
 \subsection{Tiếng Việt với các VLM thiên tiếng Anh}
 
@@ -53,30 +166,65 @@ V1--V4 và dùng xuyên suốt khóa luận:
 
 \begin{description}
   \item[V1, đọc chữ có dấu trong ảnh.] Dấu thanh là nét rất nhỏ; đọc sai một
-  dấu là đổi nghĩa (``BÁNH MÌ'' đọc thành ``banh mi'').
+  dấu là đổi nghĩa (``BÁNH MÌ'' đọc thành ``banh mi''). Vấn đề này nặng hơn khi
+  ảnh phải thu nhỏ để giới hạn số token ảnh, vì nét dấu có thể chỉ còn vài điểm
+  ảnh. Nhiều công cụ OCR được huấn luyện cho chữ Latin cũng làm rơi dấu.
   \item[V2, sai ngôn ngữ hoặc sai định dạng.] Mô hình trả lời bằng tiếng Anh,
-  chen chữ Trung, hoặc trả lời cả câu dài trong khi đáp án chỉ vài từ.
+  chen chữ Trung, hoặc trả lời cả câu dài trong khi đáp án chỉ vài từ. Ví dụ, với
+  câu hỏi ``đây là bảo tàng gì?'', mô hình trả lời ``Bảo tàng Lịch sử Quốc gia.''
+  trong khi đáp án là ``lịch sử quốc gia''. Câu trả lời đúng ý nhưng không khớp
+  đáp án, nên bị chấm sai theo Exact Match.
   \item[V3, thứ tự chữ và ranh giới từ.] Khoảng trắng trong tiếng Việt tách âm
   tiết, không tách từ; đọc sai thứ tự các vùng chữ là vỡ từ (``cửa hàng điện
-  thoại'' thành ``cửa điện hàng thoại'').
+  thoại'' thành ``cửa điện hàng thoại''). Một biển hiệu thường có nhiều dòng chữ,
+  nên mô hình còn phải chọn đúng cụm chữ cần trả lời và cắt đúng ranh giới của
+  cụm đó.
   \item[V4, hallucination.] Câu trả lời trôi chảy nhưng nói về vật hoặc chữ
-  không có trong ảnh.
+  không có trong ảnh. Vì câu trả lời nghe hợp lý, người dùng khó tự phát hiện
+  lỗi, nên vấn đề này ảnh hưởng trực tiếp đến độ tin cậy của hệ thống.
 \end{description}
 
 Với dữ liệu tiếng Việt, khoảng cách giữa máy và người còn lớn: trên
 ViTextVQA~\cite{nguyen2024vitextvqa}, kết quả công bố tốt nhất trước khóa luận
-này là EM 25,48, trong khi người đạt 88,00.
+này là EM 25,48, trong khi người đạt 88,00. Mỗi vấn đề V1--V4 được đo bằng số
+liệu cụ thể ở Chương~\ref{chap:results} và tổng hợp lại ở
+Chương~\ref{chap:discussion}.
+
+\subsection{Thích nghi mô hình lớn với chi phí nhỏ}
+
+Cách thông thường để đưa một mô hình đã tiền huấn luyện vào một tác vụ mới là
+fine-tune toàn bộ tham số. Với một VLM vài tỉ tham số, cách này cần lưu trọng số,
+gradient và trạng thái optimizer cho mọi tham số, tức cần nhiều GPU dung lượng
+lớn. Parameter-efficient fine-tuning (PEFT) giải quyết vấn đề này bằng cách giữ
+nguyên mô hình nền và chỉ huấn luyện một phần rất nhỏ tham số thêm vào, ví dụ
+adapter~\cite{houlsby2019adapter,sung2022vladapter} hoặc LoRA~\cite{hu2022lora}.
+LoRA thêm vào mỗi lớp tuyến tính hai ma trận hạng thấp và chỉ huấn luyện hai ma
+trận đó. QLoRA~\cite{dettmers2023qlora} đi thêm một bước: mô hình nền được lượng
+tử hóa 4-bit để giảm bộ nhớ, trong khi adapter LoRA vẫn được huấn luyện ở độ
+chính xác cao hơn.
+
+Nhờ QLoRA, việc thích nghi một VLM 3 tỉ tham số trở nên khả thi trên một GPU phổ
+thông. Câu hỏi còn bỏ ngỏ là cách làm này hiệu quả đến đâu với tiếng Việt, và
+nên đưa thêm thông tin gì vào quá trình thích nghi để mô hình đọc chữ tiếng Việt
+tốt hơn. Đây là điểm xuất phát của đề tài.
 
 \subsection{Ràng buộc tài nguyên}
 
 Huấn luyện lại toàn bộ một VLM vài tỉ tham số (full fine-tuning) cần nhiều GPU
 dung lượng lớn, vượt quá điều kiện của một nhóm sinh viên. Trường không có máy
-chủ GPU cho đề tài, nên mọi thí nghiệm chạy trên Google Colab. Đề tài vì vậy đặt
-hiệu quả thành một ràng buộc thiết kế tường minh: chỉ dùng parameter-efficient
-fine-tuning (LoRA~\cite{hu2022lora}, QLoRA~\cite{dettmers2023qlora}) và báo cáo
-kèm thời gian huấn luyện, thời gian suy luận và bộ nhớ GPU cho mọi kết quả.
+chủ GPU cho đề tài, nên mọi thí nghiệm chạy trên Google Colab, chủ yếu trên một
+GPU NVIDIA L4 24~GB. Ngân sách tính toán là hữu hạn: một lần huấn luyện QLoRA
+trên toàn bộ ViTextVQA mất khoảng 12 giờ L4, nên số lần huấn luyện đầy đủ là ràng
+buộc lớn nhất của kế hoạch thí nghiệm.
 
-%********************************** Mục 1.2 ************************************
+Đề tài vì vậy đặt hiệu quả thành một ràng buộc thiết kế tường minh: chỉ dùng
+parameter-efficient fine-tuning (LoRA~\cite{hu2022lora},
+QLoRA~\cite{dettmers2023qlora}) và báo cáo kèm thời gian huấn luyện, thời gian suy
+luận và bộ nhớ GPU cho mọi kết quả. Ràng buộc này cũng ảnh hưởng đến các lựa chọn
+thiết kế khác, ví dụ số token ảnh tối đa (Chương~\ref{chap:methods}): mỗi lựa
+chọn được đo chi phí trước khi chốt, thay vì chọn cấu hình lớn nhất có thể chạy.
+
+%********************************** Mục 1.3 ************************************
 \section{Phát biểu bài toán}
 \label{sec:intro-problem}
 
@@ -95,9 +243,75 @@ chuẩn hóa văn bản. Hai bộ dữ liệu đặt ra hai yêu cầu khác nha
 
 Với ví dụ của ViVQA, câu hỏi ``màu của xe đạp là gì?'' có đáp án ``màu đỏ''. Với
 ví dụ của ViTextVQA, câu hỏi ``cửa hàng có biển màu vàng là nơi nào?'' có đáp án
-``đại lý xổ số miền Bắc'', chữ lấy trực tiếp từ biển hiệu.
+``đại lý xổ số miền Bắc'', chữ lấy trực tiếp từ biển hiệu
+(Hình~\ref{fig:intro-overview}). Hàm $f$ phải được xây dựng bằng cách thích nghi
+một VLM mã nguồn mở chỉ bằng PEFT, chạy trên một GPU Colab. Bài toán chung này
+được tách thành năm bài toán con dưới đây.
 
-%********************************** Mục 1.3 ************************************
+\subsection{Trả lời đúng định dạng và đúng ngôn ngữ}
+
+Bài toán con đầu tiên là làm cho mô hình trả lời đúng kiểu đáp án của từng bộ dữ
+liệu: ngắn, bằng tiếng Việt, không giải thích thêm. Ở chế độ zero-shot, câu trả
+lời của mô hình dài trung bình 2,9 từ so với 1,6 từ của đáp án trên ViVQA, và
+5,4 từ so với 3,7 từ trên ViTextVQA; 18\% câu ViTextVQA có câu trả lời chứa đúng
+đáp án nhưng vẫn trượt EM. Nếu không giải quyết vấn đề định dạng này, mọi so
+sánh khác đều bị che lấp bởi lỗi định dạng.
+
+\subsection{Đọc chữ tiếng Việt có dấu trong ảnh}
+
+Bài toán con thứ hai là đọc đúng chữ có dấu. Để giới hạn chi phí, mỗi ảnh được
+biểu diễn bằng tối đa 512 token ảnh; 57,7\% ảnh ViTextVQA chạm mức trần này và
+phải thu nhỏ, khiến nét dấu càng khó nhận ra. Dùng một công cụ OCR riêng để đọc
+chữ từ ảnh gốc là một hướng bù lại, nhưng công cụ OCR cũng có thể làm rơi dấu: bộ
+nhận dạng Latin của PaddleOCR đọc ``Kiểu Thẩm'' thành ``Kiu Thm''. Câu hỏi đặt ra
+là chọn công cụ OCR nào và đưa kết quả OCR vào mô hình như thế nào.
+
+\subsection{Thứ tự đọc và ranh giới cụm chữ}
+
+Một ảnh ViTextVQA thường có nhiều vùng chữ: tên cửa hàng, khẩu hiệu, số điện
+thoại, địa chỉ. Bài toán con thứ ba là sắp các vùng chữ theo đúng thứ tự đọc, rồi
+chọn đúng cụm chữ và cắt đúng ranh giới cụm cần trả lời. Ví dụ, đáp án là ``ủy
+ban nhân dân quận 2'' nhưng mô hình chỉ trả lời ``nhân dân quận 2'': đọc đúng chữ
+nhưng cắt sai ranh giới, nên vẫn bị chấm sai.
+
+\subsection{Hạn chế hallucination}
+
+Bài toán con thứ tư là bảo đảm việc thích nghi không làm mô hình bịa nội dung
+nhiều hơn. Huấn luyện mô hình trả lời ngắn và tự tin có thể vô tình khuyến khích
+mô hình trả lời cả khi ảnh không có thông tin. Trước khóa luận này chưa có bộ đo
+hallucination kiểu POPE~\cite{li2023pope} cho tiếng Việt, nên bài toán con này
+gồm cả việc xây công cụ đo.
+
+\subsection{Thích nghi và đánh giá trong giới hạn tài nguyên}
+
+Bài toán con cuối cùng là phương pháp: thích nghi mô hình với dưới 1\% tham số
+được huấn luyện trên một GPU, và đánh giá sao cho kết luận đáng tin. EM là thước
+đo khắt khe, câu trả lời đúng ý nhưng khác cách viết vẫn bị tính sai; mỗi lần
+huấn luyện đầy đủ lại tốn khoảng 12 giờ GPU, nên không thể chạy lặp nhiều lần. Do
+đó cần một giao thức đánh giá cố định, kiểm định thống kê ghép cặp trên cùng tập
+test, và thiết kế thí nghiệm sao cho mỗi bước chỉ đổi một yếu tố.
+
+\paragraph{Các yếu tố làm bài toán khó hơn.} Ngoài năm bài toán con trên, dữ liệu
+có một số đặc điểm khiến việc huấn luyện và đánh giá phức tạp hơn:
+
+\begin{itemize}
+  \item một phần đáp án gold bị sai: khi duyệt tay lỗi của mô hình, 12,5\% lỗi là
+  do gold sai, riêng ViVQA là 19\%;
+  \item câu hỏi ViVQA được dịch máy từ COCO-QA~\cite{ren2015cocoqa} nên đôi khi
+  không tự nhiên, và bộ dữ liệu không có câu hỏi có/không;
+  \item ViVQA không có tập validation, và khoảng 46\% câu test dùng ảnh đã xuất
+  hiện trong tập train, tạo nguy cơ đánh giá quá cao;
+  \item ViTextVQA không có nhãn loại câu hỏi, nên khó phân rã lỗi theo loại câu
+  hỏi;
+  \item một số ảnh chụp bằng điện thoại có cờ xoay EXIF; nếu bỏ qua cờ này, OCR
+  đọc chữ nằm nghiêng và cho ra chữ vô nghĩa.
+\end{itemize}
+
+Những đặc điểm này được đo và xử lý ở Chương~\ref{chap:methods} mà không thay đổi
+tập train và test chính thức, để kết quả vẫn so sánh được với các công trình
+trước.
+
+%********************************** Mục 1.4 ************************************
 \section{Khoảng trống nghiên cứu}
 \label{sec:intro-gaps}
 
@@ -116,9 +330,19 @@ trống:
   kiểu POPE~\cite{li2023pope} bằng tiếng Việt.
 \end{description}
 
-Khóa luận tập trung vào G3 và dùng G2, G4 làm nơi kiểm chứng.
+Các khoảng trống này liên quan với nhau. G1 giải thích vì sao một VLM mạnh vẫn
+cho kết quả thấp khi dùng trực tiếp cho tiếng Việt. G2 cho thấy khoảng cách lớn
+nhất nằm ở câu hỏi đọc chữ. G3 là chỗ trống về phương pháp: chưa có câu trả lời
+cho câu hỏi ``chỉ huấn luyện một adapter nhỏ trên một VLM mở thì được bao nhiêu,
+và nên huấn luyện với thông tin gì''. G4 là chỗ trống về đánh giá: không đo được
+hallucination thì không biết việc thích nghi có làm hệ thống kém tin cậy đi hay
+không.
 
-%********************************** Mục 1.4 ************************************
+Khóa luận tập trung vào G3 và dùng G2, G4 làm nơi kiểm chứng. Bảng đối chiếu từng
+khoảng trống với bằng chứng trong tài liệu và cách khóa luận xử lý được trình bày
+ở Chương~\ref{chap:related}.
+
+%********************************** Mục 1.5 ************************************
 \section{Mục tiêu}
 \label{sec:intro-objectives}
 
@@ -159,7 +383,37 @@ code, adapter, config, script suy luận \\
 \end{tabular}
 \end{table}
 
-%********************************** Mục 1.5 ************************************
+Để đạt các mục tiêu trên, nhóm đi theo một lộ trình sáu bước, trong đó mỗi bước
+chỉ thay đổi một yếu tố so với bước trước.
+
+\paragraph{Bước 1: Tái lập baseline.} Nhóm chạy lại Qwen2.5-VL-3B-Instruct trên
+TextVQA val với cấu hình gốc và so với số trong báo cáo kỹ thuật của mô hình.
+Bước này kiểm tra toàn bộ đường nạp mô hình, dựng prompt và chấm điểm trước khi
+dùng nó cho tiếng Việt.
+
+\paragraph{Bước 2: Đo zero-shot trên dữ liệu tiếng Việt.} Với cấu hình tiết kiệm
+(4-bit, tối đa 512 token ảnh), nhóm đo mô hình chưa huấn luyện trên toàn bộ tập
+test của hai bộ dữ liệu. Kết quả này là mốc so sánh cho mọi bước sau và cho biết
+lỗi tiếng Việt nào chiếm ưu thế.
+
+\paragraph{Bước 3: Thích nghi bằng QLoRA.} Nhóm huấn luyện adapter LoRA trên mô
+hình nền 4-bit, không thêm thông tin gì vào prompt, để đo riêng tác dụng của
+PEFT so với zero-shot.
+
+\paragraph{Bước 4: QLoRA nhận biết OCR.} Từ phân tích lỗi của bước 3, nhóm thêm
+dòng chữ OCR tiếng Việt vào prompt ngay trong lúc huấn luyện. Phép thử có kiểm
+soát được chạy trước trên một tập con 8.000 câu, so với QLoRA thường trên cùng
+tập con; khi kết quả đã rõ mới chạy trên toàn bộ dữ liệu.
+
+\paragraph{Bước 5: Phân tích.} Nhóm làm ablation cho từng thành phần, kiểm tra
+độ ổn định qua ba seed, phân tích lỗi tự động đối chiếu với duyệt tay, và đo
+hallucination bằng bộ POPE tiếng Việt do nhóm xây.
+
+\paragraph{Bước 6: Prototype và gói tái lập.} Nhóm đóng gói mô hình thành một
+prototype web, kiểm chứng prototype cho cùng câu trả lời với đường đánh giá, và
+chuẩn bị gói tái lập để người khác chạy lại từng con số.
+
+%********************************** Mục 1.6 ************************************
 \section{Câu hỏi nghiên cứu và giả thuyết}
 \label{sec:intro-rq}
 
@@ -174,8 +428,14 @@ code, adapter, config, script suy luận \\
   ít hơn?
 \end{description}
 
+RQ1 xác định điểm xuất phát và loại lỗi cần sửa. RQ2 là câu hỏi trung tâm, ứng
+với khoảng trống G3. RQ3 kiểm tra cải tiến đề xuất trên phần khó nhất của bài
+toán là câu hỏi đọc chữ (G2). RQ4 kiểm tra mặt trái của việc thích nghi (G4).
+
 Mỗi giả thuyết trong Bảng~\ref{tab:hypotheses} có ngưỡng định lượng được ghi lại
-trước khi chạy thí nghiệm tương ứng.
+trước khi chạy thí nghiệm tương ứng. Nhờ ngưỡng ghi trước, kết luận ``ủng hộ'',
+``ủng hộ một phần'' hay ``không ủng hộ'' được quyết định theo luật đã đặt, không
+theo cảm nhận sau khi thấy kết quả.
 
 \begin{table}[htbp]
 \caption{Giả thuyết và câu hỏi nghiên cứu tương ứng}
@@ -198,7 +458,11 @@ H4 & QLoRA không làm tăng tỉ lệ hallucination so với zero-shot. & RQ4; 
 \end{tabular}
 \end{table}
 
-%********************************** Mục 1.6 ************************************
+Kết quả cho từng câu hỏi nghiên cứu được báo cáo ở Chương~\ref{chap:results},
+phân tích nguyên nhân ở Chương~\ref{chap:discussion}, và câu trả lời tổng hợp nằm
+ở Chương~\ref{chap:conclusion}.
+
+%********************************** Mục 1.7 ************************************
 \section{Đóng góp}
 \label{sec:intro-contrib}
 
@@ -228,7 +492,9 @@ triệu tham số adapter, tức 0,196\% tổng số tham số, trên một GPU 
   chứng cho ra cùng câu trả lời với đường đánh giá chính thức.
 \end{enumerate}
 
-\subsection{Ý nghĩa của đề tài}
+%********************************** Mục 1.8 ************************************
+\section{Ý nghĩa của đề tài}
+\label{sec:intro-significance}
 
 \paragraph{Ý nghĩa khoa học.} Khóa luận cung cấp một nghiên cứu có hệ thống về
 PEFT cho VLM trên VQA tiếng Việt, gồm baseline tái lập, ablation cho từng thành
@@ -236,23 +502,62 @@ phần và kiểm định thống kê ghép cặp. Kết quả chính không ch�
 hơn mà còn là một cơ chế được tách bạch: lợi ích của OCR đến từ việc huấn luyện
 mô hình dùng OCR, không đến từ việc thêm OCR vào prompt. Nhóm cũng đưa ra bộ
 POPE tiếng Việt để đo hallucination và một phân tích có số đo cho từng vấn đề
-V1--V4.
-
-\paragraph{Ý nghĩa thực tiễn.} Hệ thống đọc và trả lời câu hỏi về biển hiệu,
-nhãn hàng, bảng giá, thực đơn và biểu mẫu tiếng Việt. Đây là chức năng nền cho
-công nghệ hỗ trợ người khiếm thị và cho các ứng dụng tra cứu thông tin từ ảnh. Vì
-chỉ cần một GPU và một adapter 29,5~MB, cách làm có thể áp dụng cho các nhóm hoặc
-tổ chức có tài nguyên hạn chế.
+V1--V4. Các kết quả này có thể dùng làm mốc so sánh cho các nghiên cứu VQA tiếng
+Việt sau.
 
 \paragraph{Ý nghĩa phương pháp.} Mọi kết luận trong khóa luận dựa trên luật
 quyết định được ghi lại trước khi chạy, kiểm định ghép cặp trên cùng tập test,
 và log đầy đủ (split, seed, GPU, thời gian). Quy trình này giúp tránh việc chọn
 kết quả sau khi đã thấy số liệu, và cho phép người khác chạy lại từng con số từ
-mã nguồn công khai.
+mã nguồn công khai. Khóa luận cũng báo cáo cả những kết quả không như kỳ vọng,
+ví dụ giả thuyết H3 không được ủng hộ, để người đọc thấy đầy đủ bức tranh.
 
-%********************************** Mục 1.7 ************************************
+\paragraph{Ý nghĩa thực tiễn.} Hệ thống đọc và trả lời câu hỏi về biển hiệu,
+nhãn hàng, bảng giá, thực đơn và biểu mẫu tiếng Việt. Đây là chức năng nền cho
+công nghệ hỗ trợ người khiếm thị và cho các ứng dụng tra cứu thông tin từ ảnh.
+Prototype trả lời kèm chữ OCR và mức tin cậy, nên người dùng có cơ sở để tự kiểm
+tra câu trả lời thay vì tin tuyệt đối vào mô hình.
+
+\paragraph{Ý nghĩa về chi phí.} Vì chỉ cần một GPU và một adapter 29,5~MB, cách
+làm có thể áp dụng cho các nhóm nghiên cứu, doanh nghiệp nhỏ hoặc tổ chức có tài
+nguyên hạn chế. Một mô hình nền có thể dùng chung cho nhiều tác vụ, mỗi tác vụ
+chỉ cần lưu thêm một adapter nhỏ; khóa luận cũng cho thấy một adapter dùng chung
+cho cả hai bộ dữ liệu không kém adapter riêng cho từng bộ.
+
+\paragraph{Ý nghĩa đối với tiếng Việt.} Phần lớn tiến bộ của VLM được đo trên
+tiếng Anh. Khóa luận chỉ ra cụ thể những gì bị mất khi dùng các mô hình này cho
+tiếng Việt (dấu thanh, định dạng, thứ tự chữ, hallucination) và một cách bù lại
+với chi phí nhỏ. Cách tiếp cận này có thể áp dụng cho các ngôn ngữ ít tài nguyên
+khác có chữ viết dùng dấu.
+
+%********************************** Mục 1.9 ************************************
 \section{Phạm vi và giới hạn}
 \label{sec:intro-scope}
+
+\subsection{Phạm vi}
+
+\paragraph{Dữ liệu.} Đề tài dùng hai bộ dữ liệu công khai ViVQA và ViTextVQA với
+split chính thức cố định. ViVQA không có tập validation nên nhóm tách 1.200 câu
+từ tập train (seed 42) để chọn mô hình; tập test giữ nguyên. Nhóm không thu thập
+thêm dữ liệu huấn luyện và không tăng cường dữ liệu, để kết quả so sánh được với
+các công trình trước trên cùng tập test.
+
+\paragraph{Mô hình và cách thích nghi.} Đề tài dùng đúng một baseline là
+Qwen2.5-VL-3B-Instruct. Các VLM khác chỉ được dùng để tham khảo khi chọn
+baseline. Việc thích nghi chỉ dùng QLoRA 4-bit; chữ OCR là đầu vào phụ được ghép
+vào prompt, không phải một mô-đun được huấn luyện.
+
+\paragraph{Đánh giá.} Thước đo chính là EM, VQA-Acc và ANLS; token-F1 chỉ là chỉ
+số phụ để so với công trình trước. Mọi so sánh dùng cùng giao thức: cùng split,
+seed, cấu hình suy luận và cùng một bước chuẩn hóa đáp án. Ngoài kết quả chính,
+đề tài có ablation, phân tích lỗi và đo hallucination.
+
+\paragraph{Prototype.} Prototype là một ứng dụng web chạy trên Colab với một
+GPU, nhận ảnh và câu hỏi tiếng Việt, trả về câu trả lời kèm chữ OCR và mức tin
+cậy. Prototype dùng để minh họa và kiểm chứng, không phải một sản phẩm triển khai
+cho nhiều người dùng.
+
+Bảng~\ref{tab:scope} tóm tắt những gì nằm trong và ngoài phạm vi.
 
 \begin{table}[htbp]
 \caption{Trong và ngoài phạm vi}
@@ -277,20 +582,163 @@ Triển khai sản phẩm quy mô lớn, ứng dụng di động \\
 \end{tabular}
 \end{table}
 
+\subsection{Giới hạn}
+
+\paragraph{Giới hạn về mô hình.} Kết quả bị giới hạn bởi một mô hình nền 3 tỉ
+tham số ở dạng 4-bit. Lượng tử hóa làm giảm độ chính xác so với cấu hình gốc, và
+một mô hình lớn hơn có thể cho kết quả khác. Khóa luận không khẳng định kết quả
+giữ nguyên với các backbone khác.
+
+\paragraph{Giới hạn về OCR.} Phương pháp đề xuất phụ thuộc vào chất lượng OCR.
+Khi dòng OCR không chứa đúng đáp án, mô hình khó trả lời đúng; ảnh mờ, chữ nhỏ
+hoặc chữ nghệ thuật vẫn có thể làm OCR đọc sai dấu hoặc ra chữ vô nghĩa.
+
+\paragraph{Giới hạn về dữ liệu.} Một phần đáp án gold bị sai, câu hỏi ViVQA được
+dịch máy, và ViVQA không có câu hỏi có/không. Nhóm đo các vấn đề này và báo cáo
+riêng, nhưng không sửa tập test chính thức.
+
+\paragraph{Giới hạn về đánh giá.} EM là thước đo khắt khe với câu trả lời đúng ý
+nhưng khác cách viết, nên nhóm bổ sung ANLS và duyệt tay. So sánh với công trình
+trước còn phụ thuộc vào cách chuẩn hóa đáp án mà các công trình đó không công bố
+đầy đủ; nhóm báo cáo thêm token-F1 để giảm ảnh hưởng của điểm này.
+
+\paragraph{Giới hạn về thống kê.} Mọi thí nghiệm chính chạy với một seed; riêng
+phần so sánh OCR được kiểm thêm trên ba seed ở tập con 8.000 câu. Mô hình đầy đủ
+B3-full chỉ có một seed vì mỗi lần huấn luyện tốn khoảng 12,75 giờ GPU.
+
+\paragraph{Giới hạn về prototype.} Mức tin cậy của prototype chưa được hiệu chỉnh
+tốt, nên giao diện chỉ hiển thị mức Cao, Trung bình, Thấp thay vì một con số phần
+trăm. Prototype chạy trong một phiên Colab nên không có tính sẵn sàng như một
+dịch vụ thật.
+
+Các giới hạn này được phân tích lại ở Chương~\ref{chap:discussion} và
+Chương~\ref{chap:conclusion}.
+
+\subsection{Ngoài phạm vi}
+
+Các nội dung sau nằm ngoài phạm vi của khóa luận:
+
+\begin{itemize}
+  \item full fine-tuning hoặc huấn luyện VLM từ đầu;
+  \item xây bộ dữ liệu huấn luyện mới, gán nhãn thêm hoặc tăng cường dữ liệu;
+  \item huấn luyện lại hoặc fine-tune mô hình OCR;
+  \item retrieval-augmented VQA với nguồn tri thức bên ngoài ảnh;
+  \item so sánh nhiều backbone như nhiều baseline chính;
+  \item triển khai sản phẩm quy mô lớn, ứng dụng di động hoặc dịch vụ trực tuyến
+  lâu dài;
+  \item các câu hỏi về video hoặc nhiều ảnh cùng lúc.
+\end{itemize}
+
 \paragraph{Giả định.} Nhóm giả định rằng split chính thức của hai bộ dữ liệu
 đại diện cho phân bố câu hỏi thực tế của từng bộ, rằng đáp án gold là đúng ở đa
 số câu (phần gold sai được đo và báo cáo riêng ở Chương~\ref{chap:results}), và
 rằng GPU L4 trên Colab cho kết quả ổn định giữa các phiên khi cố định seed và
 cấu hình.
 
-\paragraph{Giới hạn biết trước.} Kết quả bị giới hạn bởi một mô hình nền 3 tỉ
-tham số ở 4-bit và bởi chất lượng OCR; mọi thí nghiệm chính chạy với một seed,
-riêng phần so sánh OCR được kiểm thêm trên ba seed. EM là thước đo khắt khe với
-câu trả lời đúng ý nhưng khác cách viết, nên nhóm bổ sung ANLS và duyệt tay. Các
-giới hạn này được phân tích lại ở Chương~\ref{chap:discussion} và
-Chương~\ref{chap:conclusion}.
+%********************************** Mục 1.10 ***********************************
+\section{Tổ chức nhóm}
+\label{sec:intro-team}
 
-%********************************** Mục 1.8 ************************************
+\subsection{Cơ cấu và vai trò}
+
+Nhóm có bốn sinh viên, mỗi người phụ trách một mảng kỹ thuật theo đề cương.
+
+Phạm Lê Huy Hoàng (SE182670) là trưởng nhóm và phụ trách mảng PEFT / Training.
+Ngoài việc huấn luyện các mô hình QLoRA, làm ablation cấu hình LoRA và xây
+adapter dùng chung, Hoàng điều phối tiến độ, tích hợp kết quả của các mảng và
+duyệt các kết quả liên mảng.
+
+Hồ Đắc Toàn (SE183249) phụ trách mảng VLM / Baseline: tìm hiểu kiến trúc
+Qwen2.5-VL, tái lập baseline zero-shot và đối chiếu với số đã công bố.
+
+Trần Quốc Huân (SE193642) phụ trách mảng Dataset / OCR: lấy dữ liệu từ nguồn
+chính thức, cố định split, kiểm tra rò rỉ giữa train và test, và tạo OCR cache
+bằng PaddleOCR và VietOCR.
+
+Văn Quang Trường (SE182458) phụ trách mảng Evaluation / Deployment: cài đặt các
+thước đo, kiểm định thống kê, đo hallucination, xây prototype và video demo.
+
+Bảng phân công chi tiết, kèm thư mục mã nguồn chính của từng người, nằm ở Phụ
+lục~\ref{appendix:pm}.
+
+\subsection{Kế hoạch giao tiếp}
+
+Nhóm làm việc với giảng viên hướng dẫn theo các mốc của khoa và khi cần xác nhận
+một quyết định lớn, ví dụ việc chốt baseline Qwen2.5-VL-3B ngày 07/10/2026. Sau
+mỗi buổi review với giảng viên phản biện, nhóm điền checklist góp ý, gửi email
+cho giảng viên hướng dẫn và giảng viên review, rồi tải lên thư mục chung.
+
+Trong nhóm, mỗi tuần làm việc có một README và một Team Report trong thư mục
+\path{docs/Wxx/} của repo, ghi việc đã làm, kết quả, quyết định và việc dời lại.
+Mã nguồn, log nhỏ và tài liệu được quản lý trên GitHub; ảnh, adapter, OCR cache
+và video demo được lưu trên Google Drive. Các quyết định ảnh hưởng đến kết quả
+chính được ghi lại trước khi chạy và được giảng viên hướng dẫn xác nhận khi cần.
+
+%********************************** Mục 1.11 ***********************************
+\section{Cách tiếp cận quản lý dự án}
+\label{sec:intro-pm}
+
+Vì đây là một đề tài nghiên cứu, kế hoạch xoay quanh thí nghiệm: mỗi kết luận ở
+Chương~\ref{chap:results} phải truy ngược được về một lần chạy có log, seed và cấu
+hình cố định. Mục này tóm tắt cách nhóm tổ chức công việc; Phụ
+lục~\ref{appendix:pm} trình bày đầy đủ phân rã công việc, lịch, rủi ro và quản lý
+chất lượng.
+
+\subsection{Các giai đoạn}
+
+Dự án được chia thành năm giai đoạn theo khung 15 tuần của đề cương:
+
+\paragraph{Giai đoạn 1: Định hướng và lập kế hoạch (W01--W03).} Nhóm đọc paper
+theo bốn mảng, lập literature matrix, phân tích hai bộ dữ liệu, xác định khoảng
+trống nghiên cứu, câu hỏi nghiên cứu và giả thuyết, rồi trình bày ở Review~1.
+
+\paragraph{Giai đoạn 2: Dữ liệu và baseline (W04--W07).} Nhóm lấy dữ liệu từ nguồn
+chính thức, chốt baseline Qwen2.5-VL-3B-Instruct, đo zero-shot, tái lập số công bố
+trên TextVQA và chốt cấu hình suy luận dựa trên số đo (số token ảnh, kiểu số).
+
+\paragraph{Giai đoạn 3: Thích nghi và cải tiến (W07--W10).} Nhóm huấn luyện QLoRA
+thường, phân tích lỗi, đề xuất QLoRA nhận biết OCR, kiểm chứng trên tập con 8.000
+câu, kiểm tra qua ba seed và bảng $2\times2$, rồi chạy trên toàn bộ dữ liệu.
+
+\paragraph{Giai đoạn 4: Đánh giá và phân tích (W10--W12).} Nhóm lập bảng đánh giá
+đầy đủ, làm ablation cấu hình LoRA, thử adapter dùng chung, phân tích lỗi và đo
+hallucination bằng POPE tiếng Việt.
+
+\paragraph{Giai đoạn 5: Prototype, đóng gói và khóa luận (W13--W15).} Nhóm xây
+prototype web, kiểm chứng prototype khớp với đường đánh giá, quay video demo,
+chuẩn bị gói tái lập, slide bảo vệ và khóa luận.
+
+\subsection{Tích hợp các thành phần}
+
+Các thành phần của hệ thống được ghép với nhau qua một số điểm chung cố định. Một
+hàm dựng prompt duy nhất được dùng cho cả huấn luyện, đánh giá và prototype, nên
+không có sai lệch prompt giữa các giai đoạn. OCR được chạy một lần và lưu cache
+có mã băm; huấn luyện và đánh giá chỉ đọc cache. Danh sách các mô hình chính thức
+được sinh tự động từ log, và prototype được kiểm tra theo luật đặt trước để bảo
+đảm cho cùng câu trả lời với đường đánh giá.
+
+\subsection{Quản lý chất lượng và rủi ro}
+
+Chất lượng của đề tài trước hết là độ tin cậy của con số. Nhóm ghi luật quyết
+định của mỗi phép thử chính lên Git trước khi chạy, dùng kiểm định ghép cặp cho
+mọi so sánh, tính lại bảng kết quả trực tiếp từ file dự đoán gốc thay vì chép
+tay, và ghi mã băm SHA-256 cho adapter, OCR cache và file dữ liệu.
+
+Về rủi ro, kế hoạch ban đầu liệt kê tám rủi ro. Những rủi ro đã thực sự xảy ra
+gồm: trường không có GPU server, fp16 làm hỏng câu trả lời trên GPU T4, dữ liệu
+ban đầu lấy sai nguồn, mỗi lần huấn luyện đầy đủ tốn khoảng 12 giờ, và ảnh có cờ
+xoay EXIF làm sai OCR cache. Cách xử lý từng rủi ro được ghi ở Phụ
+lục~\ref{appendix:pm}.
+
+\subsection{Theo dõi tiến độ}
+
+Nhóm làm theo chu kỳ tuần: lập kế hoạch, ghi luật trước, chạy thí nghiệm, kiểm
+tra lại số liệu, và đóng tuần bằng README cùng Team Report. Tiến độ được đối chiếu
+với các mốc của khoa: Review~1, Review~2, hội đồng cấp khoa và hội đồng cấp
+trường. Khi một quyết định thay đổi kế hoạch, ví dụ đổi baseline hay chuyển sang
+Colab, quyết định đó được ghi lại cùng lý do trong báo cáo tuần.
+
+%********************************** Mục 1.12 ***********************************
 \section{Cấu trúc khóa luận}
 \label{sec:intro-outline}
 
@@ -300,4 +748,4 @@ dữ liệu, baseline, phương pháp QLoRA nhận biết OCR và giao thức đ
 Chương~\ref{chap:results} báo cáo kết quả chính và các ablation.
 Chương~\ref{chap:discussion} thảo luận phân tích lỗi, hallucination và giới hạn.
 Chương~\ref{chap:conclusion} kết luận. Phụ lục~\ref{appendix:pm} trình bày kế
-hoạch quản lý dự án.
+hoạch quản lý dự án, và Phụ lục~\ref{appendix:repro} mô tả gói tái lập.
