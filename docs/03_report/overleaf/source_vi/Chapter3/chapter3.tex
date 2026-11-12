@@ -500,10 +500,10 @@ tự và không lọc theo độ tin cậy.
 Phần chữ của prompt có hai dạng, khác nhau đúng một dòng:
 
 \begin{itemize}
-  \item Không OCR (B1, B2, C1, C3): \texttt{Câu hỏi: \{câu hỏi\}}
-  \item Có OCR (B3, B3-full, SH): \texttt{Văn bản đọc được trong ảnh: \{dòng 1\}
-  \textbar\ \{dòng 2\} \textbar\ \ldots}, xuống dòng, rồi
-  \texttt{Câu hỏi: \{câu hỏi\}}
+  \item Không OCR (B1, B2, C1, C3): ``Câu hỏi: \{câu hỏi\}''
+  \item Có OCR (B3, B3-full, SH): ``Văn bản đọc được trong ảnh: \{dòng 1\}
+  \textbar\ \{dòng 2\} \textbar\ \ldots'', xuống dòng, rồi
+  ``Câu hỏi: \{câu hỏi\}''
 \end{itemize}
 
 Dòng OCR đặt trước câu hỏi để mô hình đọc nó như ngữ cảnh. Với một mẫu ViTextVQA
@@ -618,8 +618,8 @@ ViVQA test chưa từng xuất hiện trong train hoặc val; nhãn vật thể 
 thích COCO 2014 và dịch sang tiếng Việt bằng một từ điển 80 lớp. Mỗi ảnh có ba
 câu hỏi về vật có trong ảnh (đáp án ``có'') và ba câu hỏi về vật không có (đáp án
 ``không'') cho mỗi cách chọn vật vắng mặt: ngẫu nhiên (random), vật phổ biến
-(popular) và vật hay đi kèm (adversarial). Mẫu câu là \texttt{Trong ảnh có \{vật\}
-không? Trả lời "có" hoặc "không".} Sau khi bỏ câu trùng còn 4.985 câu. Từ điển,
+(popular) và vật hay đi kèm (adversarial). Mẫu câu dạng: Trong ảnh có \{vật\}
+không? Trả lời ``có'' hoặc ``không''. Sau khi bỏ câu trùng còn 4.985 câu. Từ điển,
 luật và file câu hỏi được khóa trong kho mã trước khi chạy mô hình.
 
 Mỗi mô hình được so với chính mô hình nền zero-shot dùng cùng dạng prompt. Ngoài
@@ -652,12 +652,23 @@ Không lần chạy nào dùng quá một GPU.
 bitsandbytes 0.50.2, Accelerate 1.15.0, qwen-vl-utils 0.0.14, PaddleOCR 3.x,
 VietOCR và Gradio 6.31.0.
 
-\paragraph{Log để tái lập.} Mỗi lần chạy ghi một file chữ ký gồm split và mã băm
-file dữ liệu, seed, commit mã nguồn, loại GPU, phiên bản thư viện, toàn bộ cấu
-hình, thời gian huấn luyện và suy luận, VRAM đỉnh. Kết quả được lưu theo từng câu
-(\path{predictions.json}) để mọi thước đo và kiểm định có thể tính lại từ đầu.
-Thư mục kết quả đặt tên theo quy ước
-\path{experiments/W<tuần>_<chế độ>_<mô hình>_<dữ liệu>_seed<seed>/}.
+\paragraph{Log để tái lập.} Mỗi lần chạy ghi file chữ ký
+\path{run_signature.json} (cấu hình và mã băm dữ liệu) cùng log kèm theo
+(\path{train_log.json} khi huấn luyện; meta trong \path{metrics.json} khi đánh
+giá), gồm split và mã băm file dữ liệu, seed, commit mã nguồn, loại GPU, phiên
+bản thư viện, toàn bộ cấu hình, thời gian huấn luyện và suy luận, VRAM đỉnh.
+Kết quả theo từng câu hỏi được lưu trong \path{predictions.json} để mọi thước đo
+và kiểm định có thể tính lại từ đầu. Thư mục kết quả đặt tên ASCII theo quy ước
+\begin{quote}\raggedright
+\path|experiments/W<week>_<method>_<model>_<data>_<dtype>_<gpu>_seed<seed>/|
+\end{quote}
+(có thể xen thêm token phụ như hạng LoRA hay số epoch). Trong đó \texttt{week}
+là tuần thí nghiệm, \texttt{method} là phương pháp, \texttt{model} là mô hình,
+\texttt{data} là tập dữ liệu, \texttt{dtype} là kiểu số, \texttt{gpu} là GPU và
+\texttt{seed} là hạt giống ngẫu nhiên. Ví dụ thư mục có thật:
+\begin{quote}\raggedright
+\path{experiments/W07_B2_qlora_r16_qwen25vl_vitextvqa_ep1_bf16_L4_seed42/}
+\end{quote}
 
 %********************************** Mục 3.8 ************************************
 \section{Thiết kế prototype}
