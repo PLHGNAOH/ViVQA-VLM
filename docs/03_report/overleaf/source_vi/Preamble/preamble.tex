@@ -200,11 +200,28 @@
   % Tên mục viết bằng ký tự Unicode trực tiếp để bookmark PDF hiện đủ dấu
   \addto\captionsvietnamese{\renewcommand{\listtablename}{Danh sách bảng}\renewcommand{\bibname}{Tài liệu tham khảo}}
   \newcommand{\vi}[1]{#1}
-  % Vietnamese names for headings that the class hard-codes in English
+  % Vietnamese names for headings that the class hard-codes in English.
+  % Also add each front-matter chapter* to TOC + PDF bookmarks (same chapter
+  % level as LOF/LOT via tocbibind). \phantomsection before \addcontentsline
+  % so hyperlinks land on the correct page.
   \usepackage{etoolbox}
-  \patchcmd{\declaration}{Declaration}{Lời cam đoan}{}{\PackageWarning{vivqa}{declaration patch failed}}
-  \patchcmd{\acknowledgements}{Acknowledgements}{Lời cảm ơn}{}{\PackageWarning{vivqa}{acknowledgements patch failed}}
-  \patchcmd{\abstract}{Abstract}{Tóm tắt}{}{\PackageWarning{vivqa}{abstract patch failed}}
+  \newcommand{\vivqaFrontmatterTocEntry}[1]{%
+    \phantomsection
+    \addcontentsline{toc}{chapter}{#1}%
+  }
+  % \texorpdfstring: tránh hyperref "Token not allowed" từ \centering/\Large trong bookmark
+  \patchcmd{\declaration}
+    {\chapter*{\centering \Large Declaration}}
+    {\vivqaFrontmatterTocEntry{Lời cam đoan}\chapter*{\texorpdfstring{\centering \Large Lời cam đoan}{Lời cam đoan}}}
+    {}{\PackageWarning{vivqa}{declaration toc patch failed}}
+  \patchcmd{\acknowledgements}
+    {\chapter*{\centering \Large Acknowledgements}}
+    {\vivqaFrontmatterTocEntry{Lời cảm ơn}\chapter*{\texorpdfstring{\centering \Large Lời cảm ơn}{Lời cảm ơn}}}
+    {}{\PackageWarning{vivqa}{acknowledgements toc patch failed}}
+  \patchcmd{\abstract}
+    {\chapter*{\centering \Large Abstract}}
+    {\vivqaFrontmatterTocEntry{Tóm tắt}\chapter*{\texorpdfstring{\centering \Large Tóm tắt}{Tóm tắt}}}
+    {}{\PackageWarning{vivqa}{abstract toc patch failed}}
   \renewcommand{\nomname}{Danh mục từ viết tắt}
   \renewcommand{\nomgroup}[1]{\ifthenelse{\equal{#1}{Z}}{\item[\textbf{Từ viết tắt}]}{}}
 \else
