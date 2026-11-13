@@ -9,9 +9,11 @@
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Share
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Mock
+#   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -OcrThreads 12
 #
-# Khởi động đo ở B5 (2026-11-13, RTX 3050 Ti 4 GB): ~78 s (OCR CPU ~31 s + Qwen/adapter).
-# Máy phải bật suốt lúc demo. Hôm bảo vệ dùng -Offline, mở http://127.0.0.1:7860
+# Khởi động ~78 s (nạp OCR+Qwen+adapter). OCR CPU dùng OMP/MKL threads (mặc định 12;
+# đo 2026-11-13: giống hệt 1 luồng, nhanh hơn ~3×). Máy phải bật suốt lúc demo.
+# Hôm bảo vệ dùng -Offline, mở http://127.0.0.1:7860
 # =============================================================================
 
 [CmdletBinding()]
@@ -19,7 +21,8 @@ param(
     [switch]$Share,
     [switch]$Offline,
     [switch]$Mock,
-    [int]$Port = 7860
+    [int]$Port = 7860,
+    [int]$OcrThreads = 12
 )
 
 $ErrorActionPreference = "Stop"
@@ -42,6 +45,13 @@ $env:HF_HUB_CACHE = Join-Path $HfHome "hub"
 $env:PYTHONUTF8 = "1"
 $env:PYTHONIOENCODING = "utf-8"
 $env:HF_HUB_DISABLE_SYMLINKS_WARNING = "1"
+
+# Paddle mặc định gán OMP_NUM_THREADS=1 khi import nếu biến chưa có → OCR CPU chậm.
+# Đặt trước khi spawn app/ocr_worker (tiến trình con thừa kế env). Không bật mkldnn.
+if ($OcrThreads -lt 1) { throw "-OcrThreads phải >= 1" }
+$env:OMP_NUM_THREADS = "$OcrThreads"
+$env:MKL_NUM_THREADS = "$OcrThreads"
+Write-Host "OCR CPU threads: OMP_NUM_THREADS=$OcrThreads MKL_NUM_THREADS=$OcrThreads"
 
 if ($Offline) {
     $env:HF_HUB_OFFLINE = "1"

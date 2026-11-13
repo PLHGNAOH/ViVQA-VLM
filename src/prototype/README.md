@@ -45,27 +45,43 @@ powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Sh
 # Hôm bảo vệ (không cần mạng sau khi đã tải model):
 powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline
 # rồi mở http://127.0.0.1:7860
+
+# (tuỳ chọn) số luồng OCR CPU — mặc định 12; chuỗi OCR giống hệt 1 luồng:
+powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -OcrThreads 12
 ```
 
-Khởi động ~78 s (đo B5). Máy phải bật suốt lúc demo. Không đổi prompt / tham số sinh / min-max pixels / model OCR.
+Khởi động ~48 s với `OMP_NUM_THREADS=12` (trước đó ~78 s khi Paddle tự gán 1 luồng). Máy phải bật suốt lúc demo. Không đổi prompt / tham số sinh / min-max pixels / model OCR.
 
 ### Vì sao OCR chạy CPU
 
 VRAM 4 GB chỉ đủ cho Qwen2.5-VL-3B 4-bit + adapter (~2,3–2,4 GB peak). OCR (PaddleOCR + VietOCR) chạy tiến trình riêng trên CPU (`--ocr_device cpu`) để tránh OOM và tránh xung đột Paddle GPU ↔ torch (cùng lý do `ocr_worker` trên Colab).
 
-### Số đo B5 (3 câu demo, 2026-11-13)
+Paddle **tự gán `OMP_NUM_THREADS=1`** khi import nếu biến chưa có → OCR chậm. Script `run_local_windows.ps1` đặt `OMP_NUM_THREADS` / `MKL_NUM_THREADS` trước khi chạy (mặc định **12**). Không bật mkldnn (vẫn `enable_mkldnn=False` như eval CPU).
 
-Tải Qwen lần đầu: **1346,6 s** (riêng). Khởi động (nạp OCR+model+adapter, không tính tải): **78,2 s**. Peak VRAM ~**2,40 GB**; RAM ~12,4 GB.
+### Quét số luồng OCR CPU (30 ảnh B5b, giống hệt T=1)
 
-| Câu (slot) | Lần 1 tổng / OCR / Qwen (s) | Lần 2 (nóng) | Trả lời | Mức | Khớp tham chiếu L4 |
+| T (OMP/MKL) | p50 (s/ảnh) | p95 (s/ảnh) | Khớp cache | Giống hệt T=1 |
+|---|---|---|---|---|
+| 1 | 21,7 | 38,3 | 29/30 | 30/30 |
+| 4 | 18,3 | 27,7 | 29/30 | 30/30 |
+| 8 | 7,4 | 21,5 | 29/30 | 30/30 |
+| **12 (T\*)** | **7,3** | **10,5** | 29/30 | **30/30** |
+
+### Số đo B5 với T\*=12 (3 câu demo, 2026-11-13)
+
+Tải Qwen lần đầu: **1346,6 s** (riêng, lần cài). Khởi động (nạp OCR+model+adapter): **47,9 s**. Peak VRAM ~**2,40 GB**; RAM ~11–12 GB. Câu trả lời **trùng** bản đo 1 luồng.
+
+| Câu (slot) | Lần 1 tổng / OCR / Qwen (s) | Lần 2 (nóng) | OCR chiếm (lần 1) | Trả lời | Mức |
 |---|---|---|---|---|---|
-| ViTextVQA chữ (198.jpg) | 25,0 / 17,4 / 7,6 | 22,3 / 16,6 / 5,6 | trẻ em phải đội mũ bảo hiểm khi đi xe máy | Cao | có (demo_examples) |
-| ViVQA đếm | 9,3 / 8,0 / 1,3 | 9,3 / 7,7 / 1,6 | hai | Cao | có |
-| Có/không (ảnh thật) | 21,6 / 20,4 / 1,2 | 21,0 / 19,7 / 1,3 | không | Trung bình | có (đáp án demo) |
+| ViTextVQA chữ (198.jpg) | 9,2 / 5,5 / 3,6 | 7,5 / 5,4 / 2,1 | ~60% | trẻ em phải đội mũ bảo hiểm khi đi xe máy | Cao |
+| ViVQA đếm | 3,9 / 2,9 / 1,0 | 4,0 / 3,0 / 1,0 | ~75% | hai | Cao |
+| Có/không (ảnh thật) | 8,3 / 7,1 / 1,2 | 8,1 / 7,1 / 1,1 | ~86% | không | Trung bình |
+
+Trước (OMP=1): tổng ~9–25 s/câu; OCR chiếm ~80–94% thời gian mỗi câu. Sau (T\*=12): tổng ~4–9 s/câu; OCR vẫn chiếm phần lớn nhưng tuyệt đối giảm ~3×.
 
 ### OCR CPU so với cache (B5b)
 
-30 ảnh ViTextVQA đầu có trong `paddledet_vietocr.json` (eval): **29/30** khớp hoàn toàn chuỗi prompt (`" | "`, cắt 600 ký tự). p50 **20,4 s**/ảnh, p95 **34,9 s**/ảnh; `OMP_NUM_THREADS=1`. Lệch 1 ảnh (`11081.jpg`) — khác GPU so với cache T4/L4, cùng hiện tượng đã ghi ở W14 R-OCR.
+30 ảnh ViTextVQA đầu có trong `paddledet_vietocr.json` (eval): **29/30** khớp hoàn toàn chuỗi prompt (`" | "`, cắt 600 ký tự). Với T=1: p50 **21,7 s**/ảnh. Lệch 1 ảnh (`11081.jpg`) — khác GPU so với cache T4/L4, cùng hiện tượng đã ghi ở W14 R-OCR. T\*=12 giữ nguyên 29/30 khớp cache và 30/30 giống chuỗi T=1.
 
 ### Cách chia sẻ
 
