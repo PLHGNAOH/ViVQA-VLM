@@ -1,0 +1,126 @@
+{
+  "meta": {
+    "run_name": "W08_smoke_B3_qlora_ocr_qwen25vl_vitextvqa_sub8k_ep1_bf16_L4_seed42",
+    "finished_utc": "2026-10-13T13:58:59+00:00",
+    "dataset": "vitextvqa_official",
+    "data_file": "data/vitextvqa_official/train_subset8000_byimage_seed42.json",
+    "data_file_sha256": "093ab061edbbdcb1eae7abe1f45884eee462cfedb82b7864e6854bf3f0e847d9",
+    "num_samples": 32,
+    "num_dropped": 0,
+    "answer_policy": "đáp án đầu tiên trong trường answers",
+    "prompting_mode": "ocr",
+    "ocr": {
+      "backend": "paddledet_vietocr",
+      "cache_format": "vivqa-vlm/ocr-cache/v2",
+      "engine": {
+        "paddleocr": "3.7.0",
+        "det_model": "PP-OCRv6_medium_det",
+        "rec_model": "vietocr/vgg_transformer",
+        "lang": "vi",
+        "vietocr_config": "vgg_transformer, beamsearch=False"
+      },
+      "cache_file": "paddledet_vietocr.json",
+      "subset_sha256": "70511dbc1460b27273c46e95a456aad5256e61ff2c41222d93b67bff18749ae7",
+      "template": "v1",
+      "max_chars": 600,
+      "min_conf": 0.0,
+      "stats": {
+        "n_samples": 32,
+        "n_images": 8,
+        "n_ocr_errors": 0,
+        "pct_samples_with_text": 100.0,
+        "pct_samples_truncated": 0.0,
+        "mean_chars": 123.2,
+        "subset_sha256": "70511dbc1460b27273c46e95a456aad5256e61ff2c41222d93b67bff18749ae7"
+      }
+    },
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "max_pixels": 401408,
+    "min_pixels": 200704,
+    "torch_dtype": "bfloat16",
+    "quantization": {
+      "enabled": true,
+      "load_in_4bit": true,
+      "bnb_4bit_quant_type": "nf4",
+      "bnb_4bit_use_double_quant": true,
+      "bnb_4bit_compute_dtype": "bfloat16"
+    },
+    "lora": {
+      "r": 16,
+      "lora_alpha": 32,
+      "lora_dropout": 0.05,
+      "bias": "none",
+      "target_modules": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj"
+      ]
+    },
+    "training": {
+      "epochs": 3,
+      "per_device_batch_size": 2,
+      "gradient_accumulation_steps": 8,
+      "learning_rate": 0.0002,
+      "warmup_ratio": 0.03,
+      "weight_decay": 0.0,
+      "logging_steps": 10,
+      "save_strategy": "steps",
+      "save_steps": 200,
+      "save_total_limit": 2,
+      "gradient_checkpointing": true,
+      "max_steps": 2,
+      "limit": 32,
+      "steps_per_epoch": 2,
+      "total_steps": 2,
+      "warmup_steps": 1,
+      "unsupported_training_args": []
+    },
+    "run_signature_sha256": "b4edfb2ce3cdb4b977fa37b819ee815e089b8b24d9d4a0e3f5e7378387ca0b06",
+    "resumed_from": null,
+    "cost_note": "cost tính trọn run",
+    "epoch_adapters": [
+      "epoch_1"
+    ],
+    "peft_only": true,
+    "trainable_params": 7372800,
+    "total_params": 3761995776,
+    "trainable_pct": 0.196,
+    "param_count_method": "peft.get_nb_trainable_parameters (4-bit aware)",
+    "seed": 42,
+    "git_commit": "6b69ff2",
+    "config_file": "configs/qwen_lora.yaml",
+    "hardware": {
+      "gpu": "NVIDIA L4",
+      "bf16_supported": true,
+      "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+    },
+    "cost": {
+      "train_runtime_sec": 46.4,
+      "steps": 2,
+      "global_step": 2,
+      "sec_per_step": 23.198,
+      "peak_vram_gb": 7.34,
+      "final_loss": 1.4886,
+      "last_logged_loss": NaN,
+      "hf_train_loss_raw": 1.4886
+    },
+    "adapter_dir": "/content/drive/MyDrive/ViVQA-VLM/adapters/W08_smoke_B3_qlora_ocr_qwen25vl_vitextvqa_sub8k_ep1_bf16_L4_seed42",
+    "versions": {
+      "transformers": "5.17.0",
+      "torch": "2.11.0+cu130",
+      "peft": "0.21.1"
+    }
+  },
+  "log_history": [
+    {
+      "train_runtime": 46.3966,
+      "train_samples_per_second": 0.69,
+      "train_steps_per_second": 0.043,
+      "total_flos": 445529869123584.0,
+      "train_loss": 1.4886282682418823,
+      "epoch": 1.0,
+      "step": 2
+    }
+  ]
+}

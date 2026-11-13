@@ -1,0 +1,366 @@
+{
+  "what": "Đối chứng few-shot (FS5): B1 + 5 ví dụ chỉ chữ từ train trong prompt; tách lợi ích định dạng khỏi QLoRA (B2)",
+  "pre_registered_rules": {
+    "rule1": "few-shot sửa định dạng nếu EM(FS5) > EM(B1) và McNemar exact p < 0,05",
+    "rule2": "QLoRA có lợi ích ngoài định dạng nếu EM(B2) > EM(FS5) và McNemar exact p < 0,05",
+    "rule3": "tỉ lệ = (EM_FS5 - EM_B1) / (EM_B2 - EM_B1), CI95 bootstrap ghép cặp 10.000 lần seed 42 (chỉ báo cáo)",
+    "examples": "k=5, seed 42, round-robin theo question_type, answers[0], cùng ví dụ cho mọi câu test"
+  },
+  "runs": {
+    "vivqa": {
+      "B1": "W07_B1_zeroshot_qwen25vl_vivqa_test_bf16_L4_seed42",
+      "FS5": "W07_FS5_fewshot_qwen25vl_vivqa_test_bf16_L4_seed42",
+      "B2": "W07_B2_eval_qlora_r16_ep1_vivqa_test_bf16_L4_seed42"
+    },
+    "vitextvqa": {
+      "B1": "W07_B1_zeroshot_qwen25vl_vitextvqa_test2000_bf16_L4_seed42",
+      "FS5": "W07_FS5_fewshot_qwen25vl_vitextvqa_test2000_bf16_L4_seed42",
+      "B2": "W07_B2_eval_qlora_r16_ep1_vitextvqa_test2000_bf16_L4_seed42"
+    }
+  },
+  "results": {
+    "vivqa": {
+      "table": [
+        {
+          "run": "B1",
+          "EM": 22.092635788070645,
+          "ANLS": 28.60520592021856,
+          "F1 (phụ)": 38.05318993254651,
+          "s/câu": 0.51
+        },
+        {
+          "run": "FS5",
+          "EM": 20.026657780739754,
+          "ANLS": 24.778124544523376,
+          "F1 (phụ)": 31.406307875016783,
+          "s/câu": 0.453
+        },
+        {
+          "run": "B2",
+          "EM": 73.77540819726758,
+          "ANLS": 75.65609600514632,
+          "F1 (phụ)": 76.20348772631345,
+          "s/câu": 0.571
+        }
+      ],
+      "rule1": "KHÔNG — few-shot làm GIẢM EM (p < 0,05)",
+      "rule2": "CÓ — QLoRA vượt few-shot (p < 0,05)",
+      "paired": {
+        "B1_vs_FS5": {
+          "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B1_zeroshot_qwen25vl_vivqa_test_bf16_L4_seed42",
+          "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_FS5_fewshot_qwen25vl_vivqa_test_bf16_L4_seed42",
+          "label_a": "B1",
+          "label_b": "FS5",
+          "n": 3001,
+          "n_both_correct": 409,
+          "n_only_a": 254,
+          "n_only_b": 192,
+          "n_both_wrong": 2146,
+          "b": 254,
+          "c": 192,
+          "p_value": 0.0038228282207696807,
+          "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+          "em_a": 0.22092635788070644,
+          "em_b": 0.20026657780739754,
+          "em_diff": -0.020659780073308903,
+          "anls_threshold": 0.5,
+          "anls_a": 0.2860520592021856,
+          "anls_b": 0.2477812454452336,
+          "anls_diff": -0.038270813756952016,
+          "anls_ci95": [
+            -0.05193381820780531,
+            -0.024970003965266635
+          ],
+          "bootstrap": {
+            "n_resamples": 10000,
+            "seed": 42,
+            "method": "paired percentile"
+          }
+        },
+        "FS5_vs_B2": {
+          "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_FS5_fewshot_qwen25vl_vivqa_test_bf16_L4_seed42",
+          "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B2_eval_qlora_r16_ep1_vivqa_test_bf16_L4_seed42",
+          "label_a": "FS5",
+          "label_b": "B2",
+          "n": 3001,
+          "n_both_correct": 551,
+          "n_only_a": 50,
+          "n_only_b": 1663,
+          "n_both_wrong": 737,
+          "b": 50,
+          "c": 1663,
+          "p_value": 0.0,
+          "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+          "em_a": 0.20026657780739754,
+          "em_b": 0.7377540819726758,
+          "em_diff": 0.5374875041652782,
+          "anls_threshold": 0.5,
+          "anls_a": 0.2477812454452336,
+          "anls_b": 0.7565609600514632,
+          "anls_diff": 0.5087797146062296,
+          "anls_ci95": [
+            0.4905069377736384,
+            0.5273677148954533
+          ],
+          "bootstrap": {
+            "n_resamples": 10000,
+            "seed": 42,
+            "method": "paired percentile"
+          }
+        }
+      },
+      "prompt_share_of_B2_gain": {
+        "point": -0.03997421018697616,
+        "ci95": [
+          -0.06701725893332111,
+          -0.013680336710754675
+        ],
+        "n_boot_valid": 10000
+      },
+      "answer_format": {
+        "gold": {
+          "mean_words": 1.57,
+          "pct_gt3_words": 0.17
+        },
+        "B1": {
+          "n": 3001,
+          "mean_words": 2.88,
+          "pct_gt3_words": 18.16,
+          "EM_pct": 22.09,
+          "containment_pct": 38.69,
+          "contain_not_em_pct": 16.59
+        },
+        "FS5": {
+          "n": 3001,
+          "mean_words": 2.05,
+          "pct_gt3_words": 8.86,
+          "EM_pct": 20.03,
+          "containment_pct": 29.49,
+          "contain_not_em_pct": 9.46
+        },
+        "B2": {
+          "n": 3001,
+          "mean_words": 1.55,
+          "pct_gt3_words": 0.03,
+          "EM_pct": 73.78,
+          "containment_pct": 74.61,
+          "contain_not_em_pct": 0.83
+        }
+      },
+      "containment_pairs": {
+        "B1,FS5": {
+          "only_a": 437,
+          "only_b": 161,
+          "mcnemar_p": 2.119244434517915e-30,
+          "delta_containment_pct": -9.2
+        },
+        "FS5,B2": {
+          "only_a": 86,
+          "only_b": 1440,
+          "mcnemar_p": 1.9822447e-317,
+          "delta_containment_pct": 45.12
+        }
+      },
+      "few_shot_examples": {
+        "k": 5,
+        "seed": 42,
+        "train_sha256": "892243fa732fc7fb5b9a3bd8d2f28c85d7e9f99bb0e617efd193e7303cee96ec",
+        "selection": "round-robin theo question_type, xáo bằng seed; answers[0]",
+        "examples": [
+          {
+            "question": "màu sắc của những con chim là gì",
+            "answer": "màu xanh lá"
+          },
+          {
+            "question": "khuôn mặt của một người phụ nữ trong kính râm phản chiếu",
+            "answer": "gương"
+          },
+          {
+            "question": "có bao nhiêu người phụ nữ chơi trò chơi điện tử trước ghế dài",
+            "answer": "hai"
+          },
+          {
+            "question": "những gì nằm trong lòng bàn tay của ai đó",
+            "answer": "thiết bị"
+          },
+          {
+            "question": "màu của chiếc xe là gì",
+            "answer": "màu xám"
+          }
+        ]
+      }
+    },
+    "vitextvqa": {
+      "table": [
+        {
+          "run": "B1",
+          "EM": 28.799999999999997,
+          "ANLS": 47.52661280679389,
+          "F1 (phụ)": 53.76551062892471,
+          "s/câu": 0.862
+        },
+        {
+          "run": "FS5",
+          "EM": 27.6,
+          "ANLS": 46.197734421504926,
+          "F1 (phụ)": 49.998290954720645,
+          "s/câu": 0.79
+        },
+        {
+          "run": "B2",
+          "EM": 49.7,
+          "ANLS": 71.90867530738419,
+          "F1 (phụ)": 71.00743316681678,
+          "s/câu": 1.011
+        }
+      ],
+      "rule1": "CHƯA KẾT LUẬN ĐƯỢC (p ≥ 0,05)",
+      "rule2": "CÓ — QLoRA vượt few-shot (p < 0,05)",
+      "paired": {
+        "B1_vs_FS5": {
+          "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B1_zeroshot_qwen25vl_vitextvqa_test2000_bf16_L4_seed42",
+          "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_FS5_fewshot_qwen25vl_vitextvqa_test2000_bf16_L4_seed42",
+          "label_a": "B1",
+          "label_b": "FS5",
+          "n": 2000,
+          "n_both_correct": 423,
+          "n_only_a": 153,
+          "n_only_b": 129,
+          "n_both_wrong": 1295,
+          "b": 153,
+          "c": 129,
+          "p_value": 0.17069198959921528,
+          "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+          "em_a": 0.288,
+          "em_b": 0.276,
+          "em_diff": -0.011999999999999955,
+          "anls_threshold": 0.5,
+          "anls_a": 0.4752661280679394,
+          "anls_b": 0.46197734421504955,
+          "anls_diff": -0.013288783852889882,
+          "anls_ci95": [
+            -0.030069516185269672,
+            0.0040418186938658545
+          ],
+          "bootstrap": {
+            "n_resamples": 10000,
+            "seed": 42,
+            "method": "paired percentile"
+          }
+        },
+        "FS5_vs_B2": {
+          "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_FS5_fewshot_qwen25vl_vitextvqa_test2000_bf16_L4_seed42",
+          "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B2_eval_qlora_r16_ep1_vitextvqa_test2000_bf16_L4_seed42",
+          "label_a": "FS5",
+          "label_b": "B2",
+          "n": 2000,
+          "n_both_correct": 488,
+          "n_only_a": 64,
+          "n_only_b": 506,
+          "n_both_wrong": 942,
+          "b": 64,
+          "c": 506,
+          "p_value": 2.808504657797727e-86,
+          "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+          "em_a": 0.276,
+          "em_b": 0.497,
+          "em_diff": 0.22099999999999997,
+          "anls_threshold": 0.5,
+          "anls_a": 0.46197734421504955,
+          "anls_b": 0.7190867530738413,
+          "anls_diff": 0.2571094088587917,
+          "anls_ci95": [
+            0.2368766870765059,
+            0.2772251812459664
+          ],
+          "bootstrap": {
+            "n_resamples": 10000,
+            "seed": 42,
+            "method": "paired percentile"
+          }
+        }
+      },
+      "prompt_share_of_B2_gain": {
+        "point": -0.05741626794258351,
+        "ci95": [
+          -0.14355358197861692,
+          0.02045454545454523
+        ],
+        "n_boot_valid": 10000
+      },
+      "answer_format": {
+        "gold": {
+          "mean_words": 3.68,
+          "pct_gt3_words": 37.65
+        },
+        "B1": {
+          "n": 2000,
+          "mean_words": 5.48,
+          "pct_gt3_words": 51.15,
+          "EM_pct": 28.8,
+          "containment_pct": 47.85,
+          "contain_not_em_pct": 19.05
+        },
+        "FS5": {
+          "n": 2000,
+          "mean_words": 4.28,
+          "pct_gt3_words": 42.65,
+          "EM_pct": 27.6,
+          "containment_pct": 41.65,
+          "contain_not_em_pct": 14.05
+        },
+        "B2": {
+          "n": 2000,
+          "mean_words": 3.66,
+          "pct_gt3_words": 36.4,
+          "EM_pct": 49.7,
+          "containment_pct": 56.5,
+          "contain_not_em_pct": 6.8
+        }
+      },
+      "containment_pairs": {
+        "B1,FS5": {
+          "only_a": 205,
+          "only_b": 81,
+          "mcnemar_p": 1.4546377787618762e-13,
+          "delta_containment_pct": -6.2
+        },
+        "FS5,B2": {
+          "only_a": 96,
+          "only_b": 393,
+          "mcnemar_p": 1.128823940077924e-43,
+          "delta_containment_pct": 14.85
+        }
+      },
+      "few_shot_examples": {
+        "k": 5,
+        "seed": 42,
+        "train_sha256": "dec0acc1ca998272ddbf76ba97087d9f6b1d3f96f4000274e41483c02fbde46c",
+        "selection": "round-robin theo question_type, xáo bằng seed; answers[0]",
+        "examples": [
+          {
+            "question": "ai là tác giả của cuốn sách màu xanh ?",
+            "answer": "tom goodwin"
+          },
+          {
+            "question": "cửa hàng thời trang màu đen tên gì ?",
+            "answer": "the bo"
+          },
+          {
+            "question": "unatoto là nhà hàng nhật bản như thế nào ?",
+            "answer": "chuẩn vị washoku"
+          },
+          {
+            "question": "bên phải là bản tin của ai ?",
+            "answer": "cựu chiến binh"
+          },
+          {
+            "question": "cửa hàng thực phẩm sạch tên gì ?",
+            "answer": "3s 3 sạch"
+          }
+        ]
+      }
+    }
+  },
+  "gpu": "NVIDIA L4"
+}

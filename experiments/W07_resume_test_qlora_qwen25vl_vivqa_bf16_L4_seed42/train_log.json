@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "run_name": "W07_resume_test_qlora_qwen25vl_vivqa_bf16_L4_seed42",
+    "finished_utc": "2026-10-08T12:12:04+00:00",
+    "dataset": "vivqa",
+    "data_file": "data/vivqa/train.json",
+    "data_file_sha256": "892243fa732fc7fb5b9a3bd8d2f28c85d7e9f99bb0e617efd193e7303cee96ec",
+    "num_samples": 200,
+    "num_dropped": 0,
+    "answer_policy": "đáp án đầu tiên trong trường answers",
+    "prompting_mode": "zero_shot",
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "max_pixels": 401408,
+    "min_pixels": 200704,
+    "torch_dtype": "bfloat16",
+    "quantization": {
+      "enabled": true,
+      "load_in_4bit": true,
+      "bnb_4bit_quant_type": "nf4",
+      "bnb_4bit_use_double_quant": true,
+      "bnb_4bit_compute_dtype": "bfloat16"
+    },
+    "lora": {
+      "r": 16,
+      "lora_alpha": 32,
+      "lora_dropout": 0.05,
+      "bias": "none",
+      "target_modules": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj"
+      ]
+    },
+    "training": {
+      "epochs": 3,
+      "per_device_batch_size": 2,
+      "gradient_accumulation_steps": 8,
+      "learning_rate": 0.0002,
+      "warmup_ratio": 0.03,
+      "weight_decay": 0.0,
+      "logging_steps": 10,
+      "save_strategy": "steps",
+      "save_steps": 5,
+      "save_total_limit": 2,
+      "gradient_checkpointing": true,
+      "max_steps": 12,
+      "limit": 200,
+      "steps_per_epoch": 13,
+      "total_steps": 12,
+      "warmup_steps": 1,
+      "unsupported_training_args": []
+    },
+    "run_signature_sha256": "f938a71f86ab642aa9946ee182d0346d98dbc3d8fd45c03793596d5a2ffde06e",
+    "resumed_from": "checkpoint-5",
+    "cost_note": "cost chỉ tính PHIÊN CUỐI (đã chạy tiếp từ checkpoint)",
+    "epoch_adapters": [
+      "epoch_1"
+    ],
+    "peft_only": true,
+    "trainable_params": 7372800,
+    "total_params": 3761995776,
+    "trainable_pct": 0.196,
+    "param_count_method": "peft.get_nb_trainable_parameters (4-bit aware)",
+    "seed": 42,
+    "git_commit": "7729301",
+    "config_file": "configs/qwen_lora.yaml",
+    "hardware": {
+      "gpu": "NVIDIA L4",
+      "bf16_supported": true,
+      "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+    },
+    "cost": {
+      "train_runtime_sec": 117.9,
+      "steps": 7,
+      "global_step": 12,
+      "sec_per_step": 16.837,
+      "peak_vram_gb": 6.51,
+      "final_loss": 0.8226
+    },
+    "adapter_dir": "/content/drive/MyDrive/ViVQA-VLM/adapters/W07_resume_test_qlora_qwen25vl_vivqa_bf16_L4_seed42",
+    "versions": {
+      "transformers": "5.17.0",
+      "torch": "2.11.0+cu130",
+      "peft": "0.21.1"
+    }
+  },
+  "log_history": [
+    {
+      "loss": 1.450827407836914,
+      "grad_norm": 2.4716641902923584,
+      "learning_rate": 5.4545454545454546e-05,
+      "epoch": 0.8,
+      "step": 10
+    },
+    {
+      "train_runtime": 117.8567,
+      "train_samples_per_second": 1.629,
+      "train_steps_per_second": 0.102,
+      "total_flos": 1863572887830528.0,
+      "train_loss": 0.8226313591003418,
+      "epoch": 0.96,
+      "step": 12
+    }
+  ]
+}

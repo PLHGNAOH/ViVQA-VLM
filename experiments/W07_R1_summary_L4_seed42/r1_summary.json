@@ -1,0 +1,284 @@
+{
+  "what": "R1: Qwen2-VL-7B-Instruct zero-shot trên ViTextVQA test2000, đối chiếu Table 7 paper ViTextVQA; R1b: cùng model, cấu hình B1 (ablation backbone)",
+  "reference": {
+    "what": "Table 7, dòng 'QwenVL-7b', zero-shot, 100 câu test ngẫu nhiên (prompt/checkpoint không công bố)",
+    "em": 28.0,
+    "f1": 53.8,
+    "n": 100
+  },
+  "source": "Nguyen et al., ViTextVQA, Expert Systems with Applications 2025, arXiv:2404.10652v5",
+  "pre_registered_rules": {
+    "R1_vs_table7": "nhất quán nếu |z| <= 1,96 cho cả EM và F1 (tính sai số 100 câu của paper)",
+    "R1b_vs_B1": "khác biệt nếu McNemar exact p < 0,05 (EM); ANLS kèm CI95 bootstrap ghép cặp"
+  },
+  "runs": {
+    "B1": "W07_B1_zeroshot_qwen25vl_vitextvqa_test2000_bf16_L4_seed42",
+    "R1": "W07_R1_vitextvqa_test2000_qwen2vl7b_paper_bf16_L4_seed42",
+    "R1b": "W07_R1b_vitextvqa_test2000_qwen2vl7b_b1cfg_L4_seed42"
+  },
+  "variants": {
+    "R1": "qwen2vl7b_paper",
+    "R1b": "qwen2vl7b_b1cfg"
+  },
+  "table1": [
+    {
+      "run": "B1 · Qwen2.5-VL-3B · 4-bit · 512 token",
+      "EM": 28.799999999999997,
+      "F1 (phụ)": 53.76551062892471,
+      "ANLS": 47.52661280679389,
+      "VQA-Acc": 28.799999999999997,
+      "s/câu": 0.862,
+      "VRAM đỉnh (GB)": null,
+      "ảnh thu nhỏ do tràn VRAM": 0,
+      "câu rỗng": 0
+    },
+    {
+      "run": "R1 · Qwen2-VL-7B · bf16 · độ phân giải mặc định",
+      "EM": 16.7,
+      "F1 (phụ)": 43.50430077778375,
+      "ANLS": 29.94400996551797,
+      "VQA-Acc": 16.7,
+      "s/câu": 2.85,
+      "VRAM đỉnh (GB)": 20.27,
+      "ảnh thu nhỏ do tràn VRAM": 0,
+      "câu rỗng": 0
+    },
+    {
+      "run": "R1b · Qwen2-VL-7B · 4-bit · 512 token",
+      "EM": 16.2,
+      "F1 (phụ)": 41.31133942687322,
+      "ANLS": 29.03982058510622,
+      "VQA-Acc": 16.2,
+      "s/câu": 1.025,
+      "VRAM đỉnh (GB)": 6.2,
+      "ảnh thu nhỏ do tràn VRAM": 0,
+      "câu rỗng": 0
+    },
+    {
+      "run": "Paper Table 7 · \"QwenVL-7b\" (100 câu)",
+      "EM": 28.0,
+      "F1 (phụ)": 53.8
+    }
+  ],
+  "table7_reports": {
+    "B1": {
+      "reference": {
+        "what": "Table 7, dòng 'QwenVL-7b', zero-shot, 100 câu test ngẫu nhiên (prompt/checkpoint không công bố)",
+        "em": 28.0,
+        "f1": 53.8,
+        "n": 100
+      },
+      "source": "Nguyen et al., ViTextVQA, Expert Systems with Applications 2025, arXiv:2404.10652v5",
+      "EM": {
+        "ours_pct": 28.8,
+        "paper_pct": 28.0,
+        "n_ours": 2000,
+        "n_paper": 100,
+        "diff_points": 0.8,
+        "z": 0.172,
+        "paper_ci95_pct": [
+          19.12,
+          36.88
+        ],
+        "min_detectable_diff_points": 9.1,
+        "verdict": "NHẤT QUÁN với paper"
+      },
+      "F1": {
+        "ours_pct": 53.77,
+        "paper_pct": 53.8,
+        "n_ours": 2000,
+        "n_paper": 100,
+        "diff_points": -0.03,
+        "z": -0.009,
+        "paper_ci95_pct": [
+          46.05,
+          61.55
+        ],
+        "min_detectable_diff_points": 7.94,
+        "verdict": "NHẤT QUÁN với paper"
+      },
+      "rule": "nhất quán nếu |z| <= 1,96 cho CẢ EM và F1 (z tính cả sai số 100 câu của paper)",
+      "verdict": "NHẤT QUÁN với Table 7 (trong phạm vi sai số 100 câu)"
+    },
+    "R1": {
+      "reference": {
+        "what": "Table 7, dòng 'QwenVL-7b', zero-shot, 100 câu test ngẫu nhiên (prompt/checkpoint không công bố)",
+        "em": 28.0,
+        "f1": 53.8,
+        "n": 100
+      },
+      "source": "Nguyen et al., ViTextVQA, Expert Systems with Applications 2025, arXiv:2404.10652v5",
+      "EM": {
+        "ours_pct": 16.7,
+        "paper_pct": 28.0,
+        "n_ours": 2000,
+        "n_paper": 100,
+        "diff_points": -11.3,
+        "z": -2.956,
+        "paper_ci95_pct": [
+          20.69,
+          35.31
+        ],
+        "min_detectable_diff_points": 7.49,
+        "verdict": "LỆCH so với paper"
+      },
+      "F1": {
+        "ours_pct": 43.5,
+        "paper_pct": 53.8,
+        "n_ours": 2000,
+        "n_paper": 100,
+        "diff_points": -10.3,
+        "z": -2.827,
+        "paper_ci95_pct": [
+          46.83,
+          60.77
+        ],
+        "min_detectable_diff_points": 7.14,
+        "verdict": "LỆCH so với paper"
+      },
+      "rule": "nhất quán nếu |z| <= 1,96 cho CẢ EM và F1 (z tính cả sai số 100 câu của paper)",
+      "verdict": "LỆCH so với Table 7"
+    },
+    "R1b": {
+      "reference": {
+        "what": "Table 7, dòng 'QwenVL-7b', zero-shot, 100 câu test ngẫu nhiên (prompt/checkpoint không công bố)",
+        "em": 28.0,
+        "f1": 53.8,
+        "n": 100
+      },
+      "source": "Nguyen et al., ViTextVQA, Expert Systems with Applications 2025, arXiv:2404.10652v5",
+      "EM": {
+        "ours_pct": 16.2,
+        "paper_pct": 28.0,
+        "n_ours": 2000,
+        "n_paper": 100,
+        "diff_points": -11.8,
+        "z": -3.125,
+        "paper_ci95_pct": [
+          20.78,
+          35.22
+        ],
+        "min_detectable_diff_points": 7.4,
+        "verdict": "LỆCH so với paper"
+      },
+      "F1": {
+        "ours_pct": 41.31,
+        "paper_pct": 53.8,
+        "n_ours": 2000,
+        "n_paper": 100,
+        "diff_points": -12.49,
+        "z": -3.396,
+        "paper_ci95_pct": [
+          46.77,
+          60.83
+        ],
+        "min_detectable_diff_points": 7.21,
+        "verdict": "LỆCH so với paper"
+      },
+      "rule": "nhất quán nếu |z| <= 1,96 cho CẢ EM và F1 (z tính cả sai số 100 câu của paper)",
+      "verdict": "LỆCH so với Table 7"
+    }
+  },
+  "paired": {
+    "B1_vs_R1b": {
+      "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B1_zeroshot_qwen25vl_vitextvqa_test2000_bf16_L4_seed42",
+      "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_R1b_vitextvqa_test2000_qwen2vl7b_b1cfg_L4_seed42",
+      "label_a": "B1",
+      "label_b": "R1b",
+      "n": 2000,
+      "n_both_correct": 219,
+      "n_only_a": 357,
+      "n_only_b": 105,
+      "n_both_wrong": 1319,
+      "b": 357,
+      "c": 105,
+      "p_value": 3.615174509578822e-33,
+      "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+      "em_a": 0.288,
+      "em_b": 0.162,
+      "em_diff": -0.12599999999999997,
+      "anls_threshold": 0.5,
+      "anls_a": 0.4752661280679394,
+      "anls_b": 0.29039820585106235,
+      "anls_diff": -0.18486792221687703,
+      "anls_ci95": [
+        -0.20560230858939707,
+        -0.16413448369482922
+      ],
+      "bootstrap": {
+        "n_resamples": 10000,
+        "seed": 42,
+        "method": "paired percentile"
+      }
+    },
+    "B1_vs_R1": {
+      "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B1_zeroshot_qwen25vl_vitextvqa_test2000_bf16_L4_seed42",
+      "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_R1_vitextvqa_test2000_qwen2vl7b_paper_bf16_L4_seed42",
+      "label_a": "B1",
+      "label_b": "R1",
+      "n": 2000,
+      "n_both_correct": 213,
+      "n_only_a": 363,
+      "n_only_b": 121,
+      "n_both_wrong": 1303,
+      "b": 363,
+      "c": 121,
+      "p_value": 3.985942945617653e-29,
+      "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+      "em_a": 0.288,
+      "em_b": 0.167,
+      "em_diff": -0.12099999999999997,
+      "anls_threshold": 0.5,
+      "anls_a": 0.4752661280679394,
+      "anls_b": 0.2994400996551798,
+      "anls_diff": -0.17582602841275957,
+      "anls_ci95": [
+        -0.19745858017597603,
+        -0.15435951179898952
+      ],
+      "bootstrap": {
+        "n_resamples": 10000,
+        "seed": 42,
+        "method": "paired percentile"
+      }
+    },
+    "R1b_vs_R1": {
+      "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_R1b_vitextvqa_test2000_qwen2vl7b_b1cfg_L4_seed42",
+      "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_R1_vitextvqa_test2000_qwen2vl7b_paper_bf16_L4_seed42",
+      "label_a": "R1b",
+      "label_b": "R1",
+      "n": 2000,
+      "n_both_correct": 257,
+      "n_only_a": 67,
+      "n_only_b": 77,
+      "n_both_wrong": 1599,
+      "b": 67,
+      "c": 77,
+      "p_value": 0.4533716994309751,
+      "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+      "em_a": 0.162,
+      "em_b": 0.167,
+      "em_diff": 0.0050000000000000044,
+      "anls_threshold": 0.5,
+      "anls_a": 0.29039820585106235,
+      "anls_b": 0.2994400996551798,
+      "anls_diff": 0.009041893804117476,
+      "anls_ci95": [
+        -0.0038926123775528455,
+        0.022167286393810437
+      ],
+      "bootstrap": {
+        "n_resamples": 10000,
+        "seed": 42,
+        "method": "paired percentile"
+      }
+    }
+  },
+  "answer_length_mean_words": {
+    "gold (đáp án đầu)": 3.6835,
+    "B1": 5.479,
+    "R1": 8.2015,
+    "R1b": 8.0145
+  },
+  "gpu": "NVIDIA L4"
+}

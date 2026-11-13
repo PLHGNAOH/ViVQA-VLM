@@ -1,0 +1,83 @@
+{
+  "metrics": {
+    "exact_match": 0.2935,
+    "vqa_accuracy": 0.2935,
+    "anls": 0.4802294324623447,
+    "token_f1": 0.5461954830620962,
+    "exact_match__unknown": 0.2935,
+    "vqa_accuracy__unknown": 0.2935,
+    "anls__unknown": 0.4802294324623447,
+    "token_f1__unknown": 0.5461954830620962
+  },
+  "meta": {
+    "run_name": "W08_B1ocr_vietocr_v1_qwen25vl_vitextvqa_test2000_bf16_L4_seed42",
+    "finished_utc": "2026-10-13T12:53:10+00:00",
+    "num_samples": 2000,
+    "question_type_counts": {
+      "unknown": 2000
+    },
+    "prompting_mode": "ocr",
+    "decoding": "greedy (do_sample=False)",
+    "max_new_tokens": 32,
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "backbone": "qwen2_5_vl",
+    "variant": null,
+    "quantization": {
+      "4bit": true,
+      "type": "nf4",
+      "double_quant": true,
+      "compute_dtype": "bfloat16"
+    },
+    "torch_dtype": "bfloat16",
+    "min_pixels": 200704,
+    "max_pixels": 401408,
+    "seed": 42,
+    "git_commit": "50b794c",
+    "config_file": "configs/qwen_lora.yaml",
+    "hardware": {
+      "gpus_seen": [
+        "NVIDIA L4"
+      ],
+      "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+    },
+    "inference_time_sec": 1811.2,
+    "sec_per_sample": 0.906,
+    "peak_vram_gb_this_session": 2.58,
+    "dataset": "vitextvqa_official",
+    "data_file": "data/vitextvqa_official/test_subset2000_seed42.json",
+    "data_file_sha256": "69a8b35c64fb505147fbd7904b19dce3853d7b63a24bb888359bdff61b30f68e",
+    "limit": null,
+    "chunk_size": 500,
+    "adapter": null,
+    "few_shot": null,
+    "ocr": {
+      "backend": "paddledet_vietocr",
+      "cache_format": "vivqa-vlm/ocr-cache/v2",
+      "engine": {
+        "paddleocr": "3.7.0",
+        "det_model": "PP-OCRv6_medium_det",
+        "rec_model": "vietocr/vgg_transformer",
+        "lang": "vi",
+        "vietocr_config": "vgg_transformer, beamsearch=False"
+      },
+      "cache_file": "paddledet_vietocr.json",
+      "subset_sha256": "e9ef758e8492aa98cf15146c584e08595e597e15936f75209162b6123e4fa904",
+      "template": "v1",
+      "max_chars": 600,
+      "min_conf": 0.0,
+      "stats": {
+        "n_samples": 2000,
+        "n_images": 1486,
+        "n_ocr_errors": 0,
+        "pct_samples_with_text": 99.85,
+        "pct_samples_truncated": 3.55,
+        "mean_chars": 144.1,
+        "subset_sha256": "e9ef758e8492aa98cf15146c584e08595e597e15936f75209162b6123e4fa904"
+      }
+    },
+    "versions": {
+      "transformers": "5.17.0",
+      "torch": "2.11.0+cu130"
+    }
+  }
+}

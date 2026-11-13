@@ -1,0 +1,1483 @@
+{
+ "qt_version": "qt-v1 (W11, 21/10/2026, thiết kế trên dev300)",
+ "qt_rules_sha256": "92c21a7a8e23653ee46e32c670099a10be79ffe66ba59849b82e97c6b0bc6bcb",
+ "type_map": {
+  "source": "source",
+  "contact": "contact",
+  "number_time": "number_time",
+  "person": "person",
+  "location": "location",
+  "name": "name",
+  "text_content": "text_content",
+  "product_service": "product_service",
+  "other": "other"
+ },
+ "runs": {
+  "vitext": {
+   "B1": "W07_B1_zeroshot_qwen25vl_vitextvqa_testfull_bf16_L4_seed42",
+   "B2": "W07_B2_eval_qlora_r16_ep1_vitextvqa_testfull_bf16_L4_seed42",
+   "B3full": "W10_B3full_eval_qlora_ocr_vietocr_v1_r16_full_ep1_vitextvqa_testfull_bf16_L4_seed42"
+  },
+  "vivqa": {
+   "B1": "W07_B1_zeroshot_qwen25vl_vivqa_test_bf16_L4_seed42",
+   "C1": "W07_B2_eval_qlora_r16_ep1_vivqa_test_bf16_L4_seed42",
+   "C3": "W09_C3_eval_qlora_r16_vivqa_test_bf16_L4_seed42"
+  }
+ },
+ "inputs_sha256": {
+  "vitext_test": "956da0ae2a6a8f57fbfb52cbbdc6626e677be857417145bc3e1d25bb45f00f08",
+  "vivqa_test": "0a09f7bac471ce7359eda5b965d94821ae78fd151217f84cf9a59b14b6ccb787",
+  "vitext_ocr": "e7ce4f76d98c1eb5dbbd7c07bb6ed62cfb3e4043b955143a2b5a6cc182560c1b"
+ },
+ "vitext": {
+  "n": 10028,
+  "buckets": {
+   "B1": {
+    "n": 10028,
+    "n_errors": 7108,
+    "error_rate_pct": 70.88,
+    "counts": {
+     "tone": 237,
+     "truncated": 352,
+     "extended": 1830,
+     "near_miss": 570,
+     "other": 4119
+    },
+    "pct_of_errors": {
+     "tone": 3.3,
+     "truncated": 5.0,
+     "extended": 25.7,
+     "near_miss": 8.0,
+     "other": 57.9
+    }
+   },
+   "B2": {
+    "n": 10028,
+    "n_errors": 4988,
+    "error_rate_pct": 49.74,
+    "counts": {
+     "tone": 449,
+     "truncated": 656,
+     "extended": 678,
+     "near_miss": 839,
+     "other": 2366
+    },
+    "pct_of_errors": {
+     "tone": 9.0,
+     "truncated": 13.2,
+     "extended": 13.6,
+     "near_miss": 16.8,
+     "other": 47.4
+    }
+   },
+   "B3full": {
+    "n": 10028,
+    "n_errors": 4678,
+    "error_rate_pct": 46.65,
+    "counts": {
+     "tone": 450,
+     "truncated": 727,
+     "extended": 676,
+     "near_miss": 770,
+     "other": 2055
+    },
+    "pct_of_errors": {
+     "tone": 9.6,
+     "truncated": 15.5,
+     "extended": 14.5,
+     "near_miss": 16.5,
+     "other": 43.9
+    }
+   }
+  },
+  "ocr_status_all_questions": {
+   "counts": {
+    "answer_missing": 5526,
+    "has_answer": 3321,
+    "wrong_diacritics": 1149,
+    "no_text": 32
+   },
+   "pct": {
+    "has_answer": 33.1,
+    "wrong_diacritics": 11.5,
+    "answer_missing": 55.1,
+    "no_text": 0.3
+   }
+  },
+  "b3_sources": {
+   "n_errors": 4678,
+   "counts": {
+    "ocr_upstream": 3788,
+    "model_wrong_span": 492,
+    "model_outside_ocr": 398
+   },
+   "pct": {
+    "ocr_upstream": 81.0,
+    "model_wrong_span": 10.5,
+    "model_outside_ocr": 8.5
+   },
+   "ocr_upstream_detail": {
+    "wrong_diacritics": 14.6,
+    "answer_missing": 84.8,
+    "no_text": 0.6
+   }
+  },
+  "b3_source_x_bucket": {
+   "ocr_upstream": {
+    "tone": 393,
+    "truncated": 537,
+    "extended": 360,
+    "near_miss": 682,
+    "other": 1816
+   },
+   "model_wrong_span": {
+    "tone": 2,
+    "truncated": 190,
+    "extended": 193,
+    "near_miss": 11,
+    "other": 96
+   },
+   "model_outside_ocr": {
+    "tone": 55,
+    "truncated": 0,
+    "extended": 123,
+    "near_miss": 77,
+    "other": 143
+   }
+  },
+  "b3_by_type": {
+   "contact": {
+    "n": 641,
+    "em_pct": 64.1,
+    "has_answer_pct": 30.1,
+    "n_errors": 230,
+    "source_pct": {
+     "ocr_upstream": 90.9,
+     "model_wrong_span": 3.9,
+     "model_outside_ocr": 5.2
+    }
+   },
+   "location": {
+    "n": 969,
+    "em_pct": 47.0,
+    "has_answer_pct": 30.1,
+    "n_errors": 514,
+    "source_pct": {
+     "ocr_upstream": 84.4,
+     "model_wrong_span": 10.3,
+     "model_outside_ocr": 5.3
+    }
+   },
+   "name": {
+    "n": 1971,
+    "em_pct": 57.6,
+    "has_answer_pct": 34.2,
+    "n_errors": 835,
+    "source_pct": {
+     "ocr_upstream": 80.4,
+     "model_wrong_span": 9.9,
+     "model_outside_ocr": 9.7
+    }
+   },
+   "number_time": {
+    "n": 1041,
+    "em_pct": 58.8,
+    "has_answer_pct": 47.4,
+    "n_errors": 429,
+    "source_pct": {
+     "ocr_upstream": 72.5,
+     "model_wrong_span": 15.4,
+     "model_outside_ocr": 12.1
+    }
+   },
+   "other": {
+    "n": 2404,
+    "em_pct": 49.6,
+    "has_answer_pct": 34.0,
+    "n_errors": 1211,
+    "source_pct": {
+     "ocr_upstream": 77.8,
+     "model_wrong_span": 14.2,
+     "model_outside_ocr": 8.0
+    }
+   },
+   "person": {
+    "n": 420,
+    "em_pct": 61.2,
+    "has_answer_pct": 40.0,
+    "n_errors": 163,
+    "source_pct": {
+     "ocr_upstream": 82.2,
+     "model_wrong_span": 8.6,
+     "model_outside_ocr": 9.2
+    }
+   },
+   "product_service": {
+    "n": 1144,
+    "em_pct": 44.1,
+    "has_answer_pct": 25.6,
+    "n_errors": 639,
+    "source_pct": {
+     "ocr_upstream": 81.7,
+     "model_wrong_span": 10.2,
+     "model_outside_ocr": 8.1
+    }
+   },
+   "source": {
+    "n": 661,
+    "em_pct": 58.1,
+    "has_answer_pct": 30.7,
+    "n_errors": 277,
+    "source_pct": {
+     "ocr_upstream": 83.8,
+     "model_wrong_span": 5.1,
+     "model_outside_ocr": 11.2
+    }
+   },
+   "text_content": {
+    "n": 777,
+    "em_pct": 51.1,
+    "has_answer_pct": 24.1,
+    "n_errors": 380,
+    "source_pct": {
+     "ocr_upstream": 87.6,
+     "model_wrong_span": 4.2,
+     "model_outside_ocr": 8.2
+    }
+   }
+  },
+  "b2_to_b3": {
+   "all": {
+    "fixed": 705,
+    "broken": 395,
+    "both_right": 4645,
+    "both_wrong": 4283
+   },
+   "by_ocr_status": {
+    "has_answer": {
+     "n": 3321,
+     "fixed": 326,
+     "broken": 116,
+     "both_right": 2105,
+     "both_wrong": 774
+    },
+    "wrong_diacritics": {
+     "n": 1149,
+     "fixed": 90,
+     "broken": 68,
+     "both_right": 506,
+     "both_wrong": 485
+    },
+    "answer_missing": {
+     "n": 5526,
+     "fixed": 289,
+     "broken": 211,
+     "both_right": 2023,
+     "both_wrong": 3003
+    },
+    "no_text": {
+     "n": 32,
+     "fixed": 0,
+     "broken": 0,
+     "both_right": 11,
+     "both_wrong": 21
+    }
+   },
+   "broken_b3_answer_in_ocr_pct": 34.9,
+   "fixed_gold_in_ocr_pct": 46.2
+  },
+  "examples": {
+   "ocr_fixed": [
+    {
+     "qid": "test_13350",
+     "image": "4444.jpg",
+     "question": "bức hình được chụp vào năm nào ?",
+     "answers": [
+      "2016"
+     ],
+     "type": "number_time",
+     "ocr_status": "has_answer",
+     "b1": "2019",
+     "b2": "2017",
+     "b3": "2016",
+     "b2_right": false,
+     "b3_right": true,
+     "b3_in_ocr": true,
+     "b2_in_ocr": false,
+     "b3_bucket": null,
+     "source": null
+    },
+    {
+     "qid": "test_30959",
+     "image": "10341.jpg",
+     "question": "trường thpt này mang tên gọi là gì ?",
+     "answers": [
+      "đào duy từ"
+     ],
+     "type": "name",
+     "ocr_status": "has_answer",
+     "b1": "Thành phố Thanh Bì.",
+     "b2": "thành phố đào duy trì",
+     "b3": "đào duy từ",
+     "b2_right": false,
+     "b3_right": true,
+     "b3_in_ocr": true,
+     "b2_in_ocr": false,
+     "b3_bucket": null,
+     "source": null
+    },
+    {
+     "qid": "test_22920",
+     "image": "7699.jpg",
+     "question": "bức hình này được lấy ở báo nào ?",
+     "answers": [
+      "bth"
+     ],
+     "type": "source",
+     "ocr_status": "has_answer",
+     "b1": "Báo BTH.",
+     "b2": "báo thành phố",
+     "b3": "bth",
+     "b2_right": false,
+     "b3_right": true,
+     "b3_in_ocr": true,
+     "b2_in_ocr": false,
+     "b3_bucket": null,
+     "source": null
+    },
+    {
+     "qid": "test_42304",
+     "image": "14151.jpg",
+     "question": "trạm xăng này có tên là gì ?",
+     "answers": [
+      "mipec"
+     ],
+     "type": "name",
+     "ocr_status": "has_answer",
+     "b1": "Trạm xăng này có tên là Mipec.",
+     "b2": "mipeo",
+     "b3": "mipec",
+     "b2_right": false,
+     "b3_right": true,
+     "b3_in_ocr": true,
+     "b2_in_ocr": false,
+     "b3_bucket": null,
+     "source": null
+    },
+    {
+     "qid": "test_38279",
+     "image": "12741.jpg",
+     "question": "đây là cổng số mấy của hội chợ ?",
+     "answers": [
+      "1"
+     ],
+     "type": "number_time",
+     "ocr_status": "has_answer",
+     "b1": "2017",
+     "b2": "2",
+     "b3": "1",
+     "b2_right": false,
+     "b3_right": true,
+     "b3_in_ocr": true,
+     "b2_in_ocr": false,
+     "b3_bucket": null,
+     "source": null
+    }
+   ],
+   "ocr_distraction": [
+    {
+     "qid": "test_43847",
+     "image": "14629.jpg",
+     "question": "món cơm gà hải nam làm theo nước nào ?",
+     "answers": [
+      "kiểu singapore"
+     ],
+     "type": "location",
+     "ocr_status": "has_answer",
+     "b1": "Singapore",
+     "b2": "kiểu singapore",
+     "b3": "singapore",
+     "b2_right": true,
+     "b3_right": false,
+     "b3_in_ocr": true,
+     "b2_in_ocr": true,
+     "b3_bucket": "truncated",
+     "source": "model_wrong_span"
+    },
+    {
+     "qid": "test_8650",
+     "image": "2943.jpg",
+     "question": "ở đây có bán táo của hãng nào ?",
+     "answers": [
+      "envy"
+     ],
+     "type": "name",
+     "ocr_status": "answer_missing",
+     "b1": "Hàng Eny",
+     "b2": "envy",
+     "b3": "enwell",
+     "b2_right": true,
+     "b3_right": false,
+     "b3_in_ocr": true,
+     "b2_in_ocr": false,
+     "b3_bucket": "other",
+     "source": "ocr_upstream"
+    },
+    {
+     "qid": "test_21833",
+     "image": "7343.jpg",
+     "question": "cửa hàng thái nguyên thuộc hệ thống nào ?",
+     "answers": [
+      "trà tân cương"
+     ],
+     "type": "other",
+     "ocr_status": "has_answer",
+     "b1": "Hệ thống Trà Tân Cương",
+     "b2": "trà tân cương",
+     "b3": "hệ thống trà tân cương",
+     "b2_right": true,
+     "b3_right": false,
+     "b3_in_ocr": true,
+     "b2_in_ocr": true,
+     "b3_bucket": "extended",
+     "source": "model_wrong_span"
+    },
+    {
+     "qid": "test_26011",
+     "image": "8741.jpg",
+     "question": "khi muốn thuê căn nhà ở giữa thì liên hệ với người nào ?",
+     "answers": [
+      "cô tuyết"
+     ],
+     "type": "other",
+     "ocr_status": "wrong_diacritics",
+     "b1": "Có Tuyết - 0963 000 388",
+     "b2": "cô tuyết",
+     "b3": "có tuyết",
+     "b2_right": true,
+     "b3_right": false,
+     "b3_in_ocr": true,
+     "b2_in_ocr": false,
+     "b3_bucket": "tone",
+     "source": "ocr_upstream"
+    },
+    {
+     "qid": "test_41781",
+     "image": "13977.jpg",
+     "question": "xe tăng này bị tiêu diệt ngày nào ?",
+     "answers": [
+      "1 . 4 . 1954"
+     ],
+     "type": "number_time",
+     "ocr_status": "has_answer",
+     "b1": "1.4.1954",
+     "b2": "1 . 4 . 1954",
+     "b3": "sáng 1 . 4 . 1954",
+     "b2_right": true,
+     "b3_right": false,
+     "b3_in_ocr": true,
+     "b2_in_ocr": true,
+     "b3_bucket": "extended",
+     "source": "model_wrong_span"
+    }
+   ],
+   "ocr_missing": [
+    {
+     "qid": "test_26064",
+     "image": "8753.jpg",
+     "question": "máy mài góc m18 fsag100x - 0x0 là sản phẩm thuộc combo nào ?",
+     "answers": [
+      "3"
+     ],
+     "type": "other",
+     "ocr_status": "answer_missing",
+     "b1": "COMBO 3",
+     "b2": "combo 3",
+     "b3": "combo 3",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": false,
+     "b2_in_ocr": false,
+     "b3_bucket": "extended",
+     "source": "ocr_upstream"
+    },
+    {
+     "qid": "test_34842",
+     "image": "11584.jpg",
+     "question": "địa chỉ email của công ty là gì ?",
+     "answers": [
+      "tnhhanphatvn@gmail . com"
+     ],
+     "type": "contact",
+     "ocr_status": "answer_missing",
+     "b1": "Email: thnhanphatvn@gmail.com",
+     "b2": "tnhanhphatvn@gmail . com",
+     "b3": "tnhphanhatvn@gmail . com",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": false,
+     "b2_in_ocr": false,
+     "b3_bucket": "near_miss",
+     "source": "ocr_upstream"
+    },
+    {
+     "qid": "test_3901",
+     "image": "1408.jpg",
+     "question": "ngôi trường trong ảnh do ai quản lý ?",
+     "answers": [
+      "phòng giáo dục và đào tạo châu thành"
+     ],
+     "type": "person",
+     "ocr_status": "answer_missing",
+     "b1": "Phòng Giáo dục và Đào tạo Châu Thành.",
+     "b2": "phòng giáo dục và đào tạo châu thanh",
+     "b3": "phòng giáo dục và đào tạo châu thanh",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": false,
+     "b2_in_ocr": false,
+     "b3_bucket": "tone",
+     "source": "ocr_upstream"
+    },
+    {
+     "qid": "test_25152",
+     "image": "8492.jpg",
+     "question": "tác giả của quyển sách là ai ?",
+     "answers": [
+      "kuroyanagi tetsuko"
+     ],
+     "type": "person",
+     "ocr_status": "answer_missing",
+     "b1": "Tatsuro Yamazaki",
+     "b2": "kuroyanagi tetsuko",
+     "b3": "iwasaki chihiro",
+     "b2_right": true,
+     "b3_right": false,
+     "b3_in_ocr": false,
+     "b2_in_ocr": false,
+     "b3_bucket": "other",
+     "source": "ocr_upstream"
+    },
+    {
+     "qid": "test_14423",
+     "image": "4823.jpg",
+     "question": "ở trước chợ bình tây có biển báo gì ?",
+     "answers": [
+      "cấm"
+     ],
+     "type": "other",
+     "ocr_status": "answer_missing",
+     "b1": "Có biển báo \"Đi bộ\".",
+     "b2": "cấm đi",
+     "b3": "cấm đi",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": false,
+     "b2_in_ocr": false,
+     "b3_bucket": "extended",
+     "source": "ocr_upstream"
+    }
+   ],
+   "ocr_wrong_diacritics": [
+    {
+     "qid": "test_16520",
+     "image": "5512.jpg",
+     "question": "quán trung bắc là quán ăn như thế nào ?",
+     "answers": [
+      "tiệm ăn cao lầu"
+     ],
+     "type": "other",
+     "ocr_status": "wrong_diacritics",
+     "b1": "Quán Trung Bắc là một quán ăn.",
+     "b2": "tiệm ăn - cao lâu",
+     "b3": "tiệm ăn cao lâu",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": false,
+     "b2_in_ocr": false,
+     "b3_bucket": "tone",
+     "source": "ocr_upstream"
+    },
+    {
+     "qid": "test_43435",
+     "image": "14489.jpg",
+     "question": "trung tâm này có tên là gì ?",
+     "answers": [
+      "bưu chính viễn thông tin học"
+     ],
+     "type": "name",
+     "ocr_status": "wrong_diacritics",
+     "b1": "Trung tâm Bưu chính Viễn thông Tín học tỉnh Bắc Giang",
+     "b2": "bưu chính viên thông tin học tỉnh bắc giang",
+     "b3": "trung tâm bưu chính viễn thông tin học tỉnh bắc giang",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": false,
+     "b2_in_ocr": false,
+     "b3_bucket": "extended",
+     "source": "ocr_upstream"
+    },
+    {
+     "qid": "test_12280",
+     "image": "4105.jpg",
+     "question": "ngồi quay hấp quán bên trái của cửa hàng này còn bán món ăn gì ?",
+     "answers": [
+      "lẩu"
+     ],
+     "type": "product_service",
+     "ocr_status": "wrong_diacritics",
+     "b1": "Chim cút.",
+     "b2": "lẩu chimi cầu",
+     "b3": "lẩu chim cậu",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": false,
+     "b2_in_ocr": false,
+     "b3_bucket": "extended",
+     "source": "ocr_upstream"
+    },
+    {
+     "qid": "test_28608",
+     "image": "9517.jpg",
+     "question": "cà phê ở góc dưới bên phải có tên là gì ?",
+     "answers": [
+      "đen đá việt nam"
+     ],
+     "type": "name",
+     "ocr_status": "wrong_diacritics",
+     "b1": "Cà phê đen đá Việt Nam",
+     "b2": "cà phê đen đá việt nam",
+     "b3": "cà phê đen đà việt nam",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": false,
+     "b2_in_ocr": false,
+     "b3_bucket": "other",
+     "source": "ocr_upstream"
+    },
+    {
+     "qid": "test_8025",
+     "image": "2742.jpg",
+     "question": "gian hàng ở phía sau gian 108 là gian hàng gì ?",
+     "answers": [
+      "htx làng nghề thổ cẩm hoa tiến"
+     ],
+     "type": "product_service",
+     "ocr_status": "wrong_diacritics",
+     "b1": "Gian hàng ở phía sau gian 108 là gian hàng của Công ty TNHH Đồ Thú Công Hải Trang.",
+     "b2": "mtx làng nghề thổ cẩm hoa tiên",
+     "b3": "mtx làng nghề thổ cẩm hoa tiên",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": false,
+     "b2_in_ocr": false,
+     "b3_bucket": "near_miss",
+     "source": "ocr_upstream"
+    }
+   ],
+   "model_wrong_span": [
+    {
+     "qid": "test_25743",
+     "image": "8670.jpg",
+     "question": "ai được nhắc đến ở trong dòng chữ phía trên cuốn sách đường vào tình sử ?",
+     "answers": [
+      "người cầm bút"
+     ],
+     "type": "person",
+     "ocr_status": "has_answer",
+     "b1": "Đinh Hùng",
+     "b2": "đinh hùng",
+     "b3": "đinh hùng",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": true,
+     "b2_in_ocr": true,
+     "b3_bucket": "other",
+     "source": "model_wrong_span"
+    },
+    {
+     "qid": "test_12580",
+     "image": "4204.jpg",
+     "question": "nơi này được gọi là gì ?",
+     "answers": [
+      "ga trạm tramway"
+     ],
+     "type": "other",
+     "ocr_status": "has_answer",
+     "b1": "Ga Trạm Tramway ở Sài Gòn (trước Chợ Cũ) đi Chợ Lớn - Đằng sau hình là mái nhà g",
+     "b2": "gare du tramway de cholon - saigon",
+     "b3": "gare du tramway de cholon - saigon",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": true,
+     "b2_in_ocr": true,
+     "b3_bucket": "other",
+     "source": "model_wrong_span"
+    },
+    {
+     "qid": "test_2949",
+     "image": "1075.jpg",
+     "question": "bảo quảng cáo của công ty nào ?",
+     "answers": [
+      "công ty tnhh quảng cáo phan gia"
+     ],
+     "type": "name",
+     "ocr_status": "has_answer",
+     "b1": "Phan Gia Advertising - Interior",
+     "b2": "phan gia",
+     "b3": "phan gia",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": true,
+     "b2_in_ocr": true,
+     "b3_bucket": "truncated",
+     "source": "model_wrong_span"
+    },
+    {
+     "qid": "test_34841",
+     "image": "11584.jpg",
+     "question": "số điện thoại của công ty là gì ?",
+     "answers": [
+      "đt : 0822301666"
+     ],
+     "type": "contact",
+     "ocr_status": "has_answer",
+     "b1": "08223101665",
+     "b2": "0822301666",
+     "b3": "0822301666",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": true,
+     "b2_in_ocr": true,
+     "b3_bucket": "truncated",
+     "source": "model_wrong_span"
+    },
+    {
+     "qid": "test_30858",
+     "image": "10306.jpg",
+     "question": "giáo trình này là giáo trình gì ?",
+     "answers": [
+      "giáo trình dạy piano"
+     ],
+     "type": "other",
+     "ocr_status": "has_answer",
+     "b1": "Giáo trình dạy piano.",
+     "b2": "dạy piano nổi tiếng của pháp",
+     "b3": "dạy piano nổi tiếng của pháp",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": true,
+     "b2_in_ocr": true,
+     "b3_bucket": "other",
+     "source": "model_wrong_span"
+    }
+   ],
+   "tone": [
+    {
+     "qid": "test_39141",
+     "image": "13070.jpg",
+     "question": "địa điểm của tấm hình này là ở đâu ?",
+     "answers": [
+      "khách sạn siêu thị"
+     ],
+     "type": "location",
+     "ocr_status": "wrong_diacritics",
+     "b1": "Đà Nẵng",
+     "b2": "khách sạn siêu thi",
+     "b3": "khách sạn siêu thi",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": false,
+     "b2_in_ocr": false,
+     "b3_bucket": "tone",
+     "source": "ocr_upstream"
+    },
+    {
+     "qid": "test_25550",
+     "image": "8614.jpg",
+     "question": "địa chỉ của quán cà phê này là gì ?",
+     "answers": [
+      "82 hà huy tập - tp . vinh"
+     ],
+     "type": "location",
+     "ocr_status": "answer_missing",
+     "b1": "Địa chỉ của quán cà phê này là 82 Hà Huy Tập, TP Vinh.",
+     "b2": "82 hà huy tap - tp . vinh",
+     "b3": "82 hà huy tap - tp . vinh",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": false,
+     "b2_in_ocr": false,
+     "b3_bucket": "tone",
+     "source": "ocr_upstream"
+    },
+    {
+     "qid": "test_16259",
+     "image": "5421.jpg",
+     "question": "35k là giá của các sản phẩm nào ?",
+     "answers": [
+      "giầy xổ"
+     ],
+     "type": "number_time",
+     "ocr_status": "has_answer",
+     "b1": "Giày xốp",
+     "b2": "giày xố",
+     "b3": "giày xổ",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": false,
+     "b2_in_ocr": false,
+     "b3_bucket": "tone",
+     "source": "model_outside_ocr"
+    },
+    {
+     "qid": "test_39447",
+     "image": "13196.jpg",
+     "question": "địa chỉ của cửa hàng 3 cô quán là gì ?",
+     "answers": [
+      "51 hai bà trưng"
+     ],
+     "type": "location",
+     "ocr_status": "answer_missing",
+     "b1": "ĐC: 51 Hai Bà Trưng",
+     "b2": "51 hải đà trung",
+     "b3": "51 hải bà trung",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": false,
+     "b2_in_ocr": false,
+     "b3_bucket": "tone",
+     "source": "ocr_upstream"
+    },
+    {
+     "qid": "test_46777",
+     "image": "15640.jpg",
+     "question": "di tích lịch sử này tên gì ?",
+     "answers": [
+      "nhà tù hòa bình"
+     ],
+     "type": "name",
+     "ocr_status": "wrong_diacritics",
+     "b1": "Nhà Tủ Hòa Bình",
+     "b2": "nhà từ hòa bình",
+     "b3": "nhà tu hòa bình",
+     "b2_right": false,
+     "b3_right": false,
+     "b3_in_ocr": true,
+     "b2_in_ocr": false,
+     "b3_bucket": "tone",
+     "source": "ocr_upstream"
+    }
+   ]
+  }
+ },
+ "vivqa": {
+  "n": 3001,
+  "buckets": {
+   "B1": {
+    "n": 3001,
+    "n_errors": 2338,
+    "error_rate_pct": 77.91,
+    "counts": {
+     "tone": 1,
+     "truncated": 85,
+     "extended": 498,
+     "near_miss": 149,
+     "other": 1605
+    },
+    "pct_of_errors": {
+     "tone": 0.0,
+     "truncated": 3.6,
+     "extended": 21.3,
+     "near_miss": 6.4,
+     "other": 68.6
+    }
+   },
+   "C1": {
+    "n": 3001,
+    "n_errors": 787,
+    "error_rate_pct": 26.22,
+    "counts": {
+     "tone": 4,
+     "truncated": 22,
+     "extended": 25,
+     "near_miss": 119,
+     "other": 617
+    },
+    "pct_of_errors": {
+     "tone": 0.5,
+     "truncated": 2.8,
+     "extended": 3.2,
+     "near_miss": 15.1,
+     "other": 78.4
+    }
+   },
+   "C3": {
+    "n": 3001,
+    "n_errors": 701,
+    "error_rate_pct": 23.36,
+    "counts": {
+     "tone": 0,
+     "truncated": 16,
+     "extended": 27,
+     "near_miss": 112,
+     "other": 546
+    },
+    "pct_of_errors": {
+     "tone": 0.0,
+     "truncated": 2.3,
+     "extended": 3.9,
+     "near_miss": 16.0,
+     "other": 77.9
+    }
+   }
+  },
+  "c3_bucket_by_type": {
+   "object": {
+    "n": 1247,
+    "n_errors": 291,
+    "error_rate_pct": 23.34,
+    "counts": {
+     "tone": 0,
+     "truncated": 11,
+     "extended": 10,
+     "near_miss": 7,
+     "other": 263
+    },
+    "pct_of_errors": {
+     "tone": 0.0,
+     "truncated": 3.8,
+     "extended": 3.4,
+     "near_miss": 2.4,
+     "other": 90.4
+    }
+   },
+   "number": {
+    "n": 444,
+    "n_errors": 102,
+    "error_rate_pct": 22.97,
+    "counts": {
+     "tone": 0,
+     "truncated": 0,
+     "extended": 0,
+     "near_miss": 102,
+     "other": 0
+    },
+    "pct_of_errors": {
+     "tone": 0.0,
+     "truncated": 0.0,
+     "extended": 0.0,
+     "near_miss": 100.0,
+     "other": 0.0
+    }
+   },
+   "color": {
+    "n": 625,
+    "n_errors": 98,
+    "error_rate_pct": 15.68,
+    "counts": {
+     "tone": 0,
+     "truncated": 0,
+     "extended": 0,
+     "near_miss": 1,
+     "other": 97
+    },
+    "pct_of_errors": {
+     "tone": 0.0,
+     "truncated": 0.0,
+     "extended": 0.0,
+     "near_miss": 1.0,
+     "other": 99.0
+    }
+   },
+   "location": {
+    "n": 685,
+    "n_errors": 210,
+    "error_rate_pct": 30.66,
+    "counts": {
+     "tone": 0,
+     "truncated": 5,
+     "extended": 17,
+     "near_miss": 2,
+     "other": 186
+    },
+    "pct_of_errors": {
+     "tone": 0.0,
+     "truncated": 2.4,
+     "extended": 8.1,
+     "near_miss": 1.0,
+     "other": 88.6
+    }
+   }
+  },
+  "c3_top_confusions": {
+   "object": [
+    {
+     "gold": "tủ lạnh",
+     "pred": "tủ đá",
+     "n": 6
+    },
+    {
+     "gold": "xe cộ",
+     "pred": "xe tải",
+     "n": 5
+    },
+    {
+     "gold": "xe đạp",
+     "pred": "xe máy",
+     "n": 4
+    },
+    {
+     "gold": "tòa nhà",
+     "pred": "tòa tháp",
+     "n": 4
+    },
+    {
+     "gold": "máy tính",
+     "pred": "laptop",
+     "n": 4
+    },
+    {
+     "gold": "lá",
+     "pred": "cây",
+     "n": 3
+    },
+    {
+     "gold": "hải âu",
+     "pred": "con chim",
+     "n": 3
+    },
+    {
+     "gold": "laptop",
+     "pred": "máy vi tính",
+     "n": 3
+    },
+    {
+     "gold": "động cơ",
+     "pred": "tàu hỏa",
+     "n": 3
+    },
+    {
+     "gold": "xe ô tô",
+     "pred": "tàu hỏa",
+     "n": 3
+    }
+   ],
+   "number": [
+    {
+     "gold": "bốn",
+     "pred": "ba",
+     "n": 11
+    },
+    {
+     "gold": "ba",
+     "pred": "bốn",
+     "n": 10
+    },
+    {
+     "gold": "một",
+     "pred": "hai",
+     "n": 10
+    },
+    {
+     "gold": "ba",
+     "pred": "hai",
+     "n": 9
+    },
+    {
+     "gold": "năm",
+     "pred": "bốn",
+     "n": 8
+    },
+    {
+     "gold": "bốn",
+     "pred": "hai",
+     "n": 7
+    },
+    {
+     "gold": "hai",
+     "pred": "ba",
+     "n": 6
+    },
+    {
+     "gold": "bốn",
+     "pred": "năm",
+     "n": 5
+    },
+    {
+     "gold": "hai",
+     "pred": "một",
+     "n": 4
+    },
+    {
+     "gold": "tám",
+     "pred": "bảy",
+     "n": 4
+    }
+   ],
+   "color": [
+    {
+     "gold": "màu nâu",
+     "pred": "màu đen",
+     "n": 5
+    },
+    {
+     "gold": "màu đỏ",
+     "pred": "màu cam",
+     "n": 5
+    },
+    {
+     "gold": "màu đen",
+     "pred": "màu xanh dương",
+     "n": 5
+    },
+    {
+     "gold": "màu xám",
+     "pred": "màu trắng",
+     "n": 4
+    },
+    {
+     "gold": "màu đỏ",
+     "pred": "màu tía",
+     "n": 4
+    },
+    {
+     "gold": "màu nâu",
+     "pred": "màu vàng",
+     "n": 4
+    },
+    {
+     "gold": "màu vàng",
+     "pred": "màu nâu",
+     "n": 4
+    },
+    {
+     "gold": "màu trắng",
+     "pred": "màu nâu",
+     "n": 4
+    },
+    {
+     "gold": "màu xanh lá",
+     "pred": "màu vàng",
+     "n": 3
+    },
+    {
+     "gold": "màu nâu",
+     "pred": "màu trắng",
+     "n": 3
+    }
+   ],
+   "location": [
+    {
+     "gold": "phòng",
+     "pred": "phòng ngủ",
+     "n": 6
+    },
+    {
+     "gold": "nhà vệ sinh",
+     "pred": "phòng tắm",
+     "n": 5
+    },
+    {
+     "gold": "phòng",
+     "pred": "phòng tắm",
+     "n": 5
+    },
+    {
+     "gold": "vườn bách thú",
+     "pred": "chuồng",
+     "n": 4
+    },
+    {
+     "gold": "ô cửa",
+     "pred": "phòng",
+     "n": 3
+    },
+    {
+     "gold": "vòi hoa sen",
+     "pred": "phòng tắm",
+     "n": 3
+    },
+    {
+     "gold": "thùng chứa",
+     "pred": "cái nồi",
+     "n": 3
+    },
+    {
+     "gold": "nhà ở",
+     "pred": "phòng",
+     "n": 3
+    },
+    {
+     "gold": "chuồng",
+     "pred": "vườn bách thú",
+     "n": 3
+    },
+    {
+     "gold": "món ăn",
+     "pred": "thùng chứa",
+     "n": 3
+    }
+   ]
+  },
+  "seen_unseen_B1_vs_C3": {
+   "all": {
+    "n": 3001,
+    "pct_of_test": 100.0,
+    "EM_B1": 0.22092635788070644,
+    "EM_C3": 0.7664111962679107,
+    "EM_prior": 0.10329890036654449,
+    "ANLS_B1": 0.2860520592021856,
+    "ANLS_C3": 0.7803328682868836,
+    "delta_EM": 0.5454848383872042,
+    "delta_EM_ci95": [
+     0.5268243918693769,
+     0.5641452849050317
+    ],
+    "only_B1_correct": 41,
+    "only_C3_correct": 1678,
+    "mcnemar_p": 0.0
+   },
+   "image_seen": {
+    "n": 1464,
+    "pct_of_test": 48.78,
+    "EM_B1": 0.12773224043715847,
+    "EM_C3": 0.7766393442622951,
+    "EM_prior": 0.05259562841530055,
+    "ANLS_B1": 0.19718243224149687,
+    "ANLS_C3": 0.7909166349740121,
+    "delta_EM": 0.6489071038251366,
+    "delta_EM_ci95": [
+     0.6236338797814208,
+     0.6734972677595629
+    ],
+    "only_B1_correct": 13,
+    "only_C3_correct": 963,
+    "mcnemar_p": 3.430478197279406e-265
+   },
+   "image_unseen": {
+    "n": 1537,
+    "pct_of_test": 51.22,
+    "EM_B1": 0.3096942094990241,
+    "EM_C3": 0.756668835393624,
+    "EM_prior": 0.15159401431359792,
+    "ANLS_B1": 0.37070081253364195,
+    "ANLS_C3": 0.7702517788724685,
+    "delta_EM": 0.44697462589459985,
+    "delta_EM_ci95": [
+     0.4196486662329213,
+     0.47364996746909566
+    ],
+    "only_B1_correct": 28,
+    "only_C3_correct": 715,
+    "mcnemar_p": 2.152103382484854e-173
+   },
+   "clean": {
+    "n": 1118,
+    "pct_of_test": 37.25,
+    "EM_B1": 0.2638640429338104,
+    "EM_C3": 0.7173524150268337,
+    "EM_prior": 0.148479427549195,
+    "ANLS_B1": 0.30900985056777963,
+    "ANLS_C3": 0.7346345514950166,
+    "delta_EM": 0.4534883720930233,
+    "delta_EM_ci95": [
+     0.4230769230769231,
+     0.4847942754919499
+    ],
+    "only_B1_correct": 22,
+    "only_C3_correct": 529,
+    "mcnemar_p": 3.326264059666895e-127
+   }
+  },
+  "examples": {
+   "c3_object": [
+    {
+     "qid": "test_1885",
+     "image": "COCO_val2014_000000430079.jpg",
+     "question": "đồng hồ và tranh cũ dòng những gì",
+     "answers": [
+      "tường"
+     ],
+     "type": "object",
+     "b1": "đồng hồ và tranh cũ dòng những bức tranh.",
+     "c3": "con chim",
+     "bucket": "other"
+    },
+    {
+     "qid": "test_1435",
+     "image": "COCO_val2014_000000498857.jpg",
+     "question": "con hươu cao cổ ăn gì qua hàng rào dây",
+     "answers": [
+      "lá"
+     ],
+     "type": "object",
+     "b1": "cây",
+     "c3": "cây",
+     "bucket": "other"
+    },
+    {
+     "qid": "test_2555",
+     "image": "COCO_val2014_000000570138.jpg",
+     "question": "những gì đang được cặp đôi treo lên",
+     "answers": [
+      "phòng tắm"
+     ],
+     "type": "object",
+     "b1": "towel",
+     "c3": "khăn",
+     "bucket": "other"
+    },
+    {
+     "qid": "test_2475",
+     "image": "COCO_val2014_000000515895.jpg",
+     "question": "người phụ nữ mặc những gì đang cưỡi một con ngựa trên bãi biển",
+     "answers": [
+      "nón"
+     ],
+     "type": "object",
+     "b1": "Người phụ nữ mặc áo hồng và quần trắng đang cưỡi một con ngựa trên bãi biển.",
+     "c3": "áo sơ mi",
+     "bucket": "other"
+    },
+    {
+     "qid": "test_2138",
+     "image": "COCO_val2014_000000359751.jpg",
+     "question": "ba con ngựa vằn trốn thoát cái gì trong bóng râm của một hàng cây",
+     "answers": [
+      "mặt trời"
+     ],
+     "type": "object",
+     "b1": "cây",
+     "c3": "bức ảnh",
+     "bucket": "other"
+    }
+   ],
+   "c3_number": [],
+   "c3_color": [
+    {
+     "qid": "test_207",
+     "image": "COCO_train2014_000000453167.jpg",
+     "question": "màu của chiếc ô là gì",
+     "answers": [
+      "màu đỏ"
+     ],
+     "type": "color",
+     "b1": "Đen",
+     "c3": "màu xám",
+     "bucket": "other"
+    },
+    {
+     "qid": "test_384",
+     "image": "COCO_train2014_000000539640.jpg",
+     "question": "màu của nho là gì",
+     "answers": [
+      "màu đỏ"
+     ],
+     "type": "color",
+     "b1": "Đen",
+     "c3": "màu tía",
+     "bucket": "other"
+    },
+    {
+     "qid": "test_49",
+     "image": "COCO_train2014_000000033494.jpg",
+     "question": "màu của con ngựa là gì",
+     "answers": [
+      "màu nâu"
+     ],
+     "type": "color",
+     "b1": "Đen",
+     "c3": "màu đen",
+     "bucket": "other"
+    },
+    {
+     "qid": "test_315",
+     "image": "COCO_train2014_000000140563.jpg",
+     "question": "màu sắc của các khối là gì",
+     "answers": [
+      "màu đỏ"
+     ],
+     "type": "color",
+     "b1": "Màu sắc của các khối là màu cam.",
+     "c3": "màu cam",
+     "bucket": "other"
+    },
+    {
+     "qid": "test_409",
+     "image": "COCO_train2014_000000421346.jpg",
+     "question": "màu sắc của ớt là gì",
+     "answers": [
+      "màu xanh lá"
+     ],
+     "type": "color",
+     "b1": "Đỏ",
+     "c3": "màu đỏ",
+     "bucket": "other"
+    }
+   ],
+   "c3_location": [
+    {
+     "qid": "test_1061",
+     "image": "COCO_train2014_000000237762.jpg",
+     "question": "một số xoài và chuối được đặt ở đâu",
+     "answers": [
+      "đĩa ăn"
+     ],
+     "type": "location",
+     "b1": "trên đĩa",
+     "c3": "bát",
+     "bucket": "other"
+    },
+    {
+     "qid": "test_1160",
+     "image": "COCO_train2014_000000578020.jpg",
+     "question": "con mèo đang ngủ trưa ở đâu",
+     "answers": [
+      "ngăn kéo"
+     ],
+     "type": "location",
+     "b1": "trong hộp giấy",
+     "c3": "hộp",
+     "bucket": "other"
+    },
+    {
+     "qid": "test_1121",
+     "image": "COCO_train2014_000000407266.jpg",
+     "question": "nhà vệ sinh kim loại ở đâu",
+     "answers": [
+      "chuồng"
+     ],
+     "type": "location",
+     "b1": "Nhà vệ sinh kim loại ở nhà vệ sinh công cộng.",
+     "c3": "phòng tắm",
+     "bucket": "other"
+    },
+    {
+     "qid": "test_1257",
+     "image": "COCO_train2014_000000404163.jpg",
+     "question": "con chó đang ngồi ở đâu trong khi mọi người đang ngồi ở bàn",
+     "answers": [
+      "ô cửa"
+     ],
+     "type": "location",
+     "b1": "trong cửa hàng",
+     "c3": "cửa sổ",
+     "bucket": "other"
+    },
+    {
+     "qid": "test_1055",
+     "image": "COCO_train2014_000000534959.jpg",
+     "question": "em bé nằm trên giường ở đâu với con mèo bên cạnh và một người đàn ông đang nhìn qua",
+     "answers": [
+      "gương"
+     ],
+     "type": "location",
+     "b1": "trong phòng",
+     "c3": "phòng ngủ",
+     "bucket": "other"
+    }
+   ]
+  }
+ }
+}

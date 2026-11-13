@@ -1,0 +1,831 @@
+{
+  "live": "prototype-live-v1",
+  "rules": {
+    "n_images": 200,
+    "seed": 42,
+    "ocr_identical_min": 0.98,
+    "answer_identical_min": 0.97,
+    "em_drop_max": 1.5,
+    "warmup": 5
+  },
+  "ocr": {
+    "vivqa": {
+      "n_images": 200,
+      "identical": 1.0,
+      "n_diff": 0,
+      "diffs": []
+    },
+    "vitextvqa_official": {
+      "n_images": 200,
+      "identical": 0.875,
+      "n_diff": 25,
+      "diffs": [
+        {
+          "image": "1849.jpg",
+          "live": [
+            "Trà Sữa",
+            "Reportite",
+            "Cho Banh Que Ma Tây",
+            "KIM HƯƠNG",
+            "DC.130B NGUYỄN TRỊ PHƯƠNG, P. 9.QUẬN 5",
+            "HOTLINE: 0906 60 60 93",
+            "Incomp",
+            "xã của happylife",
+            "flai Trương",
+            "138B Nguyễn Tri Phương, P. 9, Q.5, Tp. HCM",
+            "Chỉ - Bánh Quố Kim Hương",
+            "Mua2lytăng 1 y 1",
+            "Ap dung: tin 00/12-11/12/2022",
+            "Cluong tranh tich diễm to ly dai thị miền phí thuận",
+            "MAXXXXXXXXXXXX",
+            "MISCONTRACTION",
+            "MAXXXXXXXX"
+          ],
+          "cache": [
+            "Lin",
+            "WHIRS",
+            "Transly",
+            "Contracts",
+            "0301000000120",
+            "messing",
+            "LIT",
+            "031000000020",
+            "111",
+            "03010000000201",
+            "0310000000201",
+            "031000010001",
+            "031000000001",
+            "Contransitionalists"
+          ]
+        },
+        {
+          "image": "1981.jpg",
+          "live": [
+            "Bên",
+            "Thau",
+            "Ironipor",
+            "Man",
+            "Cố"
+          ],
+          "cache": [
+            "Bên",
+            "Thau",
+            "Ironpot",
+            "Man",
+            "Cố"
+          ]
+        },
+        {
+          "image": "2012.jpg",
+          "live": [
+            "HÙNG THỊNH",
+            "CHỈ CỤC CHẤN NUÔI VÀ THỦ Y HÀ NỘI",
+            "NG ĐỒ THỜ CAO CẤP",
+            "TRAN CHÂN NƯỚI VÀ THÚY HÀ ĐÔNG",
+            "12 P NGUYỄN TRÃI, QHÀ ĐÔNG, TP HÀ NỘI",
+            "ĐT: 0989 095 809-0915 220 744",
+            "ĐC SỐ 4 TRẦN HƯNG ĐẠO HÀ ĐÔNG NỘI",
+            "02433.824.030",
+            "GGbu",
+            "TẤM SAI GÒN",
+            "Me-0",
+            "DỊCH VỤ THÚ Y QUẬN HÀ ĐÔNG",
+            "CÔNG 7",
+            "CỊ TM DỊCH VỤ HÀ TÂY",
+            "CẢM CÁT-SỬA TÂM-PHỤ KIỆN",
+            "REM BOC DEM GHE",
+            "X CHÓ MEO",
+            "0983.800.995",
+            "0983.801",
+            "- HOÁ CHẤT - TẨYRỬA - THÔNG TẮC - KHỨ MÙI",
+            "0966.361.207",
+            "0966.361.207",
+            "CÁC LOẠI THUỐC DIỆT CÒN TRÙNG",
+            "CUNG CẤP",
+            "KHÁM CHỮA",
+            "KIẾN - GIÁN",
+            "TRUÔI - MUỐI",
+            "CHUỘT",
+            "THỨC ĂN",
+            "BỆNH",
+            "MỐI MỌT-BỌ CHÉT"
+          ],
+          "cache": [
+            "K",
+            "HÙNG THỊNH",
+            "CHỈ CỤC CHẤN NUÔI VÀ THỦ Y HÀ NỘI",
+            "NG ĐỒ THỜ CAO CẤP",
+            "TRAN CHAN NUÔI VÀ THÚY HÀ ĐÔNG",
+            "12 P NGUYỄN TRÃI, QHÀ ĐÔNG, TP HÀ NỘI",
+            "ĐT: 0989 095 809-0915 220 744",
+            "ĐC SỐ 4 TRẦN HƯNG ĐẠO - HÀ ĐÔNG",
+            "02433.824.030",
+            "GGb",
+            "TẤM SAI GÒN",
+            "Me-O",
+            "DỊCH VỤ THÚ Y QUẬN HÀ ĐÔNG",
+            "CÔNG 7",
+            "CM DỊCH VỤ HÀ TÂY",
+            "CẢM CÁT - SỬA TÂM - PHỤ KIỆN",
+            "REM BOC DEM GHE",
+            "- CHÓ MEO",
+            "0983.800.995",
+            "0983.800",
+            "HOÁ CHẤT - TẨYRỬA - THÔNG TÁC-KHỬ MÙI",
+            "0966.361.207",
+            "0966.361.207",
+            "CÁC LOẠI THUỐC DIỆT CÒN TRÙNG",
+            "CUNG CẤP",
+            "KHÁM CHỮA",
+            "KIẾN - GIÁN",
+            "TRUÔI - MUỐI",
+            "CHUỘT",
+            "THỨC ĂN",
+            "BỆNH",
+            "MỐI MỌT-BỌ CHÉT"
+          ]
+        },
+        {
+          "image": "2306.jpg",
+          "live": [
+            "Những từ ngũ",
+            "NGHIỆM",
+            "Từ",
+            "NHẬT",
+            "Không còn bực dọc và sốt r",
+            "trên hành trình nuôi day con",
+            "LÀM CHO TRẼ",
+            "Hạnhphúc",
+            "shigeta saito",
+            "Người dịch Kusum Hue",
+            "Tanaka Shigekl",
+            "Mẹ tập",
+            "shoi quen hay,",
+            "Cuôn sunh trìn hay đổi",
+            "con trương thanh",
+            "HÀNG TRIỆU",
+            "hạnh phúc",
+            "CHA MỆ NHẬT",
+            "KIMDONG",
+            "Noberyashills",
+            "HANKY",
+            "GIAOD",
+            "GIUP",
+            "1",
+            "1",
+            "L",
+            "o la",
+            "KHON",
+            "THANT",
+            "1",
+            "ix",
+            "Qu"
+          ],
+          "cache": [
+            "Những từ ngũ",
+            "NGHIỆM",
+            "ữ",
+            "NHẬT",
+            "Không còn bực dọc và sốt ra",
+            "trên hành trình nuôi day con",
+            "LÀM CHO TRẼ",
+            "Hạnhphúc",
+            "shigeta saito",
+            "Người dịch Kusum Hue",
+            "Tanaka Shigekl",
+            "Mẹ tập",
+            "thổi quen hay,",
+            "Cuôn sunh trìn hay đổi",
+            "con trương thành",
+            "HÀNG TRIỆU",
+            "hạnh phúc",
+            "CHA MỆ NHẬT",
+            "KIMDONG",
+            "Noberyashills",
+            "5",
+            "HANKY",
+            "GIAOD",
+            "Glup",
+            "1",
+            "1",
+            "1",
+            "o lạ",
+            "KHON",
+            "THANT",
+            "1",
+            "Ix",
+            "Qu"
+          ]
+        },
+        {
+          "image": "3333.jpg",
+          "live": [
+            "CẦN",
+            "Thu Giang",
+            "7",
+            "NGUYỄN DUY CẦN",
+            "LUẬ",
+            "DỊCH TƯỢNG LUẬN",
+            "1",
+            "KIẾP",
+            "TỪ VI BÍ KIẾP",
+            "CAO",
+            "1",
+            "11",
+            "0300000009",
+            "DICAO",
+            "In lấn thứ 2",
+            "NHÀ XUẤT BẢN TRÊ",
+            "I NHÀ XU"
+          ],
+          "cache": [
+            "cần",
+            "Thu Giang",
+            "7",
+            "NGUYỄN DUY CẦN",
+            "LUẬ",
+            "DỊCH TƯỢNG LUẬN",
+            "1",
+            "KIẾP",
+            "TỪ VI BÍ KIẾP",
+            "Concommed",
+            "SAO",
+            "0300000009",
+            "dicao",
+            "In lần thứ 2",
+            "NHÀ XUẤT BẢN TRÊ",
+            "1",
+            "I NHÀ XU"
+          ]
+        },
+        {
+          "image": "5723.jpg",
+          "live": [
+            "TRƯƠNG VĂN GIỚI",
+            "LÊ KHẮC KIỀU LỰC",
+            "TỪ ĐIỂN",
+            "H",
+            "Han",
+            "Việt",
+            "xá",
+            "izterbiah",
+            "BẢN IN LẦM 8",
+            "PHÁXUẤT BẢ",
+            "NHÀ XUẤT BÁN KHOA HỌC XÃ HỘI"
+          ],
+          "cache": [
+            "TRƯƠNG VĂN GIỚI",
+            "LÊ KHẮC KIỀU LỰC",
+            "TỪ ĐIỂN",
+            "H",
+            "Han",
+            "Việt",
+            "Xá",
+            "ixterbian",
+            "BẢN IN LẦM 8",
+            "PHÁ XUẤT BẢ",
+            "NHÀ XUẤT BÁN KHOA HỌC XÃ HỘI"
+          ]
+        },
+        {
+          "image": "6351.jpg",
+          "live": [
+            "patibility",
+            "020",
+            "CONTENTINUATION",
+            "HỢP TÁC XÁT TÍNH CAM U",
+            "HTX NÔNG NGHIỆP BỊ GIA",
+            "LONG BUNG",
+            "LONG BINH",
+            "LONGUING"
+          ],
+          "cache": [
+            "mationing",
+            "020",
+            "CONTENTINUATION",
+            "HỢP TÁC XÁT TÍNH CAM U",
+            "HTX NÔNG NGHIỆP BỊ GIA",
+            "LONG BUNG",
+            "LONG BINH",
+            "LONGUING"
+          ]
+        },
+        {
+          "image": "6522.jpg",
+          "live": [
+            "PHỐ",
+            "VÀNG/",
+            "DATRAN",
+            "QUANS",
+            "PHỐ",
+            "VÀN",
+            "ĐÃ TRA",
+            "QUANS",
+            "NỮ TRANG BẠC",
+            "PHO",
+            "KIMNGTEN",
+            "PHOZ",
+            "UKJ",
+            "CHUNGMUA",
+            "WELEBICK",
+            "KIM NGUY",
+            "wis",
+            "MUA VÔ",
+            "LINTAL",
+            "Commonson",
+            "MISCONTRICTIONISTS",
+            "aletton"
+          ],
+          "cache": [
+            "PHỐ",
+            "VÀNG/",
+            "DATRAN",
+            "QUANS",
+            "PHO",
+            "VÀN",
+            "ĐÁTRA",
+            "QUANS",
+            "NỮ TRANG BẠC",
+            "PHO",
+            "KIMNGTEN",
+            "PHOZ",
+            "UKJ",
+            "CHUNG MUA",
+            "WELEBICK",
+            "KIM NGUY",
+            "wissy",
+            "MUA VÔ",
+            "LIWTAL",
+            "PASSILOCCO",
+            "CONTERCONTRACTIONALIZED",
+            "aletton"
+          ]
+        },
+        {
+          "image": "7186.jpg",
+          "live": [
+            "R",
+            "Paintmart",
+            "PAINTMART-SIÊU THỊ SƠN SỐ 1 VIỆT NAM",
+            "AlzoNodel",
+            "B",
+            "JEWIN",
+            "Dulux",
+            "PLATINUMBRAND",
+            "OJOTUN",
+            "FERHLER",
+            "MAJESTIC",
+            "PROMONITIONALIST",
+            "Weathershield",
+            "POWERFLEXX",
+            "BỀ MÁT BÓNG",
+            "WATERPROOF",
+            "ĐỆP 6 CHĂM SÓC",
+            "HOÀN HẢO",
+            "DÙNG THÁM ĐA NĂNG THẾ HỆ MỚI",
+            "Ways",
+            "cm",
+            "Amas",
+            "ĐAILYSON",
+            "CÙNG PAINTMART NĂM 2020",
+            "PHỐI MÀU 3D MIỄN PHÍ-BẢO HÀNH CÔNG TRÌNH-TƯ VẤN THỊ CÔNG"
+          ],
+          "cache": [
+            "R",
+            "Paintmart",
+            "PAINTMART-SIÊU THỊ SƠN SỐ 1 VIỆT NAM",
+            "AlkzoNobel",
+            "B",
+            "EWIN",
+            "Dulux",
+            "PLATINUMBRAND",
+            "OJOTUN",
+            "FERHLER",
+            "MAJESTIC",
+            "premium interior painters",
+            "sơn nói thấy cao cấp",
+            "Weathershield",
+            "POWERFLEXX",
+            "WATERPROOF",
+            "ĐỆP Ở CHĂM SÓC",
+            "HOÀN HẢO",
+            "BÉ MÁT BÓNG",
+            "Không thám đa năng thế hệ mới",
+            "ways",
+            "cm",
+            "AYNGS",
+            "ĐAILYSON",
+            "CÙNG PAINTMART NĂM 2020",
+            "PHỐI MÀU 3D MIỄN PHÍ-BẢO HÀNH CÔNG TRÌNH-TƯ VẤN THỊ CÔNG"
+          ]
+        },
+        {
+          "image": "9084.jpg",
+          "live": [
+            "GIAN HÀNG TỈNH QUẢNG NGÃI",
+            "CÔNG TY TNHH MTV HẢI ĐẢO LÝ SƠN QUẢNG NGÃI",
+            "ỦY BAN NHAN DÂN THÀNH PHỐ HÀ NỘI",
+            "OCOP",
+            "ỦY BA",
+            "BAN CHỈ ĐẠO CHƯƠNG TRÌNH MỖI XÃ MỘT SẢN PHẨM",
+            "the one commune one product of hanol, vietnain the st",
+            "BAN CHỈ ĐẠO",
+            "SỰ HIỆN",
+            "THIỆU, QUẢNG BI CẾT NỐI SẢN PHẢM LEOP",
+            "THIỆU, QUẢNG",
+            "TAI TUYẾN PHÍ",
+            "NG SƠN",
+            "TUYẾN P",
+            "DINKED",
+            "APHOROS",
+            "Milly",
+            "Um",
+            "Hanhum",
+            "TƯƠNG QUY TH",
+            "Mispranting",
+            "Theo 2000",
+            "ĐƯỜNG THỔI NÓT",
+            "GIANGS",
+            "NƯỚC HÀNG THỔI NÓT",
+            "Giá: 30.000",
+            "03",
+            "Anhiều nhanh",
+            "lyson",
+            "Chasses",
+            "ĐÁC SẢN BANH CHUYNG BỜ ĐẬU",
+            "THAI NGUYÊN",
+            "03100000199",
+            "BÁNH CHƯNG Y"
+          ],
+          "cache": [
+            "GIAN HÀNG TỈNH QUẢNG NGÃI",
+            "CÔNG TY TNHH MTV HẢI ĐẢO LÝ SƠN QUẢNG NGÃI",
+            "ỦY BAN NHAN DÂN THÀNH PHỐ HÀ NỘI",
+            "OCOP",
+            "ỦY BA",
+            "BAN CHỈ ĐẠO CHƯƠNG TRÌNH MỖI XÃ MỘT SẢN PHẨM",
+            "which one commune one product of hanoi, vietnam 1996",
+            "BAN CHỈ ĐẠO",
+            "SỰ HIỆN",
+            "THIỆU, QUẢNG BI CẾT NỐI SẢN PHẨM",
+            "THIỆU, QUẢNG",
+            "TAI TUYẾN PHÍ",
+            "NG SƠN",
+            "TUYẾN P",
+            "DISE",
+            "Chilly",
+            "ANTICIST",
+            "UNIAN",
+            "Hanhum",
+            "TƯƠNG QUY NINH",
+            "To.20.000",
+            "ĐƯỜNG THỔI NÓT",
+            "Proprinting",
+            "GIANG",
+            "NƯỚC HÀNG THỔI NÓT",
+            "Giá: 30.000",
+            "03",
+            "PHIẾU NHANH",
+            "lyson",
+            "Mossed",
+            "ĐẮC SẢN BANH CHUNG BỜ ĐẦU",
+            "THAI NGUYÊN",
+            "BÁNH CHƯNG Y"
+          ]
+        },
+        {
+          "image": "9205.jpg",
+          "live": [
+            "ĐIỂM TÂM SÁNG",
+            "BÁNH MÌ CHẢO",
+            "BÁNH MÌ CẢ MỜI",
+            "BANHMOPLA",
+            "BANKMUMBALT"
+          ],
+          "cache": [
+            "ĐIỂM TÂM SÁNG",
+            "BÁNH MÌ CHẢO",
+            "BÁNH MÌ CẢ MỜI",
+            "BANHONOPLA",
+            "BANKMUMBALT"
+          ]
+        },
+        {
+          "image": "9996.jpg",
+          "live": [
+            "VĂN HỌC CỔ ĐIỂN CHỌN LỌC",
+            "Edmondo Di Amicis",
+            "(NHÂN VĂN Biên dịch)",
+            "Tàm hôn",
+            "CAO THƯƠNG"
+          ],
+          "cache": [
+            "VĂN HỌC CỔ ĐIỂN CHỌN LỌC",
+            "Edmondo Di Amiels",
+            "(NHÂN VĂN Biên dịch)",
+            "Tam hôn",
+            "CAO THƯƠNG"
+          ]
+        },
+        {
+          "image": "10107.jpg",
+          "live": [
+            "Bin",
+            "charming",
+            "CITCHWORP",
+            "CÔNGS BỆNH VIỆN TƯ VẤN",
+            "GPKD:",
+            "03101001001990",
+            "THUỘC SĨ MẠ TRÍCH NGUYỄN THỊ THÁI THANH",
+            "NHÀ",
+            "NHÀ"
+          ],
+          "cache": [
+            "201",
+            "charming",
+            "CITCHWORP",
+            "CONGS BỆNH VIỆN TƯ VẤN",
+            "GPKD:",
+            "031001001990",
+            "THUỘC SĨ MẠ TRÍCH NGUYỄN THỊ THÁI THANH",
+            "NHÀ",
+            "NHÀ"
+          ]
+        },
+        {
+          "image": "10764.jpg",
+          "live": [
+            "0310000000199",
+            "tập đặt giá kệ siêu thị",
+            "DUITSUA",
+            "TRINGAS",
+            "Scho Đại Lý Sữa tai",
+            "Bảng Bàng-Tây Ninh",
+            "Kệ siêu thị Hanatech",
+            "0368124565"
+          ],
+          "cache": [
+            "0310000000199",
+            "tập đặt giá kệ siêu thị",
+            "DUTTSUA",
+            "TRINGAS",
+            "Scho Đại Lý Sữa tai",
+            "Bảng Bàng-Tây Ninh",
+            "Kệ siêu thị Hanatech",
+            "0368124565"
+          ]
+        },
+        {
+          "image": "11243.jpg",
+          "live": [
+            "ANHDOAN",
+            "ongcoat",
+            "XE ĐIỆN HKBIKE HOÀNG HẢI",
+            "PEGA",
+            "Trài nghiêm lần tuyệt hảo, trái nghiệm xe tương lai",
+            "CƠ",
+            "IMSTRI3GOON",
+            "ĐC TAM PHƯỚC BIÊN HOA ĐN",
+            "0908.505 219.0347063387",
+            "Chuy",
+            "VĂN PHÒNG GIÁO ĐIỀN",
+            "CỬA HÀNG XEDIÊN THỊ",
+            "VĂN PHÒNG LUÂN",
+            "TỪNG BỪNG KHAI TRƯƠNG CỬA HÀNG",
+            "HKBIKE PEGA HOÀNG HẢI",
+            "DCLISTER",
+            "NGÀY 18/212018",
+            "pran",
+            "THAI T",
+            "HỒ TRỢ TRẢ GÓP LAI SUẤT THẤP KHI MUA XE TẠI CỬA HÀNG THÁNG",
+            "200k",
+            "ĐC: TAM PHƯỢC, HIỆN HÒA, ĐỒNG NAI",
+            "03270633337",
+            "MNONOMEAOHIEM CAOCAP THEO",
+            "Aplong Du EXXTam Phude Sien",
+            "preformisses",
+            "CAP.A3",
+            "CÂN TUYÊN",
+            "Chợ, Hàn"
+          ],
+          "cache": [
+            "ANHDOAN",
+            "ongcoat",
+            "XE ĐIỆN HKBIKE HOÀNG HẢI",
+            "PEGA",
+            "Trài nghiêm lần tuyệt hảo, trái nghiệm xe tương lai",
+            "CƠ",
+            "IMSTRI3GOON",
+            "ĐC TAM PHƯỚC BIÊN HOA ĐN",
+            "0908.505 219.0347063387",
+            "Chuy",
+            "VĂN PHÒNG GIÁO ĐIỀN",
+            "CỬA HÀNG XEDIÊN THỊ",
+            "VĂN PHÒNG LUÂN",
+            "TỪNG BỪNG KHAI TRƯƠNG CỬA HÀNG",
+            "HKBIKE PEGA HOÀNG HẢI",
+            "DCLISTER",
+            "NGÀY 18/212018",
+            "Snar",
+            "THAI T",
+            "HỒ TRỢ TRẢ GÓP LAI SUẤT THẤP KHI MUA XE TẠI CỬA HÀNG THÁNG",
+            "200k",
+            "ĐC: TAM PHƯỢC, HIỆN HÒA, ĐỒNG NAI",
+            "03270633337",
+            "MNONOMEAOHIEM CAOCAP THEO",
+            "Aplong Du EXXTam Phude Sien",
+            "preformisses",
+            "CAP.A3",
+            "CÂN TUYÊN",
+            "Chợ, Hàn"
+          ]
+        }
+      ]
+    }
+  },
+  "answers": {
+    "vivqa": {
+      "n": 211,
+      "skipped_yesno": 0,
+      "identical": 1.0,
+      "n_mismatch": 0,
+      "mismatches": [],
+      "em_live": 75.82938388625593,
+      "em_w11": 75.82938388625593,
+      "em_delta": 0.0
+    },
+    "vitextvqa_official": {
+      "n": 261,
+      "skipped_yesno": 0,
+      "identical": 0.9846743295019157,
+      "n_mismatch": 4,
+      "mismatches": [
+        {
+          "question_id": "test_5273",
+          "live": "quận 5",
+          "w11": "quận tân bình"
+        },
+        {
+          "question_id": "test_27242",
+          "live": "tnhh mtv hải đảo lý sơn quảng ngãi",
+          "w11": "công ty tnhh mtv hải đảo lý sơn quảng ngãi"
+        },
+        {
+          "question_id": "test_42763",
+          "live": "51d - 0421",
+          "w11": "5a 421"
+        },
+        {
+          "question_id": "test_43533",
+          "live": "thiết thực giúp bạn tạo nên sự khác biệt",
+          "w11": "thực giúp bạn tạo nên sự khác biệt"
+        }
+      ],
+      "em_live": 50.191570881226056,
+      "em_w11": 49.808429118773944,
+      "em_delta": 0.3831417624521123
+    }
+  },
+  "latency": {
+    "vivqa": {
+      "n": 206,
+      "warmup_excluded": 5,
+      "sec_ocr": {
+        "p50": 0.03721928596496582,
+        "p95": 0.26169782876968384,
+        "max": 0.877011775970459
+      },
+      "sec_vlm": {
+        "p50": 0.5338175296783447,
+        "p95": 0.808096170425415,
+        "max": 0.8540349006652832
+      },
+      "sec_total": {
+        "p50": 0.5940600633621216,
+        "p95": 0.8838301301002502,
+        "max": 1.415064811706543
+      }
+    },
+    "vitextvqa_official": {
+      "n": 261,
+      "warmup_excluded": 0,
+      "sec_ocr": {
+        "p50": 0.6868023872375488,
+        "p95": 2.401466131210327,
+        "max": 4.079928398132324
+      },
+      "sec_vlm": {
+        "p50": 0.8097984790802002,
+        "p95": 1.7516202926635742,
+        "max": 3.293898344039917
+      },
+      "sec_total": {
+        "p50": 1.6329436302185059,
+        "p95": 3.6509389877319336,
+        "max": 5.650493383407593
+      }
+    },
+    "all": {
+      "n": 467,
+      "warmup_excluded": 5,
+      "sec_ocr": {
+        "p50": 0.3086833953857422,
+        "p95": 1.9204707145690907,
+        "max": 4.079928398132324
+      },
+      "sec_vlm": {
+        "p50": 0.6327965259552002,
+        "p95": 1.58114492893219,
+        "max": 3.293898344039917
+      },
+      "sec_total": {
+        "p50": 0.9758453369140625,
+        "p95": 3.3016139268875113,
+        "max": 5.650493383407593
+      }
+    }
+  },
+  "meta": {
+    "run_name": "W13_LIVE_sh_ocrlive_sample200img_bf16_L4_seed42",
+    "live": "prototype-live-v1",
+    "finished_utc": "2026-10-30T17:24:33+00:00",
+    "sample": {
+      "vivqa": {
+        "n_images": 200,
+        "n_questions": 211,
+        "question_ids_sha256": "90b2e600833862ede9cb5ec9c4750819207385f3eba9320812b532254fc7f3f0",
+        "data_file": "data/vivqa/test.json"
+      },
+      "vitextvqa_official": {
+        "n_images": 200,
+        "n_questions": 261,
+        "question_ids_sha256": "2ef6951ecef375abac937d0d9eaa00cda7d798468c73c9ebf9c5209e32ce7040",
+        "data_file": "data/vitextvqa_official/test_subset2000_seed42.json"
+      }
+    },
+    "n_images_per_dataset": 200,
+    "seed": 42,
+    "ocr_device": "gpu",
+    "ocr_selection": {
+      "backend": "paddledet_vietocr",
+      "template": "v1",
+      "max_chars": 600,
+      "min_conf": 0.0,
+      "max_chars_needs_review": false
+    },
+    "startup": {
+      "adapter": {
+        "weights_sha256": "c9791e961aaa58fdcd7d9baafede3bd7bd8c902acc9cc43917306f1e0fecc354",
+        "config_sha256": "5e5bae40c27b5905ccdd0189cad597f2ecf0727bbbabafe6685f489c31624553",
+        "weights_mb": 29.53
+      },
+      "ocr_engine": {
+        "engine": "PaddleOCR TextDetection + VietOCR",
+        "paddleocr": "3.7.0",
+        "paddlepaddle": "3.3.1",
+        "lang": "vi",
+        "device": "gpu",
+        "det_model": "PP-OCRv6_medium_det",
+        "rec_model": "vietocr/vgg_transformer",
+        "vietocr_config": "vgg_transformer, beamsearch=False"
+      },
+      "ocr_check": {
+        "ok": true,
+        "diff": {},
+        "device_note": null
+      },
+      "sec_start_ocr": 16.6,
+      "sec_start_total": 59.8
+    },
+    "sec_run": 664.3,
+    "peak_vram_gb_main": 2.61,
+    "gpu_memory_end": {
+      "processes": [
+        {
+          "pid": 21195,
+          "mib": 2858
+        },
+        {
+          "pid": 21218,
+          "mib": 1956
+        }
+      ],
+      "total_mib": 4814
+    },
+    "gpu": "NVIDIA L4",
+    "versions": {
+      "torch": "2.11.0+cu130",
+      "transformers": "5.17.0"
+    }
+  },
+  "levels": {
+    "Cao": 145,
+    "Trung bình": 155,
+    "Thấp": 172
+  },
+  "n_untouched_images": 447,
+  "verdicts": {
+    "R-OCR": "KHÔNG ĐẠT",
+    "R-LIVE": "ĐẠT"
+  }
+}
