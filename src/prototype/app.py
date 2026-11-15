@@ -61,20 +61,44 @@ CONF_EXPLAIN = (
     "\"có\" khi vật không có trong ảnh."
 )
 EMPTY_ANSWER = "<div class='vv-card vv-empty'>Tải ảnh lên, gõ câu hỏi rồi bấm <b>Trả lời</b>.</div>"
+# Theme-aware: theo biến Gradio + cặp light/dark tường minh.
+# Tránh @media (prefers-color-scheme) — xung đột với ?__theme=light khi OS đang dark.
 CSS = """
-.vv-card{border:1px solid #d0d7de;border-radius:12px;padding:16px 18px;background:#fff;color:#1f2328}
-.vv-empty{color:#57606a}
-.vv-ans{font-size:1.6em;font-weight:700;margin:4px 0 10px;line-height:1.3;word-break:break-word}
+.vv-card{
+  border:1px solid var(--border-color-primary,#d0d7de);
+  border-radius:12px;padding:16px 18px;
+  background:var(--block-background-fill,#ffffff);
+  color:var(--body-text-color,#1f2328);
+}
+.vv-empty{color:var(--body-text-color-subdued,#57606a)}
+.vv-ans{
+  font-size:1.6em;font-weight:700;margin:4px 0 10px;line-height:1.3;word-break:break-word;
+  color:var(--body-text-color,#1f2328);
+}
 .vv-badge{display:inline-block;border-radius:999px;padding:3px 12px;font-weight:600;font-size:.9em;margin-right:8px}
-.vv-mode{color:#57606a;font-size:.9em}
+.vv-mode{color:var(--body-text-color-subdued,#57606a);font-size:.9em}
 .vv-mock{background:#fff3cd;color:#664d03;border:1px solid #ffda6a;border-radius:8px;padding:8px 12px;margin:6px 0}
-.vv-disc{color:#57606a;font-size:.85em;border-top:1px solid #d0d7de;padding-top:8px;margin-top:8px}
-.vv-ocr{width:100%;border-collapse:collapse;font-size:.92em}
-.vv-ocr td{border-bottom:1px solid #eaeef2;padding:4px 6px;vertical-align:top}
-.vv-ocr tr.ev td{background:#d1e7dd}
-.vv-ocr tr.cut td{color:#8c959f}
-@media (prefers-color-scheme: dark){.vv-card{background:#161b22;color:#e6edf3;border-color:#30363d}
- .vv-ocr td{border-color:#30363d}.vv-ocr tr.ev td{background:#0f5132;color:#fff}}
+.vv-disc{
+  color:var(--body-text-color-subdued,#57606a);font-size:.85em;
+  border-top:1px solid var(--border-color-primary,#d0d7de);padding-top:8px;margin-top:8px
+}
+.vv-ocr{width:100%;border-collapse:collapse;font-size:.92em;color:var(--body-text-color,#1f2328)}
+.vv-ocr td{border-bottom:1px solid var(--border-color-primary,#eaeef2);padding:4px 6px;vertical-align:top}
+.vv-ocr tr.ev td{background:#d1e7dd;color:#0f5132}
+.vv-ocr tr.cut td{color:var(--body-text-color-subdued,#8c959f)}
+/* Gradio dark theme class (không dùng prefers-color-scheme) */
+.dark .vv-card{
+  background:var(--block-background-fill,#161b22);
+  color:var(--body-text-color,#e6edf3);
+  border-color:var(--border-color-primary,#30363d);
+}
+.dark .vv-ans{color:var(--body-text-color,#e6edf3)}
+.dark .vv-mode,.dark .vv-empty,.dark .vv-disc{color:var(--body-text-color-subdued,#9da7b3)}
+.dark .vv-ocr{color:var(--body-text-color,#e6edf3)}
+.dark .vv-ocr td{border-color:var(--border-color-primary,#30363d)}
+.dark .vv-ocr tr.ev td{background:#0f5132;color:#ffffff}
+.dark .vv-ocr tr.cut td{color:var(--body-text-color-subdued,#8b949e)}
+.dark .vv-mock{background:#3d2e00;color:#ffe8a3;border-color:#6c5600}
 """
 
 
