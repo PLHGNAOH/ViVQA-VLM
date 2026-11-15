@@ -1,0 +1,50 @@
+{
+  "i_adapter_ocr": {
+    "use_ocr": true,
+    "use_adapter": true,
+    "answer": "chó",
+    "confidence": 0.4777825560249485,
+    "level": "Thấp",
+    "mode": "open",
+    "prompt": "Văn bản đọc được trong ảnh: XUÂN\nCâu hỏi: Con vật trong ảnh là con gì",
+    "n_ocr_lines": 1,
+    "ocr_texts": [
+      "XUÂN"
+    ]
+  },
+  "ii_adapter_no_ocr": {
+    "use_ocr": false,
+    "use_adapter": true,
+    "answer": "con mèo",
+    "confidence": 0.8656995802642903,
+    "level": "Trung bình",
+    "mode": "open",
+    "prompt": "Câu hỏi: Con vật trong ảnh là con gì",
+    "n_ocr_lines": 0,
+    "ocr_texts": []
+  },
+  "iii_no_adapter_ocr": {
+    "use_ocr": true,
+    "use_adapter": false,
+    "answer": "Mèo",
+    "confidence": 0.9047375627970937,
+    "level": "Trung bình",
+    "mode": "open",
+    "prompt": "Văn bản đọc được trong ảnh: XUÂN\nCâu hỏi: Con vật trong ảnh là con gì",
+    "n_ocr_lines": 1,
+    "ocr_texts": [
+      "XUÂN"
+    ]
+  },
+  "iv_no_adapter_no_ocr": {
+    "use_ocr": false,
+    "use_adapter": false,
+    "answer": "Mèo",
+    "confidence": 0.878398532519582,
+    "level": "Trung bình",
+    "mode": "open",
+    "prompt": "Câu hỏi: Con vật trong ảnh là con gì",
+    "n_ocr_lines": 0,
+    "ocr_texts": []
+  }
+}

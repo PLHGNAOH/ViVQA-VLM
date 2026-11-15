@@ -60,25 +60,27 @@ powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Of
 
 Khởi động ~48 s với `OMP_NUM_THREADS=12` (trước đó ~78 s khi Paddle tự gán 1 luồng). Máy phải bật suốt lúc demo. Không đổi prompt / tham số sinh / min-max pixels / model OCR.
 
-### Latency (2026-11-15, RTX 3050 Ti 4 GB, OCR CPU T\*=12)
+### Latency (2026-11-15 **v2**, RTX 3050 Ti 4 GB, OCR CPU T\*=12)
 
-Đo bằng `python -m src.prototype.bench_latency` trên `examples_local.json` (5 câu × 3 lần, median). Số liệu: `docs/04_eval/latency/`.
+Đo bằng `python -m src.prototype.bench_latency` (đặt `OMP_NUM_THREADS=MKL_NUM_THREADS=12` **trước** import Paddle, giống `run_local_windows.ps1`) trên `examples_local.json` (5 câu × 3 lần, median). File: `docs/04_eval/latency/latency_*_2026-11-15_v2.csv` (giữ bản v1 cũ để đối chiếu).
 
-| Giai đoạn (median-of-medians, s) | Baseline (mọi lần chạy OCR) | (a) Câu đầu, ảnh mới, bấm ngay | (b) Câu đầu, OCR nền đã xong | (c) Câu 2 cùng ảnh (cache) |
+Bản v1 (`t_ocr_det` median 13,8 s) đo khi Paddle có thể đã import với 1 luồng / lạnh — **không** đại diện demo. v2 khớp B5 T\*=12 (~4–8 s E2E khi chạy OCR mỗi lần).
+
+| Giai đoạn (median-of-medians, s) | Baseline v2 (OCR mỗi lần) | (a) Câu đầu, bấm ngay | (b) OCR nền đã xong | (c) Câu 2 cùng ảnh |
 |---|---:|---:|---:|---:|
-| OCR det | 13,77 | 5,81 | 0 | 0 |
-| OCR rec | 0,91 | 0,06 | 0 | 0 |
-| OCR tổng | 14,76 | 6,42 | 0 | 0 |
-| Mô hình | 2,11 | 1,16 | 0,92 | 0,95 |
-| **Tổng end-to-end** | **20,13** | **7,61** | **0,93** | **0,96** |
+| OCR det | 4,86 | 4,89 | 0 | 0 |
+| OCR rec | 0,06 | 0,06 | 0 | 0 |
+| OCR tổng | 5,28 | 5,32 | 0 | 0 |
+| Mô hình | 1,15 | 1,18 | 0,91 | 0,94 |
+| **Tổng end-to-end** | **7,38** | **7,39** | **0,93** | **0,95** |
 
-**A1 — Prefetch OCR khi tải ảnh:** Gradio `image.change` chạy OCR nền; bấm **Trả lời** chỉ chờ đúng future đó (không OCR lần 2).  
-**A2 — Cache OCR theo sha1(bytes ảnh đã chuẩn hoá), tối đa 32 ảnh:** hỏi câu mới trên cùng ảnh → `OCR: dùng lại từ cache`.  
-**A3 — Chi tiết kỹ thuật** hiện OCR / Mô hình / Tổng (kèm nguồn cache/prefetch).
+`t_ocr_det` theo kích thước ảnh (baseline v2): 640×426 → 2,8 s · 800×600 → 4,9 s · 1536×2048 → 6,5–7,0 s. Ảnh lớn → det chậm hơn (không đổi `limit_side_len`).
 
-Parity output vs `reference_outputs.json`: **5/5** (plain) và **15/15** (a+b+c) — answer, confidence, ocr_lines, matched_line.
+**A1 — Prefetch OCR khi tải ảnh** · **A2 — Cache sha1 (≤32)** · **A3 — timing trong Chi tiết kỹ thuật.**
 
-**B1 (VietOCR GPU) / B2 (batch):** không bật thêm. B2 đã là đường mặc định trong `PaddleDetVietOCREngine.read` (`predict_batch`). B1 không giữ trên máy 4 GB (dễ đụng VRAM với Qwen 4-bit; rủi ro lệch float CPU↔GPU → fail parity).
+Parity vs code trước `bbe51d9` (7879d73): **5/5** trên `examples_local.json`. vs `reference_outputs.json`: **5/5**.
+
+**B1 / B2:** không đổi (B2 đã `predict_batch`; B1 không bật trên 4 GB).
 
 ### Vì sao OCR chạy CPU
 

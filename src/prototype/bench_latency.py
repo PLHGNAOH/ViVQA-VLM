@@ -25,6 +25,17 @@ import time
 from datetime import date
 from typing import Any, Dict, List, Optional, Tuple
 
+# C1: đặt threads TRƯỚC mọi import paddle (giống run_local_windows.ps1)
+def _ensure_ocr_threads(n: int = 12) -> Dict[str, str]:
+    for k in ("OMP_NUM_THREADS", "MKL_NUM_THREADS"):
+        if not os.environ.get(k):
+            os.environ[k] = str(n)
+    return {"OMP_NUM_THREADS": os.environ["OMP_NUM_THREADS"],
+            "MKL_NUM_THREADS": os.environ["MKL_NUM_THREADS"]}
+
+
+_THREAD_ENV = _ensure_ocr_threads(12)
+
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 STAGE_KEYS = (
@@ -74,9 +85,12 @@ def _refs_equal(a: Dict[str, Any], b: Dict[str, Any]) -> Tuple[bool, str]:
 
 def run_once(backend, image_path: str, question: str, tmp_dir: str,
              ocr_lines=None, ocr_timing=None) -> Dict[str, Any]:
+    from PIL import Image
     from src.prototype.app import prepare_image, evidence_lines
     used, info = prepare_image(image_path, tmp_dir)
     try:
+        with Image.open(used) as im:
+            wh = list(im.size)
         r = backend.ask(used, question, ocr_lines=ocr_lines, ocr_timing=ocr_timing)
         matched = evidence_lines(r["answer"], r.get("ocr_lines") or [])
         return {
@@ -84,6 +98,10 @@ def run_once(backend, image_path: str, question: str, tmp_dir: str,
             "matched": matched,
             "img_info": info,
             "used": used,
+            "image_w": int(wh[0]),
+            "image_h": int(wh[1]),
+            "omp_num_threads": _THREAD_ENV["OMP_NUM_THREADS"],
+            "mkl_num_threads": _THREAD_ENV["MKL_NUM_THREADS"],
             "t_preprocess": float(r.get("sec_preprocess") or 0.0),
             "t_ocr_det": float(r.get("sec_ocr_det") or 0.0),
             "t_ocr_rec": float(r.get("sec_ocr_rec") or 0.0),
@@ -136,11 +154,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     if not examples:
         raise SystemExit("Không có example hợp lệ")
 
+    print("Thread env (before paddle):", json.dumps(_THREAD_ENV))
     print("Loading pipeline…")
     backend, client, info, st, ocr_cfg = load_pipeline(
         args.adapter, args.config, args.ocr_device, args.expect_adapter_sha,
     )
     print("Start info:", json.dumps({k: info[k] for k in info if k != "ocr_engine"}, ensure_ascii=False))
+    # xác nhận threads vẫn còn sau khi nạp OCR worker
+    print("Thread env (after load):",
+          json.dumps({"OMP_NUM_THREADS": os.environ.get("OMP_NUM_THREADS"),
+                      "MKL_NUM_THREADS": os.environ.get("MKL_NUM_THREADS"),
+                      "paddle_cpu_threads_hint": "Paddle respects OMP_NUM_THREADS if set before import"}))
     tmp = tempfile.mkdtemp(prefix="vivqa_bench_")
 
     try:
@@ -223,6 +247,10 @@ def main(argv: Optional[List[str]] = None) -> int:
                     "scenario": scen,
                     "example_idx": ei,
                     "image": os.path.basename(ex["image"]),
+                    "image_w": last.get("image_w"),
+                    "image_h": last.get("image_h"),
+                    "omp_num_threads": last.get("omp_num_threads"),
+                    "mkl_num_threads": last.get("mkl_num_threads"),
                     "question": ex["question"],
                     "n_ocr_lines": last["n_ocr_lines"],
                     "n_gen_tokens": last["n_gen_tokens"],

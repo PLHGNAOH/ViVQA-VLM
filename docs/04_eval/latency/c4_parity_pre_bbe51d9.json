@@ -1,0 +1,41 @@
+{
+  "parity": "5/5",
+  "details": [
+    {
+      "image": "198.jpg",
+      "ok": true,
+      "old": "trẻ em phải đội mũ bảo hiểm khi đi xe máy",
+      "new": "trẻ em phải đội mũ bảo hiểm khi đi xe máy",
+      "level": "Cao"
+    },
+    {
+      "image": "COCO_train2014_000000547307.jpg",
+      "ok": true,
+      "old": "hai",
+      "new": "hai",
+      "level": "Cao"
+    },
+    {
+      "image": "anh_meo_trong_khung.jpg",
+      "ok": true,
+      "old": "không",
+      "new": "không",
+      "level": "Trung bình"
+    },
+    {
+      "image": "COCO_train2014_000000087598.jpg",
+      "ok": true,
+      "old": "màu tía",
+      "new": "màu tía",
+      "level": "Trung bình"
+    },
+    {
+      "image": "405.jpg",
+      "ok": true,
+      "old": "nhà thổ",
+      "new": "nhà thổ",
+      "level": "Cao"
+    }
+  ],
+  "old_rev": "7879d73"
+}

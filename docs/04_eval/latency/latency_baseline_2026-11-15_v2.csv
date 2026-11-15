@@ -1,0 +1,6 @@
+scenario,example_idx,image,image_w,image_h,omp_num_threads,mkl_num_threads,question,n_ocr_lines,n_gen_tokens,med_t_preprocess,med_t_ocr_det,med_t_ocr_rec,med_t_ocr,med_t_model,med_t_postprocess,med_t_total,answer,level
+plain,0,198.jpg,800,600,12,12,dòng chữ xuất hiện trên tấm bảng đỏ là gì ?,1,12,0.0272,4.8578,0.405,5.2837,2.0661,0.0001,7.3781,trẻ em phải đội mũ bảo hiểm khi đi xe máy,Cao
+plain,1,COCO_train2014_000000547307.jpg,640,426,12,12,bao nhiêu người đàn ông đang chia sẻ nụ hôn thân mật bên trong một tòa nhà,0,1,0.0128,2.8343,0.0,2.8375,0.8788,0.0001,3.729,hai,Cao
+plain,2,anh_meo_trong_khung.jpg,1536,2048,12,12,Trong ảnh có con chó không?,1,0,0.0,6.6712,0.0561,6.7561,1.0495,0.0,7.8057,không,Trung bình
+plain,3,COCO_train2014_000000087598.jpg,640,316,12,12,màu của áo là gì,0,5,0.011,2.2404,0.0,2.2423,1.1539,0.0001,3.3956,màu tía,Trung bình
+plain,4,405.jpg,700,816,12,12,bức ảnh lấy nguồn từ đâu ?,7,3,0.0264,5.9159,0.5922,6.5113,1.325,0.0001,7.8684,nhà thổ,Cao

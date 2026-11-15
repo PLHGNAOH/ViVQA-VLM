@@ -1,0 +1,156 @@
+{
+  "levels": {
+    "Cao": 3,
+    "Trung bình": 2,
+    "Thấp": 1
+  },
+  "match_prior_b5": "5/5",
+  "match_semantic": "2/3",
+  "rows": [
+    {
+      "image": "198.jpg",
+      "question": "dòng chữ xuất hiện trên tấm bảng đỏ là gì ?",
+      "answer": "trẻ em phải đội mũ bảo hiểm khi đi xe máy",
+      "level": "Cao",
+      "confidence": 0.996134802865658,
+      "n_ocr": 1,
+      "match_prior_b5": true,
+      "match_semantic": null,
+      "ocr_texts": [
+        "TRÊ EM PHẢI ĐỘI MŨ BẢO HIỂM KHI ĐI XE MÁY"
+      ]
+    },
+    {
+      "image": "COCO_train2014_000000547307.jpg",
+      "question": "bao nhiêu người đàn ông đang chia sẻ nụ hôn thân mật bên trong một tòa nhà",
+      "answer": "hai",
+      "level": "Cao",
+      "confidence": 0.9742911691203882,
+      "n_ocr": 0,
+      "match_prior_b5": true,
+      "match_semantic": true,
+      "ocr_texts": []
+    },
+    {
+      "image": "anh_meo_trong_khung.jpg",
+      "question": "Trong ảnh có con chó không?",
+      "answer": "không",
+      "level": "Trung bình",
+      "confidence": 0.9969887407620711,
+      "n_ocr": 1,
+      "match_prior_b5": true,
+      "match_semantic": true,
+      "ocr_texts": [
+        "XUÂN"
+      ]
+    },
+    {
+      "image": "COCO_train2014_000000087598.jpg",
+      "question": "màu của áo là gì",
+      "answer": "màu tía",
+      "level": "Trung bình",
+      "confidence": 0.8589935501142315,
+      "n_ocr": 0,
+      "match_prior_b5": true,
+      "match_semantic": null,
+      "ocr_texts": []
+    },
+    {
+      "image": "405.jpg",
+      "question": "bức ảnh lấy nguồn từ đâu ?",
+      "answer": "nhà thổ",
+      "level": "Cao",
+      "confidence": 0.9586813879062275,
+      "n_ocr": 7,
+      "match_prior_b5": true,
+      "match_semantic": null,
+      "ocr_texts": [
+        "MỞ CỬA RA",
+        "CHO NĂNG SỚM VÀO",
+        "PHÒNG NÀO",
+        "3",
+        "NHÀ THỔ",
+        "XEO",
+        "S"
+      ]
+    },
+    {
+      "image": "anh_meo_trong_khung.jpg",
+      "question": "Con vật trong ảnh là con gì",
+      "answer": "chó",
+      "level": "Thấp",
+      "confidence": 0.4777825560249485,
+      "n_ocr": 1,
+      "match_prior_b5": null,
+      "match_semantic": false,
+      "ocr_texts": [
+        "XUÂN"
+      ],
+      "note": "extra_open"
+    }
+  ],
+  "b6": {
+    "parity": [
+      {
+        "image": "198.jpg",
+        "ok": true,
+        "direct": "trẻ em phải đội mũ bảo hiểm khi đi xe máy",
+        "via_cache": "trẻ em phải đội mũ bảo hiểm khi đi xe máy"
+      },
+      {
+        "image": "COCO_train2014_000000547307.jpg",
+        "ok": true,
+        "direct": "hai",
+        "via_cache": "hai"
+      },
+      {
+        "image": "anh_meo_trong_khung.jpg",
+        "ok": true,
+        "direct": "không",
+        "via_cache": "không"
+      },
+      {
+        "image": "anh_meo_trong_khung.jpg",
+        "ok": true,
+        "direct": "không",
+        "via_cache": "không"
+      }
+    ],
+    "switch": {
+      "ok": true,
+      "key_a": "629917629dfd",
+      "key_b": "1ea16ac0bbc2",
+      "lines_a": [
+        "TRÊ EM PHẢI ĐỘI MŨ BẢO HIỂM KHI ĐI XE MÁY"
+      ],
+      "lines_b": [],
+      "answer_b": "hai"
+    },
+    "no_double_ocr": {
+      "ocr_calls": 1,
+      "ok": true,
+      "source": "waited_prefetch"
+    },
+    "parity_pass": true,
+    "switch_pass": true,
+    "no_double_pass": true
+  },
+  "answers_4cfg_meo_summary": {
+    "i_adapter_ocr": {
+      "answer": "chó",
+      "level": "Thấp"
+    },
+    "ii_adapter_no_ocr": {
+      "answer": "con mèo",
+      "level": "Trung bình"
+    },
+    "iii_no_adapter_ocr": {
+      "answer": "Mèo",
+      "level": "Trung bình"
+    },
+    "iv_no_adapter_no_ocr": {
+      "answer": "Mèo",
+      "level": "Trung bình"
+    }
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "note": "cat.jpg missing — used anh_meo_trong_khung.jpg as stand-in for B1-style dump",
+  "image_orig": {
+    "path": "D:\\vivqa_models\\images\\examples\\anh_meo_trong_khung.jpg",
+    "size": [
+      1536,
+      2048
+    ],
+    "mode": "RGB",
+    "format": "JPEG",
+    "exif_orientation": 1
+  },
+  "prepare_image": {
+    "orig_size": [
+      1536,
+      2048
+    ],
+    "used_size": [
+      1536,
+      2048
+    ],
+    "rotated": false,
+    "resized": false,
+    "reencoded": false,
+    "format": "JPEG"
+  },
+  "image_used": {
+    "path": "D:\\vivqa_models\\images\\examples\\anh_meo_trong_khung.jpg",
+    "size": [
+      1536,
+      2048
+    ],
+    "mode": "RGB",
+    "format": "JPEG",
+    "exif_orientation": 1
+  },
+  "model_cfg": {
+    "min_pixels": 200704,
+    "max_pixels": 401408,
+    "max_new_tokens": 32,
+    "load_in_4bit": true
+  },
+  "adapter": {
+    "type": "PeftModelForCausalLM",
+    "active_adapters": [
+      "default"
+    ],
+    "peft_config": {
+      "default": {
+        "peft_type": "LORA",
+        "r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "k_proj",
+          "o_proj",
+          "q_proj",
+          "v_proj"
+        ]
+      }
+    },
+    "lora_B_sample": "base_model.model.model.language_model.layers.0.self_attn.q_proj.lora_B.default.weight",
+    "lora_B_shape": [
+      2048,
+      16
+    ],
+    "lora_B_nonzero": true
+  },
+  "processor_debug": {
+    "chat_text_head": "<|im_start|>system\nBạn là trợ lý hỏi đáp hình ảnh tiếng Việt. Hãy trả lời thật NGẮN GỌN và CHÍNH XÁC bằng tiếng Việt, chỉ đưa ra đáp án, không giải thích dài dòng.<|im_end|>\n<|im_start|>user\n<|vision_start|><|image_pad|><|vision_end|>Văn bản đọc được trong ảnh: XUÂN\nCâu hỏi: Con vật trong ảnh là con gì<|im_end|>\n<|im_start|>assistant\n",
+    "pixel_values.shape": [
+      1976,
+      1176
+    ],
+    "image_grid_thw": [
+      [
+        1,
+        52,
+        38
+      ]
+    ],
+    "n_image_pad": 494,
+    "input_ids_len": 576
+  },
+  "question": "Con vật trong ảnh là con gì",
+  "ocr_engine": {
+    "engine": "PaddleOCR TextDetection + VietOCR",
+    "paddleocr": "3.7.0",
+    "paddlepaddle": "3.3.1",
+    "lang": "vi",
+    "device": "cpu",
+    "det_model": "PP-OCRv6_medium_det",
+    "rec_model": "vietocr/vgg_transformer",
+    "vietocr_config": "vgg_transformer, beamsearch=False",
+    "exif": "transpose-v1 (W14 R-EXIF)",
+    "det_mkldnn": false
+  }
+}
