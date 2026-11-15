@@ -1,0 +1,24 @@
+{
+  "status": "partial",
+  "sh_with_ocr_predictions": "experiments/W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vivqa_test_bf16_L4_seed42/predictions.json",
+  "sh_without_ocr_predictions": null,
+  "note": "Không tìm thấy file prediction SH trên ViVQA test khi suy luận không OCR. Số +0,15 EM trong W11/thesis là ΔEM C1→SH trên nhóm câu có dòng OCR (experiments/W11_shared_adapter_L4_seed42/shared_adapter_summary.json → vivqa_by_ocr_line.with_ocr_line), không phải flip SH+OCR vs SH−OCR trên cùng adapter. Do đó R2W/W2R (đúng→sai khi thêm OCR cho SH) = N/A theo quy tắc 1.4.",
+  "candidates_searched": [],
+  "reported_plus_0_15": {
+    "source": "shared_adapter_summary.json / vivqa_by_ocr_line / with_ocr_line",
+    "comparison": "C1 (em_a) vs SH (em_b) on n=1328 questions with non-empty OCR line",
+    "em_a_C1": 0.740210843373494,
+    "em_b_SH": 0.7417168674698795,
+    "em_diff": 0.001506024096385561,
+    "em_diff_pts": 0.1506024096385561,
+    "n": 1328,
+    "n_only_a": 33,
+    "n_only_b": 35,
+    "mcnemar_p": 0.9035973456835125,
+    "matches_plus_0_15": true
+  },
+  "R2W": null,
+  "W2R": null,
+  "delta_em_sh_ocr_vs_noocr": null,
+  "rule_1_4": true
+}
