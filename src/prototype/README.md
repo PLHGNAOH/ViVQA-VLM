@@ -38,7 +38,9 @@ Môi trường đo 2026-11-13: RTX 3050 Ti Laptop 4 GB · CPU i5-12500H · venv 
 
 ### Lệnh chạy
 
-Cách nhanh: `.\demo` (offline, tự mở trình duyệt) · `.\demo share` (link gradio.live) · hoặc **Tasks: Run Task** → `ViVQA demo (offline)` / `ViVQA demo (share)`.
+Cách nhanh: `.\demo` (offline, tự mở trình duyệt **nền sáng** `http://127.0.0.1:7860/?__theme=light`) · `.\demo share` (link gradio.live) · hoặc **Tasks: Run Task** → `ViVQA demo (offline)` / `ViVQA demo (share)`.
+
+Khi trình chiếu / máy chiếu: mở fullscreen **F11**, phóng to trang **Ctrl + '+'** (Ctrl + '-' thu nhỏ). Muốn nền tối: chạy PS1 với `-Dark` (không gắn `?__theme=light`).
 
 ```powershell
 # Từ gốc repo (khuyến nghị):
@@ -52,6 +54,8 @@ powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Of
 powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -OcrThreads 12
 # không tự mở trình duyệt:
 powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -NoBrowser
+# nền tối (không thêm ?__theme=light):
+powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -Dark
 ```
 
 Khởi động ~48 s với `OMP_NUM_THREADS=12` (trước đó ~78 s khi Paddle tự gán 1 luồng). Máy phải bật suốt lúc demo. Không đổi prompt / tham số sinh / min-max pixels / model OCR.

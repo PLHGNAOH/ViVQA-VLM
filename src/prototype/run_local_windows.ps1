@@ -15,9 +15,10 @@
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Mock
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -OcrThreads 12
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -NoBrowser
+#   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Dark
 #
 # Khởi động ~48 s (OCR 12 luồng). Máy phải bật suốt lúc demo.
-# Hôm bảo vệ dùng -Offline (hoặc .\demo), mở http://127.0.0.1:7860
+# Hôm bảo vệ dùng -Offline (hoặc .\demo), mở http://127.0.0.1:7860/?__theme=light
 # =============================================================================
 
 [CmdletBinding()]
@@ -26,6 +27,7 @@ param(
     [switch]$Offline,
     [switch]$Mock,
     [switch]$NoBrowser,
+    [switch]$Dark,
     [int]$Port = 7860,
     [int]$OcrThreads = 12
 )
@@ -83,28 +85,33 @@ if ((-not $Mock) -and (Test-Path $ExamplesJson)) {
 }
 
 Write-Host "python $($pyArgs -join ' ')"
-Write-Host "Đang nạp model (~50 s). Trình duyệt sẽ tự mở khi sẵn sàng; hoặc chờ dòng 'Running on local URL' rồi mở http://127.0.0.1:$Port. Tắt: Ctrl+C."
+Write-Host "Đang nạp model (~50 s). Trình duyệt sẽ tự mở khi sẵn sàng; hoặc chờ dòng 'Running on local URL' rồi mở http://127.0.0.1:$Port (nền sáng; muốn nền tối: thêm -Dark). Tắt: Ctrl+C."
 
 $browserJob = $null
 $exitCode = 1
 if (-not $NoBrowser -and -not $Mock) {
-    $url = "http://127.0.0.1:$Port"
+    $pollUrl = "http://127.0.0.1:$Port"
+    if ($Dark) {
+        $openUrl = $pollUrl
+    } else {
+        $openUrl = "$pollUrl/?__theme=light"
+    }
     $browserJob = Start-Job -ScriptBlock {
-        param($u)
+        param($poll, $open)
         $deadline = (Get-Date).AddSeconds(300)
         while ((Get-Date) -lt $deadline) {
             try {
-                $r = Invoke-WebRequest -Uri $u -UseBasicParsing -TimeoutSec 2
+                $r = Invoke-WebRequest -Uri $poll -UseBasicParsing -TimeoutSec 2
                 if ($r.StatusCode -eq 200) {
-                    Start-Process $u
-                    Write-Output "Đã mở trình duyệt: $u"
+                    Start-Process $open
+                    Write-Output "Đã mở trình duyệt: $open"
                     return
                 }
             } catch {}
             Start-Sleep -Seconds 3
         }
-        Write-Output "Hết 300 s chưa mở được trình duyệt ($u)"
-    } -ArgumentList $url
+        Write-Output "Hết 300 s chưa mở được trình duyệt ($open)"
+    } -ArgumentList $pollUrl, $openUrl
 }
 
 try {
