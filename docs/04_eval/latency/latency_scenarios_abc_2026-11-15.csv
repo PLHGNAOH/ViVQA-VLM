@@ -1,0 +1,16 @@
+scenario,example_idx,image,question,n_ocr_lines,n_gen_tokens,med_t_preprocess,med_t_ocr_det,med_t_ocr_rec,med_t_ocr,med_t_model,med_t_postprocess,med_t_total,answer,level
+a,0,198.jpg,dòng chữ xuất hiện trên tấm bảng đỏ là gì ?,1,12,0.0344,14.083,0.9063,14.9978,4.6166,0.0001,19.8164,trẻ em phải đội mũ bảo hiểm khi đi xe máy,Cao
+a,1,COCO_train2014_000000547307.jpg,bao nhiêu người đàn ông đang chia sẻ nụ hôn thân mật bên trong một tòa nhà,0,1,0.0133,2.7829,0.0,2.7855,0.8676,0.0001,3.6434,hai,Cao
+a,2,anh_meo_trong_khung.jpg,Trong ảnh có con chó không?,1,0,0.0,6.4784,0.0571,6.5722,1.0183,0.0,7.6118,không,Trung bình
+a,3,COCO_train2014_000000087598.jpg,màu của áo là gì,0,5,0.0128,2.3177,0.0,2.3186,1.1569,0.0001,3.4724,màu tía,Trung bình
+a,4,405.jpg,bức ảnh lấy nguồn từ đâu ?,7,3,0.0256,5.8143,0.5971,6.4191,1.3669,0.0001,7.8665,nhà thổ,Cao
+b,0,198.jpg,dòng chữ xuất hiện trên tấm bảng đỏ là gì ?,1,12,0.026,0.0,0.0,0.0,1.8312,0.0001,1.8503,trẻ em phải đội mũ bảo hiểm khi đi xe máy,Cao
+b,1,COCO_train2014_000000547307.jpg,bao nhiêu người đàn ông đang chia sẻ nụ hôn thân mật bên trong một tòa nhà,0,1,0.0142,0.0,0.0,0.0,0.6512,0.0,0.6656,hai,Cao
+b,2,anh_meo_trong_khung.jpg,Trong ảnh có con chó không?,1,0,0.0,0.0,0.0,0.0,0.8388,0.0,0.839,không,Trung bình
+b,3,COCO_train2014_000000087598.jpg,màu của áo là gì,0,5,0.0125,0.0,0.0,0.0,0.9209,0.0001,0.9335,màu tía,Trung bình
+b,4,405.jpg,bức ảnh lấy nguồn từ đâu ?,7,3,0.0169,0.0,0.0,0.0,1.0105,0.0,1.0275,nhà thổ,Cao
+c,0,198.jpg,dòng chữ xuất hiện trên tấm bảng đỏ là gì ?,1,12,0.0208,0.0,0.0,0.0,1.7703,0.0001,1.7902,trẻ em phải đội mũ bảo hiểm khi đi xe máy,Cao
+c,1,COCO_train2014_000000547307.jpg,bao nhiêu người đàn ông đang chia sẻ nụ hôn thân mật bên trong một tòa nhà,0,1,0.0142,0.0,0.0,0.0,0.6728,0.0,0.6922,hai,Cao
+c,2,anh_meo_trong_khung.jpg,Trong ảnh có con chó không?,1,0,0.0,0.0,0.0,0.0,0.8523,0.0,0.8524,không,Trung bình
+c,3,COCO_train2014_000000087598.jpg,màu của áo là gì,0,5,0.0116,0.0,0.0,0.0,0.9514,0.0001,0.9632,màu tía,Trung bình
+c,4,405.jpg,bức ảnh lấy nguồn từ đâu ?,7,3,0.0211,0.0,0.0,0.0,1.0455,0.0001,1.0673,nhà thổ,Cao

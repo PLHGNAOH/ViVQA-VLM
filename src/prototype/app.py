@@ -25,12 +25,14 @@ import html
 import json
 import os
 import tempfile
+import threading
 import time
 import uuid
+from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
-APP_VERSION = "prototype-app-v2.1"   # W14: MAX_SIDE 2048 -> 6000 (v2); ảnh bằng chứng thu nhỏ khi HIỂN THỊ (v2.1)
+APP_VERSION = "prototype-app-v2.2"   # v2.2: OCR prefetch/cache + latency chi tiết (output-identical)
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SUMMARY_REL = "experiments/W13_prototype_check_L4_seed42/prototype_check_summary.json"
 OCR_SELECTION_REL = "experiments/W08_ocr_select_dev300_L4_seed42/ocr_selection.json"
@@ -251,9 +253,27 @@ def render_result(r: Dict[str, Any], img_info: Dict[str, Any], settings: Dict[st
 
     def sec(k):
         return f"{r[k]:.2f} s".replace(".", ",") if isinstance(r.get(k), (int, float)) else "—"
+
+    ocr_src = r.get("ocr_source") or "fresh"
+    if ocr_src == "cache":
+        ocr_time_txt = "OCR: dùng lại từ cache"
+    elif ocr_src in ("prefetch", "waited_prefetch", "prefetch_ready"):
+        wall = r.get("sec_ocr_wall")
+        if ocr_src == "prefetch_ready" or (isinstance(wall, (int, float)) and wall < 0.05):
+            ocr_time_txt = "OCR: đã chạy sẵn khi tải ảnh"
+        else:
+            ocr_time_txt = f"OCR: chờ prefetch {sec('sec_ocr_wall') if wall is not None else sec('sec_ocr')}"
+    else:
+        ocr_time_txt = f"OCR {sec('sec_ocr')}"
+        if isinstance(r.get("sec_ocr_det"), (int, float)) or isinstance(r.get("sec_ocr_rec"), (int, float)):
+            ocr_time_txt += f" (det {sec('sec_ocr_det')} · rec {sec('sec_ocr_rec')})"
+
+    model_t = r.get("sec_model", r.get("sec"))
     details = "\n".join([
         f"- **Chế độ:** `{r['mode']}` · mức `{r['level']}`",
-        f"- **Thời gian:** OCR {sec('sec_ocr')} · model {sec('sec')} · tổng {sec('sec_total')}",
+        f"- **Thời gian:** {ocr_time_txt} · Mô hình "
+        f"{(f'{model_t:.2f} s'.replace('.', ',') if isinstance(model_t, (int, float)) else '—')} · "
+        f"Tổng {sec('sec_total')}",
         f"- **Ảnh:** {img_info['orig_size'][0]}×{img_info['orig_size'][1]} px"
         + (f" → {img_info['used_size'][0]}×{img_info['used_size'][1]} px" if img_info.get("reencoded") else " (dùng nguyên file)"),
         f"- **OCR:** {ocr_cfg['backend']} · template {ocr_cfg['template']} · ≤ {ocr_cfg['max_chars']} ký tự · "
@@ -264,6 +284,89 @@ def render_result(r: Dict[str, Any], img_info: Dict[str, Any], settings: Dict[st
     ])
     return {"answer_html": answer_html, "warnings_md": "\n\n".join(warns), "ocr_html": ocr_html,
             "evidence": ev, "details_md": details, "truncated": truncated}
+
+
+# =============================================================================
+# 4b) OCR prefetch / cache (A1–A2) — key = sha1(bytes ảnh đã chuẩn hoá)
+# =============================================================================
+def sha1_file(path: str) -> str:
+    h = hashlib.sha1()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+class OCRResultCache:
+    """Cache OCR theo sha1; tối đa max_items; thread-safe. start() chạy nền; get() chờ đúng future."""
+
+    def __init__(self, ocr_read, max_items: int = 32):
+        self.ocr_read = ocr_read
+        self.max_items = max_items
+        self._lock = threading.Lock()
+        self._data: Dict[str, Dict[str, Any]] = {}
+        self._order: List[str] = []
+        self._inflight: Dict[str, Future] = {}
+        self._executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="ocr_prefetch")
+
+    def _touch(self, key: str) -> None:
+        if key in self._order:
+            self._order.remove(key)
+        self._order.append(key)
+        while len(self._order) > self.max_items:
+            old = self._order.pop(0)
+            self._data.pop(old, None)
+
+    def _run(self, key: str, image_path: str) -> Dict[str, Any]:
+        raw = self.ocr_read(image_path)
+        entry = {
+            "lines": list(raw.get("lines") or []),
+            "sec_det": float(raw.get("sec_det") or 0.0),
+            "sec_rec": float(raw.get("sec_rec") or 0.0),
+            "sec": float(raw.get("sec") or 0.0),
+        }
+        with self._lock:
+            self._data[key] = entry
+            self._touch(key)
+            self._inflight.pop(key, None)
+        return entry
+
+    def start(self, key: str, image_path: str) -> None:
+        with self._lock:
+            if key in self._data or key in self._inflight:
+                if key in self._data:
+                    self._touch(key)
+                return
+            fut = self._executor.submit(self._run, key, image_path)
+            self._inflight[key] = fut
+
+    def get(self, key: str, image_path: str) -> Dict[str, Any]:
+        with self._lock:
+            if key in self._data:
+                self._touch(key)
+                out = dict(self._data[key])
+                out["ocr_source"] = "cache"
+                return out
+            fut = self._inflight.get(key)
+            started_here = False
+            if fut is None:
+                fut = self._executor.submit(self._run, key, image_path)
+                self._inflight[key] = fut
+                started_here = True
+        entry = dict(fut.result())
+        entry["ocr_source"] = "fresh" if started_here else "waited_prefetch"
+        return entry
+
+    def clear_key(self, key: Optional[str]) -> None:
+        if not key:
+            return
+        with self._lock:
+            self._data.pop(key, None)
+            if key in self._order:
+                self._order.remove(key)
+            fut = self._inflight.pop(key, None)
+        if fut is not None and not fut.done():
+            fut.cancel()
 
 
 # =============================================================================
@@ -343,14 +446,50 @@ class Handler:
     """Xử lý một lượt hỏi: kiểm đầu vào -> chuẩn bị ảnh -> backend -> hiển thị. Ghi log số đo (tuỳ chọn)."""
 
     def __init__(self, backend, settings: Dict[str, Any], ocr_cfg: Dict[str, Any], log_jsonl: Optional[str] = None,
-                 tmp_dir: Optional[str] = None):
+                 tmp_dir: Optional[str] = None, ocr_cache: Optional[OCRResultCache] = None):
         self.backend, self.settings, self.ocr_cfg, self.log_jsonl = backend, settings, ocr_cfg, log_jsonl
         self.tmp_dir = tmp_dir or tempfile.mkdtemp(prefix="vivqa_proto_")
+        self.ocr_cache = ocr_cache
+        self._current_key: Optional[str] = None
 
     def _log(self, rec: Dict[str, Any]) -> None:
         if self.log_jsonl:
             with open(self.log_jsonl, "a", encoding="utf-8") as f:
                 f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
+    def _prepare_keyed(self, image_path: str) -> Tuple[str, Dict[str, Any], str]:
+        """prepare_image + ổn định path theo sha1(bytes) để prefetch/cache trùng key."""
+        used, info = prepare_image(image_path, self.tmp_dir)
+        key = sha1_file(used)
+        if used != image_path:
+            stable = os.path.join(self.tmp_dir, f"ocr_{key}.png")
+            if os.path.abspath(used) != os.path.abspath(stable):
+                if os.path.exists(stable):
+                    try:
+                        os.remove(used)
+                    except OSError:
+                        pass
+                    used = stable
+                else:
+                    os.replace(used, stable)
+                    used = stable
+        return used, info, key
+
+    def prefetch_ocr(self, image_path: Optional[str]) -> None:
+        """A1: chạy OCR nền khi ảnh được tải / đổi (Gradio change)."""
+        if not image_path or self.ocr_cache is None or getattr(self.backend, "is_mock", False):
+            self._current_key = None
+            return
+        try:
+            used, _, key = self._prepare_keyed(image_path)
+            self._current_key = key
+            self.ocr_cache.start(key, used)
+        except Exception as e:
+            print(f"[prefetch_ocr] {type(e).__name__}: {e}")
+
+    def on_clear(self) -> None:
+        """Xoá: không dùng nhầm OCR ảnh cũ cho lượt sau (bỏ key hiện tại khỏi theo dõi)."""
+        self._current_key = None
 
     def __call__(self, image_path: Optional[str], question: Optional[str]):
         from PIL import Image
@@ -367,16 +506,44 @@ class Handler:
         used = None
         rec: Dict[str, Any] = {"ts": datetime.now(timezone.utc).isoformat(timespec="seconds"), "app": APP_VERSION}
         try:
-            used, info = prepare_image(image_path, self.tmp_dir)
+            used, info, key = self._prepare_keyed(image_path)
+            self._current_key = key
             rec.update({"img_orig": info["orig_size"], "img_used": info["used_size"], "rotated": info["rotated"],
                         "resized": info["resized"]})
-            r = self.backend.ask(used, q)
+            ocr_lines = None
+            ocr_timing = None
+            t_wait0 = time.perf_counter()
+            if self.ocr_cache is not None and not getattr(self.backend, "is_mock", False):
+                entry = self.ocr_cache.get(key, used)
+                wait_s = time.perf_counter() - t_wait0
+                ocr_lines = entry["lines"]
+                src = entry.get("ocr_source", "fresh")
+                # đã có sẵn trong cache trước khi bấm → không tính OCR vào tường
+                if src == "cache":
+                    ocr_timing = {"sec_det": 0.0, "sec_rec": 0.0, "sec_ocr": 0.0,
+                                  "ocr_source": "cache"}
+                elif src == "waited_prefetch":
+                    ocr_timing = {"sec_det": entry.get("sec_det", 0.0), "sec_rec": entry.get("sec_rec", 0.0),
+                                  "sec_ocr": entry.get("sec", 0.0), "ocr_source": "waited_prefetch"}
+                else:
+                    ocr_timing = {"sec_det": entry.get("sec_det", 0.0), "sec_rec": entry.get("sec_rec", 0.0),
+                                  "sec_ocr": entry.get("sec", wait_s), "ocr_source": "fresh"}
+                r = self.backend.ask(used, q, ocr_lines=ocr_lines, ocr_timing=ocr_timing)
+                r["sec_ocr_wall"] = wait_s if src != "cache" else 0.0
+                if src == "cache":
+                    r["ocr_source"] = "cache"
+                elif src == "waited_prefetch" and wait_s < 0.05:
+                    r["ocr_source"] = "prefetch_ready"
+                else:
+                    r["ocr_source"] = src
+            else:
+                r = self.backend.ask(used, q)
             out = render_result(r, info, self.settings, self.ocr_cfg)
             boxes = draw_ocr_boxes(used, r.get("ocr_lines") or [], out["evidence"]) if r.get("ocr_lines") \
                 else display_copy(Image.open(used).convert("RGB"))
             rec.update({"ok": True, "mode": r["mode"], "level": r["level"], "n_ocr_lines": len(r.get("ocr_lines") or []),
                         "ocr_truncated": out["truncated"], "sec_ocr": r.get("sec_ocr"), "sec_vlm": r.get("sec"),
-                        "sec_total": r.get("sec_total")})
+                        "sec_total": r.get("sec_total"), "ocr_source": r.get("ocr_source")})
             self._log(rec)
             return out["answer_html"], out["warnings_md"], boxes, out["ocr_html"], out["details_md"]
         except Exception as e:                            # lỗi hiện cho người dùng, không làm sập app
@@ -384,8 +551,15 @@ class Handler:
             self._log(rec)
             return (f"<div class='vv-card'>⚠️ Không xử lý được: {html.escape(str(e)[:400])}</div>", "", None, "", "")
         finally:
+            # Có OCR cache: giữ ocr_<sha1>.png. Không cache / mock: xoá tạm như trước (selftest).
             if used and used != image_path and os.path.exists(used):
-                os.remove(used)                           # không giữ bản ảnh tạm
+                base = os.path.basename(used)
+                keep = self.ocr_cache is not None and base.startswith("ocr_")
+                if not keep:
+                    try:
+                        os.remove(used)
+                    except OSError:
+                        pass
 
 
 def build_demo(handler: Handler, examples: Optional[List[List[str]]] = None):
@@ -426,7 +600,11 @@ def build_demo(handler: Handler, examples: Optional[List[List[str]]] = None):
         outs = [ans_out, warn_out, ocr_img, ocr_out, det_out]
         btn.click(handler, [img_in, q_in], outs)
         q_in.submit(handler, [img_in, q_in], outs)
-        clr.click(lambda: (None, "", EMPTY_ANSWER, "", None, "", ""), None, [img_in, q_in] + outs)
+        img_in.change(handler.prefetch_ocr, [img_in], None)
+        def _clear():
+            handler.on_clear()
+            return None, "", EMPTY_ANSWER, "", None, "", ""
+        clr.click(_clear, None, [img_in, q_in] + outs)
     return demo
 
 
@@ -587,6 +765,7 @@ def main() -> None:
     st = load_ui_settings(a.summary)
     ocr_cfg = load_ocr_selection()
     client = None
+    ocr_cache = None
     if a.mock:
         backend = MockBackend(st, ocr_cfg)
     else:
@@ -594,8 +773,10 @@ def main() -> None:
             raise SystemExit("Cần --adapter (hoặc --mock để thử giao diện)")
         backend, client, info = make_real_backend(a.adapter, a.config, st, ocr_cfg, a.ocr_device, a.ocr_python,
                                                   a.ocr_log, a.expect_adapter_sha, a.allow_ocr_mismatch)
+        ocr_cache = OCRResultCache(client.read, max_items=32)
         print("Khởi động:", json.dumps(info, ensure_ascii=False))
-    demo = build_demo(Handler(backend, st, ocr_cfg, a.log_jsonl), load_examples(a.examples_json))
+    demo = build_demo(Handler(backend, st, ocr_cfg, a.log_jsonl, ocr_cache=ocr_cache),
+                      load_examples(a.examples_json))
     try:
         demo.queue(default_concurrency_limit=1).launch(share=a.share, server_name="0.0.0.0", server_port=a.port,
                                                        css=CSS, show_error=True)
