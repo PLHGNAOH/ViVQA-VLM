@@ -1,0 +1,43 @@
+% !TeX root = ../thesis.tex
+% ************************** Abstract *****************************
+% Use the `abstract' option in the document class to print only the title page and abstract.
+\begin{abstract}
+
+Vietnamese Visual Question Answering requires a model that both understands the
+image and reads the Vietnamese text, with its diacritics, that appears in it.
+Open-source vision-language models (VLMs), however, are trained mostly on English,
+and fully fine-tuning such a model is beyond the resources of a student team. This
+thesis studies how to adapt a VLM to Vietnamese using only parameter-efficient
+fine-tuning on a single Google Colab GPU.
+
+We choose Qwen2.5-VL-3B-Instruct as the baseline, reproduce it on TextVQA val (VQA
+Accuracy 79.60 against the published 79.3), and then measure it zero-shot on two
+Vietnamese datasets: ViVQA (everyday images) and ViTextVQA (images containing text).
+Zero-shot reaches only 22.09 and 29.12 Exact Match (EM), mostly because the answers
+have the wrong format or the wrong language. 4-bit QLoRA, training 0.196\% of the
+parameters, raises EM to 76.64 on ViVQA and 50.26 on ViTextVQA.
+
+The proposed improvement is \textbf{OCR-aware QLoRA}: the text in the image is read
+with PaddleOCR and VietOCR, sorted in reading order and inserted into the prompt
+already during training. On the full ViTextVQA test set of 10{,}028 questions, the
+method reaches 53.35 EM and 73.89 ANLS, 3.09 EM points above plain QLoRA on the same
+data (McNemar test $p = 6.7\times10^{-21}$), is stable across three seeds, and is
+above the best previously published result (25.48 EM). A $2\times2$ factorial
+experiment shows that the gain appears only when OCR is present both in training and
+at inference (interaction $+4.9$ EM): the contribution lies in teaching the model to
+use OCR, not in adding OCR to the prompt.
+
+The thesis includes ablations, an automatic error analysis checked against a blind
+manual review, and a hallucination measurement with POPE-vi, a set of 4{,}985
+Vietnamese questions built by the team. The results show that EM underestimates the
+model (about 55\% of EM errors are semantically correct), that Vietnamese text
+reading errors still cost about 17 EM points, and that hallucination accounts for
+only about 2--4\% of the answers. Every run uses one L4 GPU with less than 8.4~GB of
+VRAM and is logged with a reproducibility package. The system is packaged as a web
+prototype that answers with the OCR text shown as evidence.
+
+\vspace{1em}
+\noindent\textbf{Keywords:} Vietnamese VQA, vision-language model, QLoRA,
+parameter-efficient fine-tuning, OCR, scene text, hallucination.
+
+\end{abstract}

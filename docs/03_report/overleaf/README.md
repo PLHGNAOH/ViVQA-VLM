@@ -20,13 +20,18 @@ Google Doc "ViVQA-VLM Thesis (TV)" chỉ còn là bản lưu trữ của Chươn
 
 ## Ngôn ngữ
 - Viết tiếng Việt trước. Preamble/preamble.tex: `\thesisvitrue` = tiếng Việt, `\thesisvifalse` = tiếng Anh.
-- Bản tiếng Anh đã có của các phần đã duyệt nằm trong source_vi/_EN_draft/ (không được biên dịch).
 
 ## Thư mục này
 - source_vi/ = bản VI v3 (11/11/2026): tắt microtype expansion, ảnh Ch3 2600 px, thêm 3 dòng %\includeonly.
 - ViVQA-VLM_Thesis_VI.pdf: bản PDF đầy đủ MỚI NHẤT của luận văn (chỉ giữ 1 file; bản cũ xem trong lịch sử git).
 - Cập nhật snapshot: tải source zip mới từ Overleaf, giải nén đè source_vi/, commit.
 - Template gốc của mentor: G:\My Drive\ViVQA-VLM\thesis\template_original\ (không đưa lên repo).
+
+## Bản tiếng Anh (source_en)
+- Dịch từ `source_vi` @ `de78d9e`; preamble `\thesisvifalse`.
+- 7 hình vẽ lại bằng tiếng Anh; build giống `source_vi` (recipe Full).
+- PDF: `ViVQA-VLM_Thesis_EN.pdf` (ghi đè sau mỗi Full build từ `source_en/thesis.pdf`).
+- Sửa nội dung một bản thì sửa cả bản kia.
 
 ## Biên dịch trên Overleaf gói miễn phí
 - Lần đầu biên dịch lần lượt từng dòng `\includeonly` (bỏ `%` ở đúng một dòng mỗi lần).

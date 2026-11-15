@@ -1,0 +1,470 @@
+%!TEX root = ../thesis.tex
+%*******************************************************************************
+%****************************** Chapter 5 **************************************
+%*******************************************************************************
+
+\chapter{DISCUSSION}
+\label{chap:discussion}
+
+\ifpdf
+    \graphicspath{{Chapter5/Figs/Raster/}{Chapter5/Figs/PDF/}{Chapter5/Figs/}}
+\else
+    \graphicspath{{Chapter5/Figs/Vector/}{Chapter5/Figs/}}
+\fi
+
+Chapter~\ref{chap:results} showed how well the models perform. This chapter asks why, and
+where the remaining errors lie. Section~\ref{sec:dis-qlora} analyses which types of errors
+QLoRA fixes. Section~\ref{sec:dis-ocr} examines the mechanism of OCR-aware QLoRA,
+Sections~\ref{sec:dis-remaining} and~\ref{sec:dis-audit} analyse the sources of the
+remaining errors with automatic analysis and a manual review, and
+Section~\ref{sec:dis-vivqa} looks at the errors on ViVQA. Section~\ref{sec:dis-halluc}
+answers RQ4 on hallucination. Section~\ref{sec:dis-v} relates the findings to the four
+Vietnamese problems V1--V4, Section~\ref{sec:dis-examples} gives qualitative examples,
+Section~\ref{sec:dis-validity} discusses limitations and validity, and
+Section~\ref{sec:dis-ethics} discusses ethical aspects.
+
+All numbers in this chapter are descriptive only and are not used to select models. The
+definitions of the error types and OCR statuses were recorded before the analysis was run
+(Section~\ref{sec:met-error}).
+
+%********************************** Section 5.1 ********************************
+\section{Which errors QLoRA fixes}
+\label{sec:dis-qlora}
+
+Table~\ref{tab:dis-buckets} classifies the EM errors by error type. In the zero-shot
+setting, extra-word errors (the gold answer is contained in the answer) account for 25.7\%
+of the errors on ViTextVQA and 21.3\% on ViVQA. After QLoRA, this share falls to 13.6\%
+(B2) and 3.9\% (C3). Most of QLoRA's gain therefore comes from the model learning the
+answer format of the dataset: short and written the right way. This agrees with problem
+V2 and with the zero-shot analysis in Section~\ref{sec:res-repro}. After QLoRA, the
+remaining errors shift towards misread characters (a few characters off, wrong tone marks)
+and wrong content.
+
+\begin{table}[htbp]
+\caption{Error types among EM errors (\% of each model's errors)}
+\label{tab:dis-buckets}
+\centering
+\small
+\begin{tabular}{p{0.21\textwidth}p{0.08\textwidth}p{0.08\textwidth}p{0.08\textwidth}p{0.08\textwidth}p{0.10\textwidth}p{0.07\textwidth}}
+\toprule
+\textbf{Model} & \textbf{Error rate} & \textbf{Tone marks} & \textbf{Missing words} & \textbf{Extra words} & \textbf{Off by $\leq$ 2 chars} & \textbf{Other} \\
+\midrule
+ViTextVQA · B1 & 70.9 & 3.3 & 5.0 & \textbf{25.7} & 8.0 & 57.9 \\
+ViTextVQA · B2 & 49.7 & 9.0 & 13.2 & 13.6 & 16.8 & 47.4 \\
+ViTextVQA · B3-full & 46.6 & 9.6 & 15.5 & 14.5 & 16.5 & 43.9 \\
+\midrule
+ViVQA · B1 & 77.9 & 0.0 & 3.6 & \textbf{21.3} & 6.4 & 68.6 \\
+ViVQA · C1 & 26.2 & 0.5 & 2.8 & 3.2 & 15.1 & 78.4 \\
+ViVQA · C3 & 23.4 & 0.0 & 2.3 & 3.9 & 16.0 & 77.9 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%********************************** Section 5.2 ********************************
+\section{The mechanism of OCR-aware QLoRA}
+\label{sec:dis-ocr}
+
+The $2\times2$ experiment (Table~\ref{tab:res-2x2}) shows that OCR helps only when the model
+is trained with OCR. A plausible explanation: a model that has not seen OCR during training
+does not know how far the OCR line can be trusted, so it uses it indiscriminately and breaks
+as many questions as it fixes (16 and 16 on dev300). When trained with OCR, the adapter
+learns when to copy from the OCR and when to rely on the image.
+
+Table~\ref{tab:dis-flips} splits the questions that change from B2 to B3-full by OCR
+status. The 705 fixed questions minus the 395 broken ones give 310 questions, exactly the
+gain of 3.09 EM points. The benefit is concentrated in the questions whose OCR contains the
+gold answer verbatim (326 fixed, 116 broken). In the questions whose OCR does not contain
+the answer, fixes and breaks are nearly balanced (289 and 211).
+
+\begin{table}[htbp]
+\caption{Changes from B2 to B3-full by OCR status (full ViTextVQA test set)}
+\label{tab:dis-flips}
+\centering
+\small
+\begin{tabular}{p{0.34\textwidth}rrrrr}
+\toprule
+\textbf{OCR status} & \textbf{n} & \textbf{Fixed} & \textbf{Broken} & \textbf{Both right} & \textbf{Both wrong} \\
+\midrule
+OCR contains the answer verbatim & 3,321 & \textbf{326} & 116 & 2,105 & 774 \\
+OCR has the right letters, wrong diacritics & 1,149 & 90 & 68 & 506 & 485 \\
+OCR has text, but not the answer & 5,526 & 289 & 211 & 2,023 & 3,003 \\
+OCR reads no text & 32 & 0 & 0 & 11 & 21 \\
+\midrule
+All & 10,028 & 705 & 395 & 4,645 & 4,283 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+OCR can also distract the model. In 138 questions (34.9\% of the broken questions, about
+1.4\% of the test set), B2 answers correctly but B3-full answers with a different phrase
+taken from the OCR line. This is the price of adding text to the prompt, and one reason
+why the prototype shows the OCR text so that users can check it themselves.
+
+%********************************** Section 5.3 ********************************
+\section{B3-full's remaining errors: OCR or model?}
+\label{sec:dis-remaining}
+
+For each ViTextVQA question, the team looks at exactly the OCR text that entered the
+prompt. Only 33.1\% of the questions have the gold answer verbatim in the OCR; 11.5\% match
+only when diacritics are removed (the OCR reads the right letters but wrong diacritics);
+55.1\% have OCR text that does not contain the answer verbatim; and 0.3\% have no OCR text
+at all. Notably, B3-full's EM (53.35) is much higher than 33.1\%, which means that for many
+questions the model reads the image correctly by itself where the OCR cannot help.
+
+Table~\ref{tab:dis-source} classifies B3-full's 4,678 errors by automatic error source.
+
+\begin{table}[htbp]
+\caption{Automatic error sources of B3-full (4,678 errors)}
+\label{tab:dis-source}
+\centering
+\small
+\begin{tabular}{p{0.46\textwidth}rp{0.30\textwidth}}
+\toprule
+\raggedright \textbf{Error source} & \raggedright \textbf{\%} & \raggedright \textbf{Most frequent error types} \tabularnewline
+\midrule
+\raggedright The OCR does not bring the answer verbatim into the prompt & \raggedright 81.0 & \raggedright other 1,816; character offset 682; missing words 537 \tabularnewline
+\raggedright The OCR has the answer, the model copies the wrong span & \raggedright 10.5 & \raggedright extra words 193; missing words 190 \tabularnewline
+\raggedright The OCR has the answer, the answer is outside the OCR & \raggedright 8.5 & \raggedright other 143; extra words 123 \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+The 81\% figure must be read with care. It is an upper bound on OCR-caused errors, because
+the group ``the OCR does not contain the answer'' includes questions that require inference
+(the answer is not written verbatim in the image) and questions with noisy gold answers;
+Section~\ref{sec:dis-audit} separates these cases with a manual review. When the OCR has
+the answer but the model is still wrong, the error is mainly a wrong phrase boundary: 383
+of 492 questions take too few or too many words. Wrong diacritics from OCR are a challenge
+specific to Vietnamese: 393 of B3-full's 450 tone-mark errors are in the group where the OCR
+does not bring the answer verbatim. By question type, the share of OCR-caused errors is
+highest for contact (90.9\%) and text content (87.6\%), and lowest for number and time
+(72.5\%).
+
+%********************************** Section 5.4 ********************************
+\section{Manual review of 150 errors}
+\label{sec:dis-audit}
+
+Table~\ref{tab:dis-audit} summarises the blind manual review of 100 EM errors of B3-full
+and 50 EM errors of C3 (design in Section~\ref{sec:met-error}). The last column is a
+reference from the earlier review of 200 B2 errors, for description only: different
+annotators, a different model, and overlapping confidence intervals.
+
+\begin{table}[htbp]
+\caption{Manual review of EM errors (Wilson CI95 in brackets)}
+\label{tab:dis-audit}
+\centering
+\small
+\begin{tabular}{p{0.32\textwidth}p{0.20\textwidth}p{0.20\textwidth}p{0.17\textwidth}}
+\toprule
+ & \textbf{B3-full (100 errors)} & \textbf{C3 (50 errors)} & \textbf{Reference B2 (ViTextVQA / ViVQA)} \\
+\midrule
+EM errors that are actually correct in meaning & \textbf{55.0} [45.2; 64.4] & \textbf{64.0} [50.1; 75.9] & 46 / 62 \\
+Errors that are hallucinations & 5.0 [2.2; 11.2] & 16.0 [8.3; 28.5] & 9 / 5 \\
+EM $\to$ correctness as judged by a reader & 53.35 $\to$ \textbf{79.01} & 76.64 $\to$ \textbf{91.59} & \\
+Hallucination over all answers & 2.33\% & 3.74\% & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Error types from the manual labels (\% of the reviewed errors)}
+\label{tab:dis-audit-types}
+\centering
+\small
+\begin{tabular}{p{0.46\textwidth}rr}
+\toprule
+\textbf{Error type} & \textbf{B3-full} & \textbf{C3} \\
+\midrule
+Format, length (meaning correct) & \textbf{40.0} & --- \\
+Synonym, different wording (meaning correct) & 4.0 & \textbf{36.0} \\
+Misread text & 29.0 & --- \\
+Wrong tone marks & 7.0 & --- \\
+Wrong region or not in the image & 15.0 & 28.0 \\
+Wrong or noisy gold answer & 5.0 & \textbf{28.0} \\
+Wrong count & --- & 6.0 \\
+Other & --- & 2.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+There are four observations.
+
+\paragraph{EM greatly underestimates the model.} More than half of B3-full's EM errors are
+actually correct in meaning, so the correctness judged by a reader is about 79\% against an
+EM of 53.35\%. The largest error type is format and length (40\%): the answer and the gold
+answer have the same content but are written differently, for example ``combo 3'' against
+the gold ``3'', or the spaces around the dot in an email address. For C3, 36\% of the errors
+are synonyms, so the correctness judged by a reader is about 92\%.
+
+\paragraph{81\% ``caused by OCR'' does not mean 81\% of the errors are caused by OCR.} Of the
+78 reviewed questions in the group where the OCR does not contain the answer, only 34
+(43.6\%, CI95 [33.1; 54.6]) are real reading errors (27 misread, 7 wrong tone marks), while
+28 (35.9\%) are correct in meaning. Over the whole sample, real reading errors account for
+36\% (CI95 [27.3; 45.8]) of B3-full's errors, i.e.\ about 17 EM points. This is a rough
+estimate of what a better Vietnamese OCR could fix.
+
+\paragraph{Wrong phrase boundaries are mostly accepted by a reader.} Of the 14 questions in
+which the model copies the wrong span from the OCR, 11 are format or length errors with the
+correct meaning.
+
+\paragraph{Noisy ViVQA gold answers.} 28\% of C3's errors are due to wrong or noisy gold
+answers, consistent with the hard-to-understand machine-translated questions in
+Section~\ref{sec:dis-examples}.
+
+Limitations of this review: there is only one annotator, so agreement $\kappa$ cannot be
+computed (this label set had $\kappa = 0.62$ between two annotators in the earlier review);
+50 ViVQA questions give wide confidence intervals; and ``correct in meaning'' is a subjective
+judgement.
+
+%********************************** Section 5.5 ********************************
+\section{Errors on ViVQA}
+\label{sec:dis-vivqa}
+
+For C3, the errors are distributed by question type as follows:
+
+\begin{itemize}
+  \item \textbf{Number} (444 questions, 23.0\% wrong): all errors are miscounts, mostly off by
+  one (four as three 11 times, three as four 10 times, one as two 10 times).
+  \item \textbf{Colour} (625 questions, 15.7\% wrong): confusion between similar colours
+  (brown as black 5 times, red as orange 5 times). In 4 questions the gold ``\vi{đỏ}''
+  (``red'') is answered ``\vi{tía}'' (``purple''), the very translation error ``purple''
+  $\to$ ``\vi{tía}'' already seen when reviewing the data.
+  \item \textbf{Object} (1,247 questions, 23.3\% wrong): many pairs of synonyms or different
+  levels of detail (computer and laptop, seagull and bird, fridge and freezer).
+  \item \textbf{Location} (685 questions, 30.7\% wrong, the hardest): different levels of
+  detail (room and bedroom, toilet and bathroom).
+\end{itemize}
+
+Most object and location errors are correct in meaning, as confirmed by the manual review in
+Section~\ref{sec:dis-audit}. A metric that accepts synonyms would better reflect the model's
+real quality on ViVQA.
+
+%********************************** Section 5.6 ********************************
+\section{Hallucination}
+\label{sec:dis-halluc}
+
+Table~\ref{tab:dis-pope} presents the results on POPE-vi (design in
+Section~\ref{sec:met-pope}).
+
+\begin{table}[htbp]
+\caption{POPE-vi results (500 images unseen in training, 4,985 questions). Invalid: answers that are neither ``yes'' nor ``no''.}
+\label{tab:dis-pope}
+\centering
+\small
+\begin{tabular}{p{0.27\textwidth}p{0.08\textwidth}p{0.08\textwidth}p{0.08\textwidth}p{0.10\textwidth}p{0.10\textwidth}}
+\toprule
+\textbf{Configuration} & \textbf{F1 random} & \textbf{F1 pop.} & \textbf{F1 adv.} & \textbf{``Yes'' ratio} & \textbf{Invalid} \\
+\midrule
+B1 · zero-shot, plain prompt & 84.60 & 83.17 & 81.19 & 40--43\% & 0.00\% \\
+B1-ocr · zero-shot, OCR prompt & 83.39 & 81.99 & 80.59 & 38--41\% & 0.00\% \\
+C3 & --- & --- & --- & --- & 91.43\% \\
+\textbf{B3-full} & \textbf{88.89} & \textbf{85.65} & \textbf{83.06} & 48--55\% & 0.00\% \\
+SH (prototype adapter) & 77.70 & 72.83 & 71.17 & 77--89\% & 0.16\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Verdict by the rule}
+
+The pre-registered rule compares each model with the zero-shot base model using the same
+prompt form, and considers a model to ``not increase hallucination'' if the lower bound of
+the CI95 of $\Delta$F1 is above $-2$ for all three sampling methods.
+
+\begin{itemize}
+  \item \textbf{B3-full}: $\Delta$F1 $+5.50$ / $+3.65$ / $+2.47$ (random / popular /
+  adversarial) against B1-ocr: \emph{does not increase hallucination}.
+  \item \textbf{C3}: 91.43\% of the answers are neither ``yes'' nor ``no'', above the 5\%
+  validity threshold: \emph{inconclusive}.
+  \item \textbf{SH}: $\Delta$F1 $-5.69$ / $-9.16$ / $-9.42$, upper bound of the CI95 below
+  $-2$: \emph{increases hallucination}. SH is not part of H4 because it is the prototype's
+  adapter, but this result is a mandatory safety check before using it.
+\end{itemize}
+
+With B3-full passing and C3 not measurable, H4 is concluded as partially supported.
+
+\subsection{Post-hoc analysis, outside the rule}
+
+\paragraph{F1 hides the fact that B3-full raises more false alarms.} The false-alarm rate
+(``no'' questions answered ``yes'') is 2.7\% / 5.7\% / 8.9\% for B1-ocr and 8.7\% / 16.1\% /
+22.4\% for B3-full. B3-full's F1 increases because recall rises (73.5\% to 86.9\%), which
+compensates for the lower precision. If object hallucination is measured in the narrow sense,
+``saying an object is there when it is not'', then B3-full invents more than zero-shot,
+about 2.5 times more under adversarial sampling. Part of the reason is that the zero-shot
+model is conservative (a ``yes'' ratio of about 40\%, below the 50\% of the POPE design).
+This is a methodological limitation: F1, the metric chosen from the start following the
+LLaVA-1.5 reporting, is not enough to draw conclusions about hallucination; the false-alarm
+rate and the ``yes'' ratio must be reported alongside it.
+
+\paragraph{C3 forgets how to answer yes/no.} ViVQA has no yes/no questions. After two
+epochs of QLoRA, C3 answers yes/no questions with nouns (``\vi{bức ảnh}'', ``the picture'',
+525 times; ``\vi{cái ghế}'', ``the chair'', 434 times); only 372 of 4,985 answers are
+``\vi{không}'' (``no''). This is a form of forgetting the ability to follow instructions
+when training on a narrow answer set.
+
+\paragraph{SH's ``yes'' bias.} SH answers ``yes'' to 3,773 of 4,985 questions, with a
+false-alarm rate of 55--79\%. Counting in the data shows that neither the ViTextVQA nor the
+ViVQA training set contains any ``yes'' answer, so the hypothesis ``the bias is learned from
+yes/no data'' is rejected; the cause is still unknown. The team corrects it at inference with
+the threshold $\tau^* = 4.85$ on the difference in log probability between ``yes'' and
+``no'' (Section~\ref{sec:met-proto}), chosen on a calibration set separate from POPE-vi.
+After the correction, SH's ``yes'' ratio returns to 41--45\% and SH passes rule R-YB without
+retraining. SH's false-alarm rate after the correction is still about 2--4 points higher than
+B1-ocr's.
+
+\paragraph{English mixed in.} B3-full answers with the English word ``no'' in 881 of 4,985
+questions (17.7\%), and is almost always right (802 of them are questions whose answer is
+``no'').
+
+\paragraph{The most frequently hallucinated objects} in every configuration are cups,
+followed by chairs, bowls and bottles. This may partly be due to missing labels in the COCO
+annotations, a limitation recorded in advance.
+
+\paragraph{Against the manual review.} Hallucination accounts for 5.0\% of B3-full's EM
+errors and 16.0\% of C3's (Table~\ref{tab:dis-audit}), i.e.\ about 2.3\% and 3.7\% of all
+answers. Both measurements show that hallucination is not the main error type of the adapted
+models on Vietnamese VQA.
+
+%********************************** Section 5.7 ********************************
+\section{The four Vietnamese problems}
+\label{sec:dis-v}
+
+Table~\ref{tab:dis-v} relates the four problems V1--V4 of Chapter~\ref{chap:intro} to the
+concrete measurements of the thesis.
+
+\begin{table}[htbp]
+\caption{The four Vietnamese problems and the corresponding measurements}
+\label{tab:dis-v}
+\centering
+\small
+\begin{tabular}{p{0.20\textwidth}p{0.70\textwidth}}
+\toprule
+\raggedright \textbf{Problem} & \raggedright \textbf{Measurements} \tabularnewline
+\midrule
+V1 · Diacritics when reading text &
+OCR keeps the right diacritics: PaddleOCR 27.0\% against VietOCR 37.7\% ($p = 0.0008$);
+9.0\% of B2's errors are tone marks only; 11.5\% of the questions have OCR with the right
+letters but wrong diacritics; zero-shot EM is 22.4 on answers with diacritics against 39.4 on
+Latin answers without diacritics. \\
+V2 · Wrong language, wrong format &
+Long zero-shot answers: 2.9 against 1.6 words (ViVQA), 5.4 against 3.7 words (ViTextVQA);
+extra-word errors fall from 25.7\% to 13.6\% of the errors after QLoRA; B3-full answers with
+the English ``no'' in 17.7\% of the yes/no questions. \\
+V3 · Text order, phrase boundaries &
+Wrong text region accounts for 23\% of B2's errors; 383/492 errors with the answer in the OCR
+are wrong phrase boundaries; word-level F1 is 1--3 points below syllable-level F1. \\
+V4 · Hallucination &
+2.3\% of B3-full's answers; POPE-vi $\Delta$F1 from $+2.5$ to $+5.5$, but the false-alarm
+rate increases under adversarial sampling. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+V2 is largely fixed by QLoRA. V1 and V3 are the reasons for choosing OCR-aware QLoRA, and
+also where most errors remain: about 17 EM points of B3-full are real reading errors. V4 is
+measured separately with POPE-vi and the manual review.
+
+%********************************** Section 5.8 ********************************
+\section{Qualitative examples}
+\label{sec:dis-examples}
+
+Table~\ref{tab:dis-examples} gives examples drawn deterministically (seed 42) from the error
+groups, illustrating the phenomena measured above. Questions are given in English
+translation; the answers are kept in the original Vietnamese because they are what is
+scored.
+
+\begin{table}[htbp]
+\caption{Qualitative examples on the ViTextVQA and ViVQA test sets}
+\label{tab:dis-examples}
+\centering
+\footnotesize
+\begin{tabular}{p{0.14\textwidth}p{0.20\textwidth}p{0.12\textwidth}p{0.12\textwidth}p{0.12\textwidth}p{0.10\textwidth}}
+\toprule
+\raggedright \textbf{Phenomenon} & \raggedright \textbf{Question (translated)} & \raggedright \textbf{Gold} & \raggedright \textbf{B2} & \raggedright \textbf{B3-full} & \raggedright \textbf{Note} \tabularnewline
+\midrule
+\raggedright OCR fixes a proper name & \raggedright what is the name of this petrol station? & \raggedright mipec & \raggedright mipeo & \raggedright \textbf{mipec} & \raggedright copied character by character \tabularnewline
+\raggedright OCR fixes a number & \raggedright in which year was the picture taken? & \raggedright 2016 & \raggedright 2017 & \raggedright \textbf{2016} & \raggedright digits easy to misread \tabularnewline
+\raggedright OCR fixes both text and length & \raggedright what is the name of this high school? & \raggedright \vi{đào duy từ} & \raggedright \vi{thành phố đào duy trì} & \raggedright \textbf{\vi{đào duy từ}} & \tabularnewline
+\raggedright OCR distracts & \raggedright \ldots\ which person should be contacted? & \raggedright \vi{cô tuyết} & \raggedright \textbf{\vi{cô tuyết}} & \raggedright \vi{có tuyết} & \raggedright OCR with wrong diacritics \tabularnewline
+\raggedright Wrong boundary & \raggedright the Hainanese chicken rice is made in the style of which country? & \raggedright \vi{kiểu singapore} & \raggedright \textbf{\vi{kiểu singapore}} & \raggedright singapore & \raggedright correct in meaning \tabularnewline
+\raggedright Wrong tone marks & \raggedright what is the name of this historical site? & \raggedright \vi{nhà tù hòa bình} & \raggedright \vi{nhà từ hòa bình} & \raggedright \vi{nhà tu hòa bình} & \raggedright both wrong \tabularnewline
+\raggedright Format & \raggedright which combo does the angle grinder \ldots\ belong to? & \raggedright 3 & \raggedright combo 3 & \raggedright combo 3 & \raggedright correct in meaning \tabularnewline
+\raggedright Long string & \raggedright what is the company's email address? & \raggedright tnhhanphat\-vn@gmail . com & \raggedright tnhanhphat\-vn@\ldots & \raggedright tnhphanhat\-vn@\ldots & \raggedright a few characters off \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+On ViVQA, the question ``\vi{đồng hồ và tranh cũ dòng những gì}'' (a garbled machine
+translation, roughly ``clock and old paintings line what'') with the gold answer
+``\vi{tường}'' (``wall'') is an example of a hard-to-understand machine-translated question:
+both B1 (``\vi{đồng hồ và tranh cũ dòng những bức tranh}'') and C3 (``\vi{con chim}'',
+``bird'') answer it wrongly. The question ``\vi{màu của nho là gì}'' (``what colour are the
+grapes?'') with the gold answer ``\vi{màu đỏ}'' (``red'') is answered ``\vi{màu tía}''
+(``purple'') by C3; the boundary between red, purple and black for grapes is inherently
+vague.
+
+%********************************** Section 5.9 ********************************
+\section{Limitations and validity}
+\label{sec:dis-validity}
+
+\paragraph{One seed for the main models.} B3-full and C3 were run only with seed 42 because
+each B3-full training run takes almost 13 GPU hours. Stability across seeds was checked only
+on the 8,000-question subset (three seeds, $+3.57 \pm 0.76$ EM). With $p = 6.7\times10^{-21}$
+on 10,028 questions, it is unlikely that the conclusion that B3-full beats B2 would reverse
+with another seed, but the exact size of the gain may vary.
+
+\paragraph{EM is too strict.} The manual review shows that 55\% of B3-full's EM errors and
+64\% of C3's are actually correct in meaning. EM therefore underestimates the real quality;
+the team adds ANLS and a manual review, but there is no large-scale human evaluation yet.
+
+\paragraph{Comparison with published results.} The ViTextVQA paper does not publish its
+answer normalisation. The gap with ViTextBLIP-2 is so large that normalisation is unlikely
+to explain it, but the absolute numbers are for reference only.
+
+\paragraph{H2 on ANLS did not reach the threshold.} OCR helps produce exactly the right
+string (EM) more clearly than it helps produce character-level near-misses (ANLS $+1.87$
+against a threshold of 3). The threshold was set before the numbers were known and the team
+keeps it unchanged.
+
+\paragraph{Dependence on OCR.} B3 depends on OCR: without OCR at inference it falls back to
+the no-OCR level. The quality of Vietnamese scene-text OCR is the main bottleneck, and the
+EXIF bug (Section~\ref{sec:res-exif}) shows that the OCR pipeline needs to be checked
+carefully.
+
+\paragraph{Data.} ViVQA questions are machine-translated and some gold answers are noisy;
+about half of the ViVQA test images are in the training set. The team measures and reports
+these issues and checks on clean subsets, but does not modify the data in order to keep the
+results comparable. The question classifier \texttt{qt-v1} has an accuracy of 80.7\%, so the
+table by question type is descriptive only.
+
+\paragraph{POPE-vi.} The COCO annotations may miss object labels, and the base model may have
+seen COCO images during pre-training. POPE-vi measures only object hallucination on everyday
+images, not text hallucination on images with text.
+
+\paragraph{Annotators.} The final manual review had only one annotator.
+
+\paragraph{Statistical power on test2000.} The ablations on 2,000 questions can only detect
+differences of about 1.7 EM points or more; the ``no difference'' conclusion of the LoRA
+configuration ablation is therefore weak.
+
+%********************************** Section 5.10 *******************************
+\section{Ethical aspects and responsible use}
+\label{sec:dis-ethics}
+
+\paragraph{Privacy.} Images uploaded by users may contain faces, documents or personal
+information. The prototype does not store images or questions; it records only processing
+times.
+
+\paragraph{Language bias.} The base model is pre-trained with a bias towards English. The
+thesis measures this bias (a 17-point EM gap between answers with and without diacritics in
+the zero-shot setting; the model mixes in English) and reduces it through adaptation, but
+does not remove it completely.
+
+\paragraph{Hallucination and trust.} Fluent but wrong answers are the main risk. The
+prototype shows the OCR text and a confidence level so that users can check the answer
+themselves, and shows only levels (High, Medium, Low) because the confidence is not well
+calibrated (ECE 0.198). The system should not be used in sensitive situations such as
+medical or legal ones without human checking.
+
+\paragraph{Data licence.} ViTextVQA is used through an access-controlled repository under the
+CC BY-NC 3.0 licence, for non-commercial research only; the test set with answers is not
+redistributed.
