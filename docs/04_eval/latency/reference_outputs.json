@@ -1,0 +1,142 @@
+[
+  {
+    "image": "D:/vivqa_models/images/examples/198.jpg",
+    "question": "dòng chữ xuất hiện trên tấm bảng đỏ là gì ?",
+    "answer": "trẻ em phải đội mũ bảo hiểm khi đi xe máy",
+    "confidence": 0.996134802865658,
+    "level": "Cao",
+    "ocr_lines": [
+      {
+        "text": "TRÊ EM PHẢI ĐỘI MŨ BẢO HIỂM KHI ĐI XE MÁY",
+        "conf": 0.8944,
+        "box": [
+          29,
+          193,
+          800,
+          293
+        ]
+      }
+    ],
+    "matched_line": []
+  },
+  {
+    "image": "D:/vivqa_models/images/examples/COCO_train2014_000000547307.jpg",
+    "question": "bao nhiêu người đàn ông đang chia sẻ nụ hôn thân mật bên trong một tòa nhà",
+    "answer": "hai",
+    "confidence": 0.9742911691203882,
+    "level": "Cao",
+    "ocr_lines": [],
+    "matched_line": []
+  },
+  {
+    "image": "D:/vivqa_models/images/examples/anh_meo_trong_khung.jpg",
+    "question": "Trong ảnh có con chó không?",
+    "answer": "không",
+    "confidence": 0.9969887407620711,
+    "level": "Trung bình",
+    "ocr_lines": [
+      {
+        "text": "XUÂN",
+        "conf": 0.9378,
+        "box": [
+          540,
+          1479,
+          841,
+          1644
+        ]
+      }
+    ],
+    "matched_line": []
+  },
+  {
+    "image": "D:/vivqa_models/images/examples/COCO_train2014_000000087598.jpg",
+    "question": "màu của áo là gì",
+    "answer": "màu tía",
+    "confidence": 0.8589935501142315,
+    "level": "Trung bình",
+    "ocr_lines": [],
+    "matched_line": []
+  },
+  {
+    "image": "D:/vivqa_models/images/examples/405.jpg",
+    "question": "bức ảnh lấy nguồn từ đâu ?",
+    "answer": "nhà thổ",
+    "confidence": 0.9586813879062275,
+    "level": "Cao",
+    "ocr_lines": [
+      {
+        "text": "MỞ CỬA RA",
+        "conf": 0.8941,
+        "box": [
+          512,
+          8,
+          647,
+          51
+        ]
+      },
+      {
+        "text": "CHO NĂNG SỚM VÀO",
+        "conf": 0.9282,
+        "box": [
+          455,
+          49,
+          700,
+          88
+        ]
+      },
+      {
+        "text": "PHÒNG NÀO",
+        "conf": 0.932,
+        "box": [
+          508,
+          87,
+          655,
+          130
+        ]
+      },
+      {
+        "text": "3",
+        "conf": 0.9215,
+        "box": [
+          381,
+          192,
+          399,
+          217
+        ]
+      },
+      {
+        "text": "NHÀ THỔ",
+        "conf": 0.9138,
+        "box": [
+          606,
+          415,
+          683,
+          450
+        ]
+      },
+      {
+        "text": "XEO",
+        "conf": 0.9291,
+        "box": [
+          415,
+          402,
+          544,
+          507
+        ]
+      },
+      {
+        "text": "S",
+        "conf": 0.3542,
+        "box": [
+          383,
+          599,
+          396,
+          618
+        ]
+      }
+    ],
+    "matched_line": [
+      4
+    ]
+  }
+]

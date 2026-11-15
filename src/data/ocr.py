@@ -366,12 +366,15 @@ class PaddleDetVietOCREngine(BaseOCREngine):
             self.info["det_mkldnn"] = False
 
     def read(self, image_path: str) -> Dict[str, Any]:
+        import time as _time
         img, tmp_png = oriented_image(image_path)       # W14: dò và cắt trên CÙNG một ảnh (xem oriented_image)
+        t_det0 = _time.perf_counter()
         try:
             det = self._det.predict(tmp_png or image_path)
         finally:
             if tmp_png:
                 os.remove(tmp_png)
+        sec_det = _time.perf_counter() - t_det0
         w, h = img.size
         polys = list(det[0]["dt_polys"]) if det else []
         boxes = [poly_to_box(p) for p in polys]
@@ -379,12 +382,14 @@ class PaddleDetVietOCREngine(BaseOCREngine):
         boxes = [b for b in boxes if b[2] - b[0] >= 4 and b[3] - b[1] >= 4]
         boxes = [boxes[i] for i in sort_reading_order(boxes)]
         if not boxes:
-            return {"w": w, "h": h, "lines": []}
+            return {"w": w, "h": h, "lines": [], "sec_det": sec_det, "sec_rec": 0.0}
         crops = [img.crop(tuple(b)) for b in boxes]
+        t_rec0 = _time.perf_counter()
         texts, probs = self._rec.predict_batch(crops, return_prob=True)
+        sec_rec = _time.perf_counter() - t_rec0
         lines = [{"text": str(t).strip(), "conf": round(float(p), 4), "box": b}
                  for t, p, b in zip(texts, probs, boxes) if str(t).strip()]
-        return {"w": w, "h": h, "lines": lines}
+        return {"w": w, "h": h, "lines": lines, "sec_det": sec_det, "sec_rec": sec_rec}
 
 
 ENGINES = {"mock": MockOCREngine, "paddleocr": PaddleOCREngine, "paddledet_vietocr": PaddleDetVietOCREngine}

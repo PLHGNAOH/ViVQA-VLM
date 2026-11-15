@@ -124,6 +124,15 @@ def conf_level(conf: float, cuts: Tuple[float, float]) -> str:
     return "Cao" if conf >= hi else ("Trung bình" if conf >= lo else "Thấp")
 
 
+def _cuda_sync() -> None:
+    try:
+        import torch
+        if torch.cuda.is_available():
+            torch.cuda.synchronize()
+    except Exception:
+        pass
+
+
 def answer_one(model, processor, image_path: str, question: str, ocr_texts: Optional[List[str]],
                prompting: Dict[str, Any], yn_tokens: Dict[str, Any], penalty: float, tau: float = TAU_STAR_SH,
                special_ids: Sequence[int] = (), max_new_tokens: int = 32) -> Dict[str, Any]:
@@ -131,20 +140,43 @@ def answer_one(model, processor, image_path: str, question: str, ocr_texts: Opti
     from src.prompting.builder import prompt_for_sample
     from src.eval.yesno_calib import score_sample
     sample = {"question": question, "ocr_texts": list(ocr_texts or []), "question_id": "proto"}
-    t0 = time.time()
+    t0 = time.perf_counter()
     if is_yes_no_question(question):
+        _cuda_sync()
+        t_pre0 = time.perf_counter()
         prompt = prompt_for_sample({**sample, "question": normalize_yes_no(question)}, prompting)
+        t_preprocess = time.perf_counter() - t_pre0
+        _cuda_sync()
+        t_gen0 = time.perf_counter()
         r = score_sample(model, processor, image_path, prompt, yn_tokens, penalty)
+        _cuda_sync()
+        t_model = time.perf_counter() - t_gen0
+        t_post0 = time.perf_counter()
         ans = "có" if r["margin"] > tau else "không"
-        return {"mode": "yesno", "answer": ans, "confidence": yes_no_confidence(r["margin"], tau),
-                "margin": r["margin"], "prompt": prompt, "sec": time.time() - t0}
+        conf = yes_no_confidence(r["margin"], tau)
+        t_postprocess = time.perf_counter() - t_post0
+        return {"mode": "yesno", "answer": ans, "confidence": conf,
+                "margin": r["margin"], "prompt": prompt, "sec": time.perf_counter() - t0,
+                "sec_preprocess": t_preprocess, "sec_model": t_model, "sec_postprocess": t_postprocess,
+                "n_tokens": 0}
+    _cuda_sync()
+    t_pre0 = time.perf_counter()
     prompt = prompt_for_sample(sample, prompting)
     inputs = build_inputs(processor, image_path, prompt, device=model.device)
+    _cuda_sync()
+    t_preprocess = time.perf_counter() - t_pre0
+    _cuda_sync()
+    t_gen0 = time.perf_counter()
     ids, lps = generate_from_inputs(model, inputs, max_new_tokens)
+    _cuda_sync()
+    t_model = time.perf_counter() - t_gen0
+    t_post0 = time.perf_counter()
     ans = processor.batch_decode([ids], skip_special_tokens=True, clean_up_tokenization_spaces=False)[0].strip()
     c = open_confidence(ids, lps, special_ids)
+    t_postprocess = time.perf_counter() - t_post0
     return {"mode": "open", "answer": ans, "confidence": c["conf"], "n_tokens": c["n_tokens"],
-            "prompt": prompt, "sec": time.time() - t0}
+            "prompt": prompt, "sec": time.perf_counter() - t0,
+            "sec_preprocess": t_preprocess, "sec_model": t_model, "sec_postprocess": t_postprocess}
 
 
 # --------------------------------------------------------------------------- #
@@ -168,15 +200,45 @@ class Backend:
         self.ocr_fn, self.ocr_max_chars, self.ocr_min_conf = ocr_fn, ocr_max_chars, ocr_min_conf
         self.tau, self.cuts_open, self.cuts_yn = tau, conf_cuts_open, conf_cuts_yn
 
-    def ask(self, image_path: str, question: str) -> Dict[str, Any]:
+    def ask(self, image_path: str, question: str,
+            ocr_lines: Optional[List[Dict[str, Any]]] = None,
+            ocr_timing: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """ocr_lines/ocr_timing: dùng lại OCR prefetch/cache — cùng answer_one, không đổi kết quả."""
         from src.data.ocr import lines_to_texts
-        t0 = time.time()
-        lines = self.ocr_fn(image_path)
+        t0 = time.perf_counter()
+        ocr_timing = dict(ocr_timing or {})
+        if ocr_lines is not None:
+            lines = ocr_lines
+            t_ocr_det = float(ocr_timing.get("sec_det", 0.0) or 0.0)
+            t_ocr_rec = float(ocr_timing.get("sec_rec", 0.0) or 0.0)
+            t_ocr = float(ocr_timing.get("sec_ocr", t_ocr_det + t_ocr_rec) or 0.0)
+            ocr_source = str(ocr_timing.get("ocr_source", "cache"))
+        else:
+            t_ocr0 = time.perf_counter()
+            read_fn = getattr(self, "ocr_read", None)
+            if callable(read_fn):
+                raw = read_fn(image_path)
+                lines = list(raw.get("lines") or [])
+                t_ocr_det = float(raw.get("sec_det") or 0.0)
+                t_ocr_rec = float(raw.get("sec_rec") or 0.0)
+                t_ocr = float(raw.get("sec") or (time.perf_counter() - t_ocr0))
+            else:
+                lines = self.ocr_fn(image_path)
+                t_ocr_det = t_ocr_rec = 0.0
+                t_ocr = time.perf_counter() - t_ocr0
+            ocr_source = "fresh"
         texts, _ = lines_to_texts({"lines": lines}, self.ocr_max_chars, self.ocr_min_conf)
-        t_ocr = time.time() - t0
         r = answer_one(self.model, self.processor, image_path, question, texts, self.cfg["prompting"],
                        self.yn_tokens, self.penalty, self.tau, self.special_ids,
                        self.cfg["prompting"].get("max_new_tokens", 32))
         cuts = self.cuts_yn if r["mode"] == "yesno" else self.cuts_open
-        return {**r, "level": conf_level(r["confidence"], cuts), "ocr_lines": lines, "ocr_texts": texts,
-                "sec_ocr": t_ocr, "sec_total": time.time() - t0}
+        t_post0 = time.perf_counter()
+        level = conf_level(r["confidence"], cuts)
+        t_level = time.perf_counter() - t_post0
+        return {**r, "level": level, "ocr_lines": lines, "ocr_texts": texts,
+                "sec_ocr": t_ocr, "sec_ocr_det": t_ocr_det, "sec_ocr_rec": t_ocr_rec,
+                "sec_preprocess": float(r.get("sec_preprocess") or 0.0),
+                "sec_model": float(r.get("sec_model") or 0.0),
+                "sec_postprocess": float(r.get("sec_postprocess") or 0.0) + t_level,
+                "ocr_source": ocr_source, "n_gen_tokens": int(r.get("n_tokens") or 0),
+                "n_ocr_lines": len(lines), "sec_total": time.perf_counter() - t0}

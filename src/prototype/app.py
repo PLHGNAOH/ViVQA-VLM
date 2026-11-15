@@ -329,6 +329,7 @@ def make_real_backend(adapter: str, config: str, settings: Dict[str, Any], ocr_c
     backend = Backend(adapter, config, ocr_fn=client.lines, ocr_template=ocr_cfg["template"],
                       ocr_max_chars=ocr_cfg["max_chars"], ocr_min_conf=ocr_cfg["min_conf"], tau=settings["tau"],
                       conf_cuts_open=settings["cuts_open"], conf_cuts_yn=settings["cuts_yn"])
+    backend.ocr_read = client.read  # sec_det/sec_rec cho bench / UI latency
     backend.is_mock = False
     info = {"adapter": fp, "ocr_engine": client.info, "ocr_check": chk, "sec_start_ocr": round(t_ocr, 1),
             "sec_start_total": round(time.time() - t0, 1)}
