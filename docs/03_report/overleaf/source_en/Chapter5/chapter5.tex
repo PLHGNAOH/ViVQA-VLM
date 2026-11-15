@@ -411,10 +411,13 @@ confidence Low. When the OCR text is removed from the prompt, the same shared ad
 (SH) answers correctly ``\vi{con mèo}'' (cat); the base model answers correctly in both
 settings (Table~\ref{tab:err_ocr_distractor}). This shows the downside of OCR-aware QLoRA:
 the model is taught to rely on text in the image, so irrelevant OCR text can derail
-questions that do not need reading. On the full ViVQA test set the effect is negligible:
-on the 1,328 questions with a non-empty OCR line (about 44\% of the test set; gold answer
-in OCR 0.0\%), SH is only $+0.15$ EM points above C1 (McNemar $p = 0.90$). A future fix
-is to add OCR to the prompt only when the question is about text
+questions that do not need reading. At the test-set level, noisy OCR text does not make
+SH worse than the ViVQA-only adapter: on the 1,328 questions with a non-empty OCR line
+(about 44\% of the test set; gold answer in OCR 0.0\%), SH (with OCR in the prompt) is
+$+0.15$ EM points above C1 (no OCR; McNemar $p = 0.90$). However, the two settings
+differ in both the adapter and the OCR input, so the effect of OCR text alone is not
+isolated; an SH run without OCR would be needed to count flipped answers in each
+direction. A future fix is to add OCR to the prompt only when the question is about text
 (Section~\ref{sec:con-future}).
 
 \begin{figure}[htbp]

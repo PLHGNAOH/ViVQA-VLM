@@ -391,11 +391,14 @@ prototype trả lời ``chó'' với độ tin cậy Thấp. Khi bỏ chữ OCR 
 adapter SH trả lời đúng ``con mèo''; mô hình gốc trả lời đúng ở cả hai trường hợp
 (Bảng~\ref{tab:err_ocr_distractor}). Điều này cho thấy mặt trái của QLoRA nhận biết
 OCR: mô hình được dạy dựa vào chữ trong ảnh, nên chữ không liên quan có thể làm lệch
-câu trả lời của câu hỏi không cần đọc chữ. Trên toàn bộ tập test ViVQA, hiệu ứng
-này không đáng kể: trên nhóm 1.328 câu có dòng OCR (khoảng 44\% tập test; đáp án
-gold nằm trong OCR 0,0\%), SH cao hơn C1 đúng $+0{,}15$ điểm EM (McNemar
-$p = 0{,}90$). Hướng khắc phục trong tương lai: chỉ đưa OCR vào prompt khi câu hỏi
-liên quan đến chữ (mục~\ref{sec:con-future}).
+câu trả lời của câu hỏi không cần đọc chữ. Ở mức toàn tập, chữ OCR nhiễu không làm
+SH kém hơn adapter chỉ huấn luyện trên ViVQA: trên 1.328 câu có dòng OCR (khoảng
+44\% tập test; đáp án gold nằm trong OCR 0,0\%), SH (có OCR trong prompt) cao hơn
+C1 (không dùng OCR) $+0{,}15$ điểm EM (McNemar $p = 0{,}90$). Tuy nhiên, hai cấu
+hình này khác nhau cả về adapter lẫn OCR, nên chưa tách riêng được tác động của
+chữ OCR; cần thêm lần chạy SH không có OCR để đếm số câu bị lật theo từng chiều.
+Hướng khắc phục trong tương lai: chỉ đưa OCR vào prompt khi câu hỏi liên quan đến
+chữ (mục~\ref{sec:con-future}).
 
 \begin{figure}[htbp]
 \centering
