@@ -38,16 +38,20 @@ Môi trường đo 2026-11-13: RTX 3050 Ti Laptop 4 GB · CPU i5-12500H · venv 
 
 ### Lệnh chạy
 
+Cách nhanh: `.\demo` (offline, tự mở trình duyệt) · `.\demo share` (link gradio.live) · hoặc **Tasks: Run Task** → `ViVQA demo (offline)` / `ViVQA demo (share)`.
+
 ```powershell
-# Nhóm xem từ máy khác (tạo link *.gradio.live):
+# Từ gốc repo (khuyến nghị):
+.\demo
+.\demo share
+
+# Tương đương đầy đủ:
 powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Share
-
-# Hôm bảo vệ (không cần mạng sau khi đã tải model):
 powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline
-# rồi mở http://127.0.0.1:7860
-
 # (tuỳ chọn) số luồng OCR CPU — mặc định 12; chuỗi OCR giống hệt 1 luồng:
 powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -OcrThreads 12
+# không tự mở trình duyệt:
+powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -NoBrowser
 ```
 
 Khởi động ~48 s với `OMP_NUM_THREADS=12` (trước đó ~78 s khi Paddle tự gán 1 luồng). Máy phải bật suốt lúc demo. Không đổi prompt / tham số sinh / min-max pixels / model OCR.

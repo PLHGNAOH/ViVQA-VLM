@@ -1,0 +1,33 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "ViVQA demo (offline)",
+      "type": "shell",
+      "command": ".\\demo.cmd",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "ViVQA demo (share)",
+      "type": "shell",
+      "command": ".\\demo.cmd share",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "isBackground": false,
+      "problemMatcher": []
+    }
+  ]
+}

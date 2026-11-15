@@ -4,16 +4,20 @@
 # Mục đích: demo bảo vệ — Qwen2.5-VL-3B 4-bit + adapter SH trên GPU, OCR trên CPU
 #           (giữ nguyên prompt / tham số sinh / min-max pixels / engine OCR như eval).
 #
+# Cách dùng nhanh (từ gốc repo):
+#   .\demo              → offline, tự mở trình duyệt khi sẵn sàng
+#   .\demo share        → tạo link *.gradio.live
+#
 # Lệnh chạy (từ bất kỳ thư mục nào):
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Share
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Mock
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -OcrThreads 12
+#   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -NoBrowser
 #
-# Khởi động ~78 s (nạp OCR+Qwen+adapter). OCR CPU dùng OMP/MKL threads (mặc định 12;
-# đo 2026-11-13: giống hệt 1 luồng, nhanh hơn ~3×). Máy phải bật suốt lúc demo.
-# Hôm bảo vệ dùng -Offline, mở http://127.0.0.1:7860
+# Khởi động ~48 s (OCR 12 luồng). Máy phải bật suốt lúc demo.
+# Hôm bảo vệ dùng -Offline (hoặc .\demo), mở http://127.0.0.1:7860
 # =============================================================================
 
 [CmdletBinding()]
@@ -21,6 +25,7 @@ param(
     [switch]$Share,
     [switch]$Offline,
     [switch]$Mock,
+    [switch]$NoBrowser,
     [int]$Port = 7860,
     [int]$OcrThreads = 12
 )
@@ -78,6 +83,41 @@ if ((-not $Mock) -and (Test-Path $ExamplesJson)) {
 }
 
 Write-Host "python $($pyArgs -join ' ')"
-Write-Host "Mở http://127.0.0.1:$Port  (máy phải bật suốt lúc demo)"
-& python @pyArgs
-exit $LASTEXITCODE
+Write-Host "Đang nạp model (~50 s). Trình duyệt sẽ tự mở khi sẵn sàng; hoặc chờ dòng 'Running on local URL' rồi mở http://127.0.0.1:$Port. Tắt: Ctrl+C."
+
+$browserJob = $null
+$exitCode = 1
+if (-not $NoBrowser -and -not $Mock) {
+    $url = "http://127.0.0.1:$Port"
+    $browserJob = Start-Job -ScriptBlock {
+        param($u)
+        $deadline = (Get-Date).AddSeconds(300)
+        while ((Get-Date) -lt $deadline) {
+            try {
+                $r = Invoke-WebRequest -Uri $u -UseBasicParsing -TimeoutSec 2
+                if ($r.StatusCode -eq 200) {
+                    Start-Process $u
+                    Write-Output "Đã mở trình duyệt: $u"
+                    return
+                }
+            } catch {}
+            Start-Sleep -Seconds 3
+        }
+        Write-Output "Hết 300 s chưa mở được trình duyệt ($u)"
+    } -ArgumentList $url
+}
+
+try {
+    & python @pyArgs
+    $exitCode = $LASTEXITCODE
+} finally {
+    if ($null -ne $browserJob) {
+        try {
+            $out = Receive-Job -Job $browserJob -ErrorAction SilentlyContinue
+            if ($out) { $out | ForEach-Object { Write-Host $_ } }
+        } catch {}
+        Stop-Job -Job $browserJob -ErrorAction SilentlyContinue
+        Remove-Job -Job $browserJob -Force -ErrorAction SilentlyContinue
+    }
+}
+exit $exitCode
