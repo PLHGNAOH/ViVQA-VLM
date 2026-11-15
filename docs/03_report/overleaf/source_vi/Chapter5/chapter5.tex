@@ -383,6 +383,46 @@ tranh'') lẫn C3 (``con chim'') đều trả lời sai. Câu hỏi ``màu của
 gold ``màu đỏ'' được C3 trả lời ``màu tía''; ranh giới giữa đỏ, tía và đen của
 nho vốn mơ hồ.
 
+\paragraph{Trường hợp minh họa: chữ OCR không liên quan.}
+\label{par:err-ocr-distractor}
+Với một ảnh con mèo đặt trong khung có in tên ``XUÂN''
+(Hình~\ref{fig:err_ocr_distractor}), câu hỏi ``Con vật trong ảnh là con gì?'' được
+prototype trả lời ``chó'' với độ tin cậy Thấp. Khi bỏ chữ OCR khỏi prompt, cùng
+adapter SH trả lời đúng ``con mèo''; mô hình gốc trả lời đúng ở cả hai trường hợp
+(Bảng~\ref{tab:err_ocr_distractor}). Điều này cho thấy mặt trái của QLoRA nhận biết
+OCR: mô hình được dạy dựa vào chữ trong ảnh, nên chữ không liên quan có thể làm lệch
+câu trả lời của câu hỏi không cần đọc chữ. Trên toàn bộ tập test ViVQA, hiệu ứng
+này không đáng kể: trên nhóm 1.328 câu có dòng OCR (khoảng 44\% tập test; đáp án
+gold nằm trong OCR 0,0\%), SH cao hơn C1 đúng $+0{,}15$ điểm EM (McNemar
+$p = 0{,}90$). Hướng khắc phục trong tương lai: chỉ đưa OCR vào prompt khi câu hỏi
+liên quan đến chữ (mục~\ref{sec:con-future}).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.45\linewidth]{err_ocr_distractor.jpg}
+\caption{Ảnh minh họa: khung chữ ``XUÂN'' được OCR đọc và đưa vào prompt, trong khi
+câu hỏi chỉ hỏi về con vật trong ảnh.}
+\label{fig:err_ocr_distractor}
+\end{figure}
+
+\begin{table}[htbp]
+\caption{Bốn cấu hình trên cùng một ảnh và câu hỏi (minh họa, không phải kết quả
+đánh giá)}
+\label{tab:err_ocr_distractor}
+\centering
+\small
+\begin{tabular}{lllc}
+\toprule
+\textbf{Adapter} & \textbf{OCR trong prompt} & \textbf{Câu trả lời} & \textbf{Độ tin cậy} \\
+\midrule
+SH & Có (``XUÂN'') & chó & Thấp \\
+SH & Không & con mèo & Trung bình \\
+Mô hình gốc & Có (``XUÂN'') & Mèo & Trung bình \\
+Mô hình gốc & Không & Mèo & Trung bình \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 %********************************** Mục 5.9 ************************************
 \section{Giới hạn và tính hợp lệ}
 \label{sec:dis-validity}

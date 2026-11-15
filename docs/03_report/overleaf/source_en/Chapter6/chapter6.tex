@@ -106,6 +106,9 @@ annotator.
   \item \textbf{Better Vietnamese scene-text OCR}: fine-tune VietOCR on scene text and improve
   the reading order. According to the error analysis, this direction has the highest ceiling
   for improvement.
+  \item \textbf{Add OCR to the prompt only when the question is about text} (gating by
+  question type), to reduce cases where irrelevant OCR text derails purely visual questions
+  as illustrated in Section~\ref{par:err-ocr-distractor}.
   \item \textbf{Position-aware OCR}: feed the coordinates and order of the text boxes to the
   model in the spirit of M4C~\cite{hu2020m4c}, to reduce wrong phrase boundaries.
   \item \textbf{Human evaluation and a synonym-tolerant metric}, since more than half of the EM

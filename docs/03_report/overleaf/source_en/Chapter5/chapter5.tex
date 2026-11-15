@@ -402,6 +402,47 @@ grapes?'') with the gold answer ``\vi{màu đỏ}'' (``red'') is answered ``\vi{
 (``purple'') by C3; the boundary between red, purple and black for grapes is inherently
 vague.
 
+\paragraph{Illustrative case: irrelevant OCR text.}
+\label{par:err-ocr-distractor}
+For a photograph of a cat in a frame printed with the name ``XUÂN''
+(Figure~\ref{fig:err_ocr_distractor}), the question ``\vi{Con vật trong ảnh là con gì?}''
+(``What animal is in the image?'') is answered ``\vi{chó}'' (dog) by the prototype with
+confidence Low. When the OCR text is removed from the prompt, the same shared adapter
+(SH) answers correctly ``\vi{con mèo}'' (cat); the base model answers correctly in both
+settings (Table~\ref{tab:err_ocr_distractor}). This shows the downside of OCR-aware QLoRA:
+the model is taught to rely on text in the image, so irrelevant OCR text can derail
+questions that do not need reading. On the full ViVQA test set the effect is negligible:
+on the 1,328 questions with a non-empty OCR line (about 44\% of the test set; gold answer
+in OCR 0.0\%), SH is only $+0.15$ EM points above C1 (McNemar $p = 0.90$). A future fix
+is to add OCR to the prompt only when the question is about text
+(Section~\ref{sec:con-future}).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.45\linewidth]{err_ocr_distractor.jpg}
+\caption{Illustrative image: the printed name ``XUÂN'' is read by OCR and inserted into
+the prompt, while the question only asks about the animal in the image.}
+\label{fig:err_ocr_distractor}
+\end{figure}
+
+\begin{table}[htbp]
+\caption{Four configurations on the same image and question (illustrative case, not an
+evaluation result)}
+\label{tab:err_ocr_distractor}
+\centering
+\small
+\begin{tabular}{lllc}
+\toprule
+\textbf{Adapter} & \textbf{OCR in prompt} & \textbf{Answer} & \textbf{Confidence} \\
+\midrule
+SH & Yes (``XUÂN'') & \vi{chó} (dog) & Low \\
+SH & No & \vi{con mèo} (cat) & Medium \\
+Base model & Yes (``XUÂN'') & \vi{Mèo} (cat) & Medium \\
+Base model & No & \vi{Mèo} (cat) & Medium \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 %********************************** Section 5.9 ********************************
 \section{Limitations and validity}
 \label{sec:dis-validity}

@@ -105,6 +105,9 @@ chuẩn hóa đáp án của bài báo; và lần duyệt tay cuối chỉ có m
   \item \textbf{Nâng cấp OCR tiếng Việt cho chữ cảnh}: fine-tune VietOCR trên chữ
   cảnh và cải tiến thứ tự đọc. Đây là hướng có trần cải thiện lớn nhất theo phân
   tích lỗi.
+  \item \textbf{Chỉ đưa OCR vào prompt khi câu hỏi liên quan đến chữ} (gating theo
+  loại câu hỏi), để giảm trường hợp chữ OCR không liên quan làm lệch câu hỏi thị
+  giác thuần như minh họa ở mục~\ref{par:err-ocr-distractor}.
   \item \textbf{OCR có vị trí}: đưa tọa độ và thứ tự các hộp chữ vào mô hình theo
   hướng của M4C~\cite{hu2020m4c}, để giảm lỗi cắt sai ranh giới cụm chữ.
   \item \textbf{Đánh giá có người chấm và thước đo chấp nhận đồng nghĩa}, vì hơn
