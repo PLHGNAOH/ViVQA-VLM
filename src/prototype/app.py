@@ -435,31 +435,124 @@ class MockBackend:
                 "sec_total": time.time() - t0 + sec_ocr}
 
 
+def _rss_gb_tree() -> float:
+    """RSS GB của tiến trình hiện tại + mọi tiến trình con (OCR worker)."""
+    try:
+        import psutil
+        p = psutil.Process()
+        rss = float(p.memory_info().rss)
+        for c in p.children(recursive=True):
+            try:
+                rss += float(c.memory_info().rss)
+            except (psutil.Error, OSError):
+                pass
+        return rss / (1024.0 ** 3)
+    except Exception:
+        return 0.0
+
+
+def _free_backend(backend) -> None:
+    """Giải phóng model khỏi VRAM/RAM trước khi thoát vì lỗi OCR."""
+    try:
+        import gc
+        import torch
+        del backend
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+    except Exception:
+        pass
+
+
 def make_real_backend(adapter: str, config: str, settings: Dict[str, Any], ocr_cfg: Dict[str, Any],
                       ocr_device: str = "gpu", ocr_python: Optional[str] = None, ocr_log: Optional[str] = None,
-                      expect_adapter_sha: Optional[str] = None, allow_ocr_mismatch: bool = False):
-    """Model thật: kiểm luật + adapter + engine OCR rồi mới nạp. Trả (backend, ocr_client, thông tin khởi động)."""
+                      expect_adapter_sha: Optional[str] = None, allow_ocr_mismatch: bool = False,
+                      sequential_start: bool = False):
+    """Model thật: OCR worker + Qwen/adapter.
+
+    Mặc định (sequential_start=False): spawn OCR worker trước (không chờ), nạp Backend song song,
+    rồi wait_ready + check_engine. sequential_start=True: giữ thứ tự cũ (OCR sẵn sàng → check → nạp model).
+    """
     from src.eval.run_baseline import adapter_fingerprint
     from src.prototype.core import Backend
     from src.prototype.ocr_worker import OCRWorkerClient, check_engine_matches_cache
     require_verified(settings)
     t0 = time.time()
+    ram_peak = _rss_gb_tree()
+
+    def _bump_ram() -> None:
+        nonlocal ram_peak
+        ram_peak = max(ram_peak, _rss_gb_tree())
+
     fp = adapter_fingerprint(adapter)
     if expect_adapter_sha and fp["weights_sha256"] != expect_adapter_sha:
         raise SystemExit(f"❌ adapter {fp['weights_sha256'][:12]} ≠ adapter đã kiểm {expect_adapter_sha[:12]}")
-    client = OCRWorkerClient(backend=ocr_cfg["backend"], device=ocr_device, python=ocr_python, log_path=ocr_log)
-    chk = check_engine_matches_cache(client.info)
-    if not chk["ok"] and not allow_ocr_mismatch:
-        client.close()
-        raise SystemExit(f"❌ engine OCR khác engine đã dựng cache: {chk['diff']}")
-    t_ocr = time.time() - t0
-    backend = Backend(adapter, config, ocr_fn=client.lines, ocr_template=ocr_cfg["template"],
-                      ocr_max_chars=ocr_cfg["max_chars"], ocr_min_conf=ocr_cfg["min_conf"], tau=settings["tau"],
-                      conf_cuts_open=settings["cuts_open"], conf_cuts_yn=settings["cuts_yn"])
+    _bump_ram()
+
+    backend = None
+    client = None
+    try:
+        if sequential_start:
+            client = OCRWorkerClient(backend=ocr_cfg["backend"], device=ocr_device, python=ocr_python,
+                                     log_path=ocr_log, wait_ready=True)
+            _bump_ram()
+            sec_ocr_ready = (client._ready_wall or time.time()) - t0
+            chk = check_engine_matches_cache(client.info)
+            if not chk["ok"] and not allow_ocr_mismatch:
+                client.close()
+                raise SystemExit(f"❌ engine OCR khác engine đã dựng cache: {chk['diff']}")
+            t_model0 = time.time()
+            backend = Backend(adapter, config, ocr_fn=client.lines, ocr_template=ocr_cfg["template"],
+                              ocr_max_chars=ocr_cfg["max_chars"], ocr_min_conf=ocr_cfg["min_conf"],
+                              tau=settings["tau"], conf_cuts_open=settings["cuts_open"],
+                              conf_cuts_yn=settings["cuts_yn"])
+            sec_model = time.time() - t_model0
+            _bump_ram()
+        else:
+            # Song song: spawn OCR → nạp Qwen → chờ OCR ready → check engine
+            client = OCRWorkerClient(backend=ocr_cfg["backend"], device=ocr_device, python=ocr_python,
+                                     log_path=ocr_log, wait_ready=False)
+            _bump_ram()
+            t_model0 = time.time()
+            backend = Backend(adapter, config, ocr_fn=client.lines, ocr_template=ocr_cfg["template"],
+                              ocr_max_chars=ocr_cfg["max_chars"], ocr_min_conf=ocr_cfg["min_conf"],
+                              tau=settings["tau"], conf_cuts_open=settings["cuts_open"],
+                              conf_cuts_yn=settings["cuts_yn"])
+            sec_model = time.time() - t_model0
+            _bump_ram()
+            client.wait_ready()
+            _bump_ram()
+            sec_ocr_ready = (client._ready_wall or time.time()) - t0
+            chk = check_engine_matches_cache(client.info)
+            if not chk["ok"] and not allow_ocr_mismatch:
+                client.close()
+                _free_backend(backend)
+                raise SystemExit(f"❌ engine OCR khác engine đã dựng cache: {chk['diff']}")
+    except Exception:
+        if client is not None:
+            try:
+                client.close()
+            except Exception:
+                pass
+        if backend is not None:
+            _free_backend(backend)
+        raise
+
     backend.ocr_read = client.read  # sec_det/sec_rec cho bench / UI latency
     backend.is_mock = False
-    info = {"adapter": fp, "ocr_engine": client.info, "ocr_check": chk, "sec_start_ocr": round(t_ocr, 1),
-            "sec_start_total": round(time.time() - t0, 1)}
+    _bump_ram()
+    # sec_start_ocr: tương thích log cũ = thời điểm OCR sẵn sàng (+ check ở đường tuần tự đã gồm trong ready)
+    info = {
+        "adapter": fp,
+        "ocr_engine": client.info,
+        "ocr_check": chk,
+        "startup_mode": "sequential" if sequential_start else "parallel",
+        "sec_start_ocr": round(sec_ocr_ready, 1),
+        "sec_start_ocr_ready": round(sec_ocr_ready, 1),
+        "sec_model_load": round(sec_model, 1),
+        "sec_start_total": round(time.time() - t0, 1),
+        "ram_peak_gb": round(ram_peak, 2),
+    }
     return backend, client, info
 
 
@@ -778,6 +871,8 @@ def main() -> None:
     ap.add_argument("--ocr_python", default=None, help="python cho tiến trình OCR (mặc định: python hiện tại)")
     ap.add_argument("--ocr_log", default=None)
     ap.add_argument("--allow_ocr_mismatch", action="store_true")
+    ap.add_argument("--sequential-start", action="store_true",
+                    help="khởi động tuần tự như cũ: chờ OCR ready rồi mới nạp Qwen (mặc định: song song)")
     ap.add_argument("--examples_json", default=None)
     ap.add_argument("--log_jsonl", default=None, help="ghi số đo từng lượt (không ghi ảnh / câu hỏi / câu trả lời)")
     ap.add_argument("--share", action="store_true", help="tạo link công khai *.gradio.live (dùng trên Colab)")
@@ -795,10 +890,13 @@ def main() -> None:
     else:
         if not a.adapter:
             raise SystemExit("Cần --adapter (hoặc --mock để thử giao diện)")
-        backend, client, info = make_real_backend(a.adapter, a.config, st, ocr_cfg, a.ocr_device, a.ocr_python,
-                                                  a.ocr_log, a.expect_adapter_sha, a.allow_ocr_mismatch)
+        backend, client, info = make_real_backend(
+            a.adapter, a.config, st, ocr_cfg, a.ocr_device, a.ocr_python, a.ocr_log,
+            a.expect_adapter_sha, a.allow_ocr_mismatch, sequential_start=a.sequential_start)
         ocr_cache = OCRResultCache(client.read, max_items=32)
         print("Khởi động:", json.dumps(info, ensure_ascii=False))
+        import atexit
+        atexit.register(client.close)
     demo = build_demo(Handler(backend, st, ocr_cfg, a.log_jsonl, ocr_cache=ocr_cache),
                       load_examples(a.examples_json))
     try:

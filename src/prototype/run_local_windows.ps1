@@ -17,7 +17,7 @@
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -NoBrowser
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Dark
 #
-# Khởi động ~48 s (OCR 12 luồng). Máy phải bật suốt lúc demo.
+# Khởi động: OCR worker song song với nạp Qwen (mặc định). -SequentialStart = cách tuần tự cũ.
 # Hôm bảo vệ dùng -Offline (hoặc .\demo), mở http://127.0.0.1:7860/?__theme=light
 # =============================================================================
 
@@ -28,6 +28,7 @@ param(
     [switch]$Mock,
     [switch]$NoBrowser,
     [switch]$Dark,
+    [switch]$SequentialStart,
     [int]$Port = 7860,
     [int]$OcrThreads = 12
 )
@@ -77,6 +78,12 @@ if ($Mock) {
 } else {
     $pyArgs += @("--adapter", $Adapter, "--expect_adapter_sha", $ExpectSha, "--ocr_device", "cpu")
 }
+if ($SequentialStart) {
+    $pyArgs += "--sequential-start"
+    Write-Host "STARTUP=sequential (OCR ready rồi mới nạp Qwen)"
+} else {
+    Write-Host "STARTUP=parallel (OCR worker song song nạp Qwen)"
+}
 if ($Share) {
     $pyArgs += "--share"
 }
@@ -85,8 +92,7 @@ if ((-not $Mock) -and (Test-Path $ExamplesJson)) {
 }
 
 Write-Host "python $($pyArgs -join ' ')"
-Write-Host "Đang nạp model (~50 s). Trình duyệt sẽ tự mở khi sẵn sàng; hoặc chờ dòng 'Running on local URL' rồi mở http://127.0.0.1:$Port (nền sáng; muốn nền tối: thêm -Dark). Tắt: Ctrl+C."
-
+Write-Host "Đang nạp model. Trình duyệt sẽ tự mở khi sẵn sàng; hoặc chờ dòng 'Running on local URL' rồi mở http://127.0.0.1:$Port (nền sáng; muốn nền tối: thêm -Dark). Tắt: Ctrl+C."
 $browserJob = $null
 $exitCode = 1
 if (-not $NoBrowser -and -not $Mock) {

@@ -98,13 +98,18 @@ class OCRWorkerError(RuntimeError):
 
 
 class OCRWorkerClient:
-    """Khởi động tiến trình OCR con, gửi ảnh, nhận dòng OCR. An toàn khi gọi từ nhiều luồng (khoá tuần tự)."""
+    """Khởi động tiến trình OCR con, gửi ảnh, nhận dòng OCR. An toàn khi gọi từ nhiều luồng (khoá tuần tự).
+
+    Có thể tách spawn / wait_ready: `wait_ready=False` chỉ tạo tiến trình con (để nạp Qwen song song),
+    rồi gọi `wait_ready()` khi cần. Mặc định `wait_ready=True` = hành vi cũ (chờ sẵn sàng ngay).
+    """
 
     def __init__(self, backend: str = "paddledet_vietocr", device: str = "gpu", python: Optional[str] = None,
                  log_path: Optional[str] = None, start_timeout: float = 900.0, read_timeout: float = 180.0,
-                 noise: bool = False):
+                 noise: bool = False, wait_ready: bool = True):
         self.backend, self.device = backend, device
         self.read_timeout = read_timeout
+        self.start_timeout = start_timeout
         self.log_path = log_path or os.path.join(tempfile.gettempdir(), "vivqa_ocr_worker.log")
         os.makedirs(os.path.dirname(os.path.abspath(self.log_path)), exist_ok=True)   # W13: thư mục log chưa có -> tạo
         self._log = open(self.log_path, "a", encoding="utf-8")
@@ -114,6 +119,11 @@ class OCRWorkerClient:
         env["PYTHONPATH"] = REPO_ROOT + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
         env.setdefault("PYTHONIOENCODING", "utf-8")
         env.setdefault("FLAGS_allocator_strategy", "auto_growth")   # Paddle không giữ trước phần lớn VRAM của Qwen
+        self._spawn_wall = time.time()
+        self._ready_wall: Optional[float] = None
+        self._ready = False
+        self.info: Dict[str, Any] = {}
+        self.pid = None
         self._proc = subprocess.Popen(cmd, cwd=REPO_ROOT, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                       stderr=self._log, text=True, encoding="utf-8", bufsize=1)
         self._q: "queue.Queue[Optional[Dict[str, Any]]]" = queue.Queue()
@@ -121,23 +131,36 @@ class OCRWorkerClient:
         self._reader.start()
         self._lock = threading.Lock()
         self._next_id = 0
-        hello = self._get(start_timeout, "khởi động OCR")
+        if wait_ready:
+            self.wait_ready(start_timeout)
+
+    def wait_ready(self, timeout: Optional[float] = None) -> Dict[str, Any]:
+        """Chờ dòng ready từ worker. Idempotent nếu đã ready."""
+        if self._ready:
+            return {"ready": True, "info": self.info, "pid": self.pid}
+        hello = self._get(timeout if timeout is not None else self.start_timeout, "khởi động OCR")
         if not hello.get("ready"):
             tail = self.log_tail()
             self.close()
             raise OCRWorkerError(f"OCR không khởi động được: {hello.get('error')}\n{tail}")
-        self.info: Dict[str, Any] = hello.get("info") or {}
+        if self._ready_wall is None:
+            self._ready_wall = time.time()
+        self.info = hello.get("info") or {}
         self.pid = hello.get("pid")
+        self._ready = True
+        return hello
 
     def _pump(self) -> None:
         for line in self._proc.stdout:                       # chỉ nhận dòng giao thức; dòng khác (nếu có) bỏ qua
             if line.startswith(PROTO_PREFIX):
                 try:
-                    self._q.put(json.loads(line[len(PROTO_PREFIX):]))
+                    msg = json.loads(line[len(PROTO_PREFIX):])
+                    if isinstance(msg, dict) and "ready" in msg and self._ready_wall is None:
+                        self._ready_wall = time.time()
+                    self._q.put(msg)
                 except json.JSONDecodeError:
                     pass
         self._q.put(None)                                    # stdout đóng = tiến trình con đã chết
-
     def _get(self, timeout: float, what: str) -> Dict[str, Any]:
         try:
             msg = self._q.get(timeout=timeout)
@@ -158,6 +181,8 @@ class OCRWorkerClient:
 
     def read(self, image_path: str) -> Dict[str, Any]:
         """{"w","h","lines":[{"text","conf","box"}], "sec"}; lỗi đọc ảnh -> OCRWorkerError."""
+        if not self._ready:
+            self.wait_ready()
         with self._lock:
             if self._proc.poll() is not None:
                 raise OCRWorkerError(f"tiến trình OCR đã dừng (mã {self._proc.returncode})\n{self.log_tail()}")
@@ -177,20 +202,25 @@ class OCRWorkerClient:
         return self.read(image_path)["lines"]
 
     def close(self) -> None:
+        """Tắt tiến trình OCR con (quit → wait → kill). An toàn gọi nhiều lần."""
         try:
-            if self._proc.poll() is None:
+            if self._proc.poll() is None and self._proc.stdin and not self._proc.stdin.closed:
                 self._proc.stdin.write(json.dumps({"quit": True}) + "\n")
                 self._proc.stdin.flush()
                 self._proc.wait(timeout=20)
         except Exception:
             pass
-        if self._proc.poll() is None:
-            self._proc.kill()
         try:
-            self._log.close()
+            if self._proc.poll() is None:
+                self._proc.kill()
+                self._proc.wait(timeout=5)
         except Exception:
             pass
-
+        try:
+            if not self._log.closed:
+                self._log.close()
+        except Exception:
+            pass
     def __enter__(self) -> "OCRWorkerClient":
         return self
 
@@ -252,8 +282,15 @@ def _selftest() -> None:
     assert check_engine_matches_cache(dict(ref))["ok"]
     assert not check_engine_matches_cache({**ref, "det_model": "PP-OCRv5_server_det"})["ok"]
     assert check_engine_matches_cache({**ref, "device": "cpu"})["device_note"]
-    print("✅ selftest ocr_worker OK (giao thức, log tách kênh, ảnh lỗi, đa luồng, tắt tiến trình, engine = cache)")
-
+    # spawn rồi wait_ready (đường song song với nạp model)
+    c2 = OCRWorkerClient(backend="mock", device="cpu", log_path=log, start_timeout=120, wait_ready=False)
+    assert not c2._ready
+    c2.wait_ready()
+    assert c2._ready and c2.info.get("engine") == "mock"
+    assert c2.read(img)["lines"][0]["text"] == "MOCK a.jpg"
+    c2.close()
+    assert c2._proc.poll() is not None
+    print("✅ selftest ocr_worker OK (giao thức, log tách kênh, ảnh lỗi, đa luồng, tắt tiến trình, engine = cache, spawn/wait_ready)")
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)

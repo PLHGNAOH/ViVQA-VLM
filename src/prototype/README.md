@@ -56,9 +56,11 @@ powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Of
 powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -NoBrowser
 # nền tối (không thêm ?__theme=light):
 powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -Dark
+# khởi động tuần tự cũ (OCR ready rồi mới nạp Qwen):
+powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -SequentialStart
 ```
 
-Khởi động ~48 s với `OMP_NUM_THREADS=12` (trước đó ~78 s khi Paddle tự gán 1 luồng). Máy phải bật suốt lúc demo. Không đổi prompt / tham số sinh / min-max pixels / model OCR.
+**Khởi động (2026-11-16, RTX 3050 Ti 4 GB, `OMP_NUM_THREADS=12`):** mặc định **OCR worker song song với nạp Qwen** — median `sec_start_total` ≈ **21 s**, tới HTTP 200 ≈ **27 s** (tuần tự: ≈ **41 s** / ≈ **47 s**). Quay lại tuần tự: `--sequential-start` / `-SequentialStart`. Log in thêm `sec_start_ocr_ready`, `sec_model_load`, `ram_peak_gb` (psutil, gồm tiến trình con OCR). Máy phải bật suốt lúc demo. Không đổi prompt / tham số sinh / min-max pixels / model OCR.
 
 ### Latency (2026-11-15 **v2**, RTX 3050 Ti 4 GB, OCR CPU T\*=12)
 
@@ -99,7 +101,7 @@ Paddle **tự gán `OMP_NUM_THREADS=1`** khi import nếu biến chưa có → O
 
 ### Số đo B5 với T\*=12 (3 câu demo, 2026-11-13)
 
-Tải Qwen lần đầu: **1346,6 s** (riêng, lần cài). Khởi động (nạp OCR+model+adapter): **47,9 s**. Peak VRAM ~**2,40 GB**; RAM ~11–12 GB. Câu trả lời **trùng** bản đo 1 luồng.
+Tải Qwen lần đầu: **1346,6 s** (riêng, lần cài). Khởi động tuần tự (OCR+model+adapter, trước song song): **47,9 s** tới sẵn sàng UI; sau song song: median `sec_start_total` ≈ **20 s**. Peak VRAM ~**2,40 GB**; RAM ~11–12 GB (Task Manager). Câu trả lời **trùng** bản đo 1 luồng.
 
 | Câu (slot) | Lần 1 tổng / OCR / Qwen (s) | Lần 2 (nóng) | OCR chiếm (lần 1) | Trả lời | Mức |
 |---|---|---|---|---|---|
