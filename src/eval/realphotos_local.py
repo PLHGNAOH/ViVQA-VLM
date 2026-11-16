@@ -621,7 +621,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--build-demo", action="store_true")
     ap.add_argument("--demo_dir", type=Path, default=None,
                     help="mặc định: Desktop\\demo_images")
-    ap.add_argument("--sets", nargs="*", default=["w13", "w15"])
+    ap.add_argument("--sets", nargs="*", default=None,
+                    help="danh sách tập con dưới --photos_root (mặc định: w13 w15)")
+    ap.add_argument("--set", dest="set_one", default=None,
+                    help="một tập duy nhất, vd --set w15 (ưu tiên hơn --sets). "
+                         "Ảnh/CSV: G:\\My Drive\\ViVQA-VLM\\data\\real_photos_w15\\ "
+                         "→ copy vào <photos_root>\\w15\\ trước khi chạy.")
     ap.add_argument("--mock", action="store_true", help="backend giả (không GPU)")
     a = ap.parse_args(list(argv) if argv is not None else None)
 
@@ -629,13 +634,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         selftest()
         return 0
 
+    set_names = [a.set_one] if a.set_one else (a.sets or ["w13", "w15"])
     skipped: Dict[str, str] = {}
     all_rows: List[Tuple[str, List[Dict[str, Any]]]] = []
-    for s in a.sets:
+    for s in set_names:
         d = a.photos_root / s
         csv_path = d / "cau_hoi.csv"
         if not d.is_dir() or not csv_path.is_file():
-            skipped[s] = f"thiếu thư mục hoặc cau_hoi.csv ({d})"
+            hint = ""
+            if s == "w15":
+                hint = " (Drive: G:\\My Drive\\ViVQA-VLM\\data\\real_photos_w15\\)"
+            skipped[s] = f"thiếu thư mục hoặc cau_hoi.csv ({d}){hint}"
             print(f"SKIP {s}: {skipped[s]}", flush=True)
             continue
         rows = load_csv(csv_path, d)

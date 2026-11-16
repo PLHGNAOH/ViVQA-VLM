@@ -1273,5 +1273,43 @@
       "t_total": 8.12112180000986,
       "tag": "dem_so_nho"
     }
-  ]
+  ],
+  "demo_refined": {
+    "desktop": "C:\\Users\\GIGA\\OneDrive\\Desktop\\demo_images",
+    "vivqa_test_example": null,
+    "vivqa_mau_probe": {
+      "image": "D:\\vivqa_models\\images\\examples\\COCO_train2014_000000087598.jpg",
+      "question": "màu của áo là gì",
+      "gold": [
+        "màu đỏ"
+      ],
+      "prediction": "màu tía",
+      "level": "Trung bình",
+      "em": 0.0,
+      "note": "not added to main (EM=0)"
+    },
+    "cat_open_probe": {
+      "question": "Con vật trong ảnh là con gì?",
+      "prediction": "chó",
+      "level": "Thấp",
+      "em": 0.0,
+      "ocr_texts": [
+        "XUÂN"
+      ],
+      "confidence": 0.5274581595816172,
+      "t_total": 7.988874100003159
+    },
+    "core": [
+      "01_cua_hang_dac_san.jpg",
+      "02_chai_xit_con_trung.jpg",
+      "03_bang_noi_quy_thang_may.jpg",
+      "04_duong_pho_chieu_ta.jpg"
+    ],
+    "them": [
+      "05_bang_thong_tin_duoi_uoi.jpg",
+      "06_ga_metro.jpg",
+      "07_canh_xe_dem.jpg"
+    ],
+    "gioi_han_extra": "anh_meo_trong_khung.jpg moved from main"
+  }
 }
