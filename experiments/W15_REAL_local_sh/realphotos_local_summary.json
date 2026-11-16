@@ -1276,30 +1276,8 @@
   ],
   "demo_refined": {
     "desktop": "C:\\Users\\GIGA\\OneDrive\\Desktop\\demo_images",
-    "vivqa_test_example": null,
-    "vivqa_mau_probe": {
-      "image": "D:\\vivqa_models\\images\\examples\\COCO_train2014_000000087598.jpg",
-      "question": "màu của áo là gì",
-      "gold": [
-        "màu đỏ"
-      ],
-      "prediction": "màu tía",
-      "level": "Trung bình",
-      "em": 0.0,
-      "note": "not added to main (EM=0)"
-    },
-    "cat_open_probe": {
-      "question": "Con vật trong ảnh là con gì?",
-      "prediction": "chó",
-      "level": "Thấp",
-      "em": 0.0,
-      "ocr_texts": [
-        "XUÂN"
-      ],
-      "confidence": 0.5274581595816172,
-      "t_total": 7.988874100003159
-    },
     "core": [
+      "00_vivqa_test_qua_bong.jpg",
       "01_cua_hang_dac_san.jpg",
       "02_chai_xit_con_trung.jpg",
       "03_bang_noi_quy_thang_may.jpg",
@@ -1310,6 +1288,28 @@
       "06_ga_metro.jpg",
       "07_canh_xe_dem.jpg"
     ],
-    "gioi_han_extra": "anh_meo_trong_khung.jpg moved from main"
+    "vivqa_core": {
+      "id": "test_23",
+      "image": "COCO_train2014_000000292302.jpg",
+      "question": "màu của quả bóng là gì",
+      "gold": [
+        "màu cam"
+      ],
+      "prediction_local": "màu cam",
+      "level": "Cao",
+      "em_local": 1.0,
+      "em_colab": 1.0
+    },
+    "vivqa_du_phong": {
+      "id": "test_134",
+      "image": "COCO_train2014_000000116650.jpg",
+      "question": "màu của xe buýt là gì",
+      "prediction_local": "màu đỏ",
+      "level": "Cao"
+    },
+    "em_vivqa_c3_pct": 76.64,
+    "em_vivqa_sh_pct": 73.51,
+    "em_source": "experiments/W11_full_eval_table/full_eval_table.csv (section vivqa_test, ids C3 & SH)",
+    "candidates_local_match": "8/8"
   }
 }

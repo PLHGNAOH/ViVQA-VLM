@@ -1,0 +1,135 @@
+{
+  "seed": 42,
+  "n_pool": 333,
+  "filter": "EM=1; object/colour; gold 1-3 words; not count/yesno; natural; OCR cache 0 lines if known",
+  "candidates": [
+    {
+      "id": "test_2397",
+      "question": "những gì chứa đầy những bông hoa màu đỏ và trắng trên đầu bàn",
+      "gold": [
+        "lọ cắm hoa"
+      ],
+      "prediction_colab": "lọ cắm hoa",
+      "image": "COCO_val2014_000000550426.jpg",
+      "question_type": "object",
+      "n_ocr_lines_cache": 0,
+      "prediction_local": "lọ cắm hoa",
+      "em_local": 1.0,
+      "level_local": "Cao",
+      "t_total_local": 4.16807409998728
+    },
+    {
+      "id": "test_142",
+      "question": "màu sắc của trang phục là gì",
+      "gold": [
+        "màu xanh dương"
+      ],
+      "prediction_colab": "màu xanh dương",
+      "image": "COCO_train2014_000000253266.jpg",
+      "question_type": "color",
+      "n_ocr_lines_cache": 0,
+      "prediction_local": "màu xanh dương",
+      "em_local": 1.0,
+      "level_local": "Cao",
+      "t_total_local": 4.076142799982335
+    },
+    {
+      "id": "test_23",
+      "question": "màu của quả bóng là gì",
+      "gold": [
+        "màu cam"
+      ],
+      "prediction_colab": "màu cam",
+      "image": "COCO_train2014_000000292302.jpg",
+      "question_type": "color",
+      "n_ocr_lines_cache": 0,
+      "prediction_local": "màu cam",
+      "em_local": 1.0,
+      "level_local": "Cao",
+      "t_total_local": 3.979392499983078
+    },
+    {
+      "id": "test_337",
+      "question": "màu của đồng cỏ là gì",
+      "gold": [
+        "màu xanh lá"
+      ],
+      "prediction_colab": "màu xanh lá",
+      "image": "COCO_train2014_000000481981.jpg",
+      "question_type": "color",
+      "n_ocr_lines_cache": 0,
+      "prediction_local": "màu xanh lá",
+      "em_local": 1.0,
+      "level_local": "Cao",
+      "t_total_local": 3.834690599993337
+    },
+    {
+      "id": "test_299",
+      "question": "màu của dấu chấm là gì",
+      "gold": [
+        "màu vàng"
+      ],
+      "prediction_colab": "màu vàng",
+      "image": "COCO_train2014_000000520385.jpg",
+      "question_type": "color",
+      "n_ocr_lines_cache": 0,
+      "prediction_local": "màu vàng",
+      "em_local": 1.0,
+      "level_local": "Trung bình",
+      "t_total_local": 5.685190000018338
+    },
+    {
+      "id": "test_279",
+      "question": "màu của áo là gì",
+      "gold": [
+        "màu trắng"
+      ],
+      "prediction_colab": "màu trắng",
+      "image": "COCO_train2014_000000172105.jpg",
+      "question_type": "color",
+      "n_ocr_lines_cache": 0,
+      "prediction_local": "màu trắng",
+      "em_local": 1.0,
+      "level_local": "Cao",
+      "t_total_local": 4.0616282999981195
+    },
+    {
+      "id": "test_180",
+      "question": "màu của con cừu là gì",
+      "gold": [
+        "màu trắng"
+      ],
+      "prediction_colab": "màu trắng",
+      "image": "COCO_train2014_000000187351.jpg",
+      "question_type": "color",
+      "n_ocr_lines_cache": 0,
+      "prediction_local": "màu trắng",
+      "em_local": 1.0,
+      "level_local": "Cao",
+      "t_total_local": 4.458725900010904
+    },
+    {
+      "id": "test_134",
+      "question": "màu của xe buýt là gì",
+      "gold": [
+        "màu đỏ"
+      ],
+      "prediction_colab": "màu đỏ",
+      "image": "COCO_train2014_000000116650.jpg",
+      "question_type": "color",
+      "n_ocr_lines_cache": 0,
+      "prediction_local": "màu đỏ",
+      "em_local": 1.0,
+      "level_local": "Cao",
+      "t_total_local": 4.530661199998576
+    }
+  ],
+  "local_match": "8/8",
+  "selected": {
+    "core": "test_23",
+    "du_phong": "test_134",
+    "em_vivqa_c3_pct": 76.64,
+    "em_vivqa_sh_pct": 73.51,
+    "em_source": "experiments/W11_full_eval_table/full_eval_table.csv (section vivqa_test, ids C3 & SH)"
+  }
+}

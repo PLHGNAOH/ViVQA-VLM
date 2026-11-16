@@ -29,44 +29,31 @@ Thấp: 8, Trung bình: 11, Cao: 1
 
 Đường dẫn Desktop: `C:\Users\GIGA\OneDrive\Desktop\demo_images\` (không commit ảnh).
 
-### CORE (demo chủ động)
+### CORE (5 ảnh)
 
 | # | File | Nguồn | Câu hỏi | Local | Mức |
 |---:|---|---|---|---|---|
+| 0 | `00_vivqa_test_qua_bong.jpg` | ViVQA test — không có trong dữ liệu huấn luyện | màu của quả bóng là gì | màu cam | Cao |
 | 1 | `01_cua_hang_dac_san.jpg` | Ảnh thật nhóm (W13) | Cửa hàng bán đặc sản của địa phương nào? | hà nội | Trung bình |
 | 2 | `02_chai_xit_con_trung.jpg` | Ảnh thật nhóm (W13) | Bình xịt côn trùng có hương gì? | cam chanh | Trung bình |
 | 3 | `03_bang_noi_quy_thang_may.jpg` | Ảnh thật nhóm (W13) | Thang máy có tải trọng tối đa bao nhiêu kg? | 1150kg | Trung bình |
 | 4 | `04_duong_pho_chieu_ta.jpg` | Ảnh thật nhóm (W13) | Trong ảnh có con chó không? | không | Trung bình |
 
-Không có `00_vivqa_test_*`: ô UI `mau_sac` (ViVQA, `COCO_train2014_000000087598.jpg`, «màu của áo là gì», gold «màu đỏ») chạy local Backend.ask → **màu tía** (Trung bình, EM=0) → không đưa vào main.
+Gợi ý lời nói (CORE 00): «Câu hỏi chung về ảnh (ViVQA, EM test C3 = 76.64%)» — nguồn `experiments/W11_full_eval_table/full_eval_table.csv (section vivqa_test, ids C3 & SH)` (SH = 73.51%).
 
-### THÊM (nếu còn thời gian)
+Ứng viên ViVQA: `vivqa_demo_candidates.json` (8 câu, local khớp Colab **8/8**). Chọn `test_23` (CORE) + `test_134` (du_phong).
 
-| # | File | Nguồn | Câu hỏi | Local | Mức |
-|---:|---|---|---|---|---|
-| 5 | `05_bang_thong_tin_duoi_uoi.jpg` | Ảnh thật nhóm (W13) | Con đười ươi trên biển thông tin tên gì? | tèo | Cao |
-| 6 | `06_ga_metro.jpg` | Ảnh thật nhóm (W13) | Trong ảnh có chữ HCMC METRO không? | có | Trung bình |
-| 7 | `07_canh_xe_dem.jpg` | Ảnh thật nhóm (W13) | Trong ảnh có bao nhiêu chiếc ô tô? | 1 | Thấp |
+### THÊM
+
+| # | File | Local | Mức |
+|---:|---|---|---|
+| 5 | `05_bang_thong_tin_duoi_uoi.jpg` | tèo | Cao |
+| 6 | `06_ga_metro.jpg` | có | Trung bình |
+| 7 | `07_canh_xe_dem.jpg` | 1 | Thấp |
 
 ### gioi_han
 
-| File | Ghi chú |
-|---|---|
-| `xe_buyt_nha_khoa.jpg` | chữ gây nhiễu (orion ≠ nha khoa orion) |
-| `tui_cua_hang.jpg` | OCR đọc sai (eleven ≠ 7-eleven) |
-| `binh_chua_chay.jpg` | OCR đọc sai |
-| `moc_ao.jpg` | lệch đáp án |
-| `bo_ho_nuoc_ban_dem.jpg` | lệch đáp án |
-| `dan_meo_con.jpg` | đếm |
-| `anh_meo_trong_khung.jpg` | yesno «có chó không?» → không (ĐÚNG, Trung bình); câu mở «Con vật trong ảnh là con gì?» → **chó** (SAI, Thấp) do OCR «XUÂN» — §5.8 |
-
-### Câu mở ảnh mèo (chạy thật Backend.ask, local)
-
-- Ảnh: `anh_meo_trong_khung.jpg`
-- Câu hỏi: `Con vật trong ảnh là con gì?`
-- OCR texts: `XUÂN` (1 dòng)
-- Trả lời: **chó** · mức **Thấp** · confidence ≈ 0.53 · t_total ≈ 8.0 s
-- EM vs {con mèo, mèo, mèo con}: **0**
+Giữ như trước; `anh_meo_trong_khung.jpg`: câu mở → chó (Thấp) do OCR XUÂN.
 
 ## Skipped
 
