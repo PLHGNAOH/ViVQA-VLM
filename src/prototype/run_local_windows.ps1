@@ -5,7 +5,8 @@
 #           (giữ nguyên prompt / tham số sinh / min-max pixels / engine OCR như eval).
 #
 # Cách dùng nhanh (từ gốc repo):
-#   .\demo              → offline, tự mở trình duyệt khi sẵn sàng
+#   .\demo              → offline, song song OCR+model, tự mở trình duyệt
+#   .\demo safe         → offline + -SequentialStart (chậm ~20 s, ít tranh RAM)
 #   .\demo share        → tạo link *.gradio.live
 #
 # Lệnh chạy (từ bất kỳ thư mục nào):
@@ -16,8 +17,9 @@
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -OcrThreads 12
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -NoBrowser
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Dark
+#   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -SequentialStart
 #
-# Khởi động: OCR worker song song với nạp Qwen (mặc định). -SequentialStart = cách tuần tự cũ.
+# Khởi động: OCR worker song song với nạp Qwen (mặc định). -SequentialStart = .\demo safe.
 # Hôm bảo vệ dùng -Offline (hoặc .\demo), mở http://127.0.0.1:7860/?__theme=light
 # =============================================================================
 

@@ -16,6 +16,20 @@
       "problemMatcher": []
     },
     {
+      "label": "ViVQA demo (safe)",
+      "type": "shell",
+      "command": ".\\demo.cmd safe",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
       "label": "ViVQA demo (share)",
       "type": "shell",
       "command": ".\\demo.cmd share",

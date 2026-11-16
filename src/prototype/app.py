@@ -436,7 +436,10 @@ class MockBackend:
 
 
 def _rss_gb_tree() -> float:
-    """RSS GB của tiến trình hiện tại + mọi tiến trình con (OCR worker)."""
+    """RSS GB của tiến trình hiện tại + mọi tiến trình con (OCR worker).
+
+    Không gồm bộ nhớ dùng chung / GPU (xem Task Manager / sys_ram_*).
+    """
     try:
         import psutil
         p = psutil.Process()
@@ -449,6 +452,52 @@ def _rss_gb_tree() -> float:
         return rss / (1024.0 ** 3)
     except Exception:
         return 0.0
+
+
+class SysRamSampler:
+    """Lấy mẫu psutil.virtual_memory() mỗi `interval` s trên thread nền (RAM toàn máy)."""
+
+    def __init__(self, interval: float = 0.5):
+        self.interval = interval
+        self.used_peak_gb = 0.0
+        self.total_gb = 0.0
+        self._stop = threading.Event()
+        self._thr: Optional[threading.Thread] = None
+
+    def _sample_once(self) -> None:
+        try:
+            import psutil
+            vm = psutil.virtual_memory()
+            used = float(vm.used) / (1024.0 ** 3)
+            total = float(vm.total) / (1024.0 ** 3)
+            self.total_gb = total
+            if used > self.used_peak_gb:
+                self.used_peak_gb = used
+        except Exception:
+            pass
+
+    def start(self) -> "SysRamSampler":
+        self._sample_once()
+        self._stop.clear()
+
+        def _loop() -> None:
+            while not self._stop.wait(self.interval):
+                self._sample_once()
+
+        self._thr = threading.Thread(target=_loop, name="sys-ram-sampler", daemon=True)
+        self._thr.start()
+        return self
+
+    def stop(self) -> Dict[str, float]:
+        self._stop.set()
+        if self._thr is not None:
+            self._thr.join(timeout=2.0)
+            self._thr = None
+        self._sample_once()
+        return {
+            "sys_ram_used_peak_gb": round(self.used_peak_gb, 2),
+            "sys_ram_total_gb": round(self.total_gb, 2),
+        }
 
 
 def _free_backend(backend) -> None:
@@ -467,25 +516,29 @@ def _free_backend(backend) -> None:
 def make_real_backend(adapter: str, config: str, settings: Dict[str, Any], ocr_cfg: Dict[str, Any],
                       ocr_device: str = "gpu", ocr_python: Optional[str] = None, ocr_log: Optional[str] = None,
                       expect_adapter_sha: Optional[str] = None, allow_ocr_mismatch: bool = False,
-                      sequential_start: bool = False):
+                      sequential_start: bool = False, keep_sys_ram_sampler: bool = False):
     """Model thật: OCR worker + Qwen/adapter.
 
     Mặc định (sequential_start=False): spawn OCR worker trước (không chờ), nạp Backend song song,
     rồi wait_ready + check_engine. sequential_start=True: giữ thứ tự cũ (OCR sẵn sàng → check → nạp model).
+
+    keep_sys_ram_sampler=True: không dừng sampler khi trả về (main dừng khi HTTP sẵn sàng).
     """
     from src.eval.run_baseline import adapter_fingerprint
     from src.prototype.core import Backend
     from src.prototype.ocr_worker import OCRWorkerClient, check_engine_matches_cache
     require_verified(settings)
     t0 = time.time()
-    ram_peak = _rss_gb_tree()
+    sampler = SysRamSampler(interval=0.5).start()
+    proc_rss_peak = _rss_gb_tree()
 
     def _bump_ram() -> None:
-        nonlocal ram_peak
-        ram_peak = max(ram_peak, _rss_gb_tree())
+        nonlocal proc_rss_peak
+        proc_rss_peak = max(proc_rss_peak, _rss_gb_tree())
 
     fp = adapter_fingerprint(adapter)
     if expect_adapter_sha and fp["weights_sha256"] != expect_adapter_sha:
+        sampler.stop()
         raise SystemExit(f"❌ adapter {fp['weights_sha256'][:12]} ≠ adapter đã kiểm {expect_adapter_sha[:12]}")
     _bump_ram()
 
@@ -529,6 +582,7 @@ def make_real_backend(adapter: str, config: str, settings: Dict[str, Any], ocr_c
                 _free_backend(backend)
                 raise SystemExit(f"❌ engine OCR khác engine đã dựng cache: {chk['diff']}")
     except Exception:
+        sampler.stop()
         if client is not None:
             try:
                 client.close()
@@ -542,7 +596,8 @@ def make_real_backend(adapter: str, config: str, settings: Dict[str, Any], ocr_c
     backend.is_mock = False
     _bump_ram()
     # sec_start_ocr: tương thích log cũ = thời điểm OCR sẵn sàng (+ check ở đường tuần tự đã gồm trong ready)
-    info = {
+    # proc_rss_peak_gb: RSS tiến trình+con (không gồm shared/GPU). sys_ram_*: RAM toàn máy (virtual_memory).
+    info: Dict[str, Any] = {
         "adapter": fp,
         "ocr_engine": client.info,
         "ocr_check": chk,
@@ -551,9 +606,40 @@ def make_real_backend(adapter: str, config: str, settings: Dict[str, Any], ocr_c
         "sec_start_ocr_ready": round(sec_ocr_ready, 1),
         "sec_model_load": round(sec_model, 1),
         "sec_start_total": round(time.time() - t0, 1),
-        "ram_peak_gb": round(ram_peak, 2),
+        "proc_rss_peak_gb": round(proc_rss_peak, 2),
+        # alias tương thích log/bench cũ
+        "ram_peak_gb": round(proc_rss_peak, 2),
     }
+    if keep_sys_ram_sampler:
+        info["_sys_ram_sampler"] = sampler
+    else:
+        info.update(sampler.stop())
     return backend, client, info
+
+
+def _print_startup_when_ready(info: Dict[str, Any], port: int, timeout_s: float = 300.0) -> None:
+    """Chờ HTTP sẵn sàng, dừng SysRamSampler, in dòng Khởi động (kèm sys_ram_*)."""
+    import urllib.request
+
+    sampler: Optional[SysRamSampler] = info.pop("_sys_ram_sampler", None)
+    url = f"http://127.0.0.1:{port}/"
+    deadline = time.time() + timeout_s
+    while time.time() < deadline:
+        try:
+            r = urllib.request.urlopen(url, timeout=1.5)
+            if getattr(r, "status", 200) == 200:
+                break
+        except Exception:
+            time.sleep(0.5)
+    if sampler is not None:
+        info.update(sampler.stop())
+    # làm mới proc RSS một lần nữa khi server đã lên
+    try:
+        info["proc_rss_peak_gb"] = round(max(float(info.get("proc_rss_peak_gb") or 0), _rss_gb_tree()), 2)
+        info["ram_peak_gb"] = info["proc_rss_peak_gb"]
+    except Exception:
+        pass
+    print("Khởi động:", json.dumps(info, ensure_ascii=False), flush=True)
 
 
 # =============================================================================
@@ -892,11 +978,16 @@ def main() -> None:
             raise SystemExit("Cần --adapter (hoặc --mock để thử giao diện)")
         backend, client, info = make_real_backend(
             a.adapter, a.config, st, ocr_cfg, a.ocr_device, a.ocr_python, a.ocr_log,
-            a.expect_adapter_sha, a.allow_ocr_mismatch, sequential_start=a.sequential_start)
+            a.expect_adapter_sha, a.allow_ocr_mismatch, sequential_start=a.sequential_start,
+            keep_sys_ram_sampler=True)
         ocr_cache = OCRResultCache(client.read, max_items=32)
-        print("Khởi động:", json.dumps(info, ensure_ascii=False))
         import atexit
         atexit.register(client.close)
+        # In Khởi động khi HTTP sẵn sàng (sys_ram_* lấy mẫu tới lúc đó)
+        threading.Thread(
+            target=_print_startup_when_ready, args=(info, a.port),
+            name="startup-log", daemon=True,
+        ).start()
     demo = build_demo(Handler(backend, st, ocr_cfg, a.log_jsonl, ocr_cache=ocr_cache),
                       load_examples(a.examples_json))
     try:

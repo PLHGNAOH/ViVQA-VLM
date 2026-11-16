@@ -38,13 +38,14 @@ Môi trường đo 2026-11-13: RTX 3050 Ti Laptop 4 GB · CPU i5-12500H · venv 
 
 ### Lệnh chạy
 
-Cách nhanh: `.\demo` (offline, tự mở trình duyệt **nền sáng** `http://127.0.0.1:7860/?__theme=light`) · `.\demo share` (link gradio.live) · hoặc **Tasks: Run Task** → `ViVQA demo (offline)` / `ViVQA demo (share)`.
+Cách nhanh: `.\demo` (offline, song song, tự mở trình duyệt **nền sáng** `http://127.0.0.1:7860/?__theme=light`) · `.\demo safe` (tuần tự, ít tranh RAM) · `.\demo share` (link gradio.live) · hoặc **Tasks** → `ViVQA demo (offline)` / `(safe)` / `(share)`.
 
 Khi trình chiếu / máy chiếu: mở fullscreen **F11**, phóng to trang **Ctrl + '+'** (Ctrl + '-' thu nhỏ). Muốn nền tối: chạy PS1 với `-Dark` (không gắn `?__theme=light`).
 
 ```powershell
 # Từ gốc repo (khuyến nghị):
 .\demo
+.\demo safe
 .\demo share
 
 # Tương đương đầy đủ:
@@ -56,11 +57,11 @@ powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Of
 powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -NoBrowser
 # nền tối (không thêm ?__theme=light):
 powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -Dark
-# khởi động tuần tự cũ (OCR ready rồi mới nạp Qwen):
+# khởi động tuần tự (= .\demo safe):
 powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -SequentialStart
 ```
 
-**Khởi động (2026-11-16, RTX 3050 Ti 4 GB, `OMP_NUM_THREADS=12`):** mặc định **OCR worker song song với nạp Qwen** — median `sec_start_total` ≈ **21 s**, tới HTTP 200 ≈ **27 s** (tuần tự: ≈ **41 s** / ≈ **47 s**). Quay lại tuần tự: `--sequential-start` / `-SequentialStart`. Log in thêm `sec_start_ocr_ready`, `sec_model_load`, `ram_peak_gb` (psutil, gồm tiến trình con OCR). Máy phải bật suốt lúc demo. Không đổi prompt / tham số sinh / min-max pixels / model OCR.
+**Khởi động (2026-11-16, RTX 3050 Ti 4 GB / 16 GB RAM, `OMP_NUM_THREADS=12`):** mặc định **OCR worker song song với nạp Qwen** — tới HTTP 200 ≈ **27 s**; `.\demo safe` (tuần tự) ≈ **47 s**, chậm hơn ~20 s nhưng ít tranh RAM khi máy đã mở VS Code + trình duyệt. Dùng **safe** nếu Task Manager gần đầy RAM / máy 16 GB hay swap lúc khởi động. Log: `sec_start_ocr_ready`, `sec_model_load`, `proc_rss_peak_gb` (RSS tiến trình+OCR, không gồm shared/GPU), `sys_ram_used_peak_gb` / `sys_ram_total_gb` (psutil `virtual_memory`, lấy mẫu 0,5 s tới khi server sẵn sàng). Máy phải bật suốt lúc demo. Không đổi prompt / tham số sinh / min-max pixels / model OCR.
 
 ### Latency (2026-11-15 **v2**, RTX 3050 Ti 4 GB, OCR CPU T\*=12)
 
