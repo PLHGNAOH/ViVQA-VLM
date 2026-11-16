@@ -1291,25 +1291,32 @@
     "vivqa_core": {
       "id": "test_23",
       "image": "COCO_train2014_000000292302.jpg",
+      "image_in_train": false,
       "question": "màu của quả bóng là gì",
-      "gold": [
-        "màu cam"
-      ],
       "prediction_local": "màu cam",
-      "level": "Cao",
-      "em_local": 1.0,
-      "em_colab": 1.0
+      "level": "Cao"
     },
     "vivqa_du_phong": {
       "id": "test_134",
       "image": "COCO_train2014_000000116650.jpg",
+      "image_in_train": false,
       "question": "màu của xe buýt là gì",
-      "prediction_local": "màu đỏ",
-      "level": "Cao"
+      "prediction_local": "màu đỏ"
     },
     "em_vivqa_c3_pct": 76.64,
     "em_vivqa_sh_pct": 73.51,
-    "em_source": "experiments/W11_full_eval_table/full_eval_table.csv (section vivqa_test, ids C3 & SH)",
-    "candidates_local_match": "8/8"
+    "em_source": "experiments/W11_full_eval_table/full_eval_table.json (+ .csv same table)",
+    "candidates_local_match": "8/8",
+    "speak_line_00": "Câu hỏi chung về ảnh từ tập test ViVQA (ảnh không có trong dữ liệu huấn luyện). Adapter dùng chung (SH) trong demo đạt EM 73,51% trên ViVQA test; adapter riêng ViVQA (C3) đạt 76,64%.",
+    "candidates_image_in_train": {
+      "test_2397": false,
+      "test_142": true,
+      "test_23": false,
+      "test_337": false,
+      "test_299": false,
+      "test_279": false,
+      "test_180": false,
+      "test_134": false
+    }
   }
 }

@@ -29,19 +29,24 @@ Thấp: 8, Trung bình: 11, Cao: 1
 
 Đường dẫn Desktop: `C:\Users\GIGA\OneDrive\Desktop\demo_images\` (không commit ảnh).
 
+Kiểm sạch: `image_in_train = (image ∈ data/vivqa/train.json)` — đúng split train của SH
+(`W11_SH_…/run_signature.json` → `data/vivqa/train.json`). Tham chiếu W07:
+`experiments/W07_data_checks/vivqa_split_overlap.json` (train∩test images = 1274);
+clean ≈ 1219 câu (không trùng ảnh + không trùng cặp hỏi–đáp) trong `docs/W07/W07_Team_Report.md`.
+
+EM ViVQA test (`experiments/W11_full_eval_table/full_eval_table.json (+ .csv same table)`): **SH (demo) = 73,51%** · C3 (so sánh) = 76,64%.
+
 ### CORE (5 ảnh)
 
-| # | File | Nguồn | Câu hỏi | Local | Mức |
-|---:|---|---|---|---|---|
-| 0 | `00_vivqa_test_qua_bong.jpg` | ViVQA test — không có trong dữ liệu huấn luyện | màu của quả bóng là gì | màu cam | Cao |
-| 1 | `01_cua_hang_dac_san.jpg` | Ảnh thật nhóm (W13) | Cửa hàng bán đặc sản của địa phương nào? | hà nội | Trung bình |
-| 2 | `02_chai_xit_con_trung.jpg` | Ảnh thật nhóm (W13) | Bình xịt côn trùng có hương gì? | cam chanh | Trung bình |
-| 3 | `03_bang_noi_quy_thang_may.jpg` | Ảnh thật nhóm (W13) | Thang máy có tải trọng tối đa bao nhiêu kg? | 1150kg | Trung bình |
-| 4 | `04_duong_pho_chieu_ta.jpg` | Ảnh thật nhóm (W13) | Trong ảnh có con chó không? | không | Trung bình |
+| # | File | Nguồn | image_in_train | Câu hỏi | Local | Mức |
+|---:|---|---|---|---|---|---|
+| 0 | `00_vivqa_test_qua_bong.jpg` | ViVQA test (test_23) | **false** | màu của quả bóng là gì | màu cam | Cao |
+| 1 | `01_cua_hang_dac_san.jpg` | Ảnh thật nhóm (W13) | n/a | Cửa hàng bán đặc sản của địa phương nào? | hà nội | Trung bình |
+| 2 | `02_chai_xit_con_trung.jpg` | Ảnh thật nhóm (W13) | n/a | Bình xịt côn trùng có hương gì? | cam chanh | Trung bình |
+| 3 | `03_bang_noi_quy_thang_may.jpg` | Ảnh thật nhóm (W13) | n/a | Thang máy có tải trọng tối đa bao nhiêu kg? | 1150kg | Trung bình |
+| 4 | `04_duong_pho_chieu_ta.jpg` | Ảnh thật nhóm (W13) | n/a | Trong ảnh có con chó không? | không | Trung bình |
 
-Gợi ý lời nói (CORE 00): «Câu hỏi chung về ảnh (ViVQA, EM test C3 = 76.64%)» — nguồn `experiments/W11_full_eval_table/full_eval_table.csv (section vivqa_test, ids C3 & SH)` (SH = 73.51%).
-
-Ứng viên ViVQA: `vivqa_demo_candidates.json` (8 câu, local khớp Colab **8/8**). Chọn `test_23` (CORE) + `test_134` (du_phong).
+Lời nói câu 00: «Câu hỏi chung về ảnh từ tập test ViVQA (ảnh không có trong dữ liệu huấn luyện). Adapter dùng chung (SH) trong demo đạt EM 73,51% trên ViVQA test; adapter riêng ViVQA (C3) đạt 76,64%.»
 
 ### THÊM
 
@@ -50,6 +55,25 @@ Gợi ý lời nói (CORE 00): «Câu hỏi chung về ảnh (ViVQA, EM test C3 
 | 5 | `05_bang_thong_tin_duoi_uoi.jpg` | tèo | Cao |
 | 6 | `06_ga_metro.jpg` | có | Trung bình |
 | 7 | `07_canh_xe_dem.jpg` | 1 | Thấp |
+
+### du_phong ViVQA
+
+| File | id | image_in_train | Câu hỏi | Local |
+|---|---|---|---|---|
+| `vivqa_test_xe_buyt.jpg` | test_134 | **false** | màu của xe buýt là gì | màu đỏ |
+
+### 8 ứng viên (`vivqa_demo_candidates.json`)
+
+| id | image_in_train | Câu hỏi |
+|---|---|---|
+| test_2397 | False | những gì chứa đầy những bông hoa màu đỏ và trắng trên đầu bàn |
+| test_142 | True | màu sắc của trang phục là gì |
+| test_23 | False | màu của quả bóng là gì |
+| test_337 | False | màu của đồng cỏ là gì |
+| test_299 | False | màu của dấu chấm là gì |
+| test_279 | False | màu của áo là gì |
+| test_180 | False | màu của con cừu là gì |
+| test_134 | False | màu của xe buýt là gì |
 
 ### gioi_han
 

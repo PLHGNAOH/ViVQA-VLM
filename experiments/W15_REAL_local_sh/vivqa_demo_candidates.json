@@ -16,7 +16,8 @@
       "prediction_local": "lọ cắm hoa",
       "em_local": 1.0,
       "level_local": "Cao",
-      "t_total_local": 4.16807409998728
+      "t_total_local": 4.16807409998728,
+      "image_in_train": false
     },
     {
       "id": "test_142",
@@ -31,7 +32,8 @@
       "prediction_local": "màu xanh dương",
       "em_local": 1.0,
       "level_local": "Cao",
-      "t_total_local": 4.076142799982335
+      "t_total_local": 4.076142799982335,
+      "image_in_train": true
     },
     {
       "id": "test_23",
@@ -46,7 +48,8 @@
       "prediction_local": "màu cam",
       "em_local": 1.0,
       "level_local": "Cao",
-      "t_total_local": 3.979392499983078
+      "t_total_local": 3.979392499983078,
+      "image_in_train": false
     },
     {
       "id": "test_337",
@@ -61,7 +64,8 @@
       "prediction_local": "màu xanh lá",
       "em_local": 1.0,
       "level_local": "Cao",
-      "t_total_local": 3.834690599993337
+      "t_total_local": 3.834690599993337,
+      "image_in_train": false
     },
     {
       "id": "test_299",
@@ -76,7 +80,8 @@
       "prediction_local": "màu vàng",
       "em_local": 1.0,
       "level_local": "Trung bình",
-      "t_total_local": 5.685190000018338
+      "t_total_local": 5.685190000018338,
+      "image_in_train": false
     },
     {
       "id": "test_279",
@@ -91,7 +96,8 @@
       "prediction_local": "màu trắng",
       "em_local": 1.0,
       "level_local": "Cao",
-      "t_total_local": 4.0616282999981195
+      "t_total_local": 4.0616282999981195,
+      "image_in_train": false
     },
     {
       "id": "test_180",
@@ -106,7 +112,8 @@
       "prediction_local": "màu trắng",
       "em_local": 1.0,
       "level_local": "Cao",
-      "t_total_local": 4.458725900010904
+      "t_total_local": 4.458725900010904,
+      "image_in_train": false
     },
     {
       "id": "test_134",
@@ -121,7 +128,8 @@
       "prediction_local": "màu đỏ",
       "em_local": 1.0,
       "level_local": "Cao",
-      "t_total_local": 4.530661199998576
+      "t_total_local": 4.530661199998576,
+      "image_in_train": false
     }
   ],
   "local_match": "8/8",
@@ -130,6 +138,23 @@
     "du_phong": "test_134",
     "em_vivqa_c3_pct": 76.64,
     "em_vivqa_sh_pct": 73.51,
-    "em_source": "experiments/W11_full_eval_table/full_eval_table.csv (section vivqa_test, ids C3 & SH)"
+    "em_source": "experiments/W11_full_eval_table/full_eval_table.json (+ .csv same table)"
+  },
+  "clean_check": {
+    "method": "image_in_train = image filename ∈ data/vivqa/train.json (SH train path per W11_SH run_signature). W07: train∩test images = 1274 (experiments/W07_data_checks/vivqa_split_overlap.json); clean subset ≈ 1219 qs without image overlap AND without QA-pair overlap (docs/W07/W07_Team_Report.md). This check uses image-unseen only.",
+    "train_json": "G:\\My Drive\\ViVQA-VLM\\data\\vivqa\\train.json",
+    "n_train_images": 8255,
+    "n_test_qs_image_unseen": 1645,
+    "em_vivqa_sh_pct": 73.51,
+    "em_vivqa_c3_pct": 76.64,
+    "em_source": "experiments/W11_full_eval_table/full_eval_table.json (+ .csv same table)",
+    "core_id": "test_23",
+    "du_phong_id": "test_134",
+    "core_image_in_train": false,
+    "du_phong_image_in_train": false,
+    "among_8": {
+      "in_train": 1,
+      "unseen": 7
+    }
   }
 }

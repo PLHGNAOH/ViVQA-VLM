@@ -1,0 +1,17 @@
+{
+  "method": "image_in_train = image filename ∈ data/vivqa/train.json (SH train path per W11_SH run_signature). W07: train∩test images = 1274 (experiments/W07_data_checks/vivqa_split_overlap.json); clean subset ≈ 1219 qs without image overlap AND without QA-pair overlap (docs/W07/W07_Team_Report.md). This check uses image-unseen only.",
+  "train_json": "G:\\My Drive\\ViVQA-VLM\\data\\vivqa\\train.json",
+  "n_train_images": 8255,
+  "n_test_qs_image_unseen": 1645,
+  "em_vivqa_sh_pct": 73.51,
+  "em_vivqa_c3_pct": 76.64,
+  "em_source": "experiments/W11_full_eval_table/full_eval_table.json (+ .csv same table)",
+  "core_id": "test_23",
+  "du_phong_id": "test_134",
+  "core_image_in_train": false,
+  "du_phong_image_in_train": false,
+  "among_8": {
+    "in_train": 1,
+    "unseen": 7
+  }
+}
