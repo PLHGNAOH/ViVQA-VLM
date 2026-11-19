@@ -1,0 +1,1322 @@
+{
+  "created_utc": "2026-11-16T03:07:28.291867+00:00",
+  "omp_num_threads": "12",
+  "mkl_num_threads": "12",
+  "skipped": {
+    "w15": "thiếu thư mục hoặc cau_hoi.csv (D:\\vivqa_models\\real_photos\\w15)"
+  },
+  "summary": {
+    "n_total": 20,
+    "em_overall": 0.7,
+    "by_set": {
+      "w13": {
+        "n": 20,
+        "em": 0.7,
+        "em_open": 0.6,
+        "em_yesno": 1.0,
+        "n_open": 15,
+        "n_yesno": 5
+      }
+    },
+    "by_mode": {
+      "open": {
+        "n": 15,
+        "em": 0.6
+      },
+      "yesno": {
+        "n": 5,
+        "em": 1.0
+      }
+    },
+    "confidence_levels": {
+      "Thấp": 8,
+      "Trung bình": 11,
+      "Cao": 1
+    },
+    "latency": {
+      "t_total_p50": 8.644688200001838,
+      "t_total_p95": 13.024937115005743,
+      "t_ocr_p50": 7.1248000000000005,
+      "t_model_p50": 1.304903700016439
+    }
+  },
+  "w13_vs_colab": {
+    "available": true,
+    "path": "D:\\FPT_university\\termno9\\ViVQA-VLM\\experiments\\W14_REAL_sh_realphotos_v2_bf16_L4\\realphotos_summary.json",
+    "n": 20,
+    "n_answer_match": 20,
+    "rows": [
+      {
+        "image": "xe_buyt_nha_khoa.jpg",
+        "question": "Trên xe buýt quảng cáo nha khoa nào?",
+        "answers": [
+          "nha khoa orion"
+        ],
+        "local_pred": "orion",
+        "colab_pred": "orion",
+        "local_em": 0.0,
+        "colab_em": 0.0,
+        "local_level": "Thấp",
+        "colab_level": "Thấp",
+        "answer_match": true
+      },
+      {
+        "image": "bang_huong_dan_y_te.jpg",
+        "question": "Ứng dụng được hướng dẫn cài đặt tên là gì?",
+        "answers": [
+          "công dân số tphcm"
+        ],
+        "local_pred": "công dân số tphcm",
+        "colab_pred": "công dân số tphcm",
+        "local_em": 1.0,
+        "colab_em": 1.0,
+        "local_level": "Trung bình",
+        "colab_level": "Trung bình",
+        "answer_match": true
+      },
+      {
+        "image": "tui_cua_hang.jpg",
+        "question": "Túi trong ảnh mang thương hiệu nào?",
+        "answers": [
+          "7-eleven",
+          "7 eleven"
+        ],
+        "local_pred": "eleven",
+        "colab_pred": "eleven",
+        "local_em": 0.0,
+        "colab_em": 0.0,
+        "local_level": "Trung bình",
+        "colab_level": "Trung bình",
+        "answer_match": true
+      },
+      {
+        "image": "cua_hang_dac_san.jpg",
+        "question": "Cửa hàng bán đặc sản của địa phương nào?",
+        "answers": [
+          "hà nội"
+        ],
+        "local_pred": "hà nội",
+        "colab_pred": "hà nội",
+        "local_em": 1.0,
+        "colab_em": 1.0,
+        "local_level": "Trung bình",
+        "colab_level": "Trung bình",
+        "answer_match": true
+      },
+      {
+        "image": "bang_noi_quy_thang_may.jpg",
+        "question": "Thang máy có tải trọng tối đa bao nhiêu kg?",
+        "answers": [
+          "1150kg",
+          "1150 kg"
+        ],
+        "local_pred": "1150kg",
+        "colab_pred": "1150kg",
+        "local_em": 1.0,
+        "colab_em": 1.0,
+        "local_level": "Trung bình",
+        "colab_level": "Trung bình",
+        "answer_match": true
+      },
+      {
+        "image": "binh_chua_chay.jpg",
+        "question": "Trên thùng đựng bình có chữ gì?",
+        "answers": [
+          "tủ đựng bình pccc",
+          "tủ đựng bình pccc 114"
+        ],
+        "local_pred": "lắp dụng bình pccc",
+        "colab_pred": "lắp dụng bình pccc",
+        "local_em": 0.0,
+        "colab_em": 0.0,
+        "local_level": "Thấp",
+        "colab_level": "Thấp",
+        "answer_match": true
+      },
+      {
+        "image": "may_anh_canon.jpg",
+        "question": "Máy ảnh trong hình có chữ Canon không?",
+        "answers": [
+          "có"
+        ],
+        "local_pred": "có",
+        "colab_pred": "có",
+        "local_em": 1.0,
+        "colab_em": 1.0,
+        "local_level": "Trung bình",
+        "colab_level": "Trung bình",
+        "answer_match": true
+      },
+      {
+        "image": "chai_xit_con_trung.jpg",
+        "question": "Bình xịt côn trùng có hương gì?",
+        "answers": [
+          "cam chanh",
+          "hương cam chanh"
+        ],
+        "local_pred": "cam chanh",
+        "colab_pred": "cam chanh",
+        "local_em": 1.0,
+        "colab_em": 1.0,
+        "local_level": "Trung bình",
+        "colab_level": "Trung bình",
+        "answer_match": true
+      },
+      {
+        "image": "bia_sach.jpg",
+        "question": "Tên cuốn sách trong hình là gì?",
+        "answers": [
+          "khúc hát đêm thâu"
+        ],
+        "local_pred": "khúc hát đêm thâu",
+        "colab_pred": "khúc hát đêm thâu",
+        "local_em": 1.0,
+        "colab_em": 1.0,
+        "local_level": "Thấp",
+        "colab_level": "Thấp",
+        "answer_match": true
+      },
+      {
+        "image": "bang_go_trang_tri.jpg",
+        "question": "Trên bảng gỗ có dòng chữ lớn màu xanh nào?",
+        "answers": [
+          "làm đi"
+        ],
+        "local_pred": "làm đi",
+        "colab_pred": "làm đi",
+        "local_em": 1.0,
+        "colab_em": 1.0,
+        "local_level": "Thấp",
+        "colab_level": "Thấp",
+        "answer_match": true
+      },
+      {
+        "image": "bang_thong_tin_duoi_uoi.jpg",
+        "question": "Con đười ươi trên biển thông tin tên gì?",
+        "answers": [
+          "tèo"
+        ],
+        "local_pred": "tèo",
+        "colab_pred": "tèo",
+        "local_em": 1.0,
+        "colab_em": 1.0,
+        "local_level": "Cao",
+        "colab_level": "Cao",
+        "answer_match": true
+      },
+      {
+        "image": "ga_metro.jpg",
+        "question": "Trong ảnh có chữ HCMC METRO không?",
+        "answers": [
+          "có"
+        ],
+        "local_pred": "có",
+        "colab_pred": "có",
+        "local_em": 1.0,
+        "colab_em": 1.0,
+        "local_level": "Trung bình",
+        "colab_level": "Trung bình",
+        "answer_match": true
+      },
+      {
+        "image": "goi_khan_uot.jpg",
+        "question": "Khăn ướt trong ảnh có thương hiệu nào?",
+        "answers": [
+          "lamy"
+        ],
+        "local_pred": "lamy",
+        "colab_pred": "lamy",
+        "local_em": 1.0,
+        "colab_em": 1.0,
+        "local_level": "Thấp",
+        "colab_level": "Thấp",
+        "answer_match": true
+      },
+      {
+        "image": "hop_dien_thoai.jpg",
+        "question": "Trong ảnh có con chó thật không?",
+        "answers": [
+          "không"
+        ],
+        "local_pred": "không",
+        "colab_pred": "không",
+        "local_em": 1.0,
+        "colab_em": 1.0,
+        "local_level": "Trung bình",
+        "colab_level": "Trung bình",
+        "answer_match": true
+      },
+      {
+        "image": "anh_meo_trong_khung.jpg",
+        "question": "Trong ảnh có con chó không?",
+        "answers": [
+          "không"
+        ],
+        "local_pred": "không",
+        "colab_pred": "không",
+        "local_em": 1.0,
+        "colab_em": 1.0,
+        "local_level": "Trung bình",
+        "colab_level": "Trung bình",
+        "answer_match": true
+      },
+      {
+        "image": "moc_ao.jpg",
+        "question": "Vật kim loại treo trên cửa sổ là gì?",
+        "answers": [
+          "móc áo",
+          "móc treo quần áo"
+        ],
+        "local_pred": "dây",
+        "colab_pred": "dây",
+        "local_em": 0.0,
+        "colab_em": 0.0,
+        "local_level": "Thấp",
+        "colab_level": "Thấp",
+        "answer_match": true
+      },
+      {
+        "image": "bo_ho_nuoc_ban_dem.jpg",
+        "question": "Phía trước hồ nước là bề mặt gì?",
+        "answers": [
+          "cát",
+          "bãi cát"
+        ],
+        "local_pred": "sân cát",
+        "colab_pred": "sân cát",
+        "local_em": 0.0,
+        "colab_em": 0.0,
+        "local_level": "Thấp",
+        "colab_level": "Thấp",
+        "answer_match": true
+      },
+      {
+        "image": "dan_meo_con.jpg",
+        "question": "Trong ảnh có bao nhiêu con mèo?",
+        "answers": [
+          "5",
+          "5 con"
+        ],
+        "local_pred": "sáu",
+        "colab_pred": "sáu",
+        "local_em": 0.0,
+        "colab_em": 0.0,
+        "local_level": "Trung bình",
+        "colab_level": "Trung bình",
+        "answer_match": true
+      },
+      {
+        "image": "duong_pho_chieu_ta.jpg",
+        "question": "Trong ảnh có con chó không?",
+        "answers": [
+          "không"
+        ],
+        "local_pred": "không",
+        "colab_pred": "không",
+        "local_em": 1.0,
+        "colab_em": 1.0,
+        "local_level": "Trung bình",
+        "colab_level": "Trung bình",
+        "answer_match": true
+      },
+      {
+        "image": "canh_xe_dem.jpg",
+        "question": "Trong ảnh có bao nhiêu chiếc ô tô?",
+        "answers": [
+          "1",
+          "một"
+        ],
+        "local_pred": "1",
+        "colab_pred": "1",
+        "local_em": 1.0,
+        "colab_em": 1.0,
+        "local_level": "Thấp",
+        "colab_level": "Thấp",
+        "answer_match": true
+      }
+    ],
+    "mismatches": []
+  },
+  "demo": {
+    "desktop": "C:\\Users\\GIGA\\OneDrive\\Desktop\\demo_images",
+    "main": [
+      {
+        "file": "01_chai_xit_con_trung.jpg",
+        "image": "chai_xit_con_trung.jpg",
+        "question": "Bình xịt côn trùng có hương gì?",
+        "prediction": "cam chanh",
+        "level": "Trung bình",
+        "tag": "doc_chu_nhieu_dau"
+      },
+      {
+        "file": "02_bang_thong_tin_duoi_uoi.jpg",
+        "image": "bang_thong_tin_duoi_uoi.jpg",
+        "question": "Con đười ươi trên biển thông tin tên gì?",
+        "prediction": "tèo",
+        "level": "Cao",
+        "tag": "doc_chu_ten"
+      },
+      {
+        "file": "03_cua_hang_dac_san.jpg",
+        "image": "cua_hang_dac_san.jpg",
+        "question": "Cửa hàng bán đặc sản của địa phương nào?",
+        "prediction": "hà nội",
+        "level": "Trung bình",
+        "tag": "doc_chu_dia_danh"
+      },
+      {
+        "file": "04_bang_noi_quy_thang_may.jpg",
+        "image": "bang_noi_quy_thang_may.jpg",
+        "question": "Thang máy có tải trọng tối đa bao nhiêu kg?",
+        "prediction": "1150kg",
+        "level": "Trung bình",
+        "tag": "so_gia"
+      },
+      {
+        "file": "05_anh_meo_trong_khung.jpg",
+        "image": "anh_meo_trong_khung.jpg",
+        "question": "Trong ảnh có con chó không?",
+        "prediction": "không",
+        "level": "Trung bình",
+        "tag": "yesno_khong_co_vat"
+      },
+      {
+        "file": "06_canh_xe_dem.jpg",
+        "image": "canh_xe_dem.jpg",
+        "question": "Trong ảnh có bao nhiêu chiếc ô tô?",
+        "prediction": "1",
+        "level": "Thấp",
+        "tag": "dem_so_nho"
+      },
+      {
+        "file": "07_duong_pho_chieu_ta.jpg",
+        "image": "duong_pho_chieu_ta.jpg",
+        "question": "Trong ảnh có con chó không?",
+        "prediction": "không",
+        "level": "Trung bình",
+        "tag": "yesno_khong_co_vat"
+      },
+      {
+        "file": "08_ga_metro.jpg",
+        "image": "ga_metro.jpg",
+        "question": "Trong ảnh có chữ HCMC METRO không?",
+        "prediction": "có",
+        "level": "Trung bình",
+        "tag": "yesno_chu"
+      }
+    ],
+    "du_phong": [
+      "bang_huong_dan_y_te.jpg",
+      "may_anh_canon.jpg",
+      "bia_sach.jpg",
+      "bang_go_trang_tri.jpg",
+      "goi_khan_uot.jpg",
+      "hop_dien_thoai.jpg"
+    ],
+    "gioi_han": [
+      {
+        "file": "xe_buyt_nha_khoa.jpg",
+        "prediction": "orion",
+        "answers": [
+          "nha khoa orion"
+        ],
+        "error_type": "chữ gây nhiễu",
+        "question": "Trên xe buýt quảng cáo nha khoa nào?"
+      },
+      {
+        "file": "tui_cua_hang.jpg",
+        "prediction": "eleven",
+        "answers": [
+          "7-eleven",
+          "7 eleven"
+        ],
+        "error_type": "OCR đọc sai",
+        "question": "Túi trong ảnh mang thương hiệu nào?"
+      },
+      {
+        "file": "binh_chua_chay.jpg",
+        "prediction": "lắp dụng bình pccc",
+        "answers": [
+          "tủ đựng bình pccc",
+          "tủ đựng bình pccc 114"
+        ],
+        "error_type": "OCR đọc sai",
+        "question": "Trên thùng đựng bình có chữ gì?"
+      },
+      {
+        "file": "moc_ao.jpg",
+        "prediction": "dây",
+        "answers": [
+          "móc áo",
+          "móc treo quần áo"
+        ],
+        "error_type": "lệch đáp án",
+        "question": "Vật kim loại treo trên cửa sổ là gì?"
+      },
+      {
+        "file": "bo_ho_nuoc_ban_dem.jpg",
+        "prediction": "sân cát",
+        "answers": [
+          "cát",
+          "bãi cát"
+        ],
+        "error_type": "lệch đáp án",
+        "question": "Phía trước hồ nước là bề mặt gì?"
+      },
+      {
+        "file": "dan_meo_con.jpg",
+        "prediction": "sáu",
+        "answers": [
+          "5",
+          "5 con"
+        ],
+        "error_type": "đếm",
+        "question": "Trong ảnh có bao nhiêu con mèo?"
+      }
+    ]
+  },
+  "records": [
+    {
+      "set": "w13",
+      "qid": "w13_001",
+      "image": "xe_buyt_nha_khoa.jpg",
+      "question": "Trên xe buýt quảng cáo nha khoa nào?",
+      "answers": [
+        "nha khoa orion"
+      ],
+      "prediction": "orion",
+      "em": 0.0,
+      "mode": "open",
+      "level": "Thấp",
+      "confidence": 0.6644681813381884,
+      "n_ocr_lines": 4,
+      "ocr_texts": [
+        "NONHAKHOAORIONS",
+        "ĐỘI NGŨ",
+        "THẠC SĨ BÁC SL CHUYÊN KHOAI",
+        "TRONG THỊ THỊ THUẬN THỊ THUẬN THỊ NHẤT"
+      ],
+      "img_size": [
+        1536,
+        2048
+      ],
+      "orig_size": [
+        1536,
+        2048
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 7.5197,
+      "t_model": 1.2884043000231031,
+      "t_total": 8.908196000003954,
+      "tag": "doc_chu_thuong_hieu"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_002",
+      "image": "bang_huong_dan_y_te.jpg",
+      "question": "Ứng dụng được hướng dẫn cài đặt tên là gì?",
+      "answers": [
+        "công dân số tphcm"
+      ],
+      "prediction": "công dân số tphcm",
+      "em": 1.0,
+      "mode": "open",
+      "level": "Trung bình",
+      "confidence": 0.9230138269879152,
+      "n_ocr_lines": 75,
+      "ocr_texts": [
+        "HƯỚNG DÂN",
+        "CÀI ĐẶT VÀ TỰ KHAI BÁO THÔNG TIN",
+        "HỒ SƠ SỨC KHỎE",
+        "TRÊN ỨNG DỤNG CÔNG DÂN SỐ TPHCM",
+        "HUỐNG DI",
+        "KHÁCH VI FOR",
+        "00",
+        "HƯỚNG DẪN CÀI ĐẶT",
+        "1",
+        "DÀNH CHO ANDROID",
+        "3",
+        "4",
+        "5",
+        "2",
+        "Tìm kiếm",
+        "? Công dân số TPHCM\"",
+        "(hoặc quét QRCode)",
+        "Cài đặt",
+        "Chào mừng đến với",
+        "Công dân số TPHCM",
+        "Mở ứng dụng",
+        "Mở ứng dụng",
+        "Chọn ứng dụng",
+        "?Cài đặt?",
+        "Nhấn",
+        "Mở ứng dụng",
+        "Google Play",
+        "\"Công dân số TPHCM\"",
+        "để sử dụng các tiện ích",
+        "và đăng nhập",
+        "DÀNH CHO IOS (IPHONE)",
+        "3",
+        "4",
+        "1",
+        "Tìm kiếm",
+        "2?Công dân số TPHCM?",
+        "Nhận",
+        "Chào mừng đến với",
+        "(hoặc quét QRCode)",
+        "Công cần số đếm với",
+        "Woứng dụng"
+      ],
+      "img_size": [
+        1536,
+        2048
+      ],
+      "orig_size": [
+        1536,
+        2048
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 12.9712,
+      "t_model": 2.031528499996057,
+      "t_total": 15.09943909998401,
+      "tag": "doc_chu_nhieu_dau"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_003",
+      "image": "tui_cua_hang.jpg",
+      "question": "Túi trong ảnh mang thương hiệu nào?",
+      "answers": [
+        "7-eleven",
+        "7 eleven"
+      ],
+      "prediction": "eleven",
+      "em": 0.0,
+      "mode": "open",
+      "level": "Trung bình",
+      "confidence": 0.9506543798258539,
+      "n_ocr_lines": 7,
+      "ocr_texts": [
+        "ELEVEN",
+        "Swell",
+        "5",
+        "201",
+        "brben",
+        "commerciovenium",
+        "hydrong"
+      ],
+      "img_size": [
+        1536,
+        2048
+      ],
+      "orig_size": [
+        1536,
+        2048
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 6.9547,
+      "t_model": 1.1994449000048917,
+      "t_total": 8.250856300001033,
+      "tag": "doc_chu_thuong_hieu"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_004",
+      "image": "cua_hang_dac_san.jpg",
+      "question": "Cửa hàng bán đặc sản của địa phương nào?",
+      "answers": [
+        "hà nội"
+      ],
+      "prediction": "hà nội",
+      "em": 1.0,
+      "mode": "open",
+      "level": "Trung bình",
+      "confidence": 0.9398230483045407,
+      "n_ocr_lines": 10,
+      "ocr_texts": [
+        "CỬA HÀNG ĐẶC SẢN",
+        "HANO",
+        "HANO",
+        "CÓ BÁN",
+        "hận đặt hàng m",
+        "Sau 22h911 m Siên",
+        "50Y",
+        "BAN",
+        "ĐỒ GIA DỤNG",
+        "RAUCUQUA"
+      ],
+      "img_size": [
+        1536,
+        2048
+      ],
+      "orig_size": [
+        1536,
+        2048
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 7.879,
+      "t_model": 1.3152693000156432,
+      "t_total": 9.290822000009939,
+      "tag": "doc_chu_dia_danh"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_005",
+      "image": "bang_noi_quy_thang_may.jpg",
+      "question": "Thang máy có tải trọng tối đa bao nhiêu kg?",
+      "answers": [
+        "1150kg",
+        "1150 kg"
+      ],
+      "prediction": "1150kg",
+      "em": 1.0,
+      "mode": "open",
+      "level": "Trung bình",
+      "confidence": 0.921846544469042,
+      "n_ocr_lines": 13,
+      "ocr_texts": [
+        "KHÔNG HÚT THUỐC",
+        "NO SMOKING",
+        "TRONG TRƯỜNG HỢP HOẢ HOẠN",
+        "KHÔNG ĐƯỢC SỬ DỤNG THANG MÁY",
+        "IN CASE OF FIRE, DO NOT USE THE LIFT",
+        "QUÝ KHÁCH VUI LÒNG CHỈ BẤM NÚT",
+        "THANG MÁY THEO CHIỀU CẦN ĐI",
+        "PLEASE ONLY PUSH THE LIFT BUTTON IN",
+        "THE DIRECTION YOU WISH TO TRAVEL",
+        "QUÝ KHÁCH LƯU Y",
+        "TẢI TRONG THANG MÁY KHÔNG QUÁ",
+        "15 NGƯỜI/LƯỢT - 1150KG",
+        "MAXIMUM 15 PERSONS OR 1150KG"
+      ],
+      "img_size": [
+        1536,
+        2048
+      ],
+      "orig_size": [
+        1536,
+        2048
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 11.0596,
+      "t_model": 1.7537669999874197,
+      "t_total": 12.915752800006885,
+      "tag": "so_gia"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_006",
+      "image": "binh_chua_chay.jpg",
+      "question": "Trên thùng đựng bình có chữ gì?",
+      "answers": [
+        "tủ đựng bình pccc",
+        "tủ đựng bình pccc 114"
+      ],
+      "prediction": "lắp dụng bình pccc",
+      "em": 0.0,
+      "mode": "open",
+      "level": "Thấp",
+      "confidence": 0.5860092933017572,
+      "n_ocr_lines": 8,
+      "ocr_texts": [
+        "Commining",
+        "Shem",
+        "nam",
+        "REPRESSES",
+        "FIREVIE",
+        "TOMO",
+        "KÊ DỤNG BÌNH",
+        "PCCCH"
+      ],
+      "img_size": [
+        2048,
+        1536
+      ],
+      "orig_size": [
+        2048,
+        1536
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 7.1091,
+      "t_model": 1.5068762000009883,
+      "t_total": 8.705192699999316,
+      "tag": "doc_chu_thuong_hieu"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_007",
+      "image": "may_anh_canon.jpg",
+      "question": "Máy ảnh trong hình có chữ Canon không?",
+      "answers": [
+        "có"
+      ],
+      "prediction": "có",
+      "em": 1.0,
+      "mode": "yesno",
+      "level": "Trung bình",
+      "confidence": 0.9971689914278197,
+      "n_ocr_lines": 5,
+      "ocr_texts": [
+        "Canon",
+        "PowerShot",
+        "Issis",
+        "CONCONTRICTIONALISTS",
+        "Constructional"
+      ],
+      "img_size": [
+        2048,
+        1536
+      ],
+      "orig_size": [
+        2048,
+        1536
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 7.1405,
+      "t_model": 1.1080311000114307,
+      "t_total": 8.249500200006878,
+      "tag": "yesno_co_vat"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_008",
+      "image": "chai_xit_con_trung.jpg",
+      "question": "Bình xịt côn trùng có hương gì?",
+      "answers": [
+        "cam chanh",
+        "hương cam chanh"
+      ],
+      "prediction": "cam chanh",
+      "em": 1.0,
+      "mode": "open",
+      "level": "Trung bình",
+      "confidence": 0.9104994989770394,
+      "n_ocr_lines": 10,
+      "ocr_texts": [
+        "sc",
+        "ohnson",
+        "A Family Company",
+        "Raid",
+        "BÌNH XIT CÔN TRÙNG",
+        "RAID-",
+        "HƯƠNG CAM CHANH",
+        "Diệt nhanh, hiệu",
+        "quả mọi nơi",
+        "senraman"
+      ],
+      "img_size": [
+        1536,
+        2048
+      ],
+      "orig_size": [
+        1536,
+        2048
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 7.6829,
+      "t_model": 1.2945381000172347,
+      "t_total": 9.067586899996968,
+      "tag": "doc_chu_nhieu_dau"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_009",
+      "image": "bia_sach.jpg",
+      "question": "Tên cuốn sách trong hình là gì?",
+      "answers": [
+        "khúc hát đêm thâu"
+      ],
+      "prediction": "khúc hát đêm thâu",
+      "em": 1.0,
+      "mode": "open",
+      "level": "Thấp",
+      "confidence": 0.6954764801422537,
+      "n_ocr_lines": 6,
+      "ocr_texts": [
+        "KINDONG",
+        "NHAXUẤT BẢN KỊM ĐỒNG",
+        "BAUCHT",
+        "ĐỒM THAU",
+        "koioyama",
+        "ruyuhakyouka dich"
+      ],
+      "img_size": [
+        1536,
+        2048
+      ],
+      "orig_size": [
+        1536,
+        2048
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 7.5724,
+      "t_model": 1.5794078999897465,
+      "t_total": 9.258138000004692,
+      "tag": "doc_chu_nhieu_dau"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_010",
+      "image": "bang_go_trang_tri.jpg",
+      "question": "Trên bảng gỗ có dòng chữ lớn màu xanh nào?",
+      "answers": [
+        "làm đi"
+      ],
+      "prediction": "làm đi",
+      "em": 1.0,
+      "mode": "open",
+      "level": "Thấp",
+      "confidence": 0.7883176871000446,
+      "n_ocr_lines": 5,
+      "ocr_texts": [
+        "H?ty",
+        "LÀM ĐI",
+        "NIT",
+        "rx",
+        "THÔI"
+      ],
+      "img_size": [
+        1536,
+        2048
+      ],
+      "orig_size": [
+        1536,
+        2048
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 7.0291,
+      "t_model": 1.4521540999994613,
+      "t_total": 8.58418370000436,
+      "tag": "doc_chu_nhieu_dau"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_011",
+      "image": "bang_thong_tin_duoi_uoi.jpg",
+      "question": "Con đười ươi trên biển thông tin tên gì?",
+      "answers": [
+        "tèo"
+      ],
+      "prediction": "tèo",
+      "em": 1.0,
+      "mode": "open",
+      "level": "Cao",
+      "confidence": 0.9861492495462707,
+      "n_ocr_lines": 8,
+      "ocr_texts": [
+        "Trầm vien",
+        "SAIGON",
+        "BOTANICAL GARDENS",
+        "zoo8",
+        "Đười ươi",
+        "(Tên khoa học: Pongo pygmaeus)",
+        "Tèo",
+        "(16/8/2006)"
+      ],
+      "img_size": [
+        2048,
+        1536
+      ],
+      "orig_size": [
+        2048,
+        1536
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 8.0273,
+      "t_model": 1.3585621999809518,
+      "t_total": 9.485240599984536,
+      "tag": "doc_chu_ten"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_012",
+      "image": "ga_metro.jpg",
+      "question": "Trong ảnh có chữ HCMC METRO không?",
+      "answers": [
+        "có"
+      ],
+      "prediction": "có",
+      "em": 1.0,
+      "mode": "yesno",
+      "level": "Trung bình",
+      "confidence": 0.9981318785844209,
+      "n_ocr_lines": 6,
+      "ocr_texts": [
+        "Burn",
+        "Hamming",
+        "1.19",
+        "1-20",
+        "D",
+        "HCMCMETRO"
+      ],
+      "img_size": [
+        2048,
+        1536
+      ],
+      "orig_size": [
+        2048,
+        1536
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 7.0313,
+      "t_model": 1.0832600999856368,
+      "t_total": 8.115363799995976,
+      "tag": "yesno_chu"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_013",
+      "image": "goi_khan_uot.jpg",
+      "question": "Khăn ướt trong ảnh có thương hiệu nào?",
+      "answers": [
+        "lamy"
+      ],
+      "prediction": "lamy",
+      "em": 1.0,
+      "mode": "open",
+      "level": "Thấp",
+      "confidence": 0.7667231443321811,
+      "n_ocr_lines": 7,
+      "ocr_texts": [
+        "Lamy",
+        "KHĂN ƯỚT LAMY",
+        "KHÔNG PARABEN",
+        "KHÔNG CỒN",
+        "1",
+        "NƯỚC TINH KHIẾT",
+        "WIPE"
+      ],
+      "img_size": [
+        2048,
+        1536
+      ],
+      "orig_size": [
+        2048,
+        1536
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 7.5411,
+      "t_model": 1.158626299991738,
+      "t_total": 8.796611699974164,
+      "tag": "doc_chu_thuong_hieu"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_014",
+      "image": "hop_dien_thoai.jpg",
+      "question": "Trong ảnh có con chó thật không?",
+      "answers": [
+        "không"
+      ],
+      "prediction": "không",
+      "em": 1.0,
+      "mode": "yesno",
+      "level": "Trung bình",
+      "confidence": 0.9945525395645446,
+      "n_ocr_lines": 36,
+      "ocr_texts": [
+        "1830",
+        "communicates",
+        "1995",
+        "03100001360",
+        "Promissions",
+        "Droo",
+        "16:30",
+        "advestions",
+        "Unsay",
+        "0310001990",
+        "misse",
+        "B",
+        "constructions",
+        "03800000039",
+        "5",
+        "Homeographically",
+        "THANH THE CHOOLOGY",
+        "salitionism",
+        "Merrago",
+        "miscounts",
+        "Transless",
+        "Conserved",
+        "nè",
+        "Specializes",
+        "Manistical",
+        "Coalycủa bones",
+        "Whisky",
+        "Stationed",
+        "Manifications",
+        "Hoadlier",
+        "Stransformed",
+        "nào không",
+        "Stransman",
+        "Convertion",
+        "Message",
+        "alm"
+      ],
+      "img_size": [
+        1536,
+        2048
+      ],
+      "orig_size": [
+        1536,
+        2048
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 8.6502,
+      "t_model": 1.2102040000027046,
+      "t_total": 9.85508840001421,
+      "tag": "yesno_khong_co_vat"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_015",
+      "image": "anh_meo_trong_khung.jpg",
+      "question": "Trong ảnh có con chó không?",
+      "answers": [
+        "không"
+      ],
+      "prediction": "không",
+      "em": 1.0,
+      "mode": "yesno",
+      "level": "Trung bình",
+      "confidence": 0.9969887407620711,
+      "n_ocr_lines": 1,
+      "ocr_texts": [
+        "XUÂN"
+      ],
+      "img_size": [
+        1536,
+        2048
+      ],
+      "orig_size": [
+        1536,
+        2048
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 6.8217,
+      "t_model": 1.0998358000069857,
+      "t_total": 7.911617600009777,
+      "tag": "yesno_khong_co_vat"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_016",
+      "image": "moc_ao.jpg",
+      "question": "Vật kim loại treo trên cửa sổ là gì?",
+      "answers": [
+        "móc áo",
+        "móc treo quần áo"
+      ],
+      "prediction": "dây",
+      "em": 0.0,
+      "mode": "open",
+      "level": "Thấp",
+      "confidence": 0.34183298410549035,
+      "n_ocr_lines": 0,
+      "ocr_texts": [],
+      "img_size": [
+        2048,
+        1536
+      ],
+      "orig_size": [
+        2048,
+        1536
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 6.7643,
+      "t_model": 1.4066023000050336,
+      "t_total": 8.276557599980151,
+      "tag": "vat_the"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_017",
+      "image": "bo_ho_nuoc_ban_dem.jpg",
+      "question": "Phía trước hồ nước là bề mặt gì?",
+      "answers": [
+        "cát",
+        "bãi cát"
+      ],
+      "prediction": "sân cát",
+      "em": 0.0,
+      "mode": "open",
+      "level": "Thấp",
+      "confidence": 0.4656682113353472,
+      "n_ocr_lines": 1,
+      "ocr_texts": [
+        "midmaship"
+      ],
+      "img_size": [
+        2048,
+        1536
+      ],
+      "orig_size": [
+        2048,
+        1536
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 6.8613,
+      "t_model": 1.4806600000010803,
+      "t_total": 8.431856699986383,
+      "tag": "vat_the_mau_sac"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_018",
+      "image": "dan_meo_con.jpg",
+      "question": "Trong ảnh có bao nhiêu con mèo?",
+      "answers": [
+        "5",
+        "5 con"
+      ],
+      "prediction": "sáu",
+      "em": 0.0,
+      "mode": "open",
+      "level": "Trung bình",
+      "confidence": 0.9323198902999656,
+      "n_ocr_lines": 0,
+      "ocr_texts": [],
+      "img_size": [
+        1536,
+        2048
+      ],
+      "orig_size": [
+        1536,
+        2048
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 6.9475,
+      "t_model": 1.4075784000160638,
+      "t_total": 8.447635400021682,
+      "tag": "dem_so_nho"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_019",
+      "image": "duong_pho_chieu_ta.jpg",
+      "question": "Trong ảnh có con chó không?",
+      "answers": [
+        "không"
+      ],
+      "prediction": "không",
+      "em": 1.0,
+      "mode": "yesno",
+      "level": "Trung bình",
+      "confidence": 0.9983372510601902,
+      "n_ocr_lines": 2,
+      "ocr_texts": [
+        "JACOLOGY",
+        "II"
+      ],
+      "img_size": [
+        1536,
+        2048
+      ],
+      "orig_size": [
+        1536,
+        2048
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 6.9187,
+      "t_model": 1.0301461000053678,
+      "t_total": 7.950519000005443,
+      "tag": "yesno_khong_co_vat"
+    },
+    {
+      "set": "w13",
+      "qid": "w13_020",
+      "image": "canh_xe_dem.jpg",
+      "question": "Trong ảnh có bao nhiêu chiếc ô tô?",
+      "answers": [
+        "1",
+        "một"
+      ],
+      "prediction": "1",
+      "em": 1.0,
+      "mode": "open",
+      "level": "Thấp",
+      "confidence": 0.45242303895778296,
+      "n_ocr_lines": 1,
+      "ocr_texts": [
+        "consat"
+      ],
+      "img_size": [
+        2048,
+        1536
+      ],
+      "orig_size": [
+        2048,
+        1536
+      ],
+      "rotated": false,
+      "resized": false,
+      "t_ocr": 6.8373,
+      "t_model": 1.1846164999878965,
+      "t_total": 8.12112180000986,
+      "tag": "dem_so_nho"
+    }
+  ],
+  "demo_refined": {
+    "desktop": "C:\\Users\\GIGA\\OneDrive\\Desktop\\demo_images",
+    "core": [
+      "00_vivqa_test_qua_bong.jpg",
+      "01_cua_hang_dac_san.jpg",
+      "02_chai_xit_con_trung.jpg",
+      "03_bang_noi_quy_thang_may.jpg",
+      "04_duong_pho_chieu_ta.jpg"
+    ],
+    "them": [
+      "05_bang_thong_tin_duoi_uoi.jpg",
+      "06_ga_metro.jpg",
+      "07_canh_xe_dem.jpg"
+    ],
+    "vivqa_core": {
+      "id": "test_23",
+      "image": "COCO_train2014_000000292302.jpg",
+      "image_in_train": false,
+      "question": "màu của quả bóng là gì",
+      "prediction_local": "màu cam",
+      "level": "Cao"
+    },
+    "vivqa_du_phong": {
+      "id": "test_134",
+      "image": "COCO_train2014_000000116650.jpg",
+      "image_in_train": false,
+      "question": "màu của xe buýt là gì",
+      "prediction_local": "màu đỏ"
+    },
+    "em_vivqa_c3_pct": 76.64,
+    "em_vivqa_sh_pct": 73.51,
+    "em_source": "experiments/W11_full_eval_table/full_eval_table.json (+ .csv same table)",
+    "candidates_local_match": "8/8",
+    "speak_line_00": "Câu hỏi chung về ảnh từ tập test ViVQA (ảnh không có trong dữ liệu huấn luyện). Adapter dùng chung (SH) trong demo đạt EM 73,51% trên ViVQA test; adapter riêng ViVQA (C3) đạt 76,64%.",
+    "candidates_image_in_train": {
+      "test_2397": false,
+      "test_142": true,
+      "test_23": false,
+      "test_337": false,
+      "test_299": false,
+      "test_279": false,
+      "test_180": false,
+      "test_134": false
+    }
+  }
+}

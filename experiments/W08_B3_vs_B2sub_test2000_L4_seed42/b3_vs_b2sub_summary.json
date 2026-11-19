@@ -1,0 +1,162 @@
+{
+  "what": "B3 (QLoRA + OCR) vs B2-sub (QLoRA, không OCR), cùng tập con 8.000 câu, test2000 (W08)",
+  "rule": "B3 cải thiện nếu EM tăng và McNemar exact p < 0,05; ANLS kèm CI95 bootstrap ghép cặp (10.000, seed 42)",
+  "ocr_config": {
+    "backend": "paddledet_vietocr",
+    "template": "v1",
+    "max_chars": 600,
+    "min_conf": 0.0,
+    "max_chars_needs_review": false
+  },
+  "train_subset_sha256": "093ab061edbbdcb1eae7abe1f45884eee462cfedb82b7864e6854bf3f0e847d9",
+  "table": [
+    {
+      "run": "B1 zero-shot",
+      "EM": 0.288,
+      "ANLS": 0.4753,
+      "token-F1 (phụ)": 0.5377,
+      "s/câu": 0.862
+    },
+    {
+      "run": "B2 (full 35.159 câu, không OCR)",
+      "EM": 0.497,
+      "ANLS": 0.7191,
+      "token-F1 (phụ)": 0.7101,
+      "s/câu": 1.011
+    },
+    {
+      "run": "B2-sub (8.000 câu, không OCR)",
+      "EM": 0.4555,
+      "ANLS": 0.6848,
+      "token-F1 (phụ)": 0.6692,
+      "s/câu": 1.021
+    },
+    {
+      "run": "B3 (8.000 câu, có OCR)",
+      "EM": 0.4925,
+      "ANLS": 0.7038,
+      "token-F1 (phụ)": 0.6981,
+      "s/câu": 1.001
+    }
+  ],
+  "train_cost": [
+    {
+      "run": "B2sub",
+      "mẫu train": 8000,
+      "step": 500,
+      "giờ train": 2.76,
+      "s/step": 19.892,
+      "VRAM đỉnh (GB)": 6.85,
+      "loss cuối": 0.7161,
+      "tham số train (%)": 0.196,
+      "chạy tiếp từ": null
+    },
+    {
+      "run": "B3",
+      "mẫu train": 8000,
+      "step": 500,
+      "giờ train": 2.98,
+      "s/step": 21.48,
+      "VRAM đỉnh (GB)": 8.25,
+      "loss cuối": 0.6605,
+      "tham số train (%)": 0.196,
+      "chạy tiếp từ": null
+    }
+  ],
+  "paired": {
+    "B2sub_vs_B3": {
+      "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W08_B2sub_eval_qlora_r16_sub8k_ep1_vitextvqa_test2000_bf16_L4_seed42",
+      "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W08_B3_eval_qlora_ocr_vietocr_v1_r16_sub8k_ep1_vitextvqa_test2000_bf16_L4_seed42",
+      "label_a": "B2sub",
+      "label_b": "B3",
+      "n": 2000,
+      "n_both_correct": 830,
+      "n_only_a": 81,
+      "n_only_b": 155,
+      "n_both_wrong": 934,
+      "b": 81,
+      "c": 155,
+      "p_value": 1.6726217992507386e-06,
+      "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+      "em_a": 0.4555,
+      "em_b": 0.4925,
+      "em_diff": 0.03699999999999998,
+      "anls_threshold": 0.5,
+      "anls_a": 0.6847517890602092,
+      "anls_b": 0.7038322141490067,
+      "anls_diff": 0.019080425088797478,
+      "anls_ci95": [
+        0.007287292961532174,
+        0.03088463514782183
+      ],
+      "bootstrap": {
+        "n_resamples": 10000,
+        "seed": 42,
+        "method": "paired percentile"
+      }
+    },
+    "B2_vs_B3_info": {
+      "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B2_eval_qlora_r16_ep1_vitextvqa_test2000_bf16_L4_seed42",
+      "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W08_B3_eval_qlora_ocr_vietocr_v1_r16_sub8k_ep1_vitextvqa_test2000_bf16_L4_seed42",
+      "label_a": "B2",
+      "label_b": "B3",
+      "n": 2000,
+      "n_both_correct": 838,
+      "n_only_a": 156,
+      "n_only_b": 147,
+      "n_both_wrong": 859,
+      "b": 156,
+      "c": 147,
+      "p_value": 0.6458839952205913,
+      "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+      "em_a": 0.497,
+      "em_b": 0.4925,
+      "em_diff": -0.004500000000000004,
+      "anls_threshold": 0.5,
+      "anls_a": 0.7190867530738413,
+      "anls_b": 0.7038322141490067,
+      "anls_diff": -0.015254538924834546,
+      "anls_ci95": [
+        -0.028839403354232844,
+        -0.0016779730857536153
+      ],
+      "bootstrap": {
+        "n_resamples": 10000,
+        "seed": 42,
+        "method": "paired percentile"
+      }
+    },
+    "B2_vs_B2sub_info": {
+      "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B2_eval_qlora_r16_ep1_vitextvqa_test2000_bf16_L4_seed42",
+      "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W08_B2sub_eval_qlora_r16_sub8k_ep1_vitextvqa_test2000_bf16_L4_seed42",
+      "label_a": "B2",
+      "label_b": "B2sub",
+      "n": 2000,
+      "n_both_correct": 840,
+      "n_only_a": 154,
+      "n_only_b": 71,
+      "n_both_wrong": 935,
+      "b": 154,
+      "c": 71,
+      "p_value": 3.236050944916202e-08,
+      "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+      "em_a": 0.497,
+      "em_b": 0.4555,
+      "em_diff": -0.04149999999999998,
+      "anls_threshold": 0.5,
+      "anls_a": 0.7190867530738413,
+      "anls_b": 0.6847517890602092,
+      "anls_diff": -0.03433496401363202,
+      "anls_ci95": [
+        -0.04695384244437866,
+        -0.022384158162520363
+      ],
+      "bootstrap": {
+        "n_resamples": 10000,
+        "seed": 42,
+        "method": "paired percentile"
+      }
+    }
+  },
+  "verdict_B3_vs_B2sub": "CẢI THIỆN"
+}

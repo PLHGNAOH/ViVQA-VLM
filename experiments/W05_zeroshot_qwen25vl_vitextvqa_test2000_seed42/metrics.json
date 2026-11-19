@@ -1,0 +1,51 @@
+{
+  "metrics": {
+    "exact_match": 0.285,
+    "vqa_accuracy": 0.285,
+    "anls": 0.4675767714937958,
+    "exact_match__unknown": 0.285,
+    "vqa_accuracy__unknown": 0.285,
+    "anls__unknown": 0.4675767714937958
+  },
+  "meta": {
+    "run_name": "W05_zeroshot_qwen25vl_vitextvqa_test2000_seed42",
+    "finished_utc": "2026-09-27T03:57:58+00:00",
+    "num_samples": 2000,
+    "question_type_counts": {
+      "unknown": 2000
+    },
+    "prompting_mode": "zero_shot",
+    "decoding": "greedy (do_sample=False)",
+    "max_new_tokens": 32,
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "quantization": {
+      "4bit": true,
+      "type": "nf4",
+      "double_quant": true,
+      "compute_dtype": "float16"
+    },
+    "torch_dtype": "float16",
+    "min_pixels": 200704,
+    "max_pixels": 401408,
+    "seed": 42,
+    "git_commit": "ae1cf6d",
+    "config_file": "configs/qwen_lora.yaml",
+    "hardware": {
+      "gpus_seen": [
+        "Tesla T4"
+      ],
+      "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+    },
+    "inference_time_sec": 2701.8,
+    "sec_per_sample": 1.351,
+    "dataset": "vitextvqa_official",
+    "data_file": "data/vitextvqa_official/test_subset2000_seed42.json",
+    "data_file_sha256": "69a8b35c64fb505147fbd7904b19dce3853d7b63a24bb888359bdff61b30f68e",
+    "limit": null,
+    "chunk_size": 500,
+    "versions": {
+      "transformers": "5.17.0",
+      "torch": "2.11.0+cu128"
+    }
+  }
+}

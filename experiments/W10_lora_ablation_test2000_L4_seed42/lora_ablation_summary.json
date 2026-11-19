@@ -1,0 +1,111 @@
+{
+  "what": "W10 ablation cấu hình LoRA trên công thức B3 (H3 vị trí gắn, H4 rank), test2000, seed 42",
+  "rule": "docs/W10/README.md mục Luật ablation LoRA",
+  "table": [
+    {
+      "so_sánh": "B3 -> A2",
+      "n": 2000,
+      "EM_B3": 0.4925,
+      "EM_A2": 0.487,
+      "ΔEM_điểm": -0.55,
+      "ΔEM_CI95_điểm": [
+        -1.6,
+        0.45
+      ],
+      "chỉ_B3_đúng": 60,
+      "chỉ_A2_đúng": 49,
+      "p_McNemar": 0.33818541219666115,
+      "ΔANLS": -0.0025,
+      "ΔANLS_CI95": [
+        -0.0116,
+        0.0068
+      ]
+    },
+    {
+      "so_sánh": "B3 -> A3",
+      "n": 2000,
+      "EM_B3": 0.4925,
+      "EM_A3": 0.503,
+      "ΔEM_điểm": 1.05,
+      "ΔEM_CI95_điểm": [
+        -0.05,
+        2.15
+      ],
+      "chỉ_B3_đúng": 51,
+      "chỉ_A3_đúng": 72,
+      "p_McNemar": 0.07090166737501423,
+      "ΔANLS": 0.0049,
+      "ΔANLS_CI95": [
+        -0.004,
+        0.014
+      ]
+    }
+  ],
+  "costs": [
+    {
+      "run": "B3",
+      "target_modules": "q_proj,k_proj,v_proj,o_proj",
+      "r": 16,
+      "alpha": 32,
+      "trainable_params": 7372800,
+      "trainable_pct": 0.196,
+      "lora_modules": null,
+      "lora_by_tower": null,
+      "train_h": 2.98,
+      "sec_per_step": 21.48,
+      "peak_vram_gb": 8.25,
+      "final_loss": 0.6605,
+      "seed": 42,
+      "resumed_from": null
+    },
+    {
+      "run": "A2",
+      "target_modules": "^(?!.*visual).*layers\\.\\d+\\.(self_attn\\.(q|k|v|o)_proj|mlp\\.(gate|up|down)_proj)$",
+      "r": 4,
+      "alpha": 8,
+      "trainable_params": 7483392,
+      "trainable_pct": 0.1989,
+      "lora_modules": 252,
+      "lora_by_tower": {
+        "llm": 252
+      },
+      "train_h": 3.51,
+      "sec_per_step": 25.239,
+      "peak_vram_gb": 8.26,
+      "final_loss": 0.6495,
+      "seed": 42,
+      "resumed_from": null
+    },
+    {
+      "run": "A3",
+      "target_modules": "q_proj,k_proj,v_proj,o_proj",
+      "r": 64,
+      "alpha": 128,
+      "trainable_params": 29491200,
+      "trainable_pct": 0.7793,
+      "lora_modules": 144,
+      "lora_by_tower": {
+        "llm": 144
+      },
+      "train_h": 2.9,
+      "sec_per_step": 20.852,
+      "peak_vram_gb": 8.58,
+      "final_loss": 0.638,
+      "seed": 42,
+      "resumed_from": null
+    }
+  ],
+  "verdict_H3": "H3 KHÔNG ĐƯỢC ỦNG HỘ: KHÔNG KHÁC BIỆT CÓ Ý NGHĨA",
+  "verdict_H4": "ỦNG HỘ H4: r = 64 KHÔNG KHÁC BIỆT CÓ Ý NGHĨA (bão hoà ở r = 16)",
+  "H4_strength": "yếu: CI95 ΔEM còn chứa giá trị > +1 điểm (test2000 chưa đủ nhạy để loại trừ)",
+  "limits": [
+    "1 seed huấn luyện (42); std EM của B3 qua 3 seed = 0,23 điểm (W09)",
+    "test2000: McNemar chỉ phát hiện được |ΔEM| khoảng ≥ 1,7 điểm; 'không khác biệt' = nhỏ hơn mức đo được"
+  ],
+  "adapter_mb": {
+    "B3": 28.2,
+    "A2": 28.6,
+    "A3": 112.5
+  },
+  "gpu": "NVIDIA L4"
+}

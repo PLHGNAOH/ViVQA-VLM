@@ -1,0 +1,64 @@
+{
+  "metrics": {
+    "exact_match": 0.882246740220662,
+    "vqa_accuracy": 0.882246740220662,
+    "anls": 0.882246740220662,
+    "token_f1": 0.882246740220662,
+    "exact_match__pope_yes": 0.758,
+    "vqa_accuracy__pope_yes": 0.758,
+    "anls__pope_yes": 0.758,
+    "token_f1__pope_yes": 0.758,
+    "exact_match__pope_no": 0.9357245337159253,
+    "vqa_accuracy__pope_no": 0.9357245337159253,
+    "anls__pope_no": 0.9357245337159253,
+    "token_f1__pope_no": 0.9357245337159253
+  },
+  "meta": {
+    "run_name": "W12_POPE_b1_zeroshot_qwen25vl_popevi_v1_bf16_L4_seed42",
+    "finished_utc": "2026-10-23T04:50:44+00:00",
+    "num_samples": 4985,
+    "question_type_counts": {
+      "pope_yes": 1500,
+      "pope_no": 3485
+    },
+    "prompting_mode": "zero_shot",
+    "decoding": "greedy (do_sample=False)",
+    "max_new_tokens": 32,
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "backbone": "qwen2_5_vl",
+    "variant": null,
+    "quantization": {
+      "4bit": true,
+      "type": "nf4",
+      "double_quant": true,
+      "compute_dtype": "bfloat16"
+    },
+    "torch_dtype": "bfloat16",
+    "min_pixels": 200704,
+    "max_pixels": 401408,
+    "seed": 42,
+    "git_commit": "b09aff4",
+    "config_file": "configs/qwen_lora.yaml",
+    "hardware": {
+      "gpus_seen": [
+        "NVIDIA L4"
+      ],
+      "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+    },
+    "inference_time_sec": 1569.3,
+    "sec_per_sample": 0.315,
+    "peak_vram_gb_this_session": 2.54,
+    "dataset": "vivqa",
+    "data_file": "experiments/W12_pope_vi_questions/pope_vi_questions_v1.json",
+    "data_file_sha256": "53d04eb23ad41ecee372d6dee01201578de75d992d33dd2c5b94d4aa328928fd",
+    "limit": null,
+    "chunk_size": 500,
+    "adapter": null,
+    "few_shot": null,
+    "ocr": null,
+    "versions": {
+      "transformers": "5.17.0",
+      "torch": "2.11.0+cu130"
+    }
+  }
+}

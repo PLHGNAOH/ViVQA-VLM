@@ -1,0 +1,634 @@
+{
+  "live": "prototype-live-v2",
+  "version": "v2",
+  "rules": {
+    "n_images": 200,
+    "seed": 42,
+    "ocr_identical_min": 0.98,
+    "answer_identical_min": 0.97,
+    "em_drop_max": 1.5,
+    "warmup": 5,
+    "max_side": 6000,
+    "ocr_sim_min_descriptive": 0.9,
+    "ocr_pipeline_ref": "direct",
+    "exclude_rotated": true,
+    "cache_suffix": {
+      "vitextvqa_official": "_exiffix"
+    }
+  },
+  "ocr": {
+    "vivqa": {
+      "n_images": 200,
+      "identical": 1.0,
+      "n_diff": 0,
+      "diffs": [],
+      "sim_min": 0.9,
+      "n_below_sim": 0,
+      "similar": 1.0,
+      "min_similarity": 1.0
+    },
+    "vitextvqa_official": {
+      "n_images": 200,
+      "identical": 0.955,
+      "n_diff": 9,
+      "diffs": [
+        {
+          "image": "14173.jpg",
+          "live": [
+            "PGS25",
+            "unsenser",
+            "GS25",
+            "Lifestyle Platform"
+          ],
+          "cache": [
+            "PGS25",
+            "inversionalized",
+            "GS25",
+            "Lifestyle Platform"
+          ],
+          "rotated": false,
+          "similarity": 0.8211
+        },
+        {
+          "image": "16475.jpg",
+          "live": [
+            "ĐƠN VỊ THI CÔNG PHÒNG NET CAO CẤP THẾ",
+            "ĐẠI LYINTERNET VÀ ĐIỂM CUNG CẤP DỊCH VỤ TRÒ CHƠI ĐIỆN TỪ CÔNG CỘNG",
+            "ORBIT",
+            "NHẬT QUÂN",
+            "ORBIT",
+            "TUNG DÙNG KHAI TRUỦNG NETGAME",
+            "CONTENTS",
+            "Khuyến Mãi Nạp Thi Tặng",
+            "KM TRONG 3 NGÀY",
+            "100%",
+            "TỪ ĐẾN",
+            "0310001001001016 CHO HOA",
+            "BACHAN",
+            "constriptions",
+            "11"
+          ],
+          "cache": [
+            "ĐƠN VỊ THI CÔNG PHÒNG NET CAO CẤP THẾ",
+            "ĐẠI LYINTERNET VÀ ĐIỂM CUNG CẤP DỊCH VỤ TRÒ CHƠI ĐIỆN TỪ CÔNG CỘNG",
+            "ORBIT",
+            "NHẬT QUÂN",
+            "ORBIT",
+            "TUNG DÙNG KHAI TRUỦNG NETGAME",
+            "CONTENTS",
+            "Khuyến Mãi Nạp Thi Tặng",
+            "KM TRONG 3 NGÀY",
+            "100%",
+            "TỪ ĐẾN",
+            "Nhà một cho như trong cho Học",
+            "BACHAN",
+            "constriptions",
+            "11"
+          ],
+          "rotated": false,
+          "similarity": 0.9207
+        },
+        {
+          "image": "6351.jpg",
+          "live": [
+            "patibility",
+            "020",
+            "CONTENTINUATION",
+            "HỢP TÁC XÁT TÍNH CAM U",
+            "HTX NÔNG NGHIỆP BỊ GIA",
+            "LONG BUNG",
+            "LONG BINH",
+            "LONGUING"
+          ],
+          "cache": [
+            "mationing",
+            "020",
+            "CONTENTINUATION",
+            "HỢP TÁC XÁT TÍNH CAM U",
+            "HTX NÔNG NGHIỆP BỊ GIA",
+            "LONG BUNG",
+            "LONG BINH",
+            "LONGUING"
+          ],
+          "rotated": false,
+          "similarity": 0.9536
+        },
+        {
+          "image": "11842.jpg",
+          "live": [
+            "MONLAMISTHONGING",
+            "PROCRAMPTIONALISTS",
+            "WHATRUOC",
+            "LONG CHÂU",
+            "CẢN TRUN",
+            "1",
+            "HUỐI NHATRUOCLONG THỊ THUY",
+            "SPECISION",
+            "contenment",
+            "NHATHUOCCANTIC",
+            "HUỐC",
+            "CHUNCHERMAN",
+            "Thuốc gi",
+            "Lagia Dinh",
+            "Trong chau phem",
+            "Standouring",
+            "CONTRANSITION",
+            "CONTRANSITUDICTION",
+            "ta",
+            "Minh",
+            "UNDERCOMMUNICATION",
+            "M15",
+            "LOÀN",
+            "NHÀ THUỐC",
+            "QUÁY THUỐC",
+            "wreeking",
+            "vmc",
+            "LONGCHAUNTER",
+            "CÁN TRING",
+            "PIA",
+            "THUÔX",
+            "GIA",
+            "TRÊN 20 NĂM",
+            "1",
+            "18006928",
+            "CẦN THUỐC GỌP",
+            "TẠI",
+            "hoặc",
+            "SÀI GÒN",
+            "GIÁO TẬN NHẢI"
+          ],
+          "cache": [
+            "MONLAMISTHONGING",
+            "PROCRAMPTIONALISTS",
+            "WHATRUOC",
+            "LONG CHÂU",
+            "CẢN TRUN",
+            "1",
+            "HUỐI NHAT LƯỚC LONG THỊ THUY",
+            "SPECISION",
+            "contenment",
+            "NHATHUOCCANTIC",
+            "HUỐC",
+            "CHUNCHERMAN",
+            "Thuốc gi",
+            "Lagia Dinh",
+            "Trong chau phem",
+            "Standouring",
+            "CONTRANSITION",
+            "CONTRANSITUDICTION",
+            "ta",
+            "Minh",
+            "UNDERCOMMUNICATION",
+            "M15",
+            "LOÀN",
+            "NHÀ THUỐC",
+            "QUÁY THUỐC",
+            "wreeking",
+            "vmc",
+            "LONGCHAUNTER",
+            "CÁN TRING",
+            "PIA",
+            "THUÔX",
+            "GIA",
+            "TRÊN 20 NĂM",
+            "1",
+            "18006928",
+            "CẦN THUỐC GỌP",
+            "TẠI",
+            "hoặc",
+            "SÀI GÒN",
+            "GIÁO TẬN NHẢI"
+          ],
+          "rotated": false,
+          "similarity": 0.9917
+        },
+        {
+          "image": "10107.jpg",
+          "live": [
+            "201",
+            "charming",
+            "CITCHWORP",
+            "CÔNGS BỆNH VIỆN TƯ VẤN",
+            "GPKD:",
+            "031001001990",
+            "THUỘC SĨ MẠ TRÍCH NGUYỄN THỊ THÁI THANH",
+            "NHÀ",
+            "NHÀ"
+          ],
+          "cache": [
+            "201",
+            "charming",
+            "CITCHWORP",
+            "CONGS BỆNH VIỆN TƯ VẤN",
+            "GPKD:",
+            "031001001990",
+            "THUỘC SĨ MẠ TRÍCH NGUYỄN THỊ THÁI THANH",
+            "NHÀ",
+            "NHÀ"
+          ],
+          "rotated": false,
+          "similarity": 0.9922
+        },
+        {
+          "image": "10764.jpg",
+          "live": [
+            "0310000000199",
+            "tập đặt giá kệ siêu thị",
+            "DUITSUA",
+            "TRINGAS",
+            "Scho Đại Lý Sữa tai",
+            "Bảng Bàng-Tây Ninh",
+            "Kệ siêu thị Hanatech",
+            "0368124565"
+          ],
+          "cache": [
+            "0310000000199",
+            "tập đặt giá kệ siêu thị",
+            "DUTTSUA",
+            "TRINGAS",
+            "Scho Đại Lý Sữa tai",
+            "Bảng Bàng-Tây Ninh",
+            "Kệ siêu thị Hanatech",
+            "0368124565"
+          ],
+          "rotated": false,
+          "similarity": 0.9928
+        },
+        {
+          "image": "11243.jpg",
+          "live": [
+            "ANHDOAN",
+            "ongcoat",
+            "XE ĐIỆN HKBIKE HOÀNG HẢI",
+            "PEGA",
+            "Trài nghiêm lần tuyệt hảo, trái nghiệm xe tương lai",
+            "CƠ",
+            "IMSTRI3GOON",
+            "ĐC TAM PHƯỚC BIÊN HOA ĐN",
+            "0908.505 219.0347063387",
+            "Chuy",
+            "VĂN PHÒNG GIÁO ĐIỀN",
+            "CỬA HÀNG XEDIÊN THỊ",
+            "VĂN PHÒNG LUÂN",
+            "TỪNG BỪNG KHAI TRƯƠNG CỬA HÀNG",
+            "HKBIKE PEGA HOÀNG HẢI",
+            "DCLISTER",
+            "NGÀY 18/212018",
+            "pran",
+            "THAI T",
+            "HỒ TRỢ TRẢ GÓP LAI SUẤT THẤP KHI MUA XE TẠI CỬA HÀNG THÁNG",
+            "200k",
+            "ĐC: TAM PHƯỢC, HIỆN HÒA, ĐỒNG NAI",
+            "03270633337",
+            "MNONOMEAOHIEM CAOCAP THEO",
+            "Aplong Du EXXTam Phude Sien",
+            "preformisses",
+            "CAP.A3",
+            "CÂN TUYÊN",
+            "Chợ, Hàn"
+          ],
+          "cache": [
+            "ANHDOAN",
+            "ongcoat",
+            "XE ĐIỆN HKBIKE HOÀNG HẢI",
+            "PEGA",
+            "Trài nghiêm lần tuyệt hảo, trái nghiệm xe tương lai",
+            "CƠ",
+            "IMSTRI3GOON",
+            "ĐC TAM PHƯỚC BIÊN HOA ĐN",
+            "0908.505 219.0347063387",
+            "Chuy",
+            "VĂN PHÒNG GIÁO ĐIỀN",
+            "CỬA HÀNG XEDIÊN THỊ",
+            "VĂN PHÒNG LUÂN",
+            "TỪNG BỪNG KHAI TRƯƠNG CỬA HÀNG",
+            "HKBIKE PEGA HOÀNG HẢI",
+            "DCLISTER",
+            "NGÀY 18/212018",
+            "Snar",
+            "THAI T",
+            "HỒ TRỢ TRẢ GÓP LAI SUẤT THẤP KHI MUA XE TẠI CỬA HÀNG THÁNG",
+            "200k",
+            "ĐC: TAM PHƯỢC, HIỆN HÒA, ĐỒNG NAI",
+            "03270633337",
+            "MNONOMEAOHIEM CAOCAP THEO",
+            "Aplong Du EXXTam Phude Sien",
+            "preformisses",
+            "CAP.A3",
+            "CÂN TUYÊN",
+            "Chợ, Hàn"
+          ],
+          "rotated": false,
+          "similarity": 0.9947
+        },
+        {
+          "image": "15607.jpg",
+          "live": [
+            "SIÊU THỊ ĐIỆN MÁY, NỘI THẤY",
+            "LÊ CHỢ LỚN",
+            "SONY",
+            "PROCHOLONES",
+            "crow",
+            "Backolon",
+            "BÁN",
+            "KHUYÊN MÀI LỚN",
+            "MAINTUNG",
+            "Suhdive",
+            "TRẢ GÓP",
+            "%",
+            "convertmentalized",
+            "cao phong",
+            "concumments",
+            "CHIẾN THANH VIÊN",
+            "HYNGANGUOA",
+            "monomerchanding",
+            "10.000",
+            "GIẢM GIÁO",
+            "50",
+            "%",
+            "COMMONODOTOMY",
+            "oen",
+            "Presonominates",
+            "Recounters",
+            "Gune",
+            "Siêu thị điện máy Chợ Lớn",
+            "O top10dongnai.com"
+          ],
+          "cache": [
+            "SIÊU THỊ ĐIỆN MÁY, NỘI THẤY",
+            "LÊ CHỢ LỚN",
+            "SONY",
+            "PROCHOLONES",
+            "crow",
+            "Backolon",
+            "BÁN",
+            "KHUYÊN MÃ LỚN",
+            "MAINTUNG",
+            "Suhdive",
+            "TRẢ GÓP",
+            "%",
+            "convertmentalized",
+            "cao phong",
+            "concumments",
+            "CHIẾN THANH VIÊN",
+            "HYNGANGUOA",
+            "monomerchanding",
+            "10.000",
+            "GIẢM GIÁO",
+            "50",
+            "%",
+            "COMMONODOTOMY",
+            "oen",
+            "Presonominates",
+            "Recounters",
+            "Gune",
+            "Siêu thị điện máy Chợ Lớn",
+            "O top10dongnai.com"
+          ],
+          "rotated": false,
+          "similarity": 0.996
+        },
+        {
+          "image": "14445.jpg",
+          "live": [
+            "168",
+            "1",
+            "impressionable",
+            "Upsound",
+            "Stamped",
+            "Shop",
+            "0",
+            "p95",
+            "03100000099",
+            "668",
+            "2",
+            "209200",
+            "0842 272868-0922272868",
+            "indement",
+            "03100000199"
+          ],
+          "cache": [
+            "168",
+            "1",
+            "impressionable",
+            "Upsound",
+            "Stamped",
+            "Shop",
+            "0",
+            "p95",
+            "03100000099",
+            "668",
+            "2",
+            "209200",
+            "0842 272868-0922272868",
+            "indement",
+            "0310000019"
+          ],
+          "rotated": false,
+          "similarity": 0.9965
+        }
+      ],
+      "sim_min": 0.9,
+      "n_below_sim": 1,
+      "similar": 0.995,
+      "min_similarity": 0.8211
+    }
+  },
+  "answers": {
+    "vivqa": {
+      "n": 211,
+      "skipped_yesno": 0,
+      "skipped_rotated": 0,
+      "identical": 1.0,
+      "n_mismatch": 0,
+      "mismatches": [],
+      "em_live": 75.82938388625593,
+      "em_w11": 75.82938388625593,
+      "em_delta": 0.0
+    },
+    "vitextvqa_official": {
+      "n": 259,
+      "skipped_yesno": 0,
+      "skipped_rotated": 2,
+      "identical": 1.0,
+      "n_mismatch": 0,
+      "mismatches": [],
+      "em_live": 50.19305019305019,
+      "em_w11": 50.19305019305019,
+      "em_delta": 0.0
+    }
+  },
+  "latency": {
+    "vivqa": {
+      "n": 206,
+      "warmup_excluded": 5,
+      "sec_ocr": {
+        "p50": 0.041824936866760254,
+        "p95": 0.28373390436172485,
+        "max": 1.0205397605895996
+      },
+      "sec_vlm": {
+        "p50": 0.5439447164535522,
+        "p95": 0.8263565301895142,
+        "max": 0.8633434772491455
+      },
+      "sec_total": {
+        "p50": 0.613072395324707,
+        "p95": 0.8916409611701965,
+        "max": 1.5640740394592285
+      }
+    },
+    "vitextvqa_official": {
+      "n": 261,
+      "warmup_excluded": 0,
+      "sec_ocr": {
+        "p50": 0.7181258201599121,
+        "p95": 2.512279987335205,
+        "max": 4.220157146453857
+      },
+      "sec_vlm": {
+        "p50": 0.8321514129638672,
+        "p95": 1.8006908893585205,
+        "max": 3.352154016494751
+      },
+      "sec_total": {
+        "p50": 1.721315622329712,
+        "p95": 3.959768295288086,
+        "max": 5.840092658996582
+      }
+    },
+    "all": {
+      "n": 467,
+      "warmup_excluded": 5,
+      "sec_ocr": {
+        "p50": 0.32043933868408203,
+        "p95": 2.0974535226821898,
+        "max": 4.220157146453857
+      },
+      "sec_vlm": {
+        "p50": 0.6469705104827881,
+        "p95": 1.6233516931533813,
+        "max": 3.352154016494751
+      },
+      "sec_total": {
+        "p50": 1.0021209716796875,
+        "p95": 3.5789269685745237,
+        "max": 5.840092658996582
+      }
+    }
+  },
+  "meta": {
+    "run_name": "W14_LIVE_sh_ocrlive_v2_sample200img_bf16_L4_seed42",
+    "live": "prototype-live-v2",
+    "version": "v2",
+    "max_side": 6000,
+    "finished_utc": "2026-11-01T16:28:51+00:00",
+    "sample": {
+      "vivqa": {
+        "n_images": 200,
+        "n_questions": 211,
+        "question_ids_sha256": "90b2e600833862ede9cb5ec9c4750819207385f3eba9320812b532254fc7f3f0",
+        "data_file": "data/vivqa/test.json"
+      },
+      "vitextvqa_official": {
+        "n_images": 200,
+        "n_questions": 261,
+        "question_ids_sha256": "2ef6951ecef375abac937d0d9eaa00cda7d798468c73c9ebf9c5209e32ce7040",
+        "data_file": "data/vitextvqa_official/test_subset2000_seed42.json"
+      }
+    },
+    "n_images_per_dataset": 200,
+    "seed": 42,
+    "ocr_device": "gpu",
+    "ocr_selection": {
+      "backend": "paddledet_vietocr",
+      "template": "v1",
+      "max_chars": 600,
+      "min_conf": 0.0,
+      "max_chars_needs_review": false
+    },
+    "startup": {
+      "adapter": {
+        "weights_sha256": "c9791e961aaa58fdcd7d9baafede3bd7bd8c902acc9cc43917306f1e0fecc354",
+        "config_sha256": "5e5bae40c27b5905ccdd0189cad597f2ecf0727bbbabafe6685f489c31624553",
+        "weights_mb": 29.53
+      },
+      "ocr_engine": {
+        "engine": "PaddleOCR TextDetection + VietOCR",
+        "paddleocr": "3.7.0",
+        "paddlepaddle": "3.3.1",
+        "lang": "vi",
+        "device": "gpu",
+        "det_model": "PP-OCRv6_medium_det",
+        "rec_model": "vietocr/vgg_transformer",
+        "vietocr_config": "vgg_transformer, beamsearch=False",
+        "exif": "transpose-v1 (W14 R-EXIF)"
+      },
+      "ocr_check": {
+        "ok": true,
+        "diff": {},
+        "device_note": null
+      },
+      "sec_start_ocr": 17.2,
+      "sec_start_total": 60.8
+    },
+    "sec_run": 853.4,
+    "peak_vram_gb_main": 2.61,
+    "gpu_memory_end": {
+      "processes": [
+        {
+          "pid": 5024,
+          "mib": 2858
+        },
+        {
+          "pid": 16194,
+          "mib": 1926
+        }
+      ],
+      "total_mib": 4784
+    },
+    "gpu": "NVIDIA L4",
+    "versions": {
+      "torch": "2.11.0+cu130",
+      "transformers": "5.17.0"
+    }
+  },
+  "caches": {
+    "vivqa": "paddledet_vietocr.json",
+    "vitextvqa_official": "paddledet_vietocr_exiffix.json"
+  },
+  "ocr_pipeline": {
+    "vivqa": {
+      "n_images": 200,
+      "identical": 1.0,
+      "n_diff": 0,
+      "diffs": [],
+      "sim_min": 0.9,
+      "n_below_sim": 0,
+      "similar": 1.0,
+      "min_similarity": 1.0
+    },
+    "vitextvqa_official": {
+      "n_images": 200,
+      "identical": 1.0,
+      "n_diff": 0,
+      "diffs": [],
+      "sim_min": 0.9,
+      "n_below_sim": 0,
+      "similar": 1.0,
+      "min_similarity": 1.0
+    }
+  },
+  "levels": {
+    "Cao": 144,
+    "Trung bình": 156,
+    "Thấp": 172
+  },
+  "n_untouched_images": 470,
+  "n_rotated_records": 2,
+  "n_resized_records": 0,
+  "verdicts": {
+    "R-OCR": "ĐẠT",
+    "R-LIVE": "ĐẠT"
+  }
+}

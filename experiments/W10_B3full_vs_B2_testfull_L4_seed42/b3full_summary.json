@@ -1,0 +1,219 @@
+{
+  "n": 10028,
+  "cells": {
+    "B2sub": {
+      "desc": "23% train · không OCR",
+      "em": 0.46559633027522934,
+      "anls": 0.689015243759332
+    },
+    "B3": {
+      "desc": "23% train · OCR",
+      "em": 0.49102512963701633,
+      "anls": 0.7046678624881277
+    },
+    "B2": {
+      "desc": "100% train · không OCR (W07)",
+      "em": 0.5025927403270841,
+      "anls": 0.7202041338874611
+    },
+    "B3full": {
+      "desc": "100% train · OCR (W10)",
+      "em": 0.5335061826884723,
+      "anls": 0.7389297956472192
+    }
+  },
+  "effects": {
+    "ocr_at_23pct": {
+      "from": "B2sub",
+      "to": "B3",
+      "meaning": "OCR-aware, 23% dữ liệu (W09)",
+      "em_a": 0.46559633027522934,
+      "em_b": 0.49102512963701633,
+      "em_diff": 0.02542879936178699,
+      "n_only_a": 417,
+      "n_only_b": 672,
+      "p_value": 1.0589815657823601e-14,
+      "anls_diff": 0.01565261872879579,
+      "anls_ci95": [
+        0.010571755525229494,
+        0.020755069322783683
+      ]
+    },
+    "ocr_at_100pct": {
+      "from": "B2",
+      "to": "B3full",
+      "meaning": "OCR-aware, 100% dữ liệu — SO SÁNH CHÍNH",
+      "em_a": 0.5025927403270841,
+      "em_b": 0.5335061826884723,
+      "em_diff": 0.030913442361388155,
+      "n_only_a": 395,
+      "n_only_b": 705,
+      "p_value": 6.656884762445767e-21,
+      "anls_diff": 0.018725661759758035,
+      "anls_ci95": [
+        0.013752976009820467,
+        0.023603051371021474
+      ]
+    },
+    "data_without_ocr": {
+      "from": "B2sub",
+      "to": "B2",
+      "meaning": "thêm dữ liệu 23% -> 100%, không OCR",
+      "em_a": 0.46559633027522934,
+      "em_b": 0.5025927403270841,
+      "em_diff": 0.03699641005185478,
+      "n_only_a": 355,
+      "n_only_b": 726,
+      "p_value": 6.076000065758099e-30,
+      "anls_diff": 0.031188890128129133,
+      "anls_ci95": [
+        0.025957352396252527,
+        0.036524737517383415
+      ]
+    },
+    "data_with_ocr": {
+      "from": "B3",
+      "to": "B3full",
+      "meaning": "thêm dữ liệu 23% -> 100%, có OCR",
+      "em_a": 0.49102512963701633,
+      "em_b": 0.5335061826884723,
+      "em_diff": 0.04248105305145594,
+      "n_only_a": 341,
+      "n_only_b": 767,
+      "p_value": 2.955466721893527e-38,
+      "anls_diff": 0.03426193315909137,
+      "anls_ci95": [
+        0.02889885048766648,
+        0.03965187539929515
+      ]
+    }
+  },
+  "interaction_report_only": {
+    "exact_match": {
+      "mean": 0.005484642999601117,
+      "ci95": [
+        -0.001994415636218588,
+        0.012863980853609892
+      ],
+      "definition": "(B3full − B2) − (B3 − B2sub), trung bình theo câu"
+    },
+    "anls": {
+      "mean": 0.0030730430309622424,
+      "ci95": [
+        -0.002964197235681273,
+        0.009183641533921356
+      ],
+      "definition": "(B3full − B2) − (B3 − B2sub), trung bình theo câu"
+    }
+  },
+  "verdict_main": "OCR-AWARE VƯỢT B2 KHI ĐỦ DỮ LIỆU",
+  "rule": "B2 -> B3full: EM tăng & p<0,05 -> 'OCR-AWARE VƯỢT B2 KHI ĐỦ DỮ LIỆU'; EM giảm & p<0,05 -> 'OCR-AWARE KÉM B2 KHI ĐỦ DỮ LIỆU'; còn lại -> 'NGANG B2 KHI ĐỦ DỮ LIỆU'. Bảng 2×2 + tương tác: CHỈ BÁO CÁO.",
+  "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 42,
+    "method": "paired percentile"
+  },
+  "runs": {
+    "B2sub": "/content/drive/MyDrive/ViVQA-VLM/experiments/W09_B2sub_eval_qlora_r16_sub8k_ep1_vitextvqa_testfull_bf16_L4_seed42",
+    "B3": "/content/drive/MyDrive/ViVQA-VLM/experiments/W09_B3_eval_qlora_ocr_vietocr_v1_r16_sub8k_ep1_vitextvqa_testfull_bf16_L4_seed42",
+    "B2": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B2_eval_qlora_r16_ep1_vitextvqa_testfull_bf16_L4_seed42",
+    "B3full": "/content/drive/MyDrive/ViVQA-VLM/experiments/W10_B3full_eval_qlora_ocr_vietocr_v1_r16_full_ep1_vitextvqa_testfull_bf16_L4_seed42"
+  },
+  "vs_vitextblip2": {
+    "reference": {
+      "what": "Table 6, ViTextBLIP-2 (SOTA của paper), full test",
+      "em": 25.48,
+      "f1": 53.95,
+      "note": "Table 10/12 cùng paper ghi 24,83 EM / 52,51 F1 cho mô hình đầy đủ; paper không giải thích"
+    },
+    "source": "Nguyen et al., ViTextVQA, Expert Systems with Applications 2025, arXiv:2404.10652v5",
+    "EM": {
+      "ours_pct": 53.35,
+      "ours_ci95_pct": [
+        52.39,
+        54.33
+      ],
+      "published_pct": 25.48,
+      "diff_points": 27.87,
+      "n": 10028,
+      "verdict": "CAO HƠN số công bố"
+    },
+    "F1": {
+      "ours_pct": 73.73,
+      "ours_ci95_pct": [
+        73.02,
+        74.45
+      ],
+      "published_pct": 53.95,
+      "diff_points": 19.78,
+      "n": 10028,
+      "verdict": "CAO HƠN số công bố"
+    },
+    "rule": "CAO HƠN nếu cận dưới CI95 bootstrap > số công bố (xét riêng EM và F1)"
+  },
+  "reference": {
+    "what": "Table 6, ViTextBLIP-2 (SOTA của paper), full test",
+    "em": 25.48,
+    "f1": 53.95,
+    "note": "Table 10/12 cùng paper ghi 24,83 EM / 52,51 F1 cho mô hình đầy đủ; paper không giải thích"
+  },
+  "source": "Nguyen et al., ViTextVQA, Expert Systems with Applications 2025, arXiv:2404.10652v5",
+  "table": [
+    {
+      "run": "B2-sub (23%, không OCR)",
+      "EM": 46.56,
+      "ANLS": 68.9,
+      "F1 (phụ)": 67.83,
+      "s/câu": 0.983
+    },
+    {
+      "run": "B3 (23%, OCR)",
+      "EM": 49.1,
+      "ANLS": 70.47,
+      "F1 (phụ)": 70.03,
+      "s/câu": 0.983
+    },
+    {
+      "run": "B2 W07 (100%, không OCR)",
+      "EM": 50.26,
+      "ANLS": 72.02,
+      "F1 (phụ)": 71.16,
+      "s/câu": 1.001
+    },
+    {
+      "run": "B3-full (100%, OCR)",
+      "EM": 53.35,
+      "ANLS": 73.89,
+      "F1 (phụ)": 73.73,
+      "s/câu": 0.996
+    }
+  ],
+  "cost": [
+    {
+      "run": "B2 W07",
+      "giờ train": 11.99,
+      "s/step": 19.634,
+      "VRAM đỉnh (GB)": 6.88,
+      "loss cuối": 0.6179,
+      "chạy tiếp từ": null
+    },
+    {
+      "run": "B3-full",
+      "giờ train": 12.75,
+      "s/step": 20.888,
+      "VRAM đỉnh (GB)": 8.38,
+      "loss cuối": 0.5598,
+      "chạy tiếp từ": null
+    }
+  ],
+  "ocr_config": {
+    "backend": "paddledet_vietocr",
+    "template": "v1",
+    "max_chars": 600,
+    "min_conf": 0.0,
+    "max_chars_needs_review": false
+  },
+  "ocr_cache_manifest": "experiments/W10_ocr_cache_fulltrain/ocr_cache_manifest.json",
+  "gpu": "NVIDIA L4",
+  "rule_doc": "docs/W10/README.md mục Luật B3-full"
+}

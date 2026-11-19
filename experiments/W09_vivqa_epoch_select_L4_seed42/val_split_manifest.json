@@ -1,0 +1,12 @@
+{
+  "what": "Tập chọn epoch ViVQA (W09): val câu có ảnh không nằm trong train.json; thứ tự giữ như val.json",
+  "train_sha256": "892243fa732fc7fb5b9a3bd8d2f28c85d7e9f99bb0e617efd193e7303cee96ec",
+  "val_sha256": "083e315abf85bbaad45a0e6e1197ebc0b7cae42ff585e7e446ad51a28a009670",
+  "val_clean_sha256": "bd6091d948b4471ed92277b53d3ad348a8f18cc549e2c46bd611046cb5a1a656",
+  "n_train": 10799,
+  "n_val": 1200,
+  "n_val_clean": 688,
+  "n_val_clean_images": 660,
+  "min_clean_rule": 300,
+  "selection_set": "valclean"
+}

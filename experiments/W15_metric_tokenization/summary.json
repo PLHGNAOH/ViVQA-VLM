@@ -1,0 +1,424 @@
+{
+  "version": "metric-tokenization-v1",
+  "finished_utc": "2026-11-04T05:46:26+00:00",
+  "word_segmenter": "pyvi 0.1.1 ViTokenizer (CRF)",
+  "bootstrap": {
+    "n": 2000,
+    "seed": 42,
+    "method": "paired percentile, mean of per-question diff"
+  },
+  "datasets": {
+    "vivqa_test": {
+      "n_questions": 3001,
+      "n_gold_answers": 3001,
+      "gold_not_nfc": 0,
+      "gold_step_changes": [
+        {
+          "step": "S0",
+          "what": "chuỗi thô (strip)",
+          "n_gold_changed": 0,
+          "pct_gold_changed": 0.0
+        },
+        {
+          "step": "S1",
+          "what": "+ Unicode NFC",
+          "n_gold_changed": 0,
+          "pct_gold_changed": 0.0
+        },
+        {
+          "step": "S2",
+          "what": "+ chữ thường (str.lower)",
+          "n_gold_changed": 0,
+          "pct_gold_changed": 0.0
+        },
+        {
+          "step": "S3",
+          "what": "+ regex bỏ dấu câu [^\\w\\s] (giữ dấu thanh)",
+          "n_gold_changed": 8,
+          "pct_gold_changed": 0.27
+        },
+        {
+          "step": "S4",
+          "what": "+ gộp khoảng trắng \\s+",
+          "n_gold_changed": 0,
+          "pct_gold_changed": 0.0
+        },
+        {
+          "step": "S5",
+          "what": "+ bỏ tiền tố 'màu ' ở đầu",
+          "n_gold_changed": 626,
+          "pct_gold_changed": 20.86
+        },
+        {
+          "step": "S6",
+          "what": "+ số đứng một mình: chữ → chữ số (= normalize_vi)",
+          "n_gold_changed": 445,
+          "pct_gold_changed": 14.83
+        }
+      ],
+      "gold_mean_syllables": 1.57,
+      "gold_mean_words": 1.36,
+      "pct_gold_with_compound_word": 20.89,
+      "gold_top_compounds": [
+        [
+          "cao_cổ",
+          46
+        ],
+        [
+          "máy_bay",
+          39
+        ],
+        [
+          "ô_tô",
+          34
+        ],
+        [
+          "xe_tải",
+          31
+        ],
+        [
+          "xe_máy",
+          31
+        ],
+        [
+          "xe_buýt",
+          28
+        ],
+        [
+          "đường_phố",
+          26
+        ],
+        [
+          "xe_đạp",
+          23
+        ],
+        [
+          "tàu_hỏa",
+          22
+        ],
+        [
+          "cửa_sổ",
+          19
+        ],
+        [
+          "đồng_hồ",
+          19
+        ],
+        [
+          "vệ_sinh",
+          18
+        ],
+        [
+          "điện_thoại",
+          18
+        ],
+        [
+          "vi_sóng",
+          16
+        ],
+        [
+          "tòa_tháp",
+          16
+        ]
+      ],
+      "runs": {
+        "B1": {
+          "em_by_step_pct": {
+            "S0": 1.7,
+            "S1": 1.7,
+            "S2": 2.4,
+            "S3": 2.4,
+            "S4": 2.67,
+            "S5": 11.86,
+            "S6": 22.09
+          },
+          "em_pct": 22.09,
+          "em_after_word_seg_pct": 22.09,
+          "token_f1_syllable_pct": 38.05,
+          "token_f1_word_pct": 35.14
+        },
+        "C3": {
+          "em_by_step_pct": {
+            "S0": 76.64,
+            "S1": 76.64,
+            "S2": 76.64,
+            "S3": 76.64,
+            "S4": 76.64,
+            "S5": 76.64,
+            "S6": 76.64
+          },
+          "em_pct": 76.64,
+          "em_after_word_seg_pct": 76.64,
+          "token_f1_syllable_pct": 78.84,
+          "token_f1_word_pct": 77.66
+        }
+      },
+      "pairs": [
+        {
+          "a": "B1",
+          "b": "C3",
+          "token_f1_syllable": {
+            "diff_pts": 40.79,
+            "ci95_pts": [
+              39.09,
+              42.5
+            ]
+          },
+          "token_f1_word": {
+            "diff_pts": 42.52,
+            "ci95_pts": [
+              40.79,
+              44.28
+            ]
+          }
+        }
+      ],
+      "ranking_syllable": [
+        "B1",
+        "C3"
+      ],
+      "ranking_word": [
+        "B1",
+        "C3"
+      ],
+      "ranking_unchanged": true,
+      "run_dirs": {
+        "B1": "W07_B1_zeroshot_qwen25vl_vivqa_test_bf16_L4_seed42",
+        "C3": "W09_C3_eval_qlora_r16_vivqa_test_bf16_L4_seed42"
+      }
+    },
+    "vitextvqa_testfull": {
+      "n_questions": 10028,
+      "n_gold_answers": 10028,
+      "gold_not_nfc": 0,
+      "gold_step_changes": [
+        {
+          "step": "S0",
+          "what": "chuỗi thô (strip)",
+          "n_gold_changed": 0,
+          "pct_gold_changed": 0.0
+        },
+        {
+          "step": "S1",
+          "what": "+ Unicode NFC",
+          "n_gold_changed": 0,
+          "pct_gold_changed": 0.0
+        },
+        {
+          "step": "S2",
+          "what": "+ chữ thường (str.lower)",
+          "n_gold_changed": 0,
+          "pct_gold_changed": 0.0
+        },
+        {
+          "step": "S3",
+          "what": "+ regex bỏ dấu câu [^\\w\\s] (giữ dấu thanh)",
+          "n_gold_changed": 2582,
+          "pct_gold_changed": 25.75
+        },
+        {
+          "step": "S4",
+          "what": "+ gộp khoảng trắng \\s+",
+          "n_gold_changed": 2580,
+          "pct_gold_changed": 25.73
+        },
+        {
+          "step": "S5",
+          "what": "+ bỏ tiền tố 'màu ' ở đầu",
+          "n_gold_changed": 1,
+          "pct_gold_changed": 0.01
+        },
+        {
+          "step": "S6",
+          "what": "+ số đứng một mình: chữ → chữ số (= normalize_vi)",
+          "n_gold_changed": 2,
+          "pct_gold_changed": 0.02
+        }
+      ],
+      "gold_mean_syllables": 3.67,
+      "gold_mean_words": 2.97,
+      "pct_gold_with_compound_word": 41.81,
+      "gold_top_compounds": [
+        [
+          "việt_nam",
+          134
+        ],
+        [
+          "hà_nội",
+          124
+        ],
+        [
+          "đồng_nai",
+          67
+        ],
+        [
+          "xuất_bản",
+          61
+        ],
+        [
+          "siêu_thị",
+          54
+        ],
+        [
+          "quảng_cáo",
+          52
+        ],
+        [
+          "khai_trương",
+          46
+        ],
+        [
+          "sài_gòn",
+          45
+        ],
+        [
+          "công_ty",
+          41
+        ],
+        [
+          "sản_phẩm",
+          37
+        ],
+        [
+          "du_lịch",
+          36
+        ],
+        [
+          "tây_ninh",
+          36
+        ],
+        [
+          "văn_hóa",
+          32
+        ],
+        [
+          "bảo_tàng",
+          31
+        ],
+        [
+          "công_ty_tnhh",
+          31
+        ]
+      ],
+      "runs": {
+        "B1": {
+          "em_by_step_pct": {
+            "S0": 4.26,
+            "S1": 4.26,
+            "S2": 19.69,
+            "S3": 19.76,
+            "S4": 29.12,
+            "S5": 29.12,
+            "S6": 29.12
+          },
+          "em_pct": 29.12,
+          "em_after_word_seg_pct": 29.12,
+          "token_f1_syllable_pct": 53.89,
+          "token_f1_word_pct": 51.83
+        },
+        "B2": {
+          "em_by_step_pct": {
+            "S0": 48.73,
+            "S1": 48.73,
+            "S2": 48.74,
+            "S3": 48.85,
+            "S4": 50.26,
+            "S5": 50.26,
+            "S6": 50.26
+          },
+          "em_pct": 50.26,
+          "em_after_word_seg_pct": 50.26,
+          "token_f1_syllable_pct": 71.16,
+          "token_f1_word_pct": 69.07
+        },
+        "B3-full": {
+          "em_by_step_pct": {
+            "S0": 51.8,
+            "S1": 51.8,
+            "S2": 51.8,
+            "S3": 51.89,
+            "S4": 53.35,
+            "S5": 53.35,
+            "S6": 53.35
+          },
+          "em_pct": 53.35,
+          "em_after_word_seg_pct": 53.35,
+          "token_f1_syllable_pct": 73.73,
+          "token_f1_word_pct": 71.67
+        }
+      },
+      "pairs": [
+        {
+          "a": "B1",
+          "b": "B2",
+          "token_f1_syllable": {
+            "diff_pts": 17.27,
+            "ci95_pts": [
+              16.58,
+              17.97
+            ]
+          },
+          "token_f1_word": {
+            "diff_pts": 17.24,
+            "ci95_pts": [
+              16.51,
+              17.96
+            ]
+          }
+        },
+        {
+          "a": "B2",
+          "b": "B3-full",
+          "token_f1_syllable": {
+            "diff_pts": 2.57,
+            "ci95_pts": [
+              2.11,
+              3.02
+            ]
+          },
+          "token_f1_word": {
+            "diff_pts": 2.6,
+            "ci95_pts": [
+              2.12,
+              3.06
+            ]
+          }
+        },
+        {
+          "a": "B1",
+          "b": "B3-full",
+          "token_f1_syllable": {
+            "diff_pts": 19.84,
+            "ci95_pts": [
+              19.11,
+              20.58
+            ]
+          },
+          "token_f1_word": {
+            "diff_pts": 19.84,
+            "ci95_pts": [
+              19.1,
+              20.62
+            ]
+          }
+        }
+      ],
+      "ranking_syllable": [
+        "B1",
+        "B2",
+        "B3-full"
+      ],
+      "ranking_word": [
+        "B1",
+        "B2",
+        "B3-full"
+      ],
+      "ranking_unchanged": true,
+      "run_dirs": {
+        "B1": "W07_B1_zeroshot_qwen25vl_vitextvqa_testfull_bf16_L4_seed42",
+        "B2": "W07_B2_eval_qlora_r16_ep1_vitextvqa_testfull_bf16_L4_seed42",
+        "B3-full": "W10_B3full_eval_qlora_ocr_vietocr_v1_r16_full_ep1_vitextvqa_testfull_bf16_L4_seed42"
+      }
+    }
+  }
+}

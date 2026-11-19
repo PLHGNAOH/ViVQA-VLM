@@ -1,0 +1,113 @@
+{
+  "what": "Ablation có / không OCR-enhanced prompting trên ViTextVQA test2000 (W08 bước 6)",
+  "ocr_config_frozen_on_dev300": {
+    "backend": "paddledet_vietocr",
+    "template": "v1",
+    "max_chars": 600,
+    "min_conf": 0.0,
+    "max_chars_needs_review": false
+  },
+  "rule": "OCR cải thiện nếu EM tăng và McNemar exact p < 0,05; ANLS kèm CI95 bootstrap ghép cặp (10.000, seed 42)",
+  "table": [
+    {
+      "run": "B1",
+      "n": 2000,
+      "EM": 0.288,
+      "ANLS": 0.4753,
+      "token-F1 (phụ)": 0.5377,
+      "s/câu": 0.862
+    },
+    {
+      "run": "B1+OCR",
+      "n": 2000,
+      "EM": 0.2935,
+      "ANLS": 0.4802,
+      "token-F1 (phụ)": 0.5462,
+      "s/câu": 0.906
+    },
+    {
+      "run": "B2",
+      "n": 2000,
+      "EM": 0.497,
+      "ANLS": 0.7191,
+      "token-F1 (phụ)": 0.7101,
+      "s/câu": 1.011
+    },
+    {
+      "run": "B2+OCR",
+      "n": 2000,
+      "EM": 0.507,
+      "ANLS": 0.7214,
+      "token-F1 (phụ)": 0.7124,
+      "s/câu": 0.997
+    }
+  ],
+  "paired": {
+    "B1_vs_B1+OCR": {
+      "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B1_zeroshot_qwen25vl_vitextvqa_test2000_bf16_L4_seed42",
+      "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W08_B1ocr_vietocr_v1_qwen25vl_vitextvqa_test2000_bf16_L4_seed42",
+      "label_a": "B1",
+      "label_b": "B1_OCR",
+      "n": 2000,
+      "n_both_correct": 444,
+      "n_only_a": 132,
+      "n_only_b": 143,
+      "n_both_wrong": 1281,
+      "b": 132,
+      "c": 143,
+      "p_value": 0.546571601982655,
+      "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+      "em_a": 0.288,
+      "em_b": 0.2935,
+      "em_diff": 0.005500000000000005,
+      "anls_threshold": 0.5,
+      "anls_a": 0.4752661280679394,
+      "anls_b": 0.48022943246234484,
+      "anls_diff": 0.004963304394405453,
+      "anls_ci95": [
+        -0.009710874212638086,
+        0.02025688607954257
+      ],
+      "bootstrap": {
+        "n_resamples": 10000,
+        "seed": 42,
+        "method": "paired percentile"
+      }
+    },
+    "B2_vs_B2+OCR": {
+      "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B2_eval_qlora_r16_ep1_vitextvqa_test2000_bf16_L4_seed42",
+      "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W08_B2ocr_vietocr_v1_qlora_r16_ep1_vitextvqa_test2000_bf16_L4_seed42",
+      "label_a": "B2",
+      "label_b": "B2_OCR",
+      "n": 2000,
+      "n_both_correct": 873,
+      "n_only_a": 121,
+      "n_only_b": 141,
+      "n_both_wrong": 865,
+      "b": 121,
+      "c": 141,
+      "p_value": 0.2404096577323517,
+      "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+      "em_a": 0.497,
+      "em_b": 0.507,
+      "em_diff": 0.010000000000000009,
+      "anls_threshold": 0.5,
+      "anls_a": 0.7190867530738413,
+      "anls_b": 0.7213860420094859,
+      "anls_diff": 0.002299288935644687,
+      "anls_ci95": [
+        -0.01024033107573516,
+        0.014810267682673992
+      ],
+      "bootstrap": {
+        "n_resamples": 10000,
+        "seed": 42,
+        "method": "paired percentile"
+      }
+    }
+  },
+  "verdict": {
+    "B1+OCR": "KHÔNG KHÁC BIỆT có ý nghĩa",
+    "B2+OCR": "KHÔNG KHÁC BIỆT có ý nghĩa"
+  }
+}
