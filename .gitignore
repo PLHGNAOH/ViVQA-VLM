@@ -18,6 +18,9 @@ Thumbs.db
 _archive/
 hand_off_to_claude.md
 
+# ảnh + cheat sheet demo bảo vệ (local only; không đẩy lên git)
+/demo_images/
+
 # file ghi âm, sổ học tập cá nhân, link riêng (không đưa lên repo public)
 *.m4a
 docs/notes/QA_Learning_Log.md

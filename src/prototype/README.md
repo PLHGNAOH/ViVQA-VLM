@@ -59,7 +59,11 @@ powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Of
 powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -Dark
 # khởi động tuần tự (= .\demo safe):
 powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -SequentialStart
+# bảng Ví dụ tắt mặc định; bật lại:
+powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -Examples
 ```
+
+Bảng **Ví dụ** tắt mặc định (`.\demo` không truyền `--examples_json`); bật lại: `run_local_windows.ps1 -Offline -Examples`. Ảnh demo bảo vệ nằm ở `demo_images/` trong repo (gitignored — không đẩy lên git).
 
 **Khởi động (2026-11-16, RTX 3050 Ti 4 GB / 16 GB RAM, `OMP_NUM_THREADS=12`):** mặc định **OCR worker song song với nạp Qwen** — tới HTTP 200 ≈ **27 s**; `.\demo safe` (tuần tự) ≈ **47 s**, chậm hơn ~20 s nhưng ít tranh RAM khi máy đã mở VS Code + trình duyệt. Dùng **safe** nếu Task Manager gần đầy RAM / máy 16 GB hay swap lúc khởi động. Log: `sec_start_ocr_ready`, `sec_model_load`, `proc_rss_peak_gb` (RSS tiến trình+OCR, không gồm shared/GPU), `sys_ram_used_peak_gb` / `sys_ram_total_gb` (psutil `virtual_memory`, lấy mẫu 0,5 s tới khi server sẵn sàng). Máy phải bật suốt lúc demo. Không đổi prompt / tham số sinh / min-max pixels / model OCR.
 

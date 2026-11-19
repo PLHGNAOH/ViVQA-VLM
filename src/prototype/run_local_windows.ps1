@@ -18,8 +18,10 @@
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -NoBrowser
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Dark
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -SequentialStart
+#   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -Examples
 #
 # Khởi động: OCR worker song song với nạp Qwen (mặc định). -SequentialStart = .\demo safe.
+# Bảng Ví dụ tắt mặc định; bật lại: -Offline -Examples.
 # Hôm bảo vệ dùng -Offline (hoặc .\demo), mở http://127.0.0.1:7860/?__theme=light
 # =============================================================================
 
@@ -31,6 +33,7 @@ param(
     [switch]$NoBrowser,
     [switch]$Dark,
     [switch]$SequentialStart,
+    [switch]$Examples,
     [int]$Port = 7860,
     [int]$OcrThreads = 12
 )
@@ -89,8 +92,12 @@ if ($SequentialStart) {
 if ($Share) {
     $pyArgs += "--share"
 }
-if ((-not $Mock) -and (Test-Path $ExamplesJson)) {
+# Bảng Ví dụ tắt mặc định; chỉ truyền --examples_json khi -Examples
+if ($Examples -and (-not $Mock) -and (Test-Path $ExamplesJson)) {
     $pyArgs += @("--examples_json", $ExamplesJson)
+    Write-Host "EXAMPLES=on ($ExamplesJson)"
+} else {
+    Write-Host "EXAMPLES=off (bật lại: -Examples)"
 }
 
 Write-Host "python $($pyArgs -join ' ')"
