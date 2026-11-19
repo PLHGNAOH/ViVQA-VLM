@@ -27,7 +27,7 @@ Thấp: 8, Trung bình: 11, Cao: 1
 
 ## Bộ demo
 
-Đường dẫn: `D:\FPT_university\termno9\ViVQA-VLM\demo_images\` (gitignored — không commit ảnh; trước đây trên Desktop).
+Đường dẫn: `D:\FPT_university\termno9\ViVQA-VLM\demo_images\` (phẳng: `*.jpg` + `cau_hoi.txt`; gitignored). Chi tiết v2: `demo_set_v2_summary.md`.
 
 Kiểm sạch: `image_in_train = (image ∈ data/vivqa/train.json)` — đúng split train của SH
 (`W11_SH_…/run_signature.json` → `data/vivqa/train.json`). Tham chiếu W07:
