@@ -64,3 +64,23 @@ Thư mục: `D:\\FPT_university\\termno9\\ViVQA-VLM\\demo_images\\` (chỉ `*.jp
 
 Xem JSON: `demo_set_v2_summary.json` (`candidates_tried`, n=46).
 
+## Bộ demo v3 (19/11/2026)
+
+Theo yêu cầu Hoàng: giữ **13 ảnh**, không đánh số lại; chuyển vào Recycle Bin các số **05, 07, 08, 09, 12, 16, 17, 18, 20, 22, 23, 24** và **toàn bộ từ 26 trở đi** (26–35 và 91–98). Bỏ Phần 3 trong `cau_hoi.txt`. Phần 1 = DEMO CHÍNH (01–04).
+
+| File | Câu hỏi | Đáp án | Nguồn |
+|---|---|---|---|
+| `01_vivqa_test_qua_bong.jpg` | màu của quả bóng là gì | màu cam | vivqa_test |
+| `02_cua_hang_dac_san.jpg` | Cửa hàng bán đặc sản của địa phương nào? | hà nội | w13_real |
+| `03_chai_xit_con_trung.jpg` | Bình xịt côn trùng có hương gì? | cam chanh \| hương cam chanh | w13_real |
+| `04_bang_noi_quy_thang_may.jpg` | Thang máy có tải trọng tối đa bao nhiêu kg? | 1150kg \| 1150 kg | w13_real |
+| `06_bang_thong_tin_duoi_uoi.jpg` | Con đười ươi trên biển thông tin tên gì? | tèo | w13_real |
+| `10_bang_huong_dan_y_te.jpg` | Ứng dụng được hướng dẫn cài đặt tên là gì? | công dân số tphcm | w13_real |
+| `11_may_anh_canon.jpg` | Máy ảnh trong hình có chữ Canon không? | có | w13_real |
+| `13_bang_go_trang_tri.jpg` | Trên bảng gỗ có dòng chữ lớn màu xanh nào? | làm đi | w13_real |
+| `14_bia_sach.jpg` | Tên cuốn sách trong hình là gì? | khúc hát đêm thâu | w13_real |
+| `15_goi_khan_uot.jpg` | Khăn ướt trong ảnh có thương hiệu nào? | lamy | w13_real |
+| `19_test_37779_gia_cua_mot_phan.jpg` | giá của một phần mì vịt tiềm là bao nhiêu ? | 40k | vitextvqa_test |
+| `21_test_43969_ten_kinh_doanh_cua.jpg` | tên kinh doanh của quán ốc trên ? | xấu quắc | vitextvqa_test |
+| `25_test_22947_san_pham_cua_ai.jpg` | sản phẩm của ai ? | vinamilk | vitextvqa_test |
+
