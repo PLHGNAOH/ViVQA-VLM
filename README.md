@@ -7,7 +7,7 @@ Hệ thống nhận **ảnh** + **câu hỏi tiếng Việt** → dùng **Vision
 ## 🎯 Deliverable cuối cùng
 
 1. **Code demo** — prototype web: upload ảnh, hỏi tiếng Việt, hiển thị câu trả lời + confidence / OCR evidence (`src/prototype/`).
-2. **Slides** — bộ trình bày cho Review 1 / Review 2 / Faculty Review / Final Defense (`docs/04_slides/`).
+2. **Slides** — 6 bộ slide cuối (Claude/Gemini/Fable × VI/EN) + link Canva; các bộ cũ (Review 1, Review 2, cumulative, final_defense) nằm trong lịch sử git tại `7b45ff6` (`docs/04_slides/`).
 3. **Báo cáo (Overleaf)** — thesis LaTeX viết trên Overleaf, đồng bộ bản `.tex` + hình/bảng về `docs/03_report/` (`docs/03_report/README.md`).
 
 ## 📁 Cây thư mục (tóm tắt)
@@ -22,7 +22,7 @@ ViVQA-VLM/
 │   ├── 01_proposal/          # capstone proposal (docx/pdf)
 │   ├── 02_references/        # PDF paper + Reading_Notes + báo cáo tham chiếu
 │   ├── 03_report/            # thesis LaTeX (đồng bộ Overleaf) + R1..R7
-│   ├── 04_slides/            # slide theo milestone; cumulative/ = bộ slide cộng dồn (R1 → bảo vệ)
+│   ├── 04_slides/            # 6 bộ slide cuối (Claude/Gemini/Fable × VI/EN) + link Canva; các bộ cũ (Review 1, Review 2, cumulative, final_defense) nằm trong lịch sử git tại 7b45ff6
 │   ├── notes/ · templates/   # ghi chú & template nhóm
 │   ├── W01/ … W14/           # deliverable theo tuần (README = luật ghi trước + kết quả; Wxx_Team_Report.md)
 │   ├── REPRODUCE.md          # hướng dẫn tái lập mọi số chính thức + prototype (W14)

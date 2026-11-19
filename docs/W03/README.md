@@ -28,7 +28,7 @@ Tuần 3: **đóng gói deliverable Review 1** + trả nợ kỹ thuật W2 (RQ/
 | 8 | Risk matrix | `docs/W01/Project_Plan_15_Weeks.md` §6; `docs/master_instruction.md` §12 |
 | 9 | (optional) zero-shot sanity | *chưa có run* — slide ghi "W4–W5"; không bịa số |
 
-Outline slide: [`docs/04_slides/review1/review1_outline.md`](../04_slides/review1/review1_outline.md)
+Outline slide: [`docs/04_slides/review1/review1_outline.md`](https://github.com/PLHGNAOH/ViVQA-VLM/blob/7b45ff6578d559171abff3261164bb8fe69bd051/docs/04_slides/review1/review1_outline.md)
 → render `.pptx` bằng Claude skill (navy/teal/amber), **không** render ở Cursor.
 
 ## Canonical literature
