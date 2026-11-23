@@ -37,3 +37,6 @@ docs/00_admin/AI_setup/handoffs/
 
 # gói nộp EduNext — local only
 /submission_edunext/
+
+# cache Gradio của demo local
+/.gradio/

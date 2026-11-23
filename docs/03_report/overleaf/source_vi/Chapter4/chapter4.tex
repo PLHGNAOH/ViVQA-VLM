@@ -101,7 +101,7 @@ luyện. (i) Prompt few-shot với 5 ví dụ chỉ gồm chữ, để mô hình
 án, làm EM giảm 2,1 điểm trên ViVQA và 1,2 điểm trên ViTextVQA. (ii) Thêm dòng
 OCR vào prompt khi suy luận không cải thiện có ý nghĩa
 (mục~\ref{sec:res-promptonly}). (iii) Một VLM lớn hơn, Qwen2-VL-7B~\cite{wang2024qwen2vl},
-ở chế độ zero-shot chỉ đạt EM 16,7 trên test2000, chủ yếu vì trả lời dài. Không
+ở chế độ zero-shot chỉ đạt EM 16,7 trên test2000 (cấu hình của bài báo tham chiếu; 16,2 với cấu hình B1), chủ yếu vì trả lời dài. Không
 cách nào trong số này sửa được vấn đề định dạng, nên cần huấn luyện.
 
 %********************************** Mục 4.2 ************************************
@@ -346,7 +346,7 @@ bốn. Nhóm giữ cấu hình $r = 16$ trên q, k, v, o.
 \footnotesize
 \begin{tabular}{p{0.07\textwidth}p{0.17\textwidth}rrrp{0.17\textwidth}rr}
 \toprule
-\raggedright \textbf{} & \raggedright \textbf{Lớp gắn LoRA} & \raggedright \textbf{$r/\alpha$} & \raggedright \textbf{Tham số} & \raggedright \textbf{EM} & \raggedright \textbf{$\Delta$EM (CI95), $p$} & \raggedright \textbf{s/bước} & \raggedright \textbf{MB} \tabularnewline
+\raggedright \textbf{} & \raggedright \textbf{Lớp gắn LoRA} & \raggedright \textbf{$r/\alpha$} & \raggedright \textbf{Tham số} & \raggedright \textbf{EM} & \raggedright \textbf{$\Delta$EM (CI95), $p$} & \raggedright \textbf{s/bước} & \raggedright \textbf{MiB} \tabularnewline
 \midrule
 \raggedright B3 & \raggedright q, k, v, o & \raggedright 16/32 & \raggedright 7.372.800 & \raggedright 49,25 & \raggedright --- & \raggedright 21,48 & \raggedright 28,2 \tabularnewline
 \raggedright A1 & \raggedright q, k, v, o, gate, up, down & \raggedright 4/8 & \raggedright 7.483.392 & \raggedright 48,70 & \raggedright $-0{,}55$ [$-1{,}60$; $+0{,}45$], 0,34 & \raggedright 25,24 & \raggedright 28,6 \tabularnewline

@@ -104,7 +104,7 @@ training. (i) A few-shot prompt with 5 text-only examples, to show the model the
 format, reduces EM by 2.1 points on ViVQA and 1.2 points on ViTextVQA. (ii) Adding the OCR
 line to the prompt at inference does not bring a significant improvement
 (Section~\ref{sec:res-promptonly}). (iii) A larger VLM, Qwen2-VL-7B~\cite{wang2024qwen2vl},
-reaches only 16.7 EM on test2000 in the zero-shot setting, mostly because of long answers.
+reaches only 16.7 EM on test2000 in the zero-shot setting (with the configuration of the reference paper; 16.2 EM with the B1 configuration), mostly because of long answers.
 None of these approaches fixes the format problem, so training is needed.
 
 %********************************** Section 4.2 ********************************
@@ -351,7 +351,7 @@ while the adapter is four times larger. The team keeps $r = 16$ on q, k, v, o.
 \footnotesize
 \begin{tabular}{p{0.07\textwidth}p{0.17\textwidth}rrrp{0.17\textwidth}rr}
 \toprule
-\raggedright \textbf{} & \raggedright \textbf{LoRA target layers} & \raggedright \textbf{$r/\alpha$} & \raggedright \textbf{Parameters} & \raggedright \textbf{EM} & \raggedright \textbf{$\Delta$EM (CI95), $p$} & \raggedright \textbf{s/step} & \raggedright \textbf{MB} \tabularnewline
+\raggedright \textbf{} & \raggedright \textbf{LoRA target layers} & \raggedright \textbf{$r/\alpha$} & \raggedright \textbf{Parameters} & \raggedright \textbf{EM} & \raggedright \textbf{$\Delta$EM (CI95), $p$} & \raggedright \textbf{s/step} & \raggedright \textbf{MiB} \tabularnewline
 \midrule
 \raggedright B3 & \raggedright q, k, v, o & \raggedright 16/32 & \raggedright 7,372,800 & \raggedright 49.25 & \raggedright --- & \raggedright 21.48 & \raggedright 28.2 \tabularnewline
 \raggedright A1 & \raggedright q, k, v, o, gate, up, down & \raggedright 4/8 & \raggedright 7,483,392 & \raggedright 48.70 & \raggedright $-0.55$ [$-1.60$; $+0.45$], 0.34 & \raggedright 25.24 & \raggedright 28.6 \tabularnewline
