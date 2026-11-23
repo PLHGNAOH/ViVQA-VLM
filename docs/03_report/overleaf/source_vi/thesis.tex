@@ -119,7 +119,16 @@
 %\includeonly{Chapter5/chapter5,Chapter6/chapter6,Appendix1/appendix1,Appendix2/appendix2}
 
 % ******************************** Front Matter ********************************
+% IEEEtran style control: \bstctlcite as defined in IEEEtran.cls (activates the
+% IEEEexample:BSTcontrol entry in references.bib: >6 authors -> first author et al.)
+\makeatletter
+\providecommand{\bstctlcite}[1]{\@bsphack\@for\@citeb:=#1\do{%
+  \edef\@citeb{\expandafter\@firstofone\@citeb}%
+  \if@filesw\immediate\write\@auxout{\string\citation{\@citeb}}\fi}\@esphack}
+\makeatother
+
 \begin{document}
+\bstctlcite{IEEEexample:BSTcontrol}
 
 \frontmatter
 

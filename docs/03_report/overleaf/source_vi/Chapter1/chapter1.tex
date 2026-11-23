@@ -47,8 +47,8 @@ lý dự án; chi tiết nằm ở Phụ lục~\ref{appendix:pm}.
 \begin{itemize}
   \item \textbf{Tên đề tài:} Nghiên cứu hệ thống hỏi đáp trực quan tiếng Việt hiệu
   quả sử dụng mô hình Vision-Language.
-  \item \textbf{Tên tiếng Anh:} Efficient Vietnamese Visual Question Answering
-  using Vision-Language Models.
+  \item {\sloppy\textbf{Tên tiếng Anh:} Efficient Vietnamese Visual Question Answering
+  using Vision-Language Models.\par}
   \item \textbf{Tên viết tắt:} ViVQA-VLM.
   \item \textbf{Mã đề tài:} FA26AI29. \textbf{Mã nhóm:} GFA26AI35.
   \item \textbf{Học phần:} AIP491, khóa luận tốt nghiệp ngành Trí tuệ nhân tạo,
@@ -103,7 +103,7 @@ tiếng Việt ngắn, kèm chữ OCR làm bằng chứng khi có.
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{intro_overview.png}
-\caption{Tổng quan hệ thống ViVQA-VLM với một ví dụ của mỗi bộ dữ liệu. Cột phải
+\caption[Tổng quan hệ thống ViVQA-VLM]{Tổng quan hệ thống ViVQA-VLM với một ví dụ của mỗi bộ dữ liệu. Cột phải
 là đáp án gold của hai câu hỏi; ô màu cam là chữ OCR thật của ảnh ViTextVQA
 16267.jpg, vẫn còn lỗi dấu. Chi tiết từng bước nằm ở Chương~\ref{chap:methods}.}
 \label{fig:intro-overview}
@@ -126,7 +126,7 @@ nguồn, adapter, cấu hình, script suy luận, log của mọi lần chạy).
 Visual Question Answering (VQA) yêu cầu hệ thống trả lời một câu hỏi bằng ngôn
 ngữ tự nhiên dựa trên nội dung ảnh~\cite{antol2015vqa}. Khác với phân loại ảnh
 hay phát hiện vật thể, VQA cần hiểu đồng thời ảnh, ngữ nghĩa câu hỏi và đôi khi
-cả chữ xuất hiện trong ảnh~\cite{singh2019textvqa,biten2019stvqa}. Các hệ thống
+cả chữ xuất hiện trong ảnh~\cite{singh2019textvqa}, \cite{biten2019stvqa}. Các hệ thống
 VQA ban đầu ghép một bộ mã hóa ảnh (CNN) với một bộ mã hóa câu hỏi (LSTM) và
 chọn đáp án từ một tập cố định. Cách này hợp với câu hỏi như ``có mấy con mèo?''
 nhưng không hợp với câu hỏi cần đọc chữ: tên một cửa hàng chưa từng xuất hiện
@@ -197,7 +197,7 @@ fine-tune toàn bộ tham số. Với một VLM vài tỉ tham số, cách này 
 gradient và trạng thái optimizer cho mọi tham số, tức cần nhiều GPU dung lượng
 lớn. Parameter-efficient fine-tuning (PEFT) giải quyết vấn đề này bằng cách giữ
 nguyên mô hình nền và chỉ huấn luyện một phần rất nhỏ tham số thêm vào, ví dụ
-adapter~\cite{houlsby2019adapter,sung2022vladapter} hoặc LoRA~\cite{hu2022lora}.
+adapter~\cite{houlsby2019adapter}, \cite{sung2022vladapter} hoặc LoRA~\cite{hu2022lora}.
 LoRA thêm vào mỗi lớp tuyến tính hai ma trận hạng thấp và chỉ huấn luyện hai ma
 trận đó. QLoRA~\cite{dettmers2023qlora} đi thêm một bước: mô hình nền được lượng
 tử hóa 4-bit để giảm bộ nhớ, trong khi adapter LoRA vẫn được huấn luyện ở độ

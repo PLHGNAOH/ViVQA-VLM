@@ -166,7 +166,7 @@ the EM of the main models on both datasets.
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth]{res_main.pdf}
-\caption{EM on the full test sets. Grey: references (zero-shot and published results);
+\caption[EM on the full test sets]{EM on the full test sets. Grey: references (zero-shot and published results);
 blue: QLoRA; orange: the proposed OCR-aware QLoRA.}
 \label{fig:res-main}
 \end{figure}
@@ -274,12 +274,12 @@ Training with OCR (B3) & 45.00 & \textbf{49.25} \\
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.68\textwidth]{res_2x2.pdf}
-\caption{Interaction between OCR in training and OCR at inference (test2000, train8k). The
+\caption[Interaction between OCR in training and OCR at inference]{Interaction between OCR in training and OCR at inference (test2000, train8k). The
 two lines cross: OCR helps only when it is present at both stages.}
 \label{fig:res-2x2}
 \end{figure}
 
-This result (Figure~\ref{fig:res-2x2}) shows that the benefit comes from \emph{teaching the
+This result (Fig.~\ref{fig:res-2x2}) shows that the benefit comes from \emph{teaching the
 model to use the OCR line}, not from adding OCR to the prompt. It also shows that B3
 depends on OCR: without OCR at inference, B3's EM drops from 49.25 to 45.00
 ($p = 3.8\times10^{-9}$), the level of B2-sub. The prototype therefore always runs OCR

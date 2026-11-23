@@ -33,7 +33,11 @@ Antol và cộng sự~\cite{antol2015vqa} đặt bài toán VQA dưới dạng m
 tự nhiên, hệ thống trả lời bằng một từ hoặc cụm từ ngắn. Bộ dữ liệu VQA của họ
 thu mười câu trả lời của người cho mỗi câu hỏi và định nghĩa thước đo VQA
 Accuracy: một câu trả lời được tính đúng hoàn toàn nếu ít nhất ba người cũng trả
-lời như vậy, tức $\mathrm{Acc}(a) = \min(\#\{\text{người trả lời } a\}/3,\ 1)$.
+lời như vậy, tức là
+\begin{equation}
+  \mathrm{Acc}(a) = \min\left(\frac{\#\{\text{người trả lời } a\}}{3},\ 1\right).
+  \label{eq:vqaacc}
+\end{equation}
 Các hệ thống thời kỳ này ghép một mạng CNN mã hóa ảnh với một mạng LSTM mã hóa
 câu hỏi, rồi \emph{phân loại} câu trả lời trên một tập đáp án thường gặp cố định.
 Cách đặt bài toán phân loại này hiệu quả với câu trả lời ngắn và lặp lại (màu
@@ -232,7 +236,7 @@ Bi-directional Cross-Attention~\cite{nguyentran2022bica}, 2022 & Bộ mã hóa �
 PAT~\cite{nguyen2023pat}, 2023 & Parallel Attention Transformer, trích đặc trưng câu hỏi theo tầng & Acc 60,55 trên ViVQA & Phân loại; không đọc chữ \\
 BARTPhoBEiT~\cite{tran2023bartphobeit}, 2023 & BARTpho cho tiếng Việt kết hợp bộ mã hóa ảnh kiểu BEiT & Acc 68,58 trên ViVQA & Phân loại; không đọc chữ \\
 AViVQA-TranConI~\cite{nguyen2024tranconi}, 2024 & BLIP-2 (đặc trưng toàn cục) và EfficientNet (đặc trưng cục bộ), BARTpho, trộn bằng BEiT-3; phân loại trên 353 đáp án & Acc 71,04 trên ViVQA & Không sinh được đáp án mới; không có OCR \\
-ViTextBLIP-2~\cite{nguyen2024vitextvqa}, 2025 & SwinTextSpotter đọc chữ, Q-Former nối ảnh và chữ OCR, ViT5 đóng băng sinh câu trả lời & EM 25,48; F1 53,95 trên ViTextVQA & Phụ thuộc OCR ngoài; cách xa người (88,00 EM) \\
+ViTextBLIP-2~\cite{nguyen2024vitextvqa}, 2026 & SwinTextSpotter đọc chữ, Q-Former nối ảnh và chữ OCR, ViT5 đóng băng sinh câu trả lời & EM 25,48; F1 53,95 trên ViTextVQA & Phụ thuộc OCR ngoài; cách xa người (88,00 EM) \\
 \bottomrule
 \end{tabular}
 \end{table}

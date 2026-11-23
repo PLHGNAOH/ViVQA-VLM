@@ -33,9 +33,10 @@ a natural-language question, the system answers with a word or a short phrase. T
 VQA dataset collects ten human answers per question and defines the VQA Accuracy
 metric: an answer is fully correct if at least three people gave the same answer,
 i.e.\
-\[
+\begin{equation}
   \mathrm{Acc}(a) = \min\left(\frac{\#\{\text{humans who answered } a\}}{3},\ 1\right).
-\]
+  \label{eq:vqaacc}
+\end{equation}
 Systems of that period combined a CNN encoding the image with an LSTM encoding the question and
 then \emph{classified} the answer over a fixed set of frequent answers. This
 classification setting works well for short, recurring answers (colour, count,
@@ -239,7 +240,7 @@ Bi-directional Cross-Attention~\cite{nguyentran2022bica}, 2022 & Pre-trained enc
 PAT~\cite{nguyen2023pat}, 2023 & Parallel Attention Transformer, hierarchical question features & Acc 60.55 on ViVQA & Classification; does not read text \\
 BARTPhoBEiT~\cite{tran2023bartphobeit}, 2023 & BARTpho for Vietnamese combined with a BEiT-style image encoder & Acc 68.58 on ViVQA & Classification; does not read text \\
 AViVQA-TranConI~\cite{nguyen2024tranconi}, 2024 & BLIP-2 (global features) and EfficientNet (local features), BARTpho, fused with BEiT-3; classification over 353 answers & Acc 71.04 on ViVQA & Cannot generate new answers; no OCR \\
-ViTextBLIP-2~\cite{nguyen2024vitextvqa}, 2025 & SwinTextSpotter reads the text, a Q-Former connects image and OCR text, a frozen ViT5 generates the answer & EM 25.48; F1 53.95 on ViTextVQA & Depends on external OCR; far from humans (88.00 EM) \\
+ViTextBLIP-2~\cite{nguyen2024vitextvqa}, 2026 & SwinTextSpotter reads the text, a Q-Former connects image and OCR text, a frozen ViT5 generates the answer & EM 25.48; F1 53.95 on ViTextVQA & Depends on external OCR; far from humans (88.00 EM) \\
 \bottomrule
 \end{tabular}
 \end{table}

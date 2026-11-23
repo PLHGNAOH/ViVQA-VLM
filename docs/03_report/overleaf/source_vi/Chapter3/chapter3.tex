@@ -54,7 +54,7 @@ Bảng~\ref{tab:met-runs} liệt kê các lần chạy được nhắc tới tro
 \begin{figure}[p]
 \centering
 \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_pipeline.jpg}
-\caption{Quy trình tám bước. Bước 3 (OCR) chỉ chạy với ViTextVQA; dòng chữ OCR
+\caption[Quy trình tám bước]{Quy trình tám bước. Bước 3 (OCR) chỉ chạy với ViTextVQA; dòng chữ OCR
 được lưu cache rồi ghép vào prompt ở bước 5. B1, B2 và B3 đi qua cùng quy trình, chỉ
 khác ở bước 3 và bước 6.}
 \label{fig:met-pipeline}
@@ -240,7 +240,7 @@ gắn adapter LoRA (mục~\ref{sec:met-qlora}).
 \begin{figure}[p]
 \centering
 \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_architecture.jpg}
-\caption{Qwen2.5-VL-3B-Instruct trong khóa luận: ảnh đi qua Conv3D, vision encoder
+\caption[Qwen2.5-VL-3B-Instruct trong khóa luận]{Qwen2.5-VL-3B-Instruct trong khóa luận: ảnh đi qua Conv3D, vision encoder
 và MLP merger thành token ảnh; câu hỏi và chữ OCR đi qua tokenizer thành token chữ;
 LM decoder (4-bit, đóng băng, gắn LoRA) đọc cả chuỗi và sinh câu trả lời. Khung bên
 trái là cấu trúc một khối của vision encoder. Sơ đồ vẽ lại, phỏng theo Hình 1
@@ -273,7 +273,7 @@ Hình~\ref{fig:met-image} minh họa các bước và hai ví dụ trên.
 \begin{figure}[p]
 \centering
 \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_image_tokens.jpg}
-\caption{Tiền xử lý ảnh: từ file ảnh đến lưới token ảnh, với một ví dụ ViVQA (chỉ
+\caption[Tiền xử lý ảnh: từ file ảnh đến token ảnh]{Tiền xử lý ảnh: từ file ảnh đến lưới token ảnh, với một ví dụ ViVQA (chỉ
 làm tròn cạnh) và một ví dụ ViTextVQA (thu nhỏ vì vượt trần 512 token). Lưới trên
 ảnh ViTextVQA chỉ để minh họa.}
 \label{fig:met-image}
@@ -335,8 +335,8 @@ tham chiếu cho mọi cải tiến. Kết quả cả hai bước nằm ở mụ
 
 \subsection{Cấu hình adapter}
 
-Theo LoRA~\cite{hu2022lora} (phương trình~\ref{eq:lora}), mỗi lớp tuyến tính được
-chọn nhận thêm hai ma trận hạng thấp $BA$; chỉ $A$ và $B$ được huấn luyện. Nhóm
+Theo LoRA~\cite{hu2022lora}, mỗi lớp tuyến tính được
+chọn nhận thêm hai ma trận hạng thấp $BA$ như trong~\eqref{eq:lora}; chỉ $A$ và $B$ được huấn luyện. Nhóm
 gắn adapter vào bốn phép chiếu attention \texttt{q\_proj}, \texttt{k\_proj},
 \texttt{v\_proj}, \texttt{o\_proj} của 36 lớp decoder, với rank $r = 16$,
 $\alpha = 32$ và dropout 0,05. Mô hình nền được lượng tử hóa 4-bit NF4 và đóng
@@ -476,7 +476,7 @@ Hình~\ref{fig:met-ocr} minh họa sáu bước trên một ảnh thật.
 \begin{figure}[p]
 \centering
 \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_ocr.jpg}
-\caption{Đường OCR trên ảnh ViTextVQA 16267.jpg: 13 hộp chữ được dò, đọc và nối thành
+\caption[Quy trình OCR trên ảnh ViTextVQA 16267.jpg]{Quy trình OCR trên ảnh ViTextVQA 16267.jpg: 13 hộp chữ được dò, đọc và nối thành
 dòng OCR. Chữ OCR còn nhiễu (``SÓ'', ``MIẾN'' thay vì ``SỐ'', ``MIỀN''), trong khi đáp
 án gold là ``đại lý xổ số miền bắc''.}
 \label{fig:met-ocr}

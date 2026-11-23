@@ -1,3 +1,11 @@
+% IEEEtran style control: list up to six authors; seven or more -> first author et al.
+% (activated by \bstctlcite{IEEEexample:BSTcontrol} right after \begin{document})
+@IEEEtranBSTCTL{IEEEexample:BSTcontrol,
+  CTLuse_forced_etal       = "yes",
+  CTLmax_names_forced_etal = "6",
+  CTLnames_show_etal       = "1"
+}
+
 % ViVQA-VLM thesis references.
 % Keys follow <firstauthor><year><shortname>. Check every entry against the
 % publisher page (Google Scholar -> Cite -> BibTeX) before submission.
@@ -5,42 +13,48 @@
 @inproceedings{antol2015vqa,
   author    = {Antol, Stanislaw and Agrawal, Aishwarya and Lu, Jiasen and Mitchell, Margaret and Batra, Dhruv and Zitnick, C. Lawrence and Parikh, Devi},
   title     = {{VQA}: Visual Question Answering},
-  booktitle = {Proceedings of the IEEE International Conference on Computer Vision (ICCV)},
+  booktitle = {Proc. IEEE Int. Conf. Comput. Vis. (ICCV)},
+  pages     = {2425--2433},
   year      = {2015}
 }
 
 @inproceedings{singh2019textvqa,
   author    = {Singh, Amanpreet and Natarajan, Vivek and Shah, Meet and Jiang, Yu and Chen, Xinlei and Batra, Dhruv and Parikh, Devi and Rohrbach, Marcus},
   title     = {Towards {VQA} Models That Can Read},
-  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  booktitle = {Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR)},
+  pages     = {8317--8326},
   year      = {2019}
 }
 
 @inproceedings{biten2019stvqa,
-  author    = {Biten, Ali Furkan and others},
+  author    = {Biten, Ali Furkan and Tito, Rub{\`e}n and Mafla, Andr{\'e}s and G{\'o}mez, Llu{\'i}s and Rusi{\~n}ol, Mar{\c{c}}al and Valveny, Ernest and Jawahar, C. V. and Karatzas, Dimosthenis},
   title     = {Scene Text Visual Question Answering},
-  booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
+  booktitle = {Proc. IEEE/CVF Int. Conf. Comput. Vis. (ICCV)},
+  pages     = {4291--4301},
   year      = {2019}
 }
 
 @inproceedings{li2023blip2,
   author    = {Li, Junnan and Li, Dongxu and Savarese, Silvio and Hoi, Steven},
   title     = {{BLIP-2}: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models},
-  booktitle = {Proceedings of the 40th International Conference on Machine Learning (ICML)},
+  booktitle = {Proc. 40th Int. Conf. Mach. Learn. (ICML)},
+  pages     = {19730--19742},
   year      = {2023}
 }
 
 @inproceedings{liu2023llava,
   author    = {Liu, Haotian and Li, Chunyuan and Wu, Qingyang and Lee, Yong Jae},
   title     = {Visual Instruction Tuning},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  booktitle = {Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)},
+  pages     = {34892--34916},
   year      = {2023}
 }
 
 @inproceedings{xiao2024florence2,
-  author    = {Xiao, Bin and others},
+  author    = {Xiao, Bin and Wu, Haiping and Xu, Weijian and Dai, Xiyang and Hu, Houdong and Lu, Yumao and Zeng, Michael and Liu, Ce and Yuan, Lu},
   title     = {{Florence-2}: Advancing a Unified Representation for a Variety of Vision Tasks},
-  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  booktitle = {Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR)},
+  pages     = {4818--4829},
   year      = {2024}
 }
 
@@ -56,37 +70,40 @@
 @inproceedings{tran2021vivqa,
   author    = {Tran, Khanh Quoc and Nguyen, An Trong and Le, An Tran-Hoai and Nguyen, Kiet Van},
   title     = {{ViVQA}: {V}ietnamese Visual Question Answering},
-  booktitle = {Proceedings of the 35th Pacific Asia Conference on Language, Information and Computation (PACLIC)},
+  booktitle = {Proc. 35th Pacific Asia Conf. Lang., Inf. Comput. (PACLIC)},
+  pages     = {683--691},
   year      = {2021}
 }
 
-@misc{nguyen2024vitextvqa,
-  author        = {Nguyen, Quan Van and Tran, Dan Quang and Pham, Huy Quang and Nguyen, Thang Kien-Bao and Nguyen, Nghia Hieu and Nguyen, Kiet Van and Nguyen, Ngan Luu-Thuy},
-  title         = {{ViTextVQA}: A Large-Scale Visual Question Answering Dataset for Evaluating {V}ietnamese Text Comprehension in Images},
-  year          = {2024},
-  eprint        = {2404.10652},
-  archivePrefix = {arXiv},
-  note          = {arXiv:2404.10652; extended version in Expert Systems with Applications}
+@article{nguyen2024vitextvqa,
+  author  = {Nguyen, Quan Van and Tran, Dan Quang and Pham, Huy Quang and Nguyen, Thang Kien-Bao and Nguyen, Nghia Hieu and Nguyen, Kiet Van and Nguyen, Ngan Luu-Thuy},
+  title   = {{ViTextVQA}: A Large-Scale Visual Question Answering Dataset and a Novel Multimodal Feature Fusion Method for {V}ietnamese Text Comprehension in Images},
+  journal = {Expert Syst. Appl.},
+  volume  = {308},
+  year    = {2026},
+  note    = {{Art.}~no.~130839}
 }
 
 @inproceedings{hu2022lora,
   author    = {Hu, Edward J. and Shen, Yelong and Wallis, Phillip and Allen-Zhu, Zeyuan and Li, Yuanzhi and Wang, Shean and Wang, Lu and Chen, Weizhu},
   title     = {{LoRA}: Low-Rank Adaptation of Large Language Models},
-  booktitle = {International Conference on Learning Representations (ICLR)},
+  booktitle = {Proc. Int. Conf. Learn. Represent. (ICLR)},
   year      = {2022}
 }
 
 @inproceedings{dettmers2023qlora,
   author    = {Dettmers, Tim and Pagnoni, Artidoro and Holtzman, Ari and Zettlemoyer, Luke},
   title     = {{QLoRA}: Efficient Finetuning of Quantized {LLMs}},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  booktitle = {Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)},
+  pages     = {10088--10115},
   year      = {2023}
 }
 
 @inproceedings{li2023pope,
   author    = {Li, Yifan and Du, Yifan and Zhou, Kun and Wang, Jinpeng and Zhao, Wayne Xin and Wen, Ji-Rong},
   title     = {Evaluating Object Hallucination in Large Vision-Language Models},
-  booktitle = {Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
+  booktitle = {Proc. Conf. Empirical Methods Natural Lang. Process. (EMNLP)},
+  pages     = {292--305},
   year      = {2023}
 }
 
@@ -95,35 +112,39 @@
 @inproceedings{hu2020m4c,
   author    = {Hu, Ronghang and Singh, Amanpreet and Darrell, Trevor and Rohrbach, Marcus},
   title     = {Iterative Answer Prediction with Pointer-Augmented Multimodal Transformers for {TextVQA}},
-  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  booktitle = {Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR)},
+  pages     = {9992--10002},
   year      = {2020}
 }
 
 @inproceedings{liu2024llava15,
   author    = {Liu, Haotian and Li, Chunyuan and Li, Yuheng and Lee, Yong Jae},
   title     = {Improved Baselines with Visual Instruction Tuning},
-  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  booktitle = {Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR)},
+  pages     = {26296--26306},
   year      = {2024}
 }
 
 @inproceedings{houlsby2019adapter,
-  author    = {Houlsby, Neil and others},
+  author    = {Houlsby, Neil and Giurgiu, Andrei and Jastrzebski, Stanislaw and Morrone, Bruna and de Laroussilhe, Quentin and Gesmundo, Andrea and Attariyan, Mona and Gelly, Sylvain},
   title     = {Parameter-Efficient Transfer Learning for {NLP}},
-  booktitle = {Proceedings of the 36th International Conference on Machine Learning (ICML)},
+  booktitle = {Proc. 36th Int. Conf. Mach. Learn. (ICML)},
+  pages     = {2790--2799},
   year      = {2019}
 }
 
 @inproceedings{li2021prefix,
   author    = {Li, Xiang Lisa and Liang, Percy},
   title     = {Prefix-Tuning: Optimizing Continuous Prompts for Generation},
-  booktitle = {Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics (ACL)},
+  booktitle = {Proc. 59th Annu. Meeting Assoc. Comput. Linguistics 11th Int. Joint Conf. Natural Lang. Process. (ACL-IJCNLP)},
+  pages     = {4582--4597},
   year      = {2021}
 }
 
 @inproceedings{sung2022vladapter,
   author    = {Sung, Yi-Lin and Cho, Jaemin and Bansal, Mohit},
   title     = {{VL-Adapter}: Parameter-Efficient Transfer Learning for Vision-and-Language Tasks},
-  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  booktitle = {Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR)},
   pages     = {5227--5237},
   year      = {2022}
 }
@@ -131,7 +152,7 @@
 @inproceedings{nguyentran2022bica,
   author    = {Nguyen-Tran, Duy-Minh and Le, Tung and Nguyen, Minh Le and Nguyen, Huy Tien},
   title     = {Bi-directional Cross-Attention Network on {V}ietnamese Visual Question Answering},
-  booktitle = {Proceedings of the 36th Pacific Asia Conference on Language, Information and Computation (PACLIC)},
+  booktitle = {Proc. 36th Pacific Asia Conf. Lang., Inf. Comput. (PACLIC)},
   pages     = {834--841},
   year      = {2022}
 }
@@ -146,7 +167,7 @@
 }
 
 @misc{tran2023bartphobeit,
-  author        = {Tran, Khiem Vinh and others},
+  author        = {Tran, Khiem Vinh and Nguyen, Kiet Van and Nguyen, Ngan Luu Thuy},
   title         = {{BARTPhoBEiT}: Pre-trained Sequence-to-Sequence and Image Transformers Models for {V}ietnamese Visual Question Answering},
   year          = {2023},
   eprint        = {2307.15335},
@@ -157,23 +178,26 @@
 @article{nguyen2024tranconi,
   author  = {Nguyen, Ngoc Son and Nguyen, Van Son and Le, Tung},
   title   = {Advancing {V}ietnamese Visual Question Answering with Transformer and Convolutional Integration},
-  journal = {Computers and Electrical Engineering},
+  journal = {Comput. Elect. Eng.},
   volume  = {119},
-  pages   = {109474},
-  year    = {2024}
+  year    = {2024},
+  note    = {{Art.}~no.~109474}
 }
 
 @article{nguyen2023openvivqa,
-  author  = {Nguyen, Nghia Hieu and others},
+  author  = {Nguyen, Nghia Hieu and Vo, Duong T. D. and Nguyen, Kiet Van and Nguyen, Ngan Luu-Thuy},
   title   = {{OpenViVQA}: Task, Dataset, and Multimodal Fusion Models for Visual Question Answering in {V}ietnamese},
-  journal = {Information Fusion},
-  year    = {2023}
+  journal = {Inf. Fusion},
+  volume  = {100},
+  year    = {2023},
+  note    = {{Art.}~no.~101868}
 }
 
 @inproceedings{rohrbach2018chair,
   author    = {Rohrbach, Anna and Hendricks, Lisa Anne and Burns, Kaylee and Darrell, Trevor and Saenko, Kate},
   title     = {Object Hallucination in Image Captioning},
-  booktitle = {Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
+  booktitle = {Proc. Conf. Empirical Methods Natural Lang. Process. (EMNLP)},
+  pages     = {4035--4045},
   year      = {2018}
 }
 
@@ -182,21 +206,23 @@
 @inproceedings{lin2014coco,
   author    = {Lin, Tsung-Yi and Maire, Michael and Belongie, Serge and Hays, James and Perona, Pietro and Ramanan, Deva and Doll{\'a}r, Piotr and Zitnick, C. Lawrence},
   title     = {Microsoft {COCO}: Common Objects in Context},
-  booktitle = {Proceedings of the European Conference on Computer Vision (ECCV)},
+  booktitle = {Proc. Eur. Conf. Comput. Vis. (ECCV)},
+  pages     = {740--755},
   year      = {2014}
 }
 
 @inproceedings{ren2015cocoqa,
   author    = {Ren, Mengye and Kiros, Ryan and Zemel, Richard},
   title     = {Exploring Models and Data for Image Question Answering},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  booktitle = {Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)},
+  pages     = {2953--2961},
   year      = {2015}
 }
 
 @inproceedings{dosovitskiy2021vit,
   author    = {Dosovitskiy, Alexey and Beyer, Lucas and Kolesnikov, Alexander and Weissenborn, Dirk and Zhai, Xiaohua and Unterthiner, Thomas and Dehghani, Mostafa and Minderer, Matthias and Heigold, Georg and Gelly, Sylvain and Uszkoreit, Jakob and Houlsby, Neil},
   title     = {An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale},
-  booktitle = {International Conference on Learning Representations (ICLR)},
+  booktitle = {Proc. Int. Conf. Learn. Represent. (ICLR)},
   year      = {2021}
 }
 
@@ -210,10 +236,10 @@
 }
 
 @misc{vietocr,
-  author       = {Pham, Ba Cuong Quoc},
-  title        = {{VietOCR}: Transformer-based {V}ietnamese Optical Character Recognition},
-  year         = {2020},
-  howpublished = {\url{https://github.com/pbcquoc/vietocr}}
+  author = {Pham, Ba Cuong Quoc},
+  title  = {{VietOCR}: Transformer-based {V}ietnamese Optical Character Recognition},
+  year   = {2020},
+  url    = {https://github.com/pbcquoc/vietocr}
 }
 
 @misc{wang2024qwen2vl,
@@ -239,13 +265,14 @@
   author    = {Efron, Bradley and Tibshirani, Robert J.},
   title     = {An Introduction to the Bootstrap},
   publisher = {Chapman \& Hall},
+  address   = {New York, NY, USA},
   year      = {1993}
 }
 
 @article{wilson1927,
   author  = {Wilson, Edwin B.},
   title   = {Probable Inference, the Law of Succession, and Statistical Inference},
-  journal = {Journal of the American Statistical Association},
+  journal = {J. Amer. Statist. Assoc.},
   volume  = {22},
   number  = {158},
   pages   = {209--212},
@@ -264,6 +291,7 @@
 @inproceedings{guo2017calibration,
   author    = {Guo, Chuan and Pleiss, Geoff and Sun, Yu and Weinberger, Kilian Q.},
   title     = {On Calibration of Modern Neural Networks},
-  booktitle = {Proceedings of the 34th International Conference on Machine Learning (ICML)},
+  booktitle = {Proc. 34th Int. Conf. Mach. Learn. (ICML)},
+  pages     = {1321--1330},
   year      = {2017}
 }

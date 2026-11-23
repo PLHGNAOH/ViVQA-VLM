@@ -103,7 +103,7 @@ available.
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{intro_overview.png}
-\caption{Overview of the ViVQA-VLM system with one example from each dataset. The
+\caption[Overview of the ViVQA-VLM system]{Overview of the ViVQA-VLM system with one example from each dataset. The
 right column shows the gold answers of the two questions; the orange box is the
 actual OCR text of ViTextVQA image 16267.jpg, which still contains diacritic
 errors. The details of each step are in Chapter~\ref{chap:methods}.}
@@ -129,7 +129,7 @@ Visual Question Answering (VQA) asks a system to answer a natural-language quest
 based on the content of an image~\cite{antol2015vqa}. Unlike image classification or
 object detection, VQA requires understanding the image, the meaning of the question
 and sometimes the text that appears in the
-image~\cite{singh2019textvqa,biten2019stvqa}. Early VQA systems combined an image
+image~\cite{singh2019textvqa}, \cite{biten2019stvqa}. Early VQA systems combined an image
 encoder (a CNN) with a question encoder (an LSTM) and chose the answer from a fixed
 set. This works for questions such as ``how many cats are there?'' but not for
 questions that require reading: the name of a shop that never appeared in the
@@ -205,7 +205,7 @@ parameters. For a VLM with several billion parameters, this requires storing
 weights, gradients and optimiser states for every parameter, and therefore several
 large GPUs. Parameter-efficient fine-tuning (PEFT) solves this problem by keeping
 the base model frozen and training only a small number of added parameters,
-for example adapters~\cite{houlsby2019adapter,sung2022vladapter} or
+for example adapters~\cite{houlsby2019adapter}, \cite{sung2022vladapter} or
 LoRA~\cite{hu2022lora}. LoRA adds two low-rank matrices to each linear layer and
 trains only these two matrices. QLoRA~\cite{dettmers2023qlora} goes one step
 further: the base model is quantised to 4 bits to reduce memory, while the LoRA
@@ -257,7 +257,7 @@ the bicycle?'') has the answer ``\vi{màu đỏ}'' (``red''). In the ViTextVQA e
 the question ``\vi{cửa hàng có biển màu vàng là nơi nào?}'' (``what place is the shop
 with the yellow sign?'') has the answer ``\vi{đại lý xổ số miền Bắc}'' (``northern
 lottery agency''), taken directly from the shop sign
-(Figure~\ref{fig:intro-overview}). The function $f$ must be built by adapting an
+(Fig.~\ref{fig:intro-overview}). The function $f$ must be built by adapting an
 open-source VLM using only PEFT, running on one Colab GPU. This general problem is
 split into the five sub-problems below.
 

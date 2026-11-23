@@ -55,7 +55,7 @@ lists the runs referred to in the thesis.
 \begin{figure}[p]
 \centering
 \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_pipeline.jpg}
-\caption{The eight-step pipeline. Step 3 (OCR) runs only for ViTextVQA; the OCR line is
+\caption[The eight-step pipeline]{The eight-step pipeline. Step 3 (OCR) runs only for ViTextVQA; the OCR line is
 cached and then added to the prompt in step 5. B1, B2 and B3 go through the same
 pipeline and differ only in steps 3 and 6.}
 \label{fig:met-pipeline}
@@ -245,11 +245,11 @@ where the LoRA adapter is attached (Section~\ref{sec:met-qlora}).
 \begin{figure}[p]
 \centering
 \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_architecture.jpg}
-\caption{Qwen2.5-VL-3B-Instruct in this thesis: the image passes through Conv3D, the
+\caption[Qwen2.5-VL-3B-Instruct as used in this thesis]{Qwen2.5-VL-3B-Instruct in this thesis: the image passes through Conv3D, the
 vision encoder and the MLP merger to become image tokens; the question and the OCR text
 pass through the tokenizer to become text tokens; the LM decoder (4-bit, frozen, with
 LoRA attached) reads the whole sequence and generates the answer. The left panel shows
-the structure of one vision-encoder block. Diagram redrawn after Figure 1 of the
+the structure of one vision-encoder block. Diagram redrawn after Fig.~1 of the
 technical report by Bai et al.~\cite{bai2025qwen25vl}.}
 \label{fig:met-arch}
 \end{figure}
@@ -281,7 +281,7 @@ above.
 \begin{figure}[p]
 \centering
 \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_image_tokens.jpg}
-\caption{Image preprocessing: from the image file to the grid of image tokens, with a
+\caption[Image preprocessing: from the image file to image tokens]{Image preprocessing: from the image file to the grid of image tokens, with a
 ViVQA example (sides only rounded) and a ViTextVQA example (downscaled because it exceeds
 the 512-token cap). The grid drawn on the ViTextVQA image is only illustrative.}
 \label{fig:met-image}
@@ -344,8 +344,8 @@ of both steps are in Section~\ref{sec:res-repro}.
 
 \subsection{Adapter configuration}
 
-Following LoRA~\cite{hu2022lora} (Equation~\ref{eq:lora}), each selected linear layer
-receives two additional low-rank matrices $BA$; only $A$ and $B$ are trained. We
+Following LoRA~\cite{hu2022lora}, each selected linear layer
+receives two additional low-rank matrices $BA$ as in~\eqref{eq:lora}; only $A$ and $B$ are trained. We
 attach the adapter to the four attention projections \texttt{q\_proj},
 \texttt{k\_proj}, \texttt{v\_proj} and \texttt{o\_proj} of the 36 decoder layers, with
 rank $r = 16$, $\alpha = 32$ and dropout 0.05. The base model is quantised to 4-bit NF4
@@ -493,7 +493,7 @@ without OCR. Figure~\ref{fig:met-ocr} illustrates the six steps on a real image.
 \begin{figure}[p]
 \centering
 \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_ocr.jpg}
-\caption{The OCR pipeline on ViTextVQA image 16267.jpg: 13 text boxes are detected, read
+\caption[The OCR pipeline on ViTextVQA image 16267.jpg]{The OCR pipeline on ViTextVQA image 16267.jpg: 13 text boxes are detected, read
 and joined into the OCR line. The OCR text is still noisy (``\vi{SÓ}'', ``\vi{MIẾN}''
 instead of ``\vi{SỐ}'', ``\vi{MIỀN}''), while the gold answer is ``\vi{đại lý xổ số miền
 bắc}'' (``northern lottery agency'').}

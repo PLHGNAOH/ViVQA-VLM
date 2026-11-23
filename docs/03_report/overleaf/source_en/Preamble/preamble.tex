@@ -54,7 +54,7 @@
 % Captions: This makes captions of figures use a boldfaced small font.
 %\RequirePackage[small,bf]{caption}
 
-\RequirePackage[labelsep=space,tableposition=top]{caption}
+\RequirePackage[labelsep=period,tableposition=top]{caption}
 \renewcommand{\figurename}{Fig.} %to support older versions of captions.sty
 
 
@@ -230,7 +230,7 @@
   % while all body text, captions and headings are English (babel: english).
   \usepackage[T1,T5]{fontenc}
   \usepackage[vietnamese,english]{babel}
-  \addto\captionsenglish{\renewcommand{\bibname}{References}}
+  \addto\captionsenglish{\renewcommand{\bibname}{References}\renewcommand{\figurename}{Fig.}}
   \newcommand{\vi}[1]{\foreignlanguage{vietnamese}{#1}}
   % Let TeX stretch interword spaces a little more instead of overfilling lines
   % that contain long unbreakable names such as Qwen2.5-VL-3B-Instruct.
