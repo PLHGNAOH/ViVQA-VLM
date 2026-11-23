@@ -104,7 +104,7 @@ why the prototype shows the OCR text so that users can check it themselves.
 \section{B3-full's remaining errors: OCR or model?}
 \label{sec:dis-remaining}
 
-For each ViTextVQA question, the team looks at exactly the OCR text that entered the
+For each ViTextVQA question, we look at exactly the OCR text that entered the
 prompt. Only 33.1\% of the questions have the gold answer verbatim in the OCR; 11.5\% match
 only when diacritics are removed (the OCR reads the right letters but wrong diacritics);
 55.1\% have OCR text that does not contain the answer verbatim; and 0.3\% have no OCR text
@@ -227,8 +227,8 @@ For C3, the errors are distributed by question type as follows:
   one (four as three 11 times, three as four 10 times, one as two 10 times).
   \item \textbf{Colour} (625 questions, 15.7\% wrong): confusion between similar colours
   (brown as black 5 times, red as orange 5 times). In 4 questions the gold ``\vi{đỏ}''
-  (``red'') is answered ``\vi{tía}'' (``purple''), the very translation error ``purple''
-  $\to$ ``\vi{tía}'' already seen when reviewing the data.
+  (``red'') is answered ``\vi{tía}'' (``purple''), which reflects the same translation
+  error (``purple'' $\to$ ``\vi{tía}'') that we found when reviewing the data.
   \item \textbf{Object} (1,247 questions, 23.3\% wrong): many pairs of synonyms or different
   levels of detail (computer and laptop, seagull and bird, fridge and freezer).
   \item \textbf{Location} (685 questions, 30.7\% wrong, the hardest): different levels of
@@ -304,7 +304,7 @@ when training on a narrow answer set.
 \paragraph{SH's ``yes'' bias.} SH answers ``yes'' to 3,773 of 4,985 questions, with a
 false-alarm rate of 55--79\%. Counting in the data shows that neither the ViTextVQA nor the
 ViVQA training set contains any ``yes'' answer, so the hypothesis ``the bias is learned from
-yes/no data'' is rejected; the cause is still unknown. The team corrects it at inference with
+yes/no data'' is rejected; the cause is still unknown. We correct it at inference with
 the threshold $\tau^* = 4.85$ on the difference in log probability between ``yes'' and
 ``no'' (Section~\ref{sec:met-proto}), chosen on a calibration set separate from POPE-vi.
 After the correction, SH's ``yes'' ratio returns to 41--45\% and SH passes rule R-YB without
@@ -449,7 +449,7 @@ with another seed, but the exact size of the gain may vary.
 
 \paragraph{EM is too strict.} The manual review shows that 55\% of B3-full's EM errors and
 64\% of C3's are actually correct in meaning. EM therefore underestimates the real quality;
-the team adds ANLS and a manual review, but there is no large-scale human evaluation yet.
+we add ANLS and a manual review, but there is no large-scale human evaluation yet.
 
 \paragraph{Comparison with published results.} The ViTextVQA paper does not publish its
 answer normalisation. The gap with ViTextBLIP-2 is so large that normalisation is unlikely
@@ -457,8 +457,8 @@ to explain it, but the absolute numbers are for reference only.
 
 \paragraph{H2 on ANLS did not reach the threshold.} OCR helps produce exactly the right
 string (EM) more clearly than it helps produce character-level near-misses (ANLS $+1.87$
-against a threshold of 3). The threshold was set before the numbers were known and the team
-keeps it unchanged.
+against a threshold of 3). The threshold was set before the numbers were known and we
+keep it unchanged.
 
 \paragraph{Dependence on OCR.} B3 depends on OCR: without OCR at inference it falls back to
 the no-OCR level. The quality of Vietnamese scene-text OCR is the main bottleneck, and the
@@ -466,8 +466,8 @@ EXIF bug (Section~\ref{sec:res-exif}) shows that the OCR pipeline needs to be ch
 carefully.
 
 \paragraph{Data.} ViVQA questions are machine-translated and some gold answers are noisy;
-about half of the ViVQA test images are in the training set. The team measures and reports
-these issues and checks on clean subsets, but does not modify the data in order to keep the
+about half of the ViVQA test images are in the training set. We measure and report
+these issues and check them on clean subsets, but do not modify the data in order to keep the
 results comparable. The question classifier \texttt{qt-v1} has an accuracy of 80.7\%, so the
 table by question type is descriptive only.
 

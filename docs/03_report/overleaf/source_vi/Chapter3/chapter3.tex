@@ -591,7 +591,7 @@ dùng kiểm định ghép cặp thay cho so sánh số tổng:
   hai phía) trên các câu chỉ một trong hai mô hình đúng.
   \item \textbf{ANLS, $\Delta$EM và hiệu ứng tương tác}: khoảng tin cậy 95\%
   bằng bootstrap ghép cặp~\cite{efron1993}, 10.000 lần lấy mẫu, seed 42.
-  \item \textbf{Tỉ lệ trong duyệt tay}: khoảng tin cậy Wilson~\cite{wilson1927}.
+  \item \textbf{Tỉ lệ trong rà soát thủ công}: khoảng tin cậy Wilson~\cite{wilson1927}.
   \item \textbf{POPE-vi}: bootstrap theo ảnh, vì các câu hỏi trên cùng một ảnh
   không độc lập.
 \end{itemize}
@@ -635,7 +635,7 @@ thứ tự ưu tiên: chỉ khác dấu thanh, thiếu chữ, thừa chữ (gold
 lời), lệch không quá 2 ký tự, và còn lại. Với ViTextVQA, mỗi câu còn được xếp
 theo trạng thái OCR: đáp án nằm nguyên văn trong OCR, chỉ khớp khi bỏ dấu, OCR có
 chữ nhưng không chứa đáp án, hoặc OCR không đọc ra chữ. Định nghĩa được ghi trước
-khi chạy. Phần duyệt tay lấy ngẫu nhiên (seed 42) 100 lỗi của B3-full và 50 lỗi
+khi chạy. Phần rà soát thủ công lấy ngẫu nhiên (seed 42) 100 lỗi của B3-full và 50 lỗi
 của C3, khóa danh sách trước khi gán nhãn, và gán nhãn mù: người gán chỉ thấy ảnh,
 câu hỏi, gold và câu trả lời, không thấy kiểu lỗi tự động hay chữ OCR.
 
@@ -674,14 +674,15 @@ là tuần thí nghiệm, \texttt{method} là phương pháp, \texttt{model} là
 \section{Thiết kế prototype}
 \label{sec:met-proto}
 
-Prototype là một ứng dụng web Gradio~\cite{abid2019gradio} chạy trên Colab L4.
-Người dùng tải ảnh lên và đặt câu hỏi tiếng Việt; hệ thống trả lời kèm chữ OCR và
+Prototype là một ứng dụng web Gradio~\cite{abid2019gradio}. Ứng dụng chạy trên Colab
+L4, và cùng mã nguồn đó cũng chạy offline trên laptop có GPU 4~GB
+(Mục~\ref{sec:res-proto}). Người dùng tải ảnh lên và đặt câu hỏi tiếng Việt; hệ thống trả lời kèm chữ OCR và
 mức tin cậy. Thiết kế tuân theo ba nguyên tắc:
 
 \begin{enumerate}
   \item \textbf{Cùng một đường suy luận với đánh giá.} Prototype gọi đúng hàm dựng
   prompt, đúng adapter và đúng cách sinh câu trả lời (greedy, tối đa 32 token)
-  của đường đánh giá. Điều này được kiểm bằng luật trùng khớp ở
+  của pipeline đánh giá. Điều này được kiểm bằng luật trùng khớp ở
   mục~\ref{sec:res-proto}.
   \item \textbf{Câu trả lời kèm bằng chứng.} Vì mô hình dùng OCR, giao diện hiển
   thị chữ OCR đọc được để người dùng tự kiểm tra câu trả lời. OCR chạy trong một
@@ -706,6 +707,12 @@ chỉnh riêng (ảnh ViVQA test chưa thấy khi huấn luyện, không thuộc
 cách tối đa balanced accuracy, để sửa thiên lệch ``có'' của SH
 (mục~\ref{sec:dis-halluc}) mà không phải huấn luyện lại. Câu hỏi khác vẫn đi
 đường greedy như khi đánh giá.
+
+\paragraph{Chạy trên laptop.} Trên GPU laptop có 4~GB VRAM, chỉ mô hình 4-bit và
+adapter được đặt lên GPU; OCR chạy bằng CPU trong một tiến trình riêng. Để giấu thời
+gian OCR, OCR bắt đầu ngay khi ảnh được tải lên, và kết quả được lưu đệm (cache) nên
+các câu hỏi tiếp theo trên cùng ảnh không phải chạy lại. Prompt, adapter và tham số
+sinh câu trả lời giữ nguyên.
 
 \paragraph{Quyền riêng tư.} Prototype không lưu ảnh hay câu hỏi của người dùng;
 chỉ ghi thời gian xử lý.

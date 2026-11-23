@@ -32,10 +32,10 @@ model in 4-bit NF4 and seed 42. Numbers are given as percentages.
 
 \subsection{Reproducing the published number (R0)}
 
-Table~\ref{tab:res-r0} compares the team's result with the number in the Qwen2.5-VL
+Table~\ref{tab:res-r0} compares our result with the number in the Qwen2.5-VL
 technical report~\cite{bai2025qwen25vl} on all 5,000 TextVQA val questions. With the
-paper's original configuration (bf16, no resolution cap), the team obtains 79.60 VQA-Acc
-against the published 79.3, a difference of $+0.3$ points. The team's inference pipeline
+paper's original configuration (bf16, no resolution cap), we obtain 79.60 VQA-Acc
+against the published 79.3, a difference of $+0.3$ points. Our inference pipeline
 is therefore considered correct. The economical configuration used in all later
 experiments (4-bit NF4, at most 512 image tokens) reaches 75.21, i.e.\ it keeps 94.5\% of
 the accuracy while inference VRAM drops from 10.9~GB to 2.5~GB (a 77\% reduction).
@@ -99,7 +99,7 @@ Vietnamese. On ViTextVQA test2000, EM on answers with Vietnamese diacritics (22.
 lower than EM on answers made only of Latin letters without diacritics (39.4). This is
 quantitative evidence for problems V1 and V2 of Chapter~\ref{chap:intro}.
 
-\paragraph{Training-free approaches.} The team tried three more approaches without
+\paragraph{Training-free approaches.} We tried three more approaches without
 training. (i) A few-shot prompt with 5 text-only examples, to show the model the answer
 format, reduces EM by 2.1 points on ViVQA and 1.2 points on ViTextVQA. (ii) Adding the OCR
 line to the prompt at inference does not bring a significant improvement
@@ -147,7 +147,7 @@ against C1). After the choice, the test set is run only once: C3 is 2.86 EM poin
 ANLS points above. C3 is the official ViVQA model, 54.6 EM points above zero-shot.
 
 \paragraph{The gain is not due to image leakage.} Because about half of the ViVQA test images
-are in the training set (Section~\ref{sec:met-quality}), the team re-checks on the clean
+are in the training set (Section~\ref{sec:met-quality}), we re-check on the clean
 test set of 1,219 questions (images not seen in training): one epoch of QLoRA raises EM from
 25.0 to 69.1, i.e.\ $+44.1$ points (CI95 [+41; +47]). The gain from C1 to C3 is also the
 same on seen and unseen images ($+2.9$ and $+2.9$ points). C3 reaches 77.66 on seen images
@@ -207,12 +207,12 @@ OCR-aware QLoRA surpasses plain QLoRA.
 \paragraph{Against the published result.} B3-full has 53.35 EM (CI95 [52.39; 54.33]) and
 73.73 F1 (CI95 [73.02; 74.45]); the lower bounds of the CI95 are above the published
 ViTextBLIP-2 numbers on both metrics. The ViTextVQA paper does not publish its answer
-normalisation, so the absolute comparison is for reference only; the team publishes its
+normalisation, so the absolute comparison is for reference only; we publish our
 own scoring function. The gap can be split into three parts: a better base model (B1 at
 29.12 is already above 25.48), QLoRA ($+21.1$ EM) and OCR ($+3.1$ EM).
 
 \paragraph{Metrics that do not depend on word segmentation.} Because token-F1 depends on how
-units are segmented, the team recomputes F1 after word segmentation with pyvi. Word-level
+units are segmented, we recompute F1 after word segmentation with pyvi. Word-level
 F1 is 1--3 points lower than syllable-level F1 (B1 51.83; B2 69.07; B3-full 71.67), but the
 gain from B2 to B3-full is almost unchanged ($+2.57$ by syllable, $+2.60$ by word) and the
 ranking B1 < B2 < B3-full holds. EM and ANLS compare whole strings and characters, so they
@@ -249,7 +249,7 @@ B2 · QLoRA without OCR & 49.70 & 50.70 & 0.24 \\
 
 \subsection{OCR in training $\times$ OCR at inference}
 
-To isolate the mechanism, the team runs a $2\times2$ factorial experiment on the same
+To isolate the mechanism, we run a $2\times2$ factorial experiment on the same
 8,000-question subset (Table~\ref{tab:res-2x2}). Adding OCR only at inference reduces EM by
 0.65 points ($p = 0.49$); training with OCR and then inferring without OCR reduces it by
 0.55 points ($p = 0.35$). Only when OCR is present at both stages does EM increase: 49.25
@@ -309,7 +309,7 @@ are additive.
 
 \subsection{Stability across seeds}
 
-Because B3-full was run with only one seed, the team checks the stability of the B3 versus
+Because B3-full was run with only one seed, we check the stability of the B3 versus
 B2-sub comparison over three training seeds (Table~\ref{tab:res-seed}). The gain is
 $+3.57 \pm 0.76$ EM points and is statistically significant for all three seeds.
 $\Delta$ANLS is $+1.55 \pm 0.40$; for seed 44 the lower bound of the CI95 of $\Delta$ANLS
@@ -342,7 +342,7 @@ QLoRA paper~\cite{dettmers2023qlora} recommends attaching every linear layer but
 that the total number of LoRA parameters is the most important factor; here that total is
 kept equal. A2 raises the rank to 64: EM increases by 1.05 points but not significantly
 ($p = 0.071$; the CI95 still includes gains of up to 2.15, so this conclusion is weak),
-while the adapter is four times larger. The team keeps $r = 16$ on q, k, v, o.
+while the adapter is four times larger. We keep $r = 16$ on q, k, v, o.
 
 \begin{table}[htbp]
 \caption{LoRA configuration ablation (test2000, B3 recipe)}
@@ -471,12 +471,12 @@ seconds per ViTextVQA image and 0.11 seconds per ViVQA image (little text) on a 
 \section{Sensitivity analysis: images with an EXIF rotation flag}
 \label{sec:res-exif}
 
-While testing the prototype, the team found that some images had gibberish OCR text in the
+While testing the prototype, we found that some images had gibberish OCR text in the
 cache even though the image was clearly readable. The cause is images with an EXIF rotation
 flag: the text detection library (OpenCV) rotates the image according to the flag, while
 the library that crops the image for VietOCR (PIL) does not, so the text regions are
 detected on the rotated image but cropped from the unrotated one. Following a
-pre-registered rule, the team confirmed that 164/165 images with a rotation flag give
+pre-registered rule, we confirmed that 164/165 images with a rotation flag give
 garbage OCR text, against 0/200 control images. The bug affects 1.256\% of the ViTextVQA
 test questions (126 questions on 41 images), 1.28\% of the training questions, and does not
 affect ViVQA.
@@ -494,7 +494,7 @@ proposed method look worse rather than better.
 \label{sec:res-proto}
 
 The prototype must give exactly the same answers as the evaluation pipeline; otherwise the
-numbers in the thesis no longer hold for the demo. The team set five rules before checking
+numbers in the thesis no longer hold for the demo. We set five rules before checking
 (Table~\ref{tab:res-proto}); all five pass after fixing the image downscaling threshold in
 version 2.
 
@@ -517,11 +517,20 @@ version 2.
 \end{table}
 
 On a Colab L4, the median latency is 1.00 second and the 95th percentile 3.58 seconds per
-question, with 4.78~GB of VRAM. On 20 photos taken by the team, the prototype answers 14
+question, with 4.78~GB of VRAM. On 20 photos that we took, the prototype answers 14
 questions correctly, including all 5 yes/no questions. The first version failed rule R-OCR
 (87.5\% on ViTextVQA) because the interface downscaled images larger than 2,048 pixels
 before OCR, while 1,418 ViTextVQA images exceed this threshold; raising the threshold to
-6,000 pixels fixed the problem. A 10-minute-28-second demo video was recorded as a backup.
+6,000 pixels fixed the problem.
+
+We also run the prototype offline on a laptop with an NVIDIA RTX 3050 Ti (4~GB) and 16~GB
+of RAM, with the same adapter, prompt and decoding settings. The model uses at most
+2.40~GB of VRAM, and system memory use peaks at 13.5 of 15.7~GB during start-up. On the
+same 20 photos, the laptop gives exactly the same answers as Colab for all 20 questions.
+On five example questions, the median time per question is 0.93 seconds when OCR has
+already finished in the background, and 7.39 seconds when the question is asked right after
+the upload; the difference is almost entirely OCR on the CPU. The application is ready
+about 27 seconds after start-up.
 
 %********************************** Section 4.9 ********************************
 \section{Summary by hypothesis}

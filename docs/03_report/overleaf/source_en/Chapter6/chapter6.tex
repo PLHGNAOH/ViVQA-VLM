@@ -18,13 +18,13 @@
 
 This thesis studied how to adapt an open-source vision-language model to Vietnamese visual
 question answering under tight resource constraints: parameter-efficient fine-tuning only,
-and a single Colab GPU. The team chose Qwen2.5-VL-3B-Instruct as the baseline, reproduced it
+and a single Colab GPU. We chose Qwen2.5-VL-3B-Instruct as the baseline, reproduced it
 on TextVQA val (79.60 against the published 79.3), measured the zero-shot baseline on ViVQA
 and ViTextVQA, and then adapted it with QLoRA using 7.37 million trainable parameters, i.e.\
 0.196\% of all parameters.
 
 The proposed improvement is OCR-aware QLoRA: the text in the image is read with VietOCR,
-sorted in reading order and added to the prompt already during training. On the full
+sorted in reading order and added to the prompt during training, not only at inference. On the full
 ViTextVQA test set of 10,028 questions, the method reaches 53.35 EM, 3.09 points above plain
 QLoRA on the same data ($p = 6.7\times10^{-21}$) and above the best previously published
 result (25.48 EM). On ViVQA, QLoRA raises EM from 22.09 to 76.64.
@@ -84,7 +84,8 @@ result (25.48 EM). On ViVQA, QLoRA raises EM from 22.09 to 76.64.
   how much could still be gained with better OCR (about 17 EM points).
   \item \textbf{A verified prototype.} A web application that answers with the OCR text and a
   confidence level, verified to give the same answers as the official evaluation pipeline,
-  with a median latency of about 1 second on one L4 GPU.
+  with a median latency of about 1 second on one L4 GPU; it also runs offline on a laptop
+with a 4~GB GPU and gives the same answers.
 \end{enumerate}
 
 %********************************** Section 6.4 ********************************

@@ -16,7 +16,7 @@ Chương~\ref{chap:results} cho biết các mô hình đạt bao nhiêu. Chươn
 vì sao, và lỗi còn lại nằm ở đâu. Mục~\ref{sec:dis-qlora} phân tích QLoRA sửa
 được loại lỗi nào. Mục~\ref{sec:dis-ocr} xem xét cơ chế của QLoRA nhận biết OCR,
 mục~\ref{sec:dis-remaining} và~\ref{sec:dis-audit} phân tích nguồn lỗi còn lại
-bằng phân tích tự động và duyệt tay, mục~\ref{sec:dis-vivqa} xem xét lỗi trên
+bằng phân tích tự động và rà soát thủ công, mục~\ref{sec:dis-vivqa} xem xét lỗi trên
 ViVQA. Mục~\ref{sec:dis-halluc} trả lời RQ4 về hallucination. Mục~\ref{sec:dis-v}
 đối chiếu với bốn vấn đề tiếng Việt V1--V4, mục~\ref{sec:dis-examples} nêu ví dụ
 định tính, mục~\ref{sec:dis-validity} bàn về giới hạn và tính hợp lệ, và
@@ -130,7 +130,7 @@ Bảng~\ref{tab:dis-source} xếp 4.678 câu sai của B3-full theo nguồn lỗ
 Con số 81\% cần được đọc thận trọng. Đây là cận trên của lỗi do OCR, vì nhóm ``OCR
 không chứa đáp án'' gồm cả những câu cần suy luận (đáp án không được viết nguyên
 văn trong ảnh) và những câu có gold nhiễu; mục~\ref{sec:dis-audit} tách các trường
-hợp này bằng duyệt tay. Khi OCR có đáp án mà mô hình vẫn sai, lỗi chủ yếu là cắt
+hợp này bằng rà soát thủ công. Khi OCR có đáp án mà mô hình vẫn sai, lỗi chủ yếu là cắt
 sai ranh giới cụm chữ: 383 trong 492 câu lấy thiếu hoặc thừa từ. Sai dấu từ OCR là
 thách thức riêng của tiếng Việt: 393 trong 450 lỗi sai dấu của B3-full nằm ở
 nhóm OCR không đưa nguyên văn đáp án. Theo loại câu hỏi, tỉ lệ lỗi do OCR cao nhất
@@ -141,13 +141,13 @@ nhóm OCR không đưa nguyên văn đáp án. Theo loại câu hỏi, tỉ lệ
 \section{Duyệt tay 150 lỗi}
 \label{sec:dis-audit}
 
-Bảng~\ref{tab:dis-audit} tổng hợp kết quả duyệt tay mù 100 lỗi EM của B3-full và
+Bảng~\ref{tab:dis-audit} tổng hợp kết quả rà soát thủ công kiểu mù 100 lỗi EM của B3-full và
 50 lỗi EM của C3 (thiết kế ở mục~\ref{sec:met-error}). Cột cuối là tham chiếu từ
 lần duyệt 200 lỗi của B2 ở giai đoạn trước, chỉ để mô tả: khác người gán, khác mô
 hình và các khoảng tin cậy chồng nhau.
 
 \begin{table}[htbp]
-\caption{Kết quả duyệt tay lỗi EM (CI95 Wilson trong ngoặc)}
+\caption{Kết quả rà soát thủ công lỗi EM (CI95 Wilson trong ngoặc)}
 \label{tab:dis-audit}
 \centering
 \small
@@ -220,14 +220,14 @@ Với C3, lỗi phân bố theo loại câu hỏi như sau:
   lệch một (bốn thành ba 11 câu, ba thành bốn 10 câu, một thành hai 10 câu).
   \item \textbf{Màu sắc} (625 câu, sai 15,7\%): nhầm màu gần nhau (nâu thành đen
   5 câu, đỏ thành cam 5 câu). Có 4 câu gold ``đỏ'' bị trả lời ``tía'', đúng lỗi
-  dịch máy ``purple'' thành ``tía'' đã gặp khi duyệt dữ liệu.
+  dịch máy ``purple'' thành ``tía'' mà nhóm đã gặp khi rà soát dữ liệu.
   \item \textbf{Vật thể} (1.247 câu, sai 23,3\%): nhiều cặp đồng nghĩa hoặc khác
   mức chi tiết (máy tính và laptop, hải âu và con chim, tủ lạnh và tủ đá).
   \item \textbf{Vị trí} (685 câu, sai 30,7\%, khó nhất): lệch mức chi tiết (phòng
   và phòng ngủ, nhà vệ sinh và phòng tắm).
 \end{itemize}
 
-Phần lớn các lỗi vật thể và vị trí là đúng ý, như duyệt tay ở
+Phần lớn các lỗi vật thể và vị trí là đúng ý, như rà soát thủ công ở
 mục~\ref{sec:dis-audit} xác nhận. Một thước đo chấp nhận đồng nghĩa sẽ phản ánh
 tốt hơn chất lượng thật của mô hình trên ViVQA.
 
@@ -306,7 +306,7 @@ của SH sau khi sửa vẫn cao hơn B1-ocr khoảng 2--4 điểm.
 \paragraph{Vật bị báo sai nhiều nhất} ở mọi cấu hình là cốc, rồi đến ghế, bát và
 chai. Một phần có thể do chú thích COCO thiếu nhãn, một giới hạn đã ghi trước.
 
-\paragraph{Đối chiếu với duyệt tay.} Hallucination chiếm 5,0\% lỗi EM của B3-full
+\paragraph{Đối chiếu với rà soát thủ công.} Hallucination chiếm 5,0\% lỗi EM của B3-full
 và 16,0\% lỗi của C3 (Bảng~\ref{tab:dis-audit}), tức khoảng 2,3\% và 3,7\% mọi
 câu trả lời. Hai cách đo cùng cho thấy hallucination không phải loại lỗi chính
 của các mô hình đã thích nghi trên VQA tiếng Việt.
@@ -347,7 +347,7 @@ tỉ lệ báo sai tăng ở cách chọn adversarial. \\
 
 V2 được QLoRA sửa phần lớn. V1 và V3 là lý do chọn QLoRA nhận biết OCR, và cũng là
 nơi còn nhiều lỗi nhất: khoảng 17 điểm EM của B3-full là lỗi đọc chữ thật. V4 được
-đo riêng bằng POPE-vi và duyệt tay.
+đo riêng bằng POPE-vi và rà soát thủ công.
 
 %********************************** Mục 5.8 ************************************
 \section{Ví dụ định tính}
@@ -429,7 +429,7 @@ nhưng độ lớn chính xác của mức tăng có thể dao động.
 
 \paragraph{EM quá khắt khe.} Duyệt tay cho thấy 55\% lỗi EM của B3-full và 64\%
 lỗi của C3 thật ra đúng ý. EM vì vậy đánh giá thấp chất lượng thật; nhóm bổ sung
-ANLS và duyệt tay, nhưng chưa có đánh giá người quy mô lớn.
+ANLS và rà soát thủ công, nhưng chưa có đánh giá người quy mô lớn.
 
 \paragraph{So sánh với kết quả công bố.} Bài báo ViTextVQA không công bố hàm chuẩn
 hóa đáp án. Mức chênh với ViTextBLIP-2 lớn đến mức khó do chuẩn hóa gây ra, nhưng
@@ -453,7 +453,7 @@ tính mô tả.
 thể đã thấy ảnh COCO khi tiền huấn luyện. POPE-vi chỉ đo hallucination vật thể
 trên ảnh đời thường, chưa đo hallucination chữ trên ảnh có chữ.
 
-\paragraph{Người gán nhãn.} Lần duyệt tay cuối chỉ có một người gán.
+\paragraph{Người gán nhãn.} Lần rà soát thủ công cuối chỉ có một người gán.
 
 \paragraph{Độ mạnh kiểm định trên test2000.} Các ablation trên 2.000 câu chỉ phát
 hiện được chênh lệch từ khoảng 1,7 điểm EM; vì vậy kết luận ``không khác biệt'' ở

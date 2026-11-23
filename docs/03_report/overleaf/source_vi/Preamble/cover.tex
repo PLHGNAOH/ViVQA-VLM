@@ -1,0 +1,81 @@
+% ******************************************************************************
+% Cover page (Vietnamese edition): double frame, centred title hierarchy, FPTU logo.
+% Loaded from thesis.tex right after thesis-info; replaces the class \maketitle.
+% ******************************************************************************
+\RequirePackage{tikz}
+\RequirePackage{array}
+\RequirePackage{changepage}
+\definecolor{covernavy}{RGB}{16,42,92}
+
+% Clean PDF metadata (names only, comma-separated keywords)
+\AtBeginDocument{%
+  \hypersetup{
+    pdfauthor   = {Phạm Lê Huy Hoàng, Hồ Đắc Toàn, Trần Quốc Huân, Văn Quang Trường},
+    pdfkeywords = {Visual Question Answering, Vision-Language Models, QLoRA, OCR, Vietnamese}
+  }%
+}
+
+% Frame centred on the page; content is shifted 3.5 mm left (adjustwidth) to match
+\newcommand{\coverframe}{%
+  \begin{tikzpicture}[remember picture, overlay]
+    \coordinate (SW) at ([xshift=18mm, yshift=16mm]current page.south west);
+    \coordinate (NE) at ([xshift=-18mm, yshift=-16mm]current page.north east);
+    \draw[covernavy, line width=2.4pt] (SW) rectangle (NE);
+    \draw[covernavy, line width=0.6pt]
+      ([xshift=1.8mm, yshift=1.8mm]SW) rectangle ([xshift=-1.8mm, yshift=-1.8mm]NE);
+  \end{tikzpicture}%
+}
+
+% Small ornament under the institution lines
+\newcommand{\coverornament}{%
+  \begin{tikzpicture}[baseline=-0.5ex]
+    \draw[covernavy, line width=0.6pt] (-2.6,0) -- (-0.22,0);
+    \draw[covernavy, line width=0.6pt] (0.22,0) -- (2.6,0);
+    \fill[covernavy] (0,0.11) -- (0.11,0) -- (0,-0.11) -- (-0.11,0) -- cycle;
+  \end{tikzpicture}%
+}
+
+\makeatletter
+\renewcommand{\maketitle}{%
+  \thispagestyle{empty}%
+  \coverframe
+  \begin{singlespace}
+  \begin{adjustwidth}{-7mm}{0mm}
+  \begin{center}
+    \vspace*{-14mm}
+    {\large\bfseries TRƯỜNG ĐẠI HỌC FPT\par}
+    \vspace{1mm}
+    {\large\bfseries BỘ MÔN TRÍ TUỆ NHÂN TẠO\par}
+    \vspace{2.5mm}
+    \coverornament\par
+    \vspace{9mm}
+    \includegraphics[width=0.44\textwidth]{FPTU_logo.png}\par
+    \vspace{12mm}
+    {\fontsize{22}{26}\selectfont\bfseries KHÓA LUẬN TỐT NGHIỆP\par}
+    \vspace{9mm}
+    {\fontsize{16.5}{23}\selectfont\bfseries\color{covernavy}
+     NGHIÊN CỨU HỆ THỐNG HỎI ĐÁP TRỰC QUAN\\
+     TIẾNG VIỆT HIỆU QUẢ SỬ DỤNG\\
+     MÔ HÌNH VISION-LANGUAGE\par}
+    \vspace{4mm}
+    {\normalsize\itshape (Efficient Vietnamese Visual Question Answering\\
+     using Vision-Language Models)\par}
+    \vspace{12mm}
+    {\large
+    \begin{tabular}{@{}>{\bfseries}l@{\hspace{6mm}}l@{\hspace{8mm}}l@{}}
+      Sinh viên thực hiện:  & Phạm Lê Huy Hoàng & SE182670 \\[1.5pt]
+                            & Hồ Đắc Toàn       & SE183249 \\[1.5pt]
+                            & Trần Quốc Huân    & SE193642 \\[1.5pt]
+                            & Văn Quang Trường  & SE182458 \\[7pt]
+      Giảng viên hướng dẫn: & \multicolumn{2}{@{}l@{}}{PGS. Đặng Ngọc Minh Đức} \\[1.5pt]
+                            & \multicolumn{2}{@{}l@{}}{Phạm Minh Trí} \\
+    \end{tabular}\par}
+    \vfill
+    {\large\bfseries TP. Hồ Chí Minh, tháng 12 năm 2026\par}
+    \vspace*{-6mm}
+  \end{center}
+  \end{adjustwidth}
+  \end{singlespace}
+  \clearpage
+}
+\makeatother

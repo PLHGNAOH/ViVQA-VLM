@@ -486,7 +486,7 @@ giá thấp đi chứ không thổi phồng nó.
 \section{Kiểm chứng prototype}
 \label{sec:res-proto}
 
-Prototype phải cho đúng câu trả lời như đường đánh giá, nếu không các số trong
+Prototype phải cho đúng câu trả lời như pipeline đánh giá, nếu không các số trong
 khóa luận không còn đúng cho bản demo. Nhóm đặt năm luật trước khi kiểm
 (Bảng~\ref{tab:res-proto}); cả năm đều đạt sau khi sửa ngưỡng thu nhỏ ảnh ở phiên
 bản 2.
@@ -500,7 +500,7 @@ bản 2.
 \toprule
 \raggedright \textbf{Luật} & \raggedright \textbf{Kết quả} & \raggedright \textbf{Ý nghĩa} \tabularnewline
 \midrule
-\raggedright R-PAR: backend trùng đường đánh giá & \raggedright 100\% & \raggedright Cùng câu trả lời với lần đánh giá chính thức \tabularnewline
+\raggedright R-PAR: backend trùng pipeline đánh giá & \raggedright 100\% & \raggedright Cùng câu trả lời với lần đánh giá chính thức \tabularnewline
 \raggedright R-LIVE: qua giao diện, OCR trực tiếp & \raggedright 100\% / 100\% & \raggedright 200 ảnh mỗi bộ ViVQA / ViTextVQA \tabularnewline
 \raggedright R-OCR: OCR qua giao diện bằng OCR đọc thẳng & \raggedright 100\% / 100\% & \raggedright Sau khi nâng ngưỡng ảnh lên 6.000 điểm ảnh mỗi cạnh \tabularnewline
 \raggedright R-CONF: mức tin cậy có ý nghĩa & \raggedright Đạt & \raggedright EM giảm dần theo mức Cao, Trung bình, Thấp \tabularnewline
@@ -514,7 +514,14 @@ VRAM 4,78~GB. Trên 20 ảnh tự chụp của nhóm, prototype trả lời đú
 đúng cả 5 câu có/không. Phiên bản đầu tiên không đạt luật R-OCR (87,5\% trên
 ViTextVQA) vì giao diện thu nhỏ ảnh lớn hơn 2.048 điểm ảnh trước khi OCR, trong khi
 1.418 ảnh ViTextVQA vượt ngưỡng này; nâng ngưỡng lên 6.000 điểm ảnh sửa được lỗi.
-Một video demo 10 phút 28 giây được ghi lại làm phương án dự phòng.
+
+Nhóm cũng chạy prototype offline trên một laptop có GPU NVIDIA RTX 3050 Ti (4~GB) và
+16~GB RAM, với cùng adapter, prompt và tham số sinh. Mô hình dùng tối đa 2,40~GB VRAM;
+RAM của máy lên cao nhất 13,5 trên 15,7~GB lúc khởi động. Trên cùng 20 ảnh tự chụp,
+laptop cho câu trả lời giống hệt Colab ở cả 20 câu. Trên năm câu hỏi mẫu, thời gian
+trung vị mỗi câu là 0,93 giây khi OCR đã chạy xong ở chế độ nền, và 7,39 giây khi hỏi
+ngay sau lúc tải ảnh; phần chênh lệch gần như hoàn toàn là thời gian OCR trên CPU.
+Ứng dụng sẵn sàng sau khoảng 27 giây kể từ lúc khởi động.
 
 %********************************** Mục 4.9 ************************************
 \section{Tổng hợp theo giả thuyết}

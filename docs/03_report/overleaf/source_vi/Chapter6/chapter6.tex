@@ -80,11 +80,12 @@ tốt nhất trước đây (EM 25,48). Trên ViVQA, QLoRA nâng EM từ 22,09 l
   đo cụ thể; POPE-vi là bộ đo hallucination tiếng Việt gồm 4.985 câu trên 500 ảnh
   chưa thấy khi huấn luyện.
   \item \textbf{Phân tích lỗi hai tầng.} Phân tích tự động theo kiểu lỗi và trạng
-  thái OCR, đối chiếu với duyệt tay mù, cho thấy EM đánh giá thấp mô hình và ước
+  thái OCR, đối chiếu với rà soát thủ công kiểu mù, cho thấy EM đánh giá thấp mô hình và ước
   lượng phần còn có thể cải thiện nhờ OCR tốt hơn (khoảng 17 điểm EM).
   \item \textbf{Prototype đã kiểm chứng.} Ứng dụng web trả lời kèm chữ OCR và mức
-  tin cậy, được kiểm cho cùng câu trả lời với đường đánh giá chính thức, với độ
-  trễ trung vị khoảng 1 giây trên một GPU L4.
+  tin cậy, được kiểm chứng là cho cùng câu trả lời với pipeline đánh giá chính thức, với độ
+  trễ trung vị khoảng 1 giây trên một GPU L4; prototype cũng chạy offline trên laptop
+  có GPU 4~GB và cho cùng câu trả lời.
 \end{enumerate}
 
 %********************************** Mục 6.4 ************************************
@@ -95,7 +96,7 @@ Các giới hạn chính đã được phân tích ở mục~\ref{sec:dis-validi
 chỉ chạy một seed; EM quá khắt khe với câu trả lời đúng ý nhưng khác cách viết;
 chất lượng OCR tiếng Việt cho chữ cảnh là nút thắt; ngưỡng ANLS của H2 chưa đạt;
 F1 trên POPE-vi che mất tỉ lệ báo sai; so sánh với kết quả công bố phụ thuộc cách
-chuẩn hóa đáp án của bài báo; và lần duyệt tay cuối chỉ có một người gán.
+chuẩn hóa đáp án của bài báo; và lần rà soát thủ công cuối chỉ có một người gán.
 
 %********************************** Mục 6.5 ************************************
 \section{Hướng phát triển}

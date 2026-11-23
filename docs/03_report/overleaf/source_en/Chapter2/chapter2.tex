@@ -89,7 +89,7 @@ a LoRA version (Section~\ref{sec:rel-peft}).
 
 \paragraph{Florence-2.} Xiao et al.~\cite{xiao2024florence2} build a unified
 encoder--decoder vision model that takes text prompts and produces results for
-captioning, object detection, grounding and OCR. The model is very small (0.23 and
+captioning, object detection, grounding and OCR. The model is small (0.23 and
 0.77 billion parameters), so it is easy to train, but it is not a multilingual
 conversational model and was not trained for open-ended question answering in
 Vietnamese.
@@ -130,7 +130,7 @@ Fully fine-tuning a large model for each task means updating and storing a copy 
 every parameter. For the 175-billion-parameter GPT-3, each copy takes about 350~GB in
 16 bits, and training also has to keep gradients and optimiser
 states~\cite{hu2022lora}. Parameter-efficient fine-tuning (PEFT) keeps the original
-weights frozen and trains only a very small number of added parameters. Early
+weights frozen and trains only a small number of added parameters. Early
 approaches include adapters~\cite{houlsby2019adapter}, which insert small layers between
 the layers of the network, and prefix-tuning~\cite{li2021prefix}, which learns a
 sequence of vectors placed before the input. Adapters add inference latency because
@@ -195,7 +195,7 @@ QLoRA & Below 1\% & Unchanged after merging & 4-bit weights; the smallest \\
 \end{tabular}
 \end{table}
 
-However, all of this evidence comes from English. Among the works the team reviewed,
+However, all of this evidence comes from English. Among the works we reviewed,
 none verifies LoRA or QLoRA on a VLM for Vietnamese VQA or for Vietnamese scene-text
 VQA. This is gap G3, on which the thesis focuses.
 

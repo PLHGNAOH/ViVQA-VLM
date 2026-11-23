@@ -27,7 +27,7 @@
 \nomenclature[z-POPE]{POPE}{Polling-based Object Probing Evaluation: measures hallucination with yes/no questions}
 \nomenclature[z-SOTA]{SOTA}{State of the art: the best published result}
 
-This chapter introduces the thesis, going from the problem to the solution.
+This chapter introduces the thesis, moving from the problem to the proposed solution.
 Section~\ref{sec:intro-overview} gives the general information and an overall
 picture of the system. Section~\ref{sec:intro-background} presents the background:
 visual question answering, the need to read Vietnamese text in images, the
@@ -36,8 +36,7 @@ Section~\ref{sec:intro-problem} states the problem and splits it into
 sub-problems. Sections~\ref{sec:intro-gaps} to~\ref{sec:intro-significance} present
 the research gaps, objectives, research questions, hypotheses, contributions and
 significance of the work. Section~\ref{sec:intro-scope} defines the scope and
-limitations. Sections~\ref{sec:intro-team} and~\ref{sec:intro-pm} summarise how the
-team was organised and how the project was managed; the details are in
+limitations. Sections~\ref{sec:intro-team} and~\ref{sec:intro-pm} summarise how the team was organised and how the project was managed; the details are in
 Appendix~\ref{appendix:pm}.
 
 %********************************** Section 1.1 ********************************
@@ -68,7 +67,7 @@ Appendix~\ref{appendix:pm}.
 
 \subsection{Project overview}
 
-Taking a photo with a phone is increasingly a way of looking up information: a user
+Taking a photo with a phone has become a common way to look up information: a user
 photographs a shop sign, a medicine box or a menu and immediately wants to ask
 ``what is the name of this shop?'' or ``what is the phone number?''. The problem
 behind this need is Visual Question Answering (VQA). Current open-source
@@ -77,8 +76,8 @@ they often answer in English, answer at length, lose the diacritics when reading
 or talk about things that are not in the image.
 
 This thesis studies how to adapt an open-source VLM to Vietnamese VQA at low cost:
-only a very small adapter is trained, the base model is kept frozen, and every
-experiment runs on a single Google Colab GPU. The system does four main things:
+only a small adapter is trained, the base model is kept frozen, and every
+experiment runs on a single Google Colab GPU. The system has four main capabilities:
 
 \begin{itemize}
   \item it answers Vietnamese questions about the general content of an image
@@ -97,7 +96,7 @@ PaddleOCR~\cite{du2020ppocr} detects the text regions and VietOCR~\cite{vietocr}
 reads them, keeping the diacritics; this line of text is added to the prompt
 together with the image and the question. The base model
 Qwen2.5-VL-3B-Instruct~\cite{bai2025qwen25vl} is compressed to 4 bits and frozen;
-the team trains only a LoRA adapter that accounts for 0.196\% of the parameters.
+we train only a LoRA adapter that accounts for 0.196\% of the parameters.
 The output is a short Vietnamese answer, with the OCR text as evidence when
 available.
 
@@ -112,7 +111,7 @@ errors. The details of each step are in Chapter~\ref{chap:methods}.}
 \end{figure}
 
 The project is designed as reproducible research, not as a demo application.
-Therefore, before any improvement, the team reproduces the baseline on a benchmark
+Therefore, before any improvement, we reproduce the baseline on a benchmark
 with published numbers; every improvement is compared with the baseline under the
 same conditions, with statistical tests, ablations, error analysis and
 hallucination measurement. The project delivers three things: a model adapted to
@@ -144,8 +143,8 @@ BLIP-2~\cite{li2023blip2}, LLaVA~\cite{liu2023llava},
 Florence-2~\cite{xiao2024florence2} and Qwen2.5-VL~\cite{bai2025qwen25vl} change the
 approach: an image encoder turns the image into a sequence of tokens, and a large
 language model reads this sequence together with the question and generates a
-free-form answer. These VLMs can answer open questions and read text in images
-already in the zero-shot setting, that is, without additional training for the
+free-form answer. These VLMs can already answer open-ended questions and read text in
+images in the zero-shot setting, that is, without additional training for the
 specific task.
 
 \subsection{The need to read Vietnamese text in images}
@@ -166,11 +165,11 @@ reads text with diacritics correctly and answers in natural Vietnamese.
 \subsection{Vietnamese and English-centric VLMs}
 
 Most open-source VLMs are pre-trained mainly on English and Chinese data. When they
-are used for Vietnamese, the team observed four specific problems, labelled V1--V4
+are used for Vietnamese, we observed four specific problems, labelled V1--V4
 and used throughout the thesis:
 
 \begin{description}
-  \item[V1, reading text with diacritics.] A tone mark is a very small stroke;
+  \item[V1, reading text with diacritics.] A tone mark is a tiny stroke;
   misreading one mark changes the meaning (``\vi{BÁNH MÌ}'' read as ``banh mi'').
   The problem is worse when the image has to be downscaled to limit the number of
   image tokens, because a diacritic may then cover only a few pixels. Many OCR tools
@@ -205,14 +204,14 @@ The usual way to bring a pre-trained model to a new task is to fine-tune all of 
 parameters. For a VLM with several billion parameters, this requires storing
 weights, gradients and optimiser states for every parameter, and therefore several
 large GPUs. Parameter-efficient fine-tuning (PEFT) solves this problem by keeping
-the base model frozen and training only a very small number of added parameters,
+the base model frozen and training only a small number of added parameters,
 for example adapters~\cite{houlsby2019adapter,sung2022vladapter} or
 LoRA~\cite{hu2022lora}. LoRA adds two low-rank matrices to each linear layer and
 trains only these two matrices. QLoRA~\cite{dettmers2023qlora} goes one step
 further: the base model is quantised to 4 bits to reduce memory, while the LoRA
 adapter is still trained at higher precision.
 
-Thanks to QLoRA, adapting a 3-billion-parameter VLM becomes feasible on a single
+With QLoRA, adapting a 3-billion-parameter VLM becomes feasible on a single
 consumer-grade GPU. The open question is how well this works for Vietnamese, and
 what additional information should be given during adaptation so that the model
 reads Vietnamese text better. This is the starting point of the thesis.
@@ -333,7 +332,7 @@ comparable with previous work.
 \section{Research gaps}
 \label{sec:intro-gaps}
 
-From the literature review in Chapter~\ref{chap:related}, the team identified four
+From the literature review in Chapter~\ref{chap:related}, we identified four
 gaps:
 
 \begin{description}
@@ -380,7 +379,7 @@ Table~\ref{tab:objectives}, each with a measurable criterion.
 \midrule
 Reproduce one baseline correctly &
 Re-run Qwen2.5-VL-3B-Instruct on a benchmark with published numbers and reach a small
-deviation (TextVQA val: the team obtains 79.60 against the published 79.3) \\
+deviation (TextVQA val: we obtain 79.60 against the published 79.3) \\
 Measure the zero-shot baseline on Vietnamese data &
 EM, VQA-Acc and ANLS on the full ViVQA and ViTextVQA test sets, with one protocol \\
 Adapt with PEFT only &
@@ -401,36 +400,36 @@ contains code, adapters, configurations and inference scripts \\
 \end{tabular}
 \end{table}
 
-To reach these objectives, the team followed a six-step roadmap in which each step
+To reach these objectives, we followed a six-step roadmap in which each step
 changes only one factor compared with the previous step.
 
-\paragraph{Step 1: Reproduce the baseline.} The team re-runs Qwen2.5-VL-3B-Instruct on
-TextVQA val with the original configuration and compares the result with the number
+\paragraph{Step 1: Reproduce the baseline.} We re-run Qwen2.5-VL-3B-Instruct on
+TextVQA val with the original configuration and compare the result with the number
 in the model's technical report. This step checks the whole pipeline for loading the
 model, building prompts and scoring before it is used for Vietnamese.
 
 \paragraph{Step 2: Measure zero-shot on Vietnamese data.} With an economical
-configuration (4 bits, at most 512 image tokens), the team measures the untrained
+configuration (4 bits, at most 512 image tokens), we measure the untrained
 model on the full test sets of both datasets. This result is the reference point
 for all later steps and shows which Vietnamese errors dominate.
 
-\paragraph{Step 3: Adapt with QLoRA.} The team trains a LoRA adapter on the 4-bit
+\paragraph{Step 3: Adapt with QLoRA.} We train a LoRA adapter on the 4-bit
 base model without adding anything to the prompt, to measure the effect of PEFT
 alone against zero-shot.
 
-\paragraph{Step 4: OCR-aware QLoRA.} Based on the error analysis of step 3, the team
-adds the Vietnamese OCR text to the prompt already during training. The controlled
+\paragraph{Step 4: OCR-aware QLoRA.} Based on the error analysis of step 3, we
+add the Vietnamese OCR text to the prompt during training, not only at inference. The controlled
 test is first run on a subset of 8,000 questions, against plain QLoRA on the same
 subset; only once the result is clear is it run on the full data.
 
-\paragraph{Step 5: Analysis.} The team runs ablations for each component, checks
-stability across three seeds, performs an automatic error analysis checked against a
-manual review, and measures hallucination with the Vietnamese POPE benchmark built by
-the team.
+\paragraph{Step 5: Analysis.} We run ablations for each component, check
+stability across three seeds, perform an automatic error analysis checked against a
+manual review, and measure hallucination with the Vietnamese POPE benchmark that we
+built.
 
-\paragraph{Step 6: Prototype and reproducibility package.} The team packages the model
-as a web prototype, verifies that the prototype gives the same answers as the
-evaluation pipeline, and prepares a reproducibility package so that others can
+\paragraph{Step 6: Prototype and reproducibility package.} We package the model
+as a web prototype, verify that the prototype gives the same answers as the
+evaluation pipeline, and prepare a reproducibility package so that others can
 re-run every number.
 
 %********************************** Section 1.6 ********************************
@@ -453,8 +452,8 @@ hardest part of the problem, questions that require reading text (G2). RQ4 check
 the downside of adaptation (G4).
 
 Each hypothesis in Table~\ref{tab:hypotheses} has a quantitative threshold recorded
-before the corresponding experiment was run. Thanks to these pre-registered
-thresholds, the verdicts ``supported'', ``partially supported'' or ``not supported''
+before the corresponding experiment was run. Because the thresholds were registered in
+advance, the verdicts ``supported'', ``partially supported'' or ``not supported''
 follow the rules set in advance, not impressions formed after seeing the results.
 
 \begin{table}[htbp]
@@ -488,18 +487,18 @@ are given in Chapter~\ref{chap:conclusion}.
 \section{Contributions}
 \label{sec:intro-contrib}
 
-The team chooses Qwen2.5-VL-3B-Instruct~\cite{bai2025qwen25vl} as the baseline,
-reproduces it first, and then adapts it to Vietnamese using QLoRA only. The
-3-billion-parameter base model is quantised to 4 bits and kept frozen; the team
-trains only 7.37 million adapter parameters, i.e.\ 0.196\% of all parameters, on one
+We choose Qwen2.5-VL-3B-Instruct~\cite{bai2025qwen25vl} as the baseline,
+reproduce it first, and then adapt it to Vietnamese using QLoRA only. The
+3-billion-parameter base model is quantised to 4 bits and kept frozen; we
+train only 7.37 million adapter parameters, i.e.\ 0.196\% of all parameters, on one
 NVIDIA L4 GPU. The contributions of the thesis are:
 
 \begin{enumerate}
   \item \textbf{OCR-aware QLoRA.} The text read from the image by VietOCR (with
-  diacritics, in reading order) is added to the prompt already during training, so
+  diacritics, in reading order) is added to the prompt during training, so
   that the adapter learns to use it. On the full ViTextVQA test set (10,028
   questions), this reaches 53.35 EM against 50.26 for plain QLoRA on the same data
-  ($+3.09$ EM, McNemar test $p = 6.7\times10^{-21}$), and is above the best published
+  ($+3.09$ EM, McNemar test $p = 6.7\times10^{-21}$), and is far above the best published
   result on the same test set (ViTextBLIP-2, 25.48
   EM~\cite{nguyen2024vitextvqa}).
   \item \textbf{An isolated mechanism.} A $2\times2$ experiment shows that OCR helps
@@ -522,7 +521,7 @@ NVIDIA L4 GPU. The contributions of the thesis are:
 for VLMs on Vietnamese VQA, with a reproduced baseline, ablations for each component
 and paired statistical tests. The main result is not only a higher number but an
 isolated mechanism: the benefit of OCR comes from training the model to use OCR, not
-from adding OCR to the prompt. The team also contributes a Vietnamese POPE benchmark
+from adding OCR to the prompt. We also contribute a Vietnamese POPE benchmark
 for hallucination and a quantified analysis of each problem V1--V4. These results can
 serve as reference points for future Vietnamese VQA research.
 
@@ -558,9 +557,9 @@ approach can be applied to other low-resource languages whose scripts use diacri
 \subsection{Scope}
 
 \paragraph{Data.} The project uses two public datasets, ViVQA and ViTextVQA, with
-their fixed official splits. ViVQA has no validation set, so the team holds out
+their fixed official splits. ViVQA has no validation set, so we hold out
 1,200 questions from the training set (seed 42) for model selection; the test set is
-unchanged. The team does not collect additional training data and does not use data
+unchanged. We do not collect additional training data or use data
 augmentation, so that the results are comparable with previous work on the same test
 sets.
 
@@ -575,10 +574,10 @@ protocol: the same split, seed, inference configuration and the same answer
 normalisation step. Besides the main results, the project includes ablations, error
 analysis and hallucination measurement.
 
-\paragraph{Prototype.} The prototype is a web application running on Colab with one
-GPU; it takes an image and a Vietnamese question and returns an answer with the OCR
-text and a confidence level. It serves to illustrate and verify the system, not as a
-product deployed to many users.
+\paragraph{Prototype.} The prototype is a web application that takes an image and a
+Vietnamese question and returns an answer with the OCR text and a confidence level. It
+runs on Colab with one GPU or offline on a laptop with a 4~GB GPU. It serves to
+illustrate and verify the system, not as a product deployed to many users.
 
 Table~\ref{tab:scope} summarises what is in and out of scope.
 
@@ -599,7 +598,7 @@ Adaptation with PEFT only (4-bit QLoRA); OCR text as auxiliary input &
 Full fine-tuning; training a VLM from scratch \\
 Metrics EM, VQA-Acc, ANLS (token-F1 as a secondary measure); ablations, error
 analysis, hallucination & Retrieval-augmented VQA with external knowledge \\
-Web prototype running on Colab with one GPU &
+Web prototype on one Colab GPU or offline on a laptop with a 4~GB GPU &
 Large-scale product deployment, mobile applications \\
 \bottomrule
 \end{tabular}
@@ -618,13 +617,13 @@ correctly; blurry images, small text or decorative fonts can still make OCR misr
 the diacritics or produce gibberish.
 
 \paragraph{Data limitations.} Some gold answers are wrong, ViVQA questions are
-machine-translated, and ViVQA has no yes/no questions. The team measures these issues
-and reports them separately, but does not modify the official test sets.
+machine-translated, and ViVQA has no yes/no questions. We measure these issues
+and report them separately, but do not modify the official test sets.
 
 \paragraph{Evaluation limitations.} EM is strict towards answers that are correct in
-meaning but written differently, so the team adds ANLS and a manual review. The
+meaning but written differently, so we add ANLS and a manual review. The
 comparison with previous work also depends on answer normalisation steps that those
-works do not fully publish; the team additionally reports token-F1 to reduce the
+works do not fully publish; we additionally report token-F1 to reduce the
 effect of this issue.
 
 \paragraph{Statistical limitations.} All main experiments run with one seed; only the
@@ -634,8 +633,9 @@ about 12.75 GPU hours.
 
 \paragraph{Prototype limitations.} The prototype's confidence is not well calibrated,
 so the interface shows only High, Medium and Low levels instead of a percentage. The
-prototype runs in a Colab session, so it does not have the availability of a real
-service.
+prototype runs in a Colab session or on a single laptop, so it does not have the
+availability of a real service. On the laptop, OCR runs on the CPU and takes several
+seconds for each new image.
 
 These limitations are analysed again in Chapter~\ref{chap:discussion} and
 Chapter~\ref{chap:conclusion}.
@@ -655,11 +655,11 @@ The following are outside the scope of the thesis:
   \item questions about videos or several images at once.
 \end{itemize}
 
-\paragraph{Assumptions.} The team assumes that the official splits of the two datasets
-represent the actual question distribution of each dataset, that the gold answers are
-correct for most questions (the share of wrong gold answers is measured and reported
-separately in Chapter~\ref{chap:results}), and that the L4 GPU on Colab gives stable
-results across sessions when the seed and the configuration are fixed.
+\paragraph{Assumptions.} We make three assumptions. First, the official splits of the two
+datasets represent the actual question distribution of each dataset. Second, the gold
+answers are correct for most questions; the share of wrong gold answers is measured and
+reported separately in Chapter~\ref{chap:results}. Third, the L4 GPU on Colab gives
+stable results across sessions when the seed and the configuration are fixed.
 
 %********************************** Section 1.10 *******************************
 \section{Team organisation}

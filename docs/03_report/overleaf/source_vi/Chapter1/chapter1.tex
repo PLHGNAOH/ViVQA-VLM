@@ -68,7 +68,7 @@ lý dự án; chi tiết nằm ở Phụ lục~\ref{appendix:pm}.
 
 \subsection{Tổng quan đề tài}
 
-Ảnh chụp bằng điện thoại ngày càng trở thành một cách tra cứu thông tin: người
+Chụp ảnh bằng điện thoại đã trở thành một cách tra cứu thông tin phổ biến: người
 dùng chụp một biển hiệu, một hộp thuốc hay một tờ thực đơn rồi muốn hỏi ngay
 ``cửa hàng này tên gì?'', ``số điện thoại là bao nhiêu?''. Bài toán đứng sau nhu
 cầu đó là hỏi đáp trên ảnh (Visual Question Answering, VQA). Các vision-language
@@ -114,7 +114,7 @@ demo. Vì vậy, trước khi cải tiến, nhóm tái lập baseline trên mộ
 đã công bố; mọi cải tiến đều được so với baseline dưới cùng điều kiện, có kiểm
 định thống kê, ablation, phân tích lỗi và đo hallucination. Sản phẩm của đề tài
 gồm ba phần: mô hình đã thích nghi cho tiếng Việt, một prototype web đã được kiểm
-chứng cho cùng câu trả lời với đường đánh giá, và khóa luận kèm gói tái lập (mã
+chứng cho cùng câu trả lời với pipeline đánh giá, và khóa luận kèm gói tái lập (mã
 nguồn, adapter, cấu hình, script suy luận, log của mọi lần chạy).
 
 %********************************** Mục 1.2 ************************************
@@ -295,7 +295,7 @@ test, và thiết kế thí nghiệm sao cho mỗi bước chỉ đổi một y�
 có một số đặc điểm khiến việc huấn luyện và đánh giá phức tạp hơn:
 
 \begin{itemize}
-  \item một phần đáp án gold bị sai: khi duyệt tay lỗi của mô hình, 12,5\% lỗi là
+  \item một phần đáp án gold bị sai: khi rà soát thủ công lỗi của mô hình, 12,5\% lỗi là
   do gold sai, riêng ViVQA là 19\%;
   \item câu hỏi ViVQA được dịch máy từ COCO-QA~\cite{ren2015cocoqa} nên đôi khi
   không tự nhiên, và bộ dữ liệu không có câu hỏi có/không;
@@ -375,7 +375,7 @@ Phân rã lỗi theo loại câu hỏi và loại lỗi; đo hallucination kiể
 Việt \\
 Prototype web &
 Tải ảnh, hỏi tiếng Việt, nhận câu trả lời kèm chữ OCR và mức tin cậy; cho cùng
-kết quả với đường đánh giá \\
+kết quả với pipeline đánh giá \\
 Tái lập được &
 Mọi run ghi lại split, seed, phần cứng, siêu tham số, thời gian; gói tái lập gồm
 code, adapter, config, script suy luận \\
@@ -406,11 +406,11 @@ soát được chạy trước trên một tập con 8.000 câu, so với QLoRA 
 tập con; khi kết quả đã rõ mới chạy trên toàn bộ dữ liệu.
 
 \paragraph{Bước 5: Phân tích.} Nhóm làm ablation cho từng thành phần, kiểm tra
-độ ổn định qua ba seed, phân tích lỗi tự động đối chiếu với duyệt tay, và đo
-hallucination bằng bộ POPE tiếng Việt do nhóm xây.
+độ ổn định qua ba seed, phân tích lỗi tự động đối chiếu với rà soát thủ công, và đo
+hallucination bằng bộ POPE tiếng Việt do nhóm xây dựng.
 
 \paragraph{Bước 6: Prototype và gói tái lập.} Nhóm đóng gói mô hình thành một
-prototype web, kiểm chứng prototype cho cùng câu trả lời với đường đánh giá, và
+prototype web, kiểm chứng prototype cho cùng câu trả lời với pipeline đánh giá, và
 chuẩn bị gói tái lập để người khác chạy lại từng con số.
 
 %********************************** Mục 1.6 ************************************
@@ -488,8 +488,8 @@ triệu tham số adapter, tức 0,196\% tổng số tham số, trên một GPU 
   \item \textbf{Bộ đo hallucination tiếng Việt.} POPE-vi, gồm 4.985 câu hỏi
   có/không trên 500 ảnh chưa thấy khi huấn luyện.
   \item \textbf{Phân tích và prototype đã kiểm chứng.} Ablation cho từng thành
-  phần, phân tích lỗi tự động và duyệt tay, và một prototype web đã được kiểm
-  chứng cho ra cùng câu trả lời với đường đánh giá chính thức.
+  phần, phân tích lỗi tự động và rà soát thủ công, và một prototype web đã được kiểm
+  chứng cho ra cùng câu trả lời với pipeline đánh giá chính thức.
 \end{enumerate}
 
 %********************************** Mục 1.8 ************************************
@@ -552,9 +552,9 @@ số phụ để so với công trình trước. Mọi so sánh dùng cùng giao
 seed, cấu hình suy luận và cùng một bước chuẩn hóa đáp án. Ngoài kết quả chính,
 đề tài có ablation, phân tích lỗi và đo hallucination.
 
-\paragraph{Prototype.} Prototype là một ứng dụng web chạy trên Colab với một
-GPU, nhận ảnh và câu hỏi tiếng Việt, trả về câu trả lời kèm chữ OCR và mức tin
-cậy. Prototype dùng để minh họa và kiểm chứng, không phải một sản phẩm triển khai
+\paragraph{Prototype.} Prototype là một ứng dụng web nhận ảnh và câu hỏi tiếng
+Việt, trả về câu trả lời kèm chữ OCR và mức tin cậy. Prototype chạy trên Colab với
+một GPU hoặc chạy offline trên laptop có GPU 4~GB. Prototype dùng để minh họa và kiểm chứng, không phải một sản phẩm triển khai
 cho nhiều người dùng.
 
 Bảng~\ref{tab:scope} tóm tắt những gì nằm trong và ngoài phạm vi.
@@ -576,7 +576,7 @@ Thích nghi chỉ bằng PEFT (QLoRA 4-bit); chữ OCR làm đầu vào phụ &
 Full fine-tuning; huấn luyện VLM từ đầu \\
 Metric EM, VQA-Acc, ANLS (token-F1 làm chỉ số phụ); ablation, phân tích lỗi,
 hallucination & Retrieval-augmented VQA với tri thức ngoài \\
-Prototype web chạy trên Colab với một GPU &
+Prototype web chạy trên một GPU Colab hoặc offline trên laptop có GPU 4~GB &
 Triển khai sản phẩm quy mô lớn, ứng dụng di động \\
 \bottomrule
 \end{tabular}
@@ -598,7 +598,7 @@ dịch máy, và ViVQA không có câu hỏi có/không. Nhóm đo các vấn đ
 riêng, nhưng không sửa tập test chính thức.
 
 \paragraph{Giới hạn về đánh giá.} EM là thước đo khắt khe với câu trả lời đúng ý
-nhưng khác cách viết, nên nhóm bổ sung ANLS và duyệt tay. So sánh với công trình
+nhưng khác cách viết, nên nhóm bổ sung ANLS và rà soát thủ công. So sánh với công trình
 trước còn phụ thuộc vào cách chuẩn hóa đáp án mà các công trình đó không công bố
 đầy đủ; nhóm báo cáo thêm token-F1 để giảm ảnh hưởng của điểm này.
 
@@ -608,8 +608,9 @@ B3-full chỉ có một seed vì mỗi lần huấn luyện tốn khoảng 12,75
 
 \paragraph{Giới hạn về prototype.} Mức tin cậy của prototype chưa được hiệu chỉnh
 tốt, nên giao diện chỉ hiển thị mức Cao, Trung bình, Thấp thay vì một con số phần
-trăm. Prototype chạy trong một phiên Colab nên không có tính sẵn sàng như một
-dịch vụ thật.
+trăm. Prototype chạy trong một phiên Colab hoặc trên một chiếc laptop nên không có tính
+sẵn sàng như một dịch vụ thật. Trên laptop, OCR chạy bằng CPU và mất vài giây cho
+mỗi ảnh mới.
 
 Các giới hạn này được phân tích lại ở Chương~\ref{chap:discussion} và
 Chương~\ref{chap:conclusion}.
@@ -629,11 +630,11 @@ Các nội dung sau nằm ngoài phạm vi của khóa luận:
   \item các câu hỏi về video hoặc nhiều ảnh cùng lúc.
 \end{itemize}
 
-\paragraph{Giả định.} Nhóm giả định rằng split chính thức của hai bộ dữ liệu
-đại diện cho phân bố câu hỏi thực tế của từng bộ, rằng đáp án gold là đúng ở đa
-số câu (phần gold sai được đo và báo cáo riêng ở Chương~\ref{chap:results}), và
-rằng GPU L4 trên Colab cho kết quả ổn định giữa các phiên khi cố định seed và
-cấu hình.
+\paragraph{Giả định.} Nhóm đặt ra ba giả định. Thứ nhất, split chính thức của hai
+bộ dữ liệu đại diện cho phân bố câu hỏi thực tế của từng bộ. Thứ hai, đáp án gold
+đúng ở đa số câu; tỉ lệ gold sai được đo và báo cáo riêng ở
+Chương~\ref{chap:results}. Thứ ba, GPU L4 trên Colab cho kết quả ổn định giữa các
+phiên khi cố định seed và cấu hình.
 
 %********************************** Mục 1.10 ***********************************
 \section{Tổ chức nhóm}
@@ -693,7 +694,7 @@ theo bốn mảng, lập literature matrix, phân tích hai bộ dữ liệu, x�
 trống nghiên cứu, câu hỏi nghiên cứu và giả thuyết, rồi trình bày ở Review~1.
 
 \paragraph{Giai đoạn 2: Dữ liệu và baseline (W04--W07).} Nhóm lấy dữ liệu từ nguồn
-chính thức, chốt baseline Qwen2.5-VL-3B-Instruct, đo zero-shot, tái lập số công bố
+chính thức, chốt baseline Qwen2.5-VL-3B-Instruct, đánh giá zero-shot, tái lập số công bố
 trên TextVQA và chốt cấu hình suy luận dựa trên số đo (số token ảnh, kiểu số).
 
 \paragraph{Giai đoạn 3: Thích nghi và cải tiến (W07--W10).} Nhóm huấn luyện QLoRA
@@ -705,7 +706,7 @@ câu, kiểm tra qua ba seed và bảng $2\times2$, rồi chạy trên toàn b�
 hallucination bằng POPE tiếng Việt.
 
 \paragraph{Giai đoạn 5: Prototype, đóng gói và khóa luận (W13--W15).} Nhóm xây
-prototype web, kiểm chứng prototype khớp với đường đánh giá, quay video demo,
+prototype web, kiểm chứng prototype khớp với pipeline đánh giá, quay video demo,
 chuẩn bị gói tái lập, slide bảo vệ và khóa luận.
 
 \subsection{Tích hợp các thành phần}
@@ -715,7 +716,7 @@ hàm dựng prompt duy nhất được dùng cho cả huấn luyện, đánh gi�
 không có sai lệch prompt giữa các giai đoạn. OCR được chạy một lần và lưu cache
 có mã băm; huấn luyện và đánh giá chỉ đọc cache. Danh sách các mô hình chính thức
 được sinh tự động từ log, và prototype được kiểm tra theo luật đặt trước để bảo
-đảm cho cùng câu trả lời với đường đánh giá.
+đảm cho cùng câu trả lời với pipeline đánh giá.
 
 \subsection{Quản lý chất lượng và rủi ro}
 
