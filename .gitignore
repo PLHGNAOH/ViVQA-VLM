@@ -40,3 +40,5 @@ docs/00_admin/AI_setup/handoffs/
 
 # cache Gradio của demo local
 /.gradio/
+# gói gửi nhóm — local only
+/team_package/
