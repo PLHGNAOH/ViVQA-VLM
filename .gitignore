@@ -42,3 +42,5 @@ docs/00_admin/AI_setup/handoffs/
 /.gradio/
 # gói gửi nhóm — local only
 /team_package/
+# deck bảo vệ — local only (bản chính ở submission_edunext/02_Slides)
+/docs/04_slides/*.pptx
