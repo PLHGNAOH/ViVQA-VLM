@@ -245,11 +245,13 @@ where the LoRA adapter is attached (Section~\ref{sec:met-qlora}).
 \begin{figure}[p]
 \centering
 \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_architecture.jpg}
-\caption[Qwen2.5-VL-3B-Instruct as used in this thesis]{Qwen2.5-VL-3B-Instruct in this thesis: the image passes through Conv3D, the
-vision encoder and the MLP merger to become image tokens; the question and the OCR text
-pass through the tokenizer to become text tokens; the LM decoder (4-bit, frozen, with
-LoRA attached) reads the whole sequence and generates the answer. The left panel shows
-the structure of one vision-encoder block. Diagram redrawn after Fig.~1 of the
+\caption[Qwen2.5-VL-3B-Instruct + LoRA as used in this thesis]{Qwen2.5-VL-3B-Instruct + LoRA as used in this thesis. Vision
+branch (frozen): the image is cut into $14\times14$ patches, passes through 32 ViT blocks
+and the patch merger, and becomes 256--512 image tokens. Text branch (frozen): the
+tokenizer turns the Vietnamese question (plus the OCR line in B3) into text tokens. The
+LLM decoder (36 blocks, 4-bit NF4, frozen) reads the combined sequence and generates the
+answer greedily. LoRA ($r=16$ on q, k, v, o; 7.37\,M parameters, 0.196\%) is the only
+trained part. Values from the model configuration; diagram redrawn after Fig.~1 of the
 technical report by Bai et al.~\cite{bai2025qwen25vl}.}
 \label{fig:met-arch}
 \end{figure}

@@ -240,11 +240,13 @@ gắn adapter LoRA (mục~\ref{sec:met-qlora}).
 \begin{figure}[p]
 \centering
 \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_architecture.jpg}
-\caption[Qwen2.5-VL-3B-Instruct trong khóa luận]{Qwen2.5-VL-3B-Instruct trong khóa luận: ảnh đi qua Conv3D, vision encoder
-và MLP merger thành token ảnh; câu hỏi và chữ OCR đi qua tokenizer thành token chữ;
-LM decoder (4-bit, đóng băng, gắn LoRA) đọc cả chuỗi và sinh câu trả lời. Khung bên
-trái là cấu trúc một khối của vision encoder. Sơ đồ vẽ lại, phỏng theo Hình 1
-trong báo cáo kỹ thuật của Bai và cộng sự~\cite{bai2025qwen25vl}.}
+\caption[Qwen2.5-VL-3B-Instruct + LoRA trong khóa luận]{Qwen2.5-VL-3B-Instruct + LoRA trong khóa luận. Nhánh ảnh
+(đóng băng): ảnh được cắt thành mảnh $14\times14$, đi qua 32 khối ViT và patch merger,
+thành 256--512 token ảnh. Nhánh chữ (đóng băng): tokenizer chuyển câu hỏi tiếng Việt
+(cùng dòng OCR ở B3) thành token chữ. LLM decoder (36 khối, 4-bit NF4, đóng băng) đọc
+cả chuỗi và sinh câu trả lời theo greedy. LoRA ($r=16$ trên q, k, v, o; 7,37 triệu tham
+số, 0,196\%) là phần duy nhất được train. Thông số lấy từ cấu hình mô hình; sơ đồ vẽ
+lại, phỏng theo Hình 1 trong báo cáo kỹ thuật của Bai và cộng sự~\cite{bai2025qwen25vl}.}
 \label{fig:met-arch}
 \end{figure}
 \end{landscape}
