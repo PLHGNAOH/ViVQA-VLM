@@ -3,8 +3,8 @@
 %****************************** Chương 2 ***************************************
 %*******************************************************************************
 
-\chapter{CÁC NGHIÊN CỨU LIÊN QUAN}
-\label{chap:related}
+\chapter{KẾ HOẠCH QUẢN LÝ DỰ ÁN}
+\label{chap:pm}
 
 \ifpdf
     \graphicspath{{Chapter2/Figs/Raster/}{Chapter2/Figs/PDF/}{Chapter2/Figs/}}
@@ -12,296 +12,477 @@
     \graphicspath{{Chapter2/Figs/Vector/}{Chapter2/Figs/}}
 \fi
 
-\nomenclature[z-OCR-VQA]{Scene-text VQA}{VQA mà câu trả lời phải đọc từ chữ xuất hiện trong ảnh}
-\nomenclature[z-Q-Former]{Q-Former}{Querying Transformer: bộ nối ảnh--ngôn ngữ của BLIP-2}
-
-Chương này tổng quan năm nhóm công trình mà khóa luận dựa vào: bài toán VQA và
-VQA đọc chữ trong ảnh (mục~\ref{sec:rel-vqa}), các vision-language model
-(mục~\ref{sec:rel-vlm}), các phương pháp parameter-efficient fine-tuning
-(mục~\ref{sec:rel-peft}), các nghiên cứu VQA tiếng Việt
-(mục~\ref{sec:rel-vivqa}) và cách đo hallucination (mục~\ref{sec:rel-halluc}).
-Mục~\ref{sec:rel-summary} tổng hợp các khoảng trống G1--G4 đã nêu ở
-Chương~\ref{chap:intro} và chỉ ra khóa luận giải quyết khoảng trống nào.
+Chương này mô tả cách nhóm tổ chức 15 tuần thực hiện đề tài, theo cấu trúc phần kế
+hoạch quản lý dự án trong hướng dẫn khóa luận AIP491. Mục~\ref{sec:intro-team} trình
+bày nhóm và cách giao tiếp. Mục~\ref{sec:intro-pm} trình bày cách tiếp cận quản lý dự
+án: các giai đoạn, phân rã công việc và lịch, cùng cách quản lý rủi ro, chất lượng,
+ngân sách tính toán, thay đổi và việc đóng dự án. Các mục~\ref{sec:pm-training}
+đến~\ref{sec:pm-config} trình bày kế hoạch đào tạo, sản phẩm bàn giao và quản lý cấu
+hình. Đề tài là một nghiên cứu nên kế hoạch xoay quanh thí nghiệm: mỗi kết luận ở
+Chương~\ref{chap:results} phải truy ngược được về một lần chạy có log, seed và cấu hình
+cố định.
 
 %********************************** Mục 2.1 ************************************
-\section{Hỏi đáp trên ảnh và VQA đọc chữ trong ảnh}
-\label{sec:rel-vqa}
+\section{Làm việc nhóm}
+\label{sec:intro-team}
 
-\subsection{Bài toán VQA}
+\subsection{Cơ cấu và vai trò}
 
-Antol và cộng sự~\cite{antol2015vqa} đặt bài toán VQA dưới dạng mở: cho một ảnh và một câu hỏi
-tự nhiên, hệ thống trả lời bằng một từ hoặc cụm từ ngắn. Bộ dữ liệu VQA của họ
-thu mười câu trả lời của người cho mỗi câu hỏi và định nghĩa thước đo VQA
-Accuracy: một câu trả lời được tính đúng hoàn toàn nếu ít nhất ba người cũng trả
-lời như vậy, tức là
-\begin{equation}
-  \mathrm{Acc}(a) = \min\left(\frac{\#\{\text{người trả lời } a\}}{3},\ 1\right).
-  \label{eq:vqaacc}
-\end{equation}
-Các hệ thống thời kỳ này ghép một mạng CNN mã hóa ảnh với một mạng LSTM mã hóa
-câu hỏi, rồi \emph{phân loại} câu trả lời trên một tập đáp án thường gặp cố định.
-Cách đặt bài toán phân loại này hiệu quả với câu trả lời ngắn và lặp lại (màu
-sắc, số lượng, có/không), nhưng không thể sinh một câu trả lời chưa từng có trong
-tập đáp án lúc huấn luyện.
+Nhóm có bốn sinh viên, mỗi người phụ trách một mảng kỹ thuật theo đề cương.
 
-\subsection{VQA đọc chữ trong ảnh}
+Phạm Lê Huy Hoàng (SE182670) là trưởng nhóm và phụ trách mảng PEFT / Training.
+Ngoài việc huấn luyện các mô hình QLoRA, làm ablation cấu hình LoRA và xây
+adapter dùng chung, Hoàng điều phối tiến độ, tích hợp kết quả của các mảng và
+duyệt các kết quả liên mảng.
 
-Nhiều câu hỏi thực tế chỉ trả lời được bằng cách đọc chữ trong ảnh: tên cửa hàng,
-giá tiền, số điện thoại. Singh và cộng sự~\cite{singh2019textvqa} giới thiệu bộ TextVQA cho
-loại câu hỏi này và cho thấy các mô hình VQA thông thường gần như không trả lời
-được; mô hình LoRRA của họ đưa thêm các từ OCR vào mô hình và cho phép
-\emph{chép} một từ OCR làm câu trả lời. Biten và cộng sự~\cite{biten2019stvqa} xây bộ ST-VQA với
-cùng mục tiêu và đề xuất thước đo ANLS (Average Normalized Levenshtein
-Similarity), tính độ giống theo ký tự giữa câu trả lời và đáp án để không phạt
-nặng những lỗi đọc nhỏ do OCR. M4C~\cite{hu2020m4c} mở rộng ý tưởng chép bằng một
-transformer đa phương thức sinh câu trả lời từng bước, mỗi bước chọn giữa một từ
-trong từ điển và một từ OCR.
+Hồ Đắc Toàn (SE183249) phụ trách mảng VLM / Baseline: tìm hiểu kiến trúc
+Qwen2.5-VL, tái lập baseline zero-shot và đối chiếu với số đã công bố.
 
-Bài học chung của nhóm công trình này là: với VQA đọc chữ, chất lượng câu trả lời
-bị chặn bởi chất lượng chữ đọc được. Nếu OCR đọc sai hoặc sắp sai thứ tự các vùng
-chữ, mô hình không thể chép ra đáp án đúng. Đây là lý do khóa luận đo riêng chất
-lượng OCR tiếng Việt và thứ tự đọc (Chương~\ref{chap:methods}).
+Trần Quốc Huân (SE193642) phụ trách mảng Dataset / OCR: lấy dữ liệu từ nguồn
+chính thức, cố định split, kiểm tra rò rỉ giữa train và test, và tạo OCR cache
+bằng PaddleOCR và VietOCR.
+
+Văn Quang Trường (SE182458) phụ trách mảng Evaluation / Deployment: cài đặt các
+thước đo, kiểm định thống kê, đo hallucination, xây prototype và video demo.
+
+Việc liên mảng, ví dụ B3 cần OCR cache của SV2 và đường ray huấn luyện của SV3, do
+người tạo kết quả chính chịu trách nhiệm và trưởng nhóm duyệt. Đóng góp cụ thể của
+từng người theo tuần được ghi trong Team Report. Bảng~\ref{tab:pm-roles} tóm tắt phân
+công, kèm thư mục mã nguồn chính của từng người.
+
+\begin{table}[htbp]
+\caption{Phân công}
+\label{tab:pm-roles}
+\centering
+\small
+\begin{tabular}{p{0.20\textwidth}p{0.18\textwidth}p{0.32\textwidth}p{0.20\textwidth}}
+\toprule
+\textbf{Thành viên} & \textbf{Vai trò} & \textbf{Trách nhiệm chính} & \textbf{Thư mục chính} \\
+\midrule
+Hồ Đắc Toàn (SE183249) & SV1: VLM / Baseline & Hiểu kiến trúc Qwen2.5-VL, tái lập baseline zero-shot, đối chiếu số công bố & \path{src/models/}, \path{src/eval/run_baseline.py} \\
+Trần Quốc Huân (SE193642) & SV2: Dataset / OCR & Dữ liệu chính thức, split, kiểm tra rò rỉ, OCR cache bằng PaddleOCR và VietOCR & \path{data/}, \path{src/data/} \\
+Phạm Lê Huy Hoàng (SE182670) & SV3: PEFT / Training; trưởng nhóm & Huấn luyện QLoRA, ablation cấu hình LoRA, adapter dùng chung; điều phối, tích hợp & \path{src/adaptation/}, \path{configs/}, \path{adapters/} \\
+Văn Quang Trường (SE182458) & SV4: Evaluation / Deployment & Metric, kiểm định thống kê, hallucination, prototype và demo & \path{src/eval/}, \path{src/prototype/} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Kế hoạch giao tiếp}
+
+Nhóm làm việc với giảng viên hướng dẫn theo các mốc của khoa và khi cần xác nhận
+một quyết định lớn, ví dụ việc chốt baseline Qwen2.5-VL-3B ngày 07/10/2026. Sau
+mỗi buổi review với giảng viên phản biện, nhóm điền checklist góp ý, gửi email
+cho giảng viên hướng dẫn và giảng viên review, rồi tải lên thư mục chung.
+
+Trong nhóm, mỗi tuần làm việc có một README và một Team Report trong thư mục
+\path{docs/Wxx/} của repo, ghi việc đã làm, kết quả, quyết định và việc dời lại.
+Mã nguồn, log nhỏ và tài liệu được quản lý trên GitHub; ảnh, adapter, OCR cache
+và video demo được lưu trên Google Drive. Các quyết định ảnh hưởng đến kết quả
+chính được ghi lại trước khi chạy và được giảng viên hướng dẫn xác nhận khi cần.
+
+Bảng~\ref{tab:pm-comm} liệt kê các kênh giao tiếp và tần suất dùng mỗi kênh.
+
+\begin{table}[htbp]
+\caption{Kênh giao tiếp}
+\label{tab:pm-comm}
+\centering
+\small
+\begin{tabular}{p{0.26\textwidth}p{0.48\textwidth}p{0.16\textwidth}}
+\toprule
+\textbf{Kênh} & \textbf{Mục đích} & \textbf{Tần suất} \\
+\midrule
+Họp với giảng viên hướng dẫn & Xác nhận các quyết định lớn, ví dụ chốt baseline Qwen2.5-VL-3B ngày 07/10/2026 & Theo mốc và khi cần \\
+Review với giảng viên phản biện & Nhận góp ý từ bên ngoài; sau mỗi review nhóm điền checklist AI\_Capstone\_Review123, gửi email cho GVHD và giảng viên review, tải lên thư mục chung & Hai lần \\
+Báo cáo tuần (README và Team Report trong \path{docs/Wxx/}) & Ghi việc đã làm, kết quả, quyết định và việc dời & Mỗi tuần làm việc \\
+GitHub & Mã nguồn, log nhỏ, tài liệu; mỗi commit có mô tả & Liên tục \\
+Google Drive & Ảnh, adapter, OCR cache, video demo, ghi âm buổi review & Liên tục \\
+Email của bộ môn & Thông báo ngày review, chỉ gửi trong tuần review & Theo mốc \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 %********************************** Mục 2.2 ************************************
-\section{Vision-language model}
-\label{sec:rel-vlm}
+\section{Cách tiếp cận quản lý dự án}
+\label{sec:intro-pm}
 
-Vision-language model (VLM) hiện nay có chung một khuôn: một bộ mã hóa ảnh biến
-ảnh thành chuỗi vector, một bộ nối chuyển các vector đó sang không gian của mô
-hình ngôn ngữ, và một mô hình ngôn ngữ lớn (LLM) đọc chuỗi token ảnh cùng câu hỏi
-để sinh câu trả lời. Khác biệt giữa các VLM nằm ở bộ nối, ở cách xử lý độ phân
-giải ảnh và ở dữ liệu huấn luyện. Bảng~\ref{tab:rel-vlm} so sánh bốn VLM mà đề
-cương cho phép chọn làm baseline.
+Mục này mô tả cách công việc được lập kế hoạch và kiểm soát: các giai đoạn của dự án,
+phân rã công việc và lịch, cùng cách quản lý rủi ro, chất lượng, ngân sách tính toán,
+thay đổi và việc đóng dự án.
 
-\paragraph{BLIP-2.} Li và cộng sự~\cite{li2023blip2} giữ nguyên (đóng băng) cả bộ mã hóa ảnh
-lẫn LLM và chỉ huấn luyện một mô-đun nhỏ ở giữa là Q-Former. Q-Former dùng một
-số ít query học được để rút thông tin từ ảnh thành một chuỗi token cố định đưa
-vào LLM. Cách làm này rẻ về huấn luyện, nhưng số token ảnh cố định và nhỏ khiến
-mô hình khó giữ chi tiết nhỏ như chữ trong ảnh.
+\subsection{Các giai đoạn}
 
-\paragraph{LLaVA và LLaVA-1.5.} Liu và cộng sự~\cite{liu2023llava} nối bộ mã hóa ảnh với LLM
-chỉ bằng một lớp chiếu và huấn luyện trên dữ liệu hội thoại về ảnh (visual
-instruction tuning). LLaVA-1.5~\cite{liu2024llava15} thay lớp chiếu bằng một MLP,
-tăng độ phân giải ảnh và thêm một câu nhắc yêu cầu trả lời ngắn; riêng câu nhắc
-này đã đủ để mô hình trả lời đúng kiểu ngắn mà các bộ VQA cần. LLaVA-1.5 cũng
-công bố cả bản fine-tune toàn bộ và bản LoRA (mục~\ref{sec:rel-peft}).
+Dự án được chia thành năm giai đoạn theo khung 15 tuần của đề cương:
 
-\paragraph{Florence-2.} Xiao và cộng sự~\cite{xiao2024florence2} xây một mô hình thị giác hợp
-nhất kiểu encoder--decoder, nhận yêu cầu bằng văn bản và sinh kết quả cho các tác
-vụ chú thích ảnh, phát hiện vật thể, định vị và OCR. Mô hình rất nhỏ (0,23 và 0,77
-tỉ tham số) nên dễ huấn luyện, nhưng không phải mô hình hội thoại đa ngôn ngữ và
-không được huấn luyện cho hỏi đáp mở bằng tiếng Việt.
+\paragraph{Giai đoạn 1: Định hướng và lập kế hoạch (W01--W03).} Nhóm đọc paper
+theo bốn mảng, lập literature matrix, phân tích hai bộ dữ liệu, xác định khoảng
+trống nghiên cứu, câu hỏi nghiên cứu và giả thuyết, rồi trình bày ở Review~1.
 
-\paragraph{Qwen2.5-VL.} Bai và cộng sự~\cite{bai2025qwen25vl} dùng một bộ mã hóa ViT nhận ảnh ở
-độ phân giải gốc (native dynamic resolution): ảnh được cắt thành các ô 14×14 điểm
-ảnh, rồi bộ nối gộp mỗi nhóm 2×2 ô thành một token, nên số token ảnh tỉ lệ với
-kích thước ảnh. Mô hình ngôn ngữ là Qwen2.5, đa ngôn ngữ, và mô hình được huấn
-luyện nhiều trên dữ liệu tài liệu và chữ trong ảnh; bản 3 tỉ tham số đạt 79,3
-trên TextVQA theo báo cáo của tác giả. Khóa luận chọn Qwen2.5-VL-3B-Instruct làm
-baseline; kiến trúc chi tiết và lý do chọn được trình bày ở
-Chương~\ref{chap:methods}.
+\paragraph{Giai đoạn 2: Dữ liệu và baseline (W04--W07).} Nhóm lấy dữ liệu từ nguồn
+chính thức, chốt baseline Qwen2.5-VL-3B-Instruct, đánh giá zero-shot, tái lập số công bố
+trên TextVQA và chốt cấu hình suy luận dựa trên số đo (số token ảnh, kiểu số).
+
+\paragraph{Giai đoạn 3: Thích nghi và cải tiến (W07--W10).} Nhóm huấn luyện QLoRA
+thường, phân tích lỗi, đề xuất QLoRA nhận biết OCR, kiểm chứng trên tập con 8.000
+câu, kiểm tra qua ba seed và bảng $2\times2$, rồi chạy trên toàn bộ dữ liệu.
+
+\paragraph{Giai đoạn 4: Đánh giá và phân tích (W10--W12).} Nhóm lập bảng đánh giá
+đầy đủ, làm ablation cấu hình LoRA, thử adapter dùng chung, phân tích lỗi và đo
+hallucination bằng POPE tiếng Việt.
+
+\paragraph{Giai đoạn 5: Prototype, đóng gói và khóa luận (W13--W15).} Nhóm xây
+prototype web, kiểm chứng prototype khớp với pipeline đánh giá, quay video demo,
+chuẩn bị gói tái lập, slide bảo vệ và khóa luận.
+
+\subsection{Phân rã công việc}
+\label{sec:pm-wbs}
+
+Công việc được chia thành tám gói (Bảng~\ref{tab:pm-wbs}). Thời gian tính theo
+tuần làm việc W01--W15 trong khung 15 tuần của đề cương;
+mục~\ref{sec:pm-process} trình bày cách các tuần này khớp với lịch thực.
 
 \begin{table}[htbp]
-\caption{So sánh bốn VLM trong phạm vi đề cương}
-\label{tab:rel-vlm}
+\caption{Phân rã công việc}
+\label{tab:pm-wbs}
 \centering
 \small
-\begin{tabular}{p{0.13\textwidth}p{0.25\textwidth}p{0.24\textwidth}p{0.26\textwidth}}
+\begin{tabular}{p{0.22\textwidth}p{0.40\textwidth}p{0.13\textwidth}p{0.14\textwidth}}
 \toprule
-\textbf{Mô hình} & \textbf{Bộ nối ảnh--ngôn ngữ} & \textbf{Điểm mạnh với đề tài} & \textbf{Hạn chế với đề tài} \\
+\textbf{Gói công việc} & \textbf{Nội dung chính} & \textbf{Tuần} & \textbf{Phụ trách chính} \\
 \midrule
-BLIP-2 & Q-Former, số token ảnh cố định; ảnh và LLM đóng băng & Rẻ khi huấn luyện; là nền của ViTextBLIP-2 & Ít token ảnh, dễ mất chi tiết chữ nhỏ \\
-LLaVA-1.5 & MLP chiếu từng patch sang LLM & Kiến trúc đơn giản; có bằng chứng LoRA ngang fine-tune toàn bộ & Chủ yếu tiếng Anh; độ phân giải ảnh cố định \\
-Florence-2 & Encoder--decoder hợp nhất, yêu cầu bằng văn bản & Rất nhỏ; có tác vụ OCR riêng & Không phải mô hình hội thoại đa ngôn ngữ \\
-Qwen2.5-VL & ViT độ phân giải gốc, gộp 2×2 ô thành một token & Đa ngôn ngữ; đọc chữ trong ảnh tốt; có bản 3B & Số token ảnh tăng theo kích thước ảnh, tốn bộ nhớ \\
+1. Khảo sát và định hướng & Đọc paper theo mảng, literature matrix, khoảng trống nghiên cứu, câu hỏi nghiên cứu, giả thuyết & W01--W03 & Cả nhóm \\
+2. Dữ liệu & Lấy ViVQA và ViTextVQA từ nguồn chính thức, cố định split, kiểm tra rò rỉ train/test, OCR cache & W02, W05, W08, W14 & SV2 \\
+3. Baseline & Tái lập Qwen2.5-VL-3B-Instruct zero-shot (B1), đối chiếu số công bố trên TextVQA (R0), chốt cấu hình suy luận & W04--W07 & SV1 \\
+4. Thích nghi bằng QLoRA & Đường ray huấn luyện QLoRA; các mô hình B2, B3, B3-full, C3, adapter dùng chung SH; ablation cấu hình LoRA & W06--W11 & SV3 \\
+5. Đánh giá & EM, VQA-Acc, ANLS, F1; kiểm định McNemar ghép cặp; độ ổn định qua seed; bảng đánh giá đầy đủ & W05--W11 & SV4 \\
+6. Phân tích & Error analysis, phân loại câu hỏi, hallucination POPE-vi, ngân sách token, ảnh hưởng của chuẩn hóa và tách từ lên metric & W07, W11--W12, W15 & SV4, SV3 \\
+7. Prototype & Web demo, hiệu chỉnh ngưỡng có/không, kiểm tra prototype khớp hệ thống đã đánh giá, video demo & W13--W14 & SV4 \\
+8. Báo cáo và bảo vệ & Báo cáo tuần, slide review, gói tái lập, khóa luận & Hằng tuần, W15 & Cả nhóm, trưởng nhóm điều phối \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\paragraph{Mục tiêu quản lý.} Kế hoạch được quản lý theo bốn mục tiêu:
+
+\begin{itemize}
+  \item \textbf{Tái lập được:} mọi lần chạy ghi split, seed, phần cứng, siêu
+  tham số, thời gian huấn luyện và suy luận.
+  \item \textbf{Không chọn kết quả sau khi thấy số:} luật quyết định của mỗi
+  phép thử chính được commit lên Git trước khi chạy.
+  \item \textbf{Đúng ràng buộc tài nguyên:} chỉ dùng QLoRA, mọi thí nghiệm chạy
+  được trên một GPU Colab (T4 hoặc L4).
+  \item \textbf{Đúng mốc:} xong nghiên cứu chính trước Review~2 và hội đồng cấp
+  khoa.
+\end{itemize}
+
+Đến hết W14, thư mục \path{experiments/} có 141 lần chạy, lần nào cũng có log.
+Sáu mô hình chính thức được liệt kê trong \path{configs/official_models.json},
+file này sinh tự động từ log; bốn adapter lưu trên Google Drive đều khớp mã băm
+SHA-256 đã ghi.
+
+\subsection{Lịch và theo dõi tiến độ}
+\label{sec:pm-process}
+
+Nhóm làm theo chu kỳ tuần. Mỗi tuần làm việc đi qua năm bước:
+
+\begin{enumerate}
+  \item \textbf{Lập kế hoạch:} chọn câu hỏi của tuần từ kế hoạch tổng và kết quả
+  tuần trước, ghi vào README của tuần.
+  \item \textbf{Ghi luật trước:} với mỗi phép thử chính, viết luật quyết định
+  (ngưỡng, kiểm định, tập dữ liệu) và commit lên Git trước khi chạy.
+  \item \textbf{Chạy:} code được viết và tự kiểm tra (self-test) trên máy cá nhân
+  rồi đẩy lên GitHub; notebook Colab clone repo và chạy trên GPU; log, kết quả
+  lưu trên Google Drive.
+  \item \textbf{Kiểm tra:} tính lại số liệu từ file dự đoán gốc
+  (\path{predictions.json}) thay vì chép tay, và clone lại repo để xác minh từng
+  commit.
+  \item \textbf{Đóng tuần:} cập nhật README, Team Report của tuần và bản nháp các
+  chương liên quan.
+\end{enumerate}
+
+Tuần làm việc W01--W15 được đánh số theo nội dung trong khung của đề cương, không
+theo lịch. Nhóm làm nhanh hơn lịch: ngày 02/11/2026 (tuần thực 9), nhóm đã sang
+W15. Tuần thực tính từ thứ Hai 07/09/2026 là tuần 1. Bảng~\ref{tab:pm-weeks} đối
+chiếu hai cách đếm.
+
+\begin{table}[htbp]
+\caption{Tuần làm việc và lịch thực (năm 2026)}
+\label{tab:pm-weeks}
+\centering
+\small
+\begin{tabular}{p{0.12\textwidth}p{0.55\textwidth}p{0.22\textwidth}}
+\toprule
+\textbf{Tuần} & \textbf{Nội dung chính} & \textbf{Thời gian thực} \\
+\midrule
+W01--W02 & Định hướng, kế hoạch 15 tuần, literature matrix, phân tích dữ liệu & 07--16/09 \\
+W03 & Hồ sơ Review~1 & 17/09 (Review~1: 24/09) \\
+W04 & Baseline zero-shot đầu tiên; đổi baseline sang Qwen2.5-VL-3B & 18--21/09 \\
+W05 & Dữ liệu chính thức; baseline zero-shot trên cả hai tập & 22--27/09 \\
+W06 & Chẩn đoán lỗi fp16; đường ray QLoRA & 28--29/09 \\
+W07 & Chốt cấu hình trên L4; B1 chính thức; B2; tái lập R0 & 30/09--12/10 \\
+W08 & OCR-enhanced prompting; B3 trên tập con & 12--14/10 \\
+W09 & Ổn định qua seed; bảng $2\times2$; ViVQA 2 epoch & 15--17/10 \\
+W10 & Ablation cấu hình LoRA; B3-full & 19--21/10 \\
+W11 & Bảng đánh giá đầy đủ; adapter dùng chung & 21--22/10 \\
+W12 & Hallucination POPE-vi; error analysis & 23--24/10 \\
+W13 & Prototype web & 26--31/10 \\
+W14 & Hoàn thiện code, video demo, gói tái lập & 01--02/11 \\
+W15 & Góp ý Review~2, slide bảo vệ, khóa luận & từ 02/11 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Các mốc của khoa giữ nguyên theo lịch thực (Bảng~\ref{tab:pm-milestones}). Điểm
+khóa luận gồm 50\% quá trình, trong đó nhóm nộp 7 báo cáo cho giảng viên hướng
+dẫn, và 50\% bảo vệ. Bảy báo cáo này tương ứng với các chương của khóa luận như ở Bảng~\ref{tab:intro-aip491}.
+
+\begin{table}[htbp]
+\caption{Các mốc của khoa}
+\label{tab:pm-milestones}
+\centering
+\small
+\begin{tabular}{p{0.18\textwidth}p{0.22\textwidth}p{0.34\textwidth}p{0.15\textwidth}}
+\toprule
+\textbf{Mốc} & \textbf{Thời gian} & \textbf{Nội dung} & \textbf{Trạng thái} \\
+\midrule
+Review~1 & 24/09/2026 (tuần thực 3) & Bài toán, khoảng trống, câu hỏi nghiên cứu, kế hoạch; hai giảng viên không phải GVHD nhận xét & Đã qua, 10 góp ý \\
+Review~2 & 29/10/2026 (tuần thực 8) & Baseline đã tái lập, phương pháp, kết quả sơ bộ & Đã qua \\
+Hội đồng cấp Khoa/Bộ môn & 30/11--06/12/2026 (tuần thực 13) & Ba thành viên, 60 phút mỗi nhóm & Chưa diễn ra \\
+Hội đồng cấp trường & 14--20/12/2026 (tuần thực 15) & Năm thành viên & Chưa diễn ra \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Quản lý rủi ro}
+\label{sec:pm-risk}
+
+Kế hoạch W01 liệt kê tám rủi ro (mô hình quá lớn, thiếu GPU, dữ liệu lỗi,
+baseline khó tái lập, OCR kém, huấn luyện không hội tụ, demo khó triển khai,
+huấn luyện chậm). Bảng~\ref{tab:pm-risks} ghi lại các rủi ro đã thực sự xảy ra
+và cách nhóm xử lý.
+
+\begin{table}[htbp]
+\caption{Rủi ro đã xảy ra và cách xử lý}
+\label{tab:pm-risks}
+\centering
+\small
+\begin{tabular}{p{0.24\textwidth}p{0.08\textwidth}p{0.10\textwidth}p{0.46\textwidth}}
+\toprule
+\textbf{Rủi ro} & \textbf{Tuần} & \textbf{Mức} & \textbf{Cách xử lý} \\
+\midrule
+Trường không có GPU server & W06 & Cao & Chuyển toàn bộ huấn luyện sang Colab; nâng lên Colab Pro ngày 07/10/2026 để dùng L4 \\
+fp16 trên T4 làm hỏng câu trả lời & W06 & Cao & Dò kiểu số trên 73 câu: fp16 hỏng 23 câu; chuyển sang bf16 trên L4 (0/73 câu hỏng) \\
+Dữ liệu sai nguồn & W05 & Cao & Dữ liệu trên máy là ViVQA-X chứ không phải ViVQA, còn ViTextVQA lấy từ bản sao không chính thức. Tải lại ViVQA từ repo gốc, xin quyền kho gated của ViTextVQA, dùng đáp án \path{test_gt.json} \\
+Một lần huấn luyện đầy đủ tốn khoảng 12 giờ & W08 & Trung bình & Chạy phép thử chính trên tập con 8.000 câu (B3 so với B2-sub); chỉ chạy bản đầy đủ B3-full ở W10 khi kết quả tập con đã rõ \\
+Thư viện đổi API & W06 & Thấp & \texttt{transformers} 5.17.0 bỏ \path{warmup_ratio}; đổi sang \path{warmup_steps}, ghi phiên bản thư viện vào log \\
+PaddleOCR bản GPU xung đột với torch trong prototype & W13 & Trung bình & Chạy OCR trong một tiến trình riêng (\path{src/prototype/ocr_worker.py}) \\
+Adapter dùng chung thiên về trả lời ``có'' & W12--W13 & Trung bình & Chọn ngưỡng trên logit token đầu bằng tập calibration tách rời tập POPE-vi \\
+Ảnh có cờ xoay EXIF làm sai OCR cache & W14 & Trung bình & Kiểm tra theo luật ghi trước (164/165 ảnh có cờ xoay bị lệch); sửa \path{ocr.py}, OCR lại 167 ảnh, suy luận lại B3-full (EM 53,35 $\rightarrow$ 53,63) \\
+Lịch review thay đổi & W10 & Thấp & Review~2 dời sang 29/10/2026; nhóm cập nhật một bộ slide cộng dồn thay vì làm lại \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Quản lý chất lượng}
+\label{sec:pm-quality}
+
+Trong đề tài này, chất lượng trước hết là độ tin cậy của con số. Nhóm dùng năm
+biện pháp:
+
+\begin{itemize}
+  \item \textbf{Luật ghi trước:} ngưỡng và cách kết luận cho mỗi phép thử chính
+  được commit trước khi có kết quả, ví dụ luật cho adapter dùng chung (commit
+  \texttt{324caeb}, W11) và luật hallucination H4 (commit \texttt{9209170}, W12).
+  \item \textbf{Kiểm định ghép cặp:} mọi so sánh hai mô hình trên cùng tập test
+  dùng McNemar trên từng câu cho EM và khoảng tin cậy 95\% bằng bootstrap ghép
+  cặp cho ANLS; kết quả chính được lặp lại với seed 42, 43 và 44.
+  \item \textbf{Tính lại từ dữ liệu gốc:} bảng kết quả cuối
+  (\path{src/eval/full_eval_table.py}) đọc trực tiếp các file
+  \path{predictions.json}, không chép số từ báo cáo tuần.
+  \item \textbf{Self-test:} các module chính có chế độ \texttt{-{}-selftest} chạy
+  trên CPU, cả Windows lẫn Linux, để bắt lỗi trước khi tốn GPU.
+  \item \textbf{Mã băm và chữ ký run:} adapter, OCR cache, file dữ liệu và slide
+  được ghi mã SHA-256; mỗi run mang chữ ký cấu hình nên script không ghi tiếp kết
+  quả của cấu hình khác vào cùng thư mục.
+\end{itemize}
+
+\paragraph{Tích hợp các thành phần.} Các thành phần của hệ thống được ghép với nhau qua một số điểm chung cố định. Một
+hàm dựng prompt duy nhất được dùng cho cả huấn luyện, đánh giá và prototype, nên
+không có sai lệch prompt giữa các giai đoạn. OCR được chạy một lần và lưu cache
+có mã băm; huấn luyện và đánh giá chỉ đọc cache. Danh sách các mô hình chính thức
+được sinh tự động từ log, và prototype được kiểm tra theo luật đặt trước để bảo
+đảm cho cùng câu trả lời với pipeline đánh giá.
+
+\subsection{Ngân sách và tài nguyên tính toán}
+\label{sec:pm-budget}
+
+Ước lượng ban đầu ở W01 giả định có GPU server của trường. Đến W06, nhóm xác
+nhận trường không có GPU server, nên chi phí được ước lượng lại theo đơn vị tính
+toán (compute unit, CU) của Google Colab. Từ W08, trước mỗi việc cần GPU, nhóm
+ước tính số giờ GPU và số CU (L4 khoảng 1,54 CU/giờ, T4 khoảng 1,2 CU/giờ), rồi
+đối chiếu với số đọc thực tế trên Colab. Một lần huấn luyện QLoRA đầy đủ trên
+ViTextVQA mất khoảng 12 giờ L4 (B2: 11,99 giờ; B3-full: 12,75 giờ), nên số lần
+huấn luyện đầy đủ là ràng buộc lớn nhất của kế hoạch.
+
+Ngân sách Colab được theo dõi bằng CU và ghi trong báo cáo tuần. Số CU còn lại
+đọc trên Colab: 146,75 (13/10), 86,52 (19/10), 49,3 (21/10), 34,96 (23/10) và
+17,38 (31/10). Riêng W10, với ablation cấu hình LoRA và B3-full, dùng khoảng
+37~CU.
+
+\subsection{Quy trình quản lý thay đổi}
+\label{sec:pm-change}
+
+Mọi thay đổi về phạm vi, lịch, phương pháp hay tài nguyên đều theo một quy trình.
+(1) Thay đổi phải xuất phát từ bằng chứng --- một số đo, một góp ý của giảng viên phản
+biện hoặc một quyết định của giảng viên hướng dẫn --- chứ không xuất phát từ ý muốn hình
+thành sau khi đã thấy kết quả. (2) Thay đổi, lý do và tác động dự kiến được ghi vào
+README hoặc Team Report của tuần trước khi áp dụng. (3) Những thay đổi ảnh hưởng đến kết
+quả chính, như baseline, nguồn dữ liệu hay giao thức đánh giá, được xác nhận với giảng
+viên hướng dẫn. (4) Không ghi đè lần chạy cũ: lần chạy bị thay thế vẫn nằm trong
+\path{experiments/}, và luật quyết định của lần chạy mới được commit trước khi chạy.
+Bảng~\ref{tab:pm-changes} liệt kê các thay đổi chính trong dự án.
+
+\begin{table}[htbp]
+\caption{Các thay đổi chính trong dự án}
+\label{tab:pm-changes}
+\centering
+\small
+\begin{tabular}{p{0.08\textwidth}p{0.40\textwidth}p{0.42\textwidth}}
+\toprule
+\raggedright \textbf{Tuần} & \raggedright \textbf{Thay đổi} & \raggedright \textbf{Lý do và cách xử lý} \tabularnewline
+\midrule
+\raggedright W04 & \raggedright Thay ứng viên baseline Qwen3-VL-4B bằng Qwen2.5-VL-3B-Instruct & \raggedright Công cụ hỗ trợ đã ổn định, nằm trong danh sách baseline được duyệt, đủ nhẹ cho GPU T4; giảng viên hướng dẫn xác nhận ngày 07/10/2026 \tabularnewline
+\raggedright W05 & \raggedright Thay ViVQA-X trên máy bằng ViVQA gốc; thay bản sao ViTextVQA bằng kho gated chính thức & \raggedright Dữ liệu trên máy hóa ra là một bộ dữ liệu khác và một bản sao không chính thức; đáp án test lấy từ \path{test_gt.json} \tabularnewline
+\raggedright W06 & \raggedright Chuyển tính toán sang Google Colab (Colab Pro với GPU L4 từ 07/10); dời việc chốt cấu hình sang W07 & \raggedright Trường không có GPU server; T4 không có bf16 nên baseline chỉ chạy lại một lần, trên phần cứng cuối cùng \tabularnewline
+\raggedright W07--W08 & \raggedright Chạy thí nghiệm OCR trước trên tập con cố định 8.000 câu; chỉ chạy B3 trên toàn bộ dữ liệu ở W10 & \raggedright Một epoch ViTextVQA tốn khoảng 12 giờ L4 \tabularnewline
+\raggedright W10 & \raggedright Đánh số lại giả thuyết thành H1--H4 cuối cùng; đặt tên ablation LoRA là A1 và A2 & \raggedright Góp ý Review~1: giả thuyết phải nhắm vào các vấn đề riêng của tiếng Việt \tabularnewline
+\raggedright W14 & \raggedright Dựng lại OCR cache cho ảnh có cờ xoay EXIF & \raggedright Luật L3 ghi trước: giữ số chính thức, kết quả sau khi sửa báo cáo dưới dạng phân tích độ nhạy (Mục~\ref{sec:res-exif}) \tabularnewline
+\raggedright W15 & \raggedright Chuyển demo lúc bảo vệ từ Colab sang laptop chạy offline & \raggedright Demo phải trình bày trực tiếp; laptop khởi động nhanh hơn (khoảng 27 giây so với khoảng 60 giây) và không cần mạng (Mục~\ref{sec:sd-deploy}) \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Đóng dự án và đánh giá}
+\label{sec:pm-closure}
+
+Dự án được đóng theo ba bước.
+
+\paragraph{Chốt kết quả.} Sáu mô hình chính thức được liệt kê trong
+\path{configs/official_models.json}, file sinh tự động từ log; bốn adapter lưu trên
+Google Drive đều khớp mã băm SHA-256 đã ghi. Sau thời điểm này, không thí nghiệm nào làm
+thay đổi số chính thức: ví dụ, kết quả sau khi sửa lỗi EXIF chỉ được báo cáo dưới dạng
+phân tích độ nhạy.
+
+\paragraph{Bàn giao.} Gói tái lập (Phụ lục~\ref{appendix:repro}) giúp người ngoài nhóm
+dựng lại mọi số chính thức và chạy prototype. Bộ hồ sơ nộp được sắp theo bốn thành phần
+khoa yêu cầu: khóa luận, slide, mã nguồn kèm adapter của prototype, và báo cáo tiến độ.
+Gói mã nguồn được kiểm tra để không chứa ảnh chụp thật và không chứa token truy cập.
+
+\paragraph{Đánh giá.} Kết quả dự án được đánh giá theo mục tiêu và tiêu chí hoàn thành ở
+Bảng~\ref{tab:objectives} và theo luật quyết định của các giả thuyết
+(Bảng~\ref{tab:res-hyp}); Chương~\ref{chap:conclusion} tổng kết kết quả, và
+Mục~\ref{sec:con-reflect} ghi lại những gì làm tốt và những gì lẽ ra làm tốt hơn. Các
+buổi đánh giá còn lại --- hội đồng cấp khoa và hội đồng cấp trường --- được xử lý theo
+cùng quy trình góp ý như Review~1 và Review~2.
 
 %********************************** Mục 2.3 ************************************
-\section{Parameter-efficient fine-tuning}
-\label{sec:rel-peft}
+\section{Kế hoạch đào tạo}
+\label{sec:pm-training}
 
-\subsection{Vì sao cần PEFT}
-
-Fine-tune toàn bộ một mô hình lớn cho mỗi bài toán nghĩa là cập nhật và lưu một
-bản sao của mọi tham số. Với GPT-3 175 tỉ tham số, mỗi bản sao chiếm khoảng 350~GB
-ở 16-bit, và lúc huấn luyện còn phải giữ thêm gradient và trạng thái của bộ tối
-ưu~\cite{hu2022lora}. Parameter-efficient fine-tuning (PEFT) giữ nguyên trọng số
-gốc và chỉ huấn luyện một phần rất nhỏ tham số thêm vào. Các hướng sớm gồm
-adapter~\cite{houlsby2019adapter}, chèn các lớp nhỏ vào giữa các lớp của mạng, và
-prefix-tuning~\cite{li2021prefix}, học một đoạn vector đặt trước chuỗi đầu vào.
-Adapter làm tăng độ trễ khi suy luận vì thêm lớp tuần tự; prefix-tuning chiếm
-một phần độ dài chuỗi và khó tối ưu.
-
-\subsection{LoRA}
-
-Hu và cộng sự~\cite{hu2022lora} giả định rằng phần thay đổi của trọng số khi thích nghi có hạng
-thấp. Với một ma trận trọng số $W_0 \in \mathbb{R}^{d \times k}$, LoRA giữ $W_0$
-cố định và học hai ma trận nhỏ $B \in \mathbb{R}^{d \times r}$,
-$A \in \mathbb{R}^{r \times k}$ với $r \ll \min(d, k)$:
-\begin{equation}
-  h = W_0 x + \frac{\alpha}{r} B A x .
-  \label{eq:lora}
-\end{equation}
-$B$ được khởi tạo bằng 0 nên lúc bắt đầu mô hình giữ nguyên hành vi gốc. Sau khi
-huấn luyện, $BA$ có thể cộng thẳng vào $W_0$, nên suy luận không chậm hơn. Trên
-GPT-3, LoRA đạt kết quả ngang hoặc hơn fine-tune toàn bộ với số tham số huấn
-luyện ít hơn khoảng 10.000 lần và bộ nhớ GPU giảm khoảng 3 lần.
-
-\subsection{QLoRA}
-
-LoRA giảm số tham số phải học nhưng vẫn phải giữ trọng số gốc ở 16-bit trong bộ
-nhớ. Dettmers và cộng sự~\cite{dettmers2023qlora} lượng tử hóa trọng số gốc xuống 4-bit và huấn
-luyện LoRA ở trên, với ba kỹ thuật: kiểu số 4-bit NormalFloat (NF4) được thiết
-kế cho trọng số có phân phối gần chuẩn; lượng tử hóa kép (double quantization)
-nén cả các hằng số lượng tử hóa; và bộ tối ưu phân trang (paged optimizer) để
-tránh tràn bộ nhớ khi có đỉnh tiêu thụ. Nhờ đó, một LLM 65 tỉ tham số được
-fine-tune trên một GPU 48~GB, trong khi kết quả khớp với fine-tune 16-bit trên các
-thí nghiệm của tác giả. Bài báo cũng khuyến nghị gắn LoRA lên mọi lớp tuyến tính
-để bù sai số lượng tử hóa. Khóa luận dùng QLoRA vì đây là cách duy nhất để
-fine-tune một VLM vài tỉ tham số trên một GPU Colab; lựa chọn gắn LoRA chỉ vào các
-ma trận attention hay vào mọi lớp tuyến tính được kiểm tra bằng ablation ở
-Chương~\ref{chap:results}.
-
-\subsection{PEFT cho vision-language model}
-
-Sung và cộng sự~\cite{sung2022vladapter} so sánh có kiểm soát các phương pháp PEFT trên các bài
-toán ảnh--ngôn ngữ, trong đó có VQA, và cho thấy một adapter dùng chung chỉ với
-4,18\% tham số huấn luyện đạt kết quả gần bằng fine-tune toàn bộ. LLaVA-1.5 cho
-bằng chứng tương tự ở quy mô lớn hơn: với mô hình 13 tỉ tham số, bản LoRA đạt
-80,0 trên VQAv2 (bằng bản fine-tune toàn bộ), 60,2 so với 61,3 trên TextVQA, và
-86,7 so với 85,9 F1 trên POPE~\cite{liu2024llava15}. Bảng~\ref{tab:rel-peft} tóm
-tắt các cách thích nghi.
+Đề tài cần kiến thức ở bốn mảng khác nhau, nên ở W01 mỗi thành viên đọc ít nhất
+ba paper thuộc mảng của mình và trả lời 10 câu hỏi cố định cho mỗi paper, trong
+đó bắt buộc có câu ``dùng được gì cho đề tài'' (Bảng~\ref{tab:pm-papers}).
 
 \begin{table}[htbp]
-\caption{Các cách thích nghi một mô hình lớn}
-\label{tab:rel-peft}
+\caption{Paper nền tảng theo mảng}
+\label{tab:pm-papers}
 \centering
 \small
-\begin{tabular}{p{0.20\textwidth}p{0.22\textwidth}p{0.20\textwidth}p{0.26\textwidth}}
+\begin{tabular}{p{0.32\textwidth}p{0.58\textwidth}}
 \toprule
-\textbf{Cách} & \textbf{Tham số huấn luyện} & \textbf{Độ trễ suy luận} & \textbf{Bộ nhớ khi huấn luyện} \\
+\textbf{Mảng} & \textbf{Paper đã đọc} \\
 \midrule
-Fine-tune toàn bộ & Toàn bộ & Không đổi & Rất lớn: trọng số, gradient, trạng thái tối ưu \\
-Adapter & Vài phần trăm & Tăng (thêm lớp) & Giữ trọng số 16-bit \\
-Prefix-tuning & Rất ít & Tăng nhẹ (chuỗi dài hơn) & Giữ trọng số 16-bit \\
-LoRA & Dưới 1\% & Không đổi sau khi gộp & Giữ trọng số 16-bit \\
-QLoRA & Dưới 1\% & Không đổi sau khi gộp & Trọng số 4-bit; nhỏ nhất \\
+SV1: VLM / Baseline & BLIP-2, Florence-2, Qwen2.5-VL \\
+SV2: Dataset / OCR & ViVQA, ViTextVQA, TextVQA (LoRRA) \\
+SV3: PEFT / Training & LoRA, QLoRA, VL-Adapter, LLaVA-1.5 \\
+SV4: Evaluation / Deployment & POPE, VQAv2, Survey Vision-Language Models (TPAMI 2024) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Tuy vậy, các bằng chứng trên đều đến từ tiếng Anh. Trong các công trình nhóm khảo
-sát, chưa có nghiên cứu nào kiểm chứng LoRA hoặc QLoRA trên VLM cho VQA tiếng Việt
-hay cho VQA đọc chữ tiếng Việt. Đây là khoảng trống G3 mà khóa luận tập trung.
+Những kỹ năng còn lại nhóm học trong quá trình làm: huấn luyện QLoRA với PEFT và
+bitsandbytes, PaddleOCR và VietOCR, kiểm định McNemar, và cách làm việc giữa máy
+cá nhân, GitHub, Colab và Google Drive. Sổ thuật ngữ song ngữ
+\path{docs/Glossary.md} được cập nhật suốt dự án.
 
 %********************************** Mục 2.4 ************************************
-\section{VQA tiếng Việt}
-\label{sec:rel-vivqa}
+\section{Sản phẩm bàn giao}
+\label{sec:pm-deliverables}
 
-\subsection{Bộ dữ liệu}
-
-\paragraph{ViVQA.} Tran và cộng sự~\cite{tran2021vivqa} công bố bộ dữ liệu VQA tiếng Việt đầu
-tiên, gồm 10.328 ảnh và 15.000 cặp câu hỏi--câu trả lời. Câu trả lời ngắn, phần
-lớn chỉ một đến ba từ, nên bài toán thường được đặt dưới dạng phân loại.
-
-\paragraph{OpenViVQA.} Nguyen và cộng sự~\cite{nguyen2023openvivqa} xây bộ dữ liệu với câu trả lời
-mở, dài hơn và đòi hỏi sinh câu trả lời thay vì chọn từ một tập cố định; khoảng
-một nửa số mẫu có liên quan tới chữ trong ảnh~\cite{nguyen2024vitextvqa}.
-
-\paragraph{ViTextVQA.} Nguyen và cộng sự~\cite{nguyen2024vitextvqa} công bố bộ dữ liệu VQA đọc chữ
-tiếng Việt quy mô lớn đầu tiên, gồm 16.762 ảnh và 50.342 câu hỏi, chia train, dev,
-test theo tỉ lệ 7:1:2. Câu trả lời thường là chữ chép từ ảnh như tên cửa hàng,
-khẩu hiệu, giá tiền. Người đạt 88,00 EM và 96,42 F1 trên bộ này. Các tác giả cũng
-cho thấy sắp xếp chữ OCR theo thứ tự từ trái sang phải, từ trên xuống dưới giúp
-các mô hình trả lời tốt hơn. Khóa luận dùng ViVQA và ViTextVQA; thống kê chi tiết
-được trình bày ở Chương~\ref{chap:methods}.
-
-\subsection{Phương pháp}
-
-Bảng~\ref{tab:rel-vivqa} tóm tắt các phương pháp tiêu biểu theo thời gian.
+Bảng~\ref{tab:pm-deliverables} liệt kê sản phẩm theo yêu cầu của đề cương, gồm cả gói
+tái lập. Trạng thái tính đến ngày 27/11/2026.
 
 \begin{table}[htbp]
-\caption{Các nghiên cứu VQA tiếng Việt tiêu biểu}
-\label{tab:rel-vivqa}
+\caption{Sản phẩm bàn giao}
+\label{tab:pm-deliverables}
 \centering
 \small
-\begin{tabular}{p{0.21\textwidth}p{0.33\textwidth}p{0.16\textwidth}p{0.20\textwidth}}
+\begin{tabular}{p{0.38\textwidth}p{0.36\textwidth}p{0.16\textwidth}}
 \toprule
-\textbf{Nghiên cứu} & \textbf{Cách làm} & \textbf{Kết quả công bố} & \textbf{Hạn chế} \\
+\textbf{Sản phẩm} & \textbf{Vị trí} & \textbf{Trạng thái} \\
 \midrule
-ViVQA~\cite{tran2021vivqa}, 2021 & LSTM, Bi-LSTM với nhiều kiểu word embedding; Hierarchical Co-Attention; chọn đáp án trong tập cố định & Acc 34,96 trên ViVQA & Đặc trưng rời rạc; không đọc được chữ \\
-Bi-directional Cross-Attention~\cite{nguyentran2022bica}, 2022 & Bộ mã hóa đã tiền huấn luyện, cross-attention hai chiều giữa ảnh và câu hỏi & Vượt baseline ViVQA & Vẫn là bài toán phân loại \\
-PAT~\cite{nguyen2023pat}, 2023 & Parallel Attention Transformer, trích đặc trưng câu hỏi theo tầng & Acc 60,55 trên ViVQA & Phân loại; không đọc chữ \\
-BARTPhoBEiT~\cite{tran2023bartphobeit}, 2023 & BARTpho cho tiếng Việt kết hợp bộ mã hóa ảnh kiểu BEiT & Acc 68,58 trên ViVQA & Phân loại; không đọc chữ \\
-AViVQA-TranConI~\cite{nguyen2024tranconi}, 2024 & BLIP-2 (đặc trưng toàn cục) và EfficientNet (đặc trưng cục bộ), BARTpho, trộn bằng BEiT-3; phân loại trên 353 đáp án & Acc 71,04 trên ViVQA & Không sinh được đáp án mới; không có OCR \\
-ViTextBLIP-2~\cite{nguyen2024vitextvqa}, 2026 & SwinTextSpotter đọc chữ, Q-Former nối ảnh và chữ OCR, ViT5 đóng băng sinh câu trả lời & EM 25,48; F1 53,95 trên ViTextVQA & Phụ thuộc OCR ngoài; cách xa người (88,00 EM) \\
+Mã nguồn: 49 module Python (dữ liệu, huấn luyện, đánh giá, prototype) & \path{src/} trên GitHub (PLHGNAOH/ViVQA-VLM) & Hoàn thành \\
+30 notebook Colab & \path{notebooks/} & Hoàn thành \\
+Log 142 lần chạy & \path{experiments/} & Hoàn thành \\
+Adapter QLoRA của các mô hình chính thức & Google Drive; mã băm trong \path{configs/official_models.json} & Hoàn thành \\
+Gói tái lập: hướng dẫn, phiên bản thư viện, script suy luận & \path{docs/REPRODUCE.md}, \path{requirements-colab.txt}, \path{src/prototype/infer.py} & Hoàn thành \\
+Prototype web và video demo (10 phút 28 giây) & \path{src/prototype/}, Google Drive & Hoàn thành \\
+Báo cáo tuần W01--W15 & \path{docs/W01/} đến \path{docs/W15/} & Hoàn thành \\
+Slide Review~1, Review~2 và slide bảo vệ (tiếng Anh, tiếng Việt) & \path{docs/W03/}, \path{docs/04_slides/} & Hoàn thành \\
+Khóa luận (bản tiếng Anh và tiếng Việt) & \path{docs/03_report/overleaf/} (mã nguồn LaTeX và PDF) & Hoàn thành \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-Các nghiên cứu trên đi theo một lộ trình rõ: từ đặc trưng rời rạc kết hợp
-attention (2021), sang bộ mã hóa đã tiền huấn luyện và mô-đun trộn đa phương thức
-(2022--2024), rồi tới mô hình sinh dựa trên BLIP-2 cho dữ liệu có chữ (2025). Có
-hai vướng mắc lặp lại. Thứ nhất, phần lớn các công trình trên ViVQA coi VQA là
-phân loại trên tập đáp án cố định, nên không trả lời được những đáp án chưa thấy
-khi huấn luyện, điều bắt buộc với câu hỏi đọc chữ. Thứ hai, đọc chữ tiếng Việt có
-dấu trong ảnh vẫn là điểm yếu: ViTextBLIP-2 dựa vào một bộ OCR bên ngoài được giữ
-cố định khi huấn luyện, nên lỗi đọc chữ của OCR truyền thẳng vào câu trả lời.
-
-Cần lưu ý khi so sánh: Accuracy của các phương pháp phân loại trên ViVQA được tính
-trên tập đáp án cố định, không cùng cách chấm với EM của mô hình sinh tự do mà
-khóa luận dùng. Vì vậy các con số trên ViVQA ở Bảng~\ref{tab:rel-vivqa} chỉ để
-tham khảo. Trên ViTextVQA, khóa luận so trực tiếp với ViTextBLIP-2 vì cùng tập
-test và cùng thước đo EM, F1 (Chương~\ref{chap:results}).
 
 %********************************** Mục 2.5 ************************************
-\section{Hallucination và cách đo}
-\label{sec:rel-halluc}
+\section{Quản lý cấu hình}
+\label{sec:pm-config}
 
-Hallucination trong VLM là hiện tượng mô hình sinh nội dung trôi chảy nhưng không
-có trong ảnh, ví dụ nhắc tới một vật không xuất hiện. Rohrbach và cộng sự~\cite{rohrbach2018chair}
-đo hiện tượng này trên chú thích ảnh bằng thước đo CHAIR, đếm tỉ lệ vật được nhắc
-tới mà không có trong nhãn của ảnh. Cách đo này phụ thuộc vào việc tách tên vật ra
-khỏi câu văn và vào độ dài câu.
+\paragraph{Quản lý tài liệu.} Tài liệu chia làm hai loại. Tài liệu theo tuần
+nằm trong \path{docs/W01} đến \path{docs/W15}; mỗi thư mục có README làm mục lục
+tuần và một Team Report. Tài liệu xuyên suốt nằm trong các thư mục đánh số:
+\path{00_admin} (quy ước, checklist), \path{01_proposal} (đề cương),
+\path{02_references} (literature matrix, ghi chú đọc paper), \path{03_report} (bản nháp các chương và mã nguồn LaTeX của khóa luận), \path{04_slides} (slide review). Mỗi tài liệu chỉ có một
+bản sống; thư mục tuần dẫn link tới bản đó thay vì sao chép. Tài liệu cũ được
+chuyển vào \path{_archive/} thay vì xóa.
 
-POPE~\cite{li2023pope} đổi sang dạng câu hỏi có/không: với mỗi ảnh, hỏi ``Trong
-ảnh có \emph{vật X} không?'' cho cả vật có thật và vật không có. Vật không có được
-chọn theo ba cách: ngẫu nhiên, vật phổ biến trong toàn bộ dữ liệu, và vật hay xuất
-hiện cùng các vật trong ảnh (adversarial). Kết quả báo cáo bằng Accuracy,
-Precision, Recall, F1 và tỉ lệ trả lời ``có''. Vì câu trả lời chỉ là có hoặc
-không, POPE không cần phân tích câu văn và dễ áp dụng cho ngôn ngữ khác. Tuy vậy,
-chưa có bộ đo kiểu POPE nào bằng tiếng Việt (khoảng trống G4). Khóa luận xây bộ
-POPE-vi theo đúng giao thức này để kiểm tra giả thuyết H4
-(Chương~\ref{chap:discussion}).
-
-%********************************** Mục 2.6 ************************************
-\section{Tổng kết và khoảng trống nghiên cứu}
-\label{sec:rel-summary}
-
-Bảng~\ref{tab:rel-gaps} nối mỗi khoảng trống nêu ở Chương~\ref{chap:intro} với
-bằng chứng từ các công trình trên và với cách khóa luận xử lý.
+\paragraph{Quản lý mã nguồn.} Mã nguồn được quản lý bằng Git trên repo công khai
+\path{github.com/PLHGNAOH/ViVQA-VLM}, làm việc trên nhánh \texttt{main}; nhánh
+\texttt{ai-context} do GitHub Actions tự sinh để gom báo cáo. Dữ liệu, ảnh và
+trọng số adapter không được đưa lên Git (chặn bằng \path{.gitignore}) mà được
+lưu trên Google Drive; vị trí và mã băm được ghi trong log và trong
+\path{configs/official_models.json}. Tên lần chạy theo quy ước trong
+\path{docs/00_admin/CONVENTIONS.md} và chứa tuần, phương pháp, mô hình, tập dữ
+liệu, kiểu số, GPU và seed, ví dụ:
+\path{W07_B2_qlora_r16_qwen25vl_vitextvqa_ep1_bf16_L4_seed42}. Mô hình gốc được
+ghim theo mã revision trên Hugging Face.
 
 \begin{table}[htbp]
-\caption{Khoảng trống, bằng chứng và cách khóa luận xử lý}
-\label{tab:rel-gaps}
+\caption{Công cụ và hạ tầng}
+\label{tab:pm-tools}
 \centering
 \small
-\begin{tabular}{p{0.20\textwidth}p{0.36\textwidth}p{0.34\textwidth}}
+\begin{tabular}{p{0.26\textwidth}p{0.64\textwidth}}
 \toprule
-\textbf{Khoảng trống} & \textbf{Bằng chứng} & \textbf{Khóa luận xử lý} \\
+\textbf{Hạng mục} & \textbf{Công cụ} \\
 \midrule
-G1. Tiền huấn luyện thiên tiếng Anh & Các VLM chủ yếu huấn luyện trên tiếng Anh; LLaVA-1.5 chỉ có khả năng đa ngôn ngữ nổi lên, không được huấn luyện riêng & Chọn baseline đa ngôn ngữ; đo lỗi sai ngôn ngữ, sai định dạng ở chế độ zero-shot \\
-G2. VQA tiếng Việt yếu, nhất là đọc chữ & ViTextBLIP-2 đạt 25,48 EM so với 88,00 của người; các phương pháp trên ViVQA là phân loại, không đọc chữ & Sinh câu trả lời tự do; đưa chữ OCR có dấu, đúng thứ tự vào prompt \\
-G3. Chưa có PEFT cho VLM tiếng Việt & LoRA, QLoRA, VL-Adapter, LLaVA-1.5 chỉ kiểm chứng trên tiếng Anh & QLoRA trên Qwen2.5-VL-3B; QLoRA nhận biết OCR là đóng góp chính \\
-G4. Chưa có bộ đo hallucination tiếng Việt & POPE và CHAIR chỉ có cho tiếng Anh & Xây POPE-vi; kiểm tra QLoRA có làm tăng hallucination không \\
+Ngôn ngữ và thư viện & Python, PyTorch, HuggingFace Transformers, PEFT, bitsandbytes, \path{qwen_vl_utils} \\
+OCR và xử lý tiếng Việt & PaddleOCR, VietOCR; pyvi để tách từ \\
+Huấn luyện và đánh giá & Google Colab Pro: NVIDIA L4 cho huấn luyện và suy luận, Tesla T4 cho OCR (W04--W06 dùng T4 bản miễn phí) \\
+Máy cá nhân & Windows 11, GPU 4~GB: phát triển, self-test, tiền xử lý, phân tích lỗi \\
+Lưu trữ & Google Drive (dữ liệu, adapter, log lớn); GitHub (mã, log nhỏ, tài liệu) \\
+Prototype & Gradio \\
+Soạn code và tài liệu & Cursor IDE \\
+Slide và khóa luận & Canva, PowerPoint, Google Docs, Overleaf \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-Tóm lại, các công trình trước cho thấy VLM đọc được chữ trong ảnh, PEFT đủ để
-thích nghi VLM, và thứ tự chữ OCR quan trọng với VQA tiếng Việt. Điều còn thiếu là
-một nghiên cứu ghép ba ý này cho tiếng Việt dưới ngân sách tài nguyên nhỏ, có
-baseline tái lập, ablation và đo hallucination. Chương~\ref{chap:methods} trình
-bày cách khóa luận làm điều đó.

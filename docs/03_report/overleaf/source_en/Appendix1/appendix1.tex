@@ -1,344 +1,161 @@
 % !TeX root = ../thesis.tex
 % ******************************* Appendix A **********************************
 
-\chapter{Project management plan}
-\label{appendix:pm}
+\chapter{Reproducibility package}
+\label{appendix:repro}
+\sloppy
 
-This appendix describes how the team organised the 15 weeks of the thesis: the scope of
-work, the milestones, the risks, quality assurance, assignments, communication and the
-management of documents and source code. The project is research, so the plan revolves
-around experiments: every conclusion in Chapter~\ref{chap:results} must be traceable to a
-run with a log, a seed and a fixed configuration.
+This appendix lets someone outside the team rebuild every official number of the thesis and
+run the prototype, using only the code repository and the data folder on Google Drive. The
+full instructions are in the file \path{docs/REPRODUCE.md} of the repository
+\path{github.com/PLHGNAOH/ViVQA-VLM}.
 
-% ------------------------------------------------------------------------------
-\section{Scope of work and estimates}
-
-The work is divided into eight work packages (Table~\ref{tab:pm-wbs}). Time is counted in
-working weeks W01--W15 within the 15-week frame of the proposal;
-Section~\ref{sec:pm-process} shows how these weeks map onto the actual calendar.
+\section{Components}
 
 \begin{table}[htbp]
-\caption{Work breakdown}
-\label{tab:pm-wbs}
+\caption{Components of the reproducibility package}
+\label{tab:repro-parts}
 \centering
 \small
-\begin{tabular}{p{0.22\textwidth}p{0.40\textwidth}p{0.13\textwidth}p{0.14\textwidth}}
+\begin{tabular}{p{0.22\textwidth}p{0.68\textwidth}}
 \toprule
-\textbf{Work package} & \textbf{Main content} & \textbf{Weeks} & \textbf{Main owner} \\
+\textbf{Component} & \textbf{Location} \\
 \midrule
-1. Survey and orientation & Read papers by area, literature matrix, research gaps, research questions, hypotheses & W01--W03 & Whole team \\
-2. Data & Obtain ViVQA and ViTextVQA from the official sources, fix splits, check train/test leakage, OCR cache & W02, W05, W08, W14 & SV2 \\
-3. Baseline & Reproduce Qwen2.5-VL-3B-Instruct zero-shot (B1), compare with the published TextVQA number (R0), fix the inference configuration & W04--W07 & SV1 \\
-4. Adaptation with QLoRA & QLoRA training pipeline; models B2, B3, B3-full, C3, shared adapter SH; LoRA configuration ablations & W06--W11 & SV3 \\
-5. Evaluation & EM, VQA-Acc, ANLS, F1; paired McNemar tests; stability across seeds; full evaluation table & W05--W11 & SV4 \\
-6. Analysis & Error analysis, question classification, POPE-vi hallucination, token budget, effect of normalisation and word segmentation on the metrics & W07, W11--W12, W15 & SV4, SV3 \\
-7. Prototype & Web demo, yes/no threshold calibration, checking that the prototype matches the evaluated system, demo video & W13--W14 & SV4 \\
-8. Reports and defence & Weekly reports, review slides, reproducibility package, thesis & Weekly, W15 & Whole team, coordinated by the leader \\
+Source code & \path{src/} (data, adaptation, eval, prompting, prototype) \\
+LoRA adapters & Drive \path{ViVQA-VLM/adapters/<run>/epoch_N/}, about 30~MB each, not in git; SHA-256 hashes recorded in \path{configs/official_models.json} \\
+Configuration & \path{configs/qwen_lora.yaml} (model, quantisation, LoRA, training, evaluation); \path{configs/pope_vi_objects.json}; the OCR configuration frozen in \path{experiments/W08_ocr_select_dev300_L4_seed42/} \\
+Inference scripts & \texttt{python -m src.prototype.infer} (command line) and \texttt{python -m src.prototype.app} (Gradio interface) \\
+Experiment logs & \path{experiments/<run>/}: \path{metrics.json}, \path{predictions.json}, \path{run_signature.json}, \path{train_log.json} \\
+Environment & \path{requirements-colab.txt} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The initial estimate in W01 assumed a university GPU server. In W06 the team confirmed that
-there was no GPU server, so costs were re-estimated in Google Colab compute units (CU). From
-W08 on, before each GPU task, the team estimated the GPU hours and CU (L4 about 1.54 CU/hour,
-T4 about 1.2 CU/hour) and compared them with the actual readings on Colab. A full QLoRA
-training run on ViTextVQA takes about 12 L4 hours (B2: 11.99 hours; B3-full: 12.75 hours), so
-the number of full training runs is the main constraint of the plan.
+\section{Environment}
 
-% ------------------------------------------------------------------------------
-\section{Management objectives}
+Every run uses Google Colab Pro: an L4 GPU with 24~GB for training, evaluation and the
+prototype; a T4 GPU for building the OCR cache. Main libraries: PyTorch 2.11.0 (CUDA 13.0, the
+version preinstalled on Colab), Transformers 5.17.0, PEFT 0.21.2, bitsandbytes 0.50.2,
+Accelerate 1.15.0, qwen-vl-utils 0.0.14 and Gradio 6.31.0. Two notes on installation:
 
 \begin{itemize}
-  \item \textbf{Reproducibility:} every run records split, seed, hardware, hyperparameters,
-  training and inference time.
-  \item \textbf{No choosing results after seeing the numbers:} the decision rule of every main
-  test is committed to Git before running it.
-  \item \textbf{Within the resource constraints:} QLoRA only, every experiment runs on one
-  Colab GPU (T4 or L4).
-  \item \textbf{On schedule:} the main research is finished before Review~2 and the
-  department committee.
+  \item \textbf{Installing GPU PaddleOCR alongside PyTorch} can overwrite PyTorch's NCCL library
+  and break \texttt{import torch}. The notebooks include a four-step procedure: record PyTorch's
+  \texttt{nvidia-*} packages, install Paddle, reinstall PyTorch's NCCL, and then check both in
+  separate processes.
+  \item \textbf{VietOCR} is installed with \texttt{pip install --no-deps vietocr==0.3.13},
+  because the PyPI release pins an old Pillow version.
 \end{itemize}
 
-By the end of W14, the \path{experiments/} directory holds 141 runs, each with a log. The six
-official models are listed in \path{configs/official_models.json}, a file generated
-automatically from the logs; the four adapters stored on Google Drive all match the recorded
-SHA-256 hashes.
+Each notebook is opened from GitHub in Colab, set to the GPU type stated at the top of the
+notebook, and run in full. The notebook checks the hashes of the data, the OCR cache and the
+adapter before using the GPU.
 
-% ------------------------------------------------------------------------------
-\section{Risks}
+\section{Data}
 
-The W01 plan listed eight risks (model too large, lack of GPUs, faulty data, baseline hard to
-reproduce, poor OCR, training not converging, demo hard to deploy, slow training).
-Table~\ref{tab:pm-risks} records the risks that actually occurred and how the team handled
-them.
+\begin{itemize}
+  \item \textbf{ViVQA}: \texttt{python -m src.data.prepare\_vivqa}, producing 10,799 training,
+  1,200 validation and 3,001 test questions with the COCO images.
+  \item \textbf{ViTextVQA}: the access-controlled Hugging Face repository
+  \path{minhquan6203/ViTextVQA} (whoever reproduces the work must request access), built with
+  the notebook \path{00_data_vitextvqa_official.ipynb}; the result has 35,159 training, 5,155
+  dev and 10,028 test questions, with the test answers taken from
+  \path{ViTextVQA_test_gt.json}.
+  \item \textbf{OCR cache}: notebook \path{10_ocr_cache_vitextvqa.ipynb} on a T4; the manifest
+  with hashes is in \path{experiments/W10_ocr_cache_fulltrain/ocr_cache_manifest.json}.
+\end{itemize}
+
+The rebuilt data files must match the \texttt{data\_file\_sha256} hash recorded for each run in
+\path{configs/official_models.json}.
+
+\section{The official models}
+
+Table~\ref{tab:repro-models} lists the official models, the notebooks that reproduce them and
+the adapter hashes (first 12 characters of the SHA-256 of the weight file). The original table
+is generated automatically from the \path{experiments/} directory with
+\texttt{python -m src.eval.repro\_manifest --build}, not typed by hand.
 
 \begin{table}[htbp]
-\caption{Risks that occurred and how they were handled}
-\label{tab:pm-risks}
+\caption{Official models and reproduction notebooks}
+\label{tab:repro-models}
 \centering
-\small
-\begin{tabular}{p{0.24\textwidth}p{0.08\textwidth}p{0.10\textwidth}p{0.46\textwidth}}
+\footnotesize
+\begin{tabular}{p{0.19\textwidth}p{0.24\textwidth}p{0.28\textwidth}p{0.16\textwidth}}
 \toprule
-\textbf{Risk} & \textbf{Week} & \textbf{Level} & \textbf{Handling} \\
+\textbf{Model} & \textbf{Official result} & \textbf{Notebook (L4)} & \textbf{Adapter SHA-256} \\
 \midrule
-No university GPU server & W06 & High & Moved all training to Colab; upgraded to Colab Pro on 7 October 2026 to use the L4 \\
-fp16 on the T4 corrupts the answers & W06 & High & Data-type check on 73 questions: fp16 broke 23; switched to bf16 on the L4 (0/73 broken) \\
-Data from the wrong source & W05 & High & The local data was ViVQA-X rather than ViVQA, and ViTextVQA came from an unofficial copy. Re-downloaded ViVQA from the original repository, requested access to the gated ViTextVQA repository, and used the answers in \path{test_gt.json} \\
-A full training run takes about 12 hours & W08 & Medium & Ran the main test on the 8,000-question subset (B3 against B2-sub); ran the full B3-full only in W10, once the subset result was clear \\
-Library API changes & W06 & Low & \texttt{transformers} 5.17.0 dropped \path{warmup_ratio}; switched to \path{warmup_steps} and recorded library versions in the logs \\
-GPU PaddleOCR conflicts with torch in the prototype & W13 & Medium & Ran OCR in a separate process (\path{src/prototype/ocr_worker.py}) \\
-The shared adapter is biased towards ``yes'' & W12--W13 & Medium & Chose a threshold on the first-token logit using a calibration set separate from POPE-vi \\
-Images with an EXIF rotation flag corrupt the OCR cache & W14 & Medium & Checked with a pre-registered rule (164/165 images with a rotation flag were misaligned); fixed \path{ocr.py}, re-ran OCR on 167 images, re-ran inference for B3-full (EM 53.35 $\rightarrow$ 53.63) \\
-Review schedule changed & W10 & Low & Review~2 moved to 29 October 2026; the team updated one cumulative slide deck instead of starting over \\
+R0 · reproduction & TextVQA val: VQA-Acc 79.60 & \path{06_r0_textvqa_repro_qwen25vl} & --- \\
+B1 · zero-shot & ViVQA EM 22.09; ViTextVQA EM 29.12 & \path{02_run_baseline_qwen25vl}, \path{08_fulltest_vitextvqa_b1_b2} & --- \\
+B2 · QLoRA & ViTextVQA EM 50.26 & \path{04_qlora_qwen25vl}, \path{08_fulltest_vitextvqa_b1_b2} & \texttt{2e7b17d18b32} \\
+C3 · QLoRA ViVQA & ViVQA EM 76.64 & \path{16_qlora_vivqa_2epoch_select_qwen25vl} & \texttt{3ceff2f7f961} \\
+B3-full · OCR-aware QLoRA & ViTextVQA EM 53.35 & \path{18_qlora_ocr_b3full_vs_b2_qwen25vl} & \texttt{c1eb9c2b4baf} \\
+SH · shared (prototype) & ViVQA EM 73.51; ViTextVQA test2000 EM 49.50 & \path{20_qlora_shared_adapter_qwen25vl} & \texttt{c9791e961aaa} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-% ------------------------------------------------------------------------------
-\section{Project process}
-\label{sec:pm-process}
+\section{Commands}
 
-The team works in weekly cycles. Each working week goes through five steps:
+Every notebook calls the two basic commands below with preset arguments. Example for B3-full:
+
+\begin{small}
+\begin{verbatim}
+python -m src.adaptation.train_qlora --dataset vitextvqa_official \
+    --run_name <run> --epochs 1 --save_steps 100 \
+    --mode ocr --ocr_backend paddledet_vietocr --ocr_template v1 \
+    --ocr_max_chars 600 --ocr_min_conf 0.0
+
+python -m src.eval.run_baseline --dataset vitextvqa_official \
+    --data_file <.../test.json> --run_name <run_eval> --chunk 500 \
+    --adapter <Drive>/adapters/<run>/epoch_1 \
+    --mode ocr --ocr_backend paddledet_vietocr --ocr_template v1 \
+    --ocr_max_chars 600 --ocr_min_conf 0.0
+\end{verbatim}
+\end{small}
+
+Removing the OCR arguments (\texttt{--mode ocr} and \texttt{--ocr\_*}) gives B2 or C3; removing
+\texttt{--adapter} gives B1. The shared configuration (bf16, 4-bit NF4, at most 401,408 pixels,
+greedy decoding, at most 32 generated tokens, seed 42, LoRA $r = 16$ on q, k, v, o) is in
+\path{configs/qwen_lora.yaml}. The file \path{run_signature.json} prevents resuming an
+unfinished run with a different configuration.
+
+The analyses (full evaluation table, paired tests, three seeds, the $2\times2$ experiment, LoRA
+ablations, POPE-vi, error analysis, the EXIF check) need only a CPU and re-read
+\path{predictions.json}; the corresponding commands and notebooks are listed in
+\path{docs/REPRODUCE.md}, section 5.
+
+\section{Prototype}
+
+The interface runs with the notebook \path{28_prototype_v2_live_demo_sh_qwen25vl.ipynb} on an
+L4; the notebook re-checks rules R-OCR and R-LIVE and then opens the Gradio link. It can also
+be run from the command line:
+
+\begin{small}
+\begin{verbatim}
+python -m src.prototype.infer --official sh \
+    --drive_root /content/drive/MyDrive/ViVQA-VLM \
+    --image image.jpg --question "<question>" --out result.jsonl
+\end{verbatim}
+\end{small}
+
+The argument \texttt{--official sh} picks the SH adapter and checks its hash automatically;
+adding \texttt{--mock} allows a test without a GPU.
+
+\section{Determinism and known limitations}
+
+Evaluation uses greedy decoding and runs question by question. Re-running on the same GPU type
+(L4) gives 100\% identical predictions (e.g.\ 9,902/9,902 questions in the week-14 check).
+Changing the GPU type (T4 versus L4) can shift the OCR slightly on a few images, so the GPU type
+stated in the notebook should be used. Known limitations:
 
 \begin{enumerate}
-  \item \textbf{Plan:} choose the week's questions from the overall plan and the previous
-  week's results, and record them in the week's README.
-  \item \textbf{Record rules in advance:} for each main test, write the decision rule
-  (threshold, test, dataset) and commit it to Git before running.
-  \item \textbf{Run:} code is written and self-tested on a personal machine, then pushed to
-  GitHub; a Colab notebook clones the repository and runs on a GPU; logs and results are
-  stored on Google Drive.
-  \item \textbf{Check:} recompute the numbers from the original prediction files
-  (\path{predictions.json}) instead of copying them by hand, and re-clone the repository to
-  verify each commit.
-  \item \textbf{Close the week:} update the week's README, the Team Report and the draft of
-  the relevant chapters.
+  \item Some libraries (bitsandbytes, Accelerate, qwen-vl-utils) are not recorded in each run's
+  log but only in the environment snapshot; the two records agree.
+  \item PyTorch is the version preinstalled on Colab; if Colab changes the default, the version
+  recorded in the logs must be installed.
+  \item The official OCR cache has the EXIF bug for 1.256\% of the ViTextVQA test questions; the
+  official numbers are kept, and the post-fix results are reported as a sensitivity analysis
+  (Section~\ref{sec:res-exif}). To reproduce the official cache exactly, use the source code
+  before the fix (commit \texttt{b9f7fd4}).
+  \item ViTextVQA is access-controlled: whoever reproduces the work must request access.
 \end{enumerate}
-
-The working weeks W01--W15 are numbered by content within the proposal's frame, not by the
-calendar. The team ran ahead of schedule: on 2 November 2026 (calendar week 9), the team had
-already reached W15. Calendar weeks are counted from Monday 7 September 2026 as week 1.
-Table~\ref{tab:pm-weeks} maps the two counts.
-
-\begin{table}[htbp]
-\caption{Working weeks and the actual calendar (2026)}
-\label{tab:pm-weeks}
-\centering
-\small
-\begin{tabular}{p{0.12\textwidth}p{0.55\textwidth}p{0.22\textwidth}}
-\toprule
-\textbf{Week} & \textbf{Main content} & \textbf{Actual dates} \\
-\midrule
-W01--W02 & Orientation, 15-week plan, literature matrix, data analysis & 7--16 Sep \\
-W03 & Review~1 package & 17 Sep (Review~1: 24 Sep) \\
-W04 & First zero-shot baseline; baseline changed to Qwen2.5-VL-3B & 18--21 Sep \\
-W05 & Official data; zero-shot baseline on both datasets & 22--27 Sep \\
-W06 & fp16 bug diagnosis; QLoRA pipeline & 28--29 Sep \\
-W07 & Configuration fixed on the L4; official B1; B2; R0 reproduction & 30 Sep--12 Oct \\
-W08 & OCR-enhanced prompting; B3 on the subset & 12--14 Oct \\
-W09 & Stability across seeds; $2\times2$ table; 2-epoch ViVQA & 15--17 Oct \\
-W10 & LoRA configuration ablations; B3-full & 19--21 Oct \\
-W11 & Full evaluation table; shared adapter & 21--22 Oct \\
-W12 & POPE-vi hallucination; error analysis & 23--24 Oct \\
-W13 & Web prototype & 26--31 Oct \\
-W14 & Code finalised, demo video, reproducibility package & 1--2 Nov \\
-W15 & Review~2 feedback, defence slides, thesis & from 2 Nov \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The department's milestones follow the actual calendar (Table~\ref{tab:pm-milestones}). The
-thesis grade is 50\% process, for which the team submits 7 reports to the supervisors, and
-50\% defence.
-
-\begin{table}[htbp]
-\caption{Department milestones}
-\label{tab:pm-milestones}
-\centering
-\small
-\begin{tabular}{p{0.18\textwidth}p{0.22\textwidth}p{0.34\textwidth}p{0.15\textwidth}}
-\toprule
-\textbf{Milestone} & \textbf{Date} & \textbf{Content} & \textbf{Status} \\
-\midrule
-Review~1 & 24 Sep 2026 (calendar week 3) & Problem, gaps, research questions, plan; feedback from two lecturers other than the supervisors & Done, 10 comments \\
-Review~2 & 29 Oct 2026 (calendar week 8) & Reproduced baseline, method, preliminary results & Done \\
-Department committee & 30 Nov--6 Dec 2026 (calendar week 13) & Three members, 60 minutes per team & Upcoming \\
-University committee & 14--20 Dec 2026 (calendar week 15) & Five members & Upcoming \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-% ------------------------------------------------------------------------------
-\section{Quality management}
-
-In this project, quality is first of all the reliability of the numbers. The team uses five
-measures:
-
-\begin{itemize}
-  \item \textbf{Pre-registered rules:} the threshold and the way to conclude for each main test
-  are committed before the results exist, for example the rule for the shared adapter (commit
-  \texttt{324caeb}, W11) and the H4 hallucination rule (commit \texttt{9209170}, W12).
-  \item \textbf{Paired tests:} every comparison of two models on the same test set uses a
-  per-question McNemar test for EM and 95\% paired-bootstrap confidence intervals for ANLS; the
-  main result is repeated with seeds 42, 43 and 44.
-  \item \textbf{Recomputing from the original data:} the final result table
-  (\path{src/eval/full_eval_table.py}) reads the \path{predictions.json} files directly, without
-  copying numbers from the weekly reports.
-  \item \textbf{Self-tests:} the main modules have a \texttt{-{}-selftest} mode that runs on the
-  CPU, on both Windows and Linux, to catch bugs before spending GPU time.
-  \item \textbf{Hashes and run signatures:} adapters, the OCR cache, data files and slides are
-  recorded with SHA-256 hashes; each run carries a configuration signature, so the scripts do
-  not append results of a different configuration to the same directory.
-\end{itemize}
-
-% ------------------------------------------------------------------------------
-\section{Training plan}
-
-The project requires knowledge in four different areas, so in W01 each member read at least
-three papers in their area and answered 10 fixed questions for each paper, including the
-mandatory question ``what can be used for the project'' (Table~\ref{tab:pm-papers}).
-
-\begin{table}[htbp]
-\caption{Foundational papers by area}
-\label{tab:pm-papers}
-\centering
-\small
-\begin{tabular}{p{0.32\textwidth}p{0.58\textwidth}}
-\toprule
-\textbf{Area} & \textbf{Papers read} \\
-\midrule
-SV1: VLM / Baseline & BLIP-2, Florence-2, Qwen2.5-VL \\
-SV2: Dataset / OCR & ViVQA, ViTextVQA, TextVQA (LoRRA) \\
-SV3: PEFT / Training & LoRA, QLoRA, VL-Adapter, LLaVA-1.5 \\
-SV4: Evaluation / Deployment & POPE, VQAv2, Survey of Vision-Language Models (TPAMI 2024) \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The remaining skills were learned along the way: QLoRA training with PEFT and bitsandbytes,
-PaddleOCR and VietOCR, the McNemar test, and working across a personal machine, GitHub, Colab
-and Google Drive. A bilingual glossary \path{docs/Glossary.md} was kept up to date throughout
-the project.
-
-% ------------------------------------------------------------------------------
-\section{Deliverables}
-
-Table~\ref{tab:pm-deliverables} lists the deliverables required by the proposal, including the
-reproducibility package. Status as of 10 November 2026.
-
-\begin{table}[htbp]
-\caption{Deliverables}
-\label{tab:pm-deliverables}
-\centering
-\small
-\begin{tabular}{p{0.38\textwidth}p{0.36\textwidth}p{0.16\textwidth}}
-\toprule
-\textbf{Deliverable} & \textbf{Location} & \textbf{Status} \\
-\midrule
-Source code: 46 Python modules (data, training, evaluation, prototype) & \path{src/} on GitHub (PLHGNAOH/ViVQA-VLM) & Done \\
-30 Colab notebooks & \path{notebooks/} & Done \\
-Logs of 141 runs & \path{experiments/} & Done \\
-QLoRA adapters of the official models & Google Drive; hashes in \path{configs/official_models.json} & Done \\
-Reproducibility package: instructions, library versions, inference script & \path{docs/REPRODUCE.md}, \path{requirements-colab.txt}, \path{src/prototype/infer.py} & Done \\
-Web prototype and demo video (10 min 28 s) & \path{src/prototype/}, Google Drive & Done \\
-Weekly reports W01--W15 & \path{docs/W01/} to \path{docs/W15/} & W15 in progress \\
-Review~1 and Review~2 slides (English, Vietnamese) & \path{docs/W03/}, \path{docs/04_slides/} & Done; defence slides in progress \\
-Thesis & Overleaf (Vietnamese edition first, then English) & In progress \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-% ------------------------------------------------------------------------------
-\section{Assignment of responsibilities}
-
-The team has four students, each in charge of one technical area as defined in the proposal
-(Table~\ref{tab:pm-roles}). Pham Le Huy Hoang is the team leader: besides the PEFT/Training
-area, he coordinates the schedule and integrates the results of the different areas.
-Cross-area work, for example B3, which needs SV2's OCR cache and SV3's training pipeline, is
-the responsibility of the person producing the main result and is reviewed by the team leader.
-Each member's specific contributions by week are recorded in the Team Reports.
-
-\begin{table}[htbp]
-\caption{Assignments}
-\label{tab:pm-roles}
-\centering
-\small
-\begin{tabular}{p{0.20\textwidth}p{0.18\textwidth}p{0.32\textwidth}p{0.20\textwidth}}
-\toprule
-\textbf{Member} & \textbf{Role} & \textbf{Main responsibilities} & \textbf{Main directories} \\
-\midrule
-Ho Dac Toan (SE183249) & SV1: VLM / Baseline & Understand the Qwen2.5-VL architecture, reproduce the zero-shot baseline, compare with published numbers & \path{src/models/}, \path{src/eval/run_baseline.py} \\
-Tran Quoc Huan (SE193642) & SV2: Dataset / OCR & Official data, splits, leakage checks, OCR cache with PaddleOCR and VietOCR & \path{data/}, \path{src/data/} \\
-Pham Le Huy Hoang (SE182670) & SV3: PEFT / Training; team leader & QLoRA training, LoRA configuration ablations, shared adapter; coordination, integration & \path{src/adaptation/}, \path{configs/}, \path{adapters/} \\
-Van Quang Truong (SE182458) & SV4: Evaluation / Deployment & Metrics, statistical tests, hallucination, prototype and demo & \path{src/eval/}, \path{src/prototype/} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-% ------------------------------------------------------------------------------
-\section{Project communication}
-
-\begin{table}[htbp]
-\caption{Communication channels}
-\label{tab:pm-comm}
-\centering
-\small
-\begin{tabular}{p{0.26\textwidth}p{0.48\textwidth}p{0.16\textwidth}}
-\toprule
-\textbf{Channel} & \textbf{Purpose} & \textbf{Frequency} \\
-\midrule
-Meetings with the supervisors & Confirm major decisions, e.g.\ fixing the Qwen2.5-VL-3B baseline on 7 October 2026 & At milestones and when needed \\
-Reviews with the reviewers & External feedback; after each review the team fills in the AI\_Capstone\_Review123 checklist, emails it to the supervisors and the reviewers, and uploads it to the shared folder & Twice \\
-Weekly reports (README and Team Report in \path{docs/Wxx/}) & Record what was done, the results, the decisions and what was postponed & Every working week \\
-GitHub & Source code, small logs, documents; every commit has a description & Continuous \\
-Google Drive & Images, adapters, OCR cache, demo video, review recordings & Continuous \\
-Department email & Review date announcements, sent only in review weeks & At milestones \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-% ------------------------------------------------------------------------------
-\section{Configuration management}
-
-\paragraph{Document management.} Documents fall into two kinds. Weekly documents are in
-\path{docs/W01} to \path{docs/W15}; each directory has a README serving as the week's index
-and a Team Report. Cross-cutting documents are in the numbered directories: \path{00_admin}
-(conventions, checklists), \path{01_proposal} (the proposal), \path{02_references}
-(literature matrix, reading notes), \path{03_report} (chapter drafts), \path{04_slides} (review
-slides). Each document has a single living copy; weekly directories link to it instead of
-copying it. Old documents are moved to \path{_archive/} instead of being deleted.
-
-\paragraph{Source-code management.} The source code is managed with Git in the public
-repository \path{github.com/PLHGNAOH/ViVQA-VLM}, working on the \texttt{main} branch; the
-\texttt{ai-context} branch is generated automatically by GitHub Actions to collect reports.
-Data, images and adapter weights are not committed to Git (blocked by \path{.gitignore}) but
-stored on Google Drive; their location and hashes are recorded in the logs and in
-\path{configs/official_models.json}. Run names follow the convention in
-\path{docs/00_admin/CONVENTIONS.md} and contain the week, method, model, dataset, data type,
-GPU and seed, for example \path{W07_B2_qlora_r16_qwen25vl_vitextvqa_ep1_bf16_L4_seed42}. The
-base model is pinned to a revision hash on Hugging Face.
-
-\begin{table}[htbp]
-\caption{Tools and infrastructure}
-\label{tab:pm-tools}
-\centering
-\small
-\begin{tabular}{p{0.26\textwidth}p{0.64\textwidth}}
-\toprule
-\textbf{Item} & \textbf{Tools} \\
-\midrule
-Languages and libraries & Python, PyTorch, HuggingFace Transformers, PEFT, bitsandbytes, \path{qwen_vl_utils} \\
-OCR and Vietnamese processing & PaddleOCR, VietOCR; pyvi for word segmentation \\
-Training and evaluation & Google Colab Pro: NVIDIA L4 for training and inference, Tesla T4 for OCR (W04--W06 used the free T4) \\
-Personal machines & Windows 11, 4~GB GPU: development, self-tests, preprocessing, error analysis \\
-Storage & Google Drive (data, adapters, large logs); GitHub (code, small logs, documents) \\
-Prototype & Gradio \\
-Writing code and documents & Cursor IDE \\
-Slides and thesis & Canva, PowerPoint, Google Docs, Overleaf \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The Colab budget is tracked in CU and recorded in the weekly reports. The remaining CU read on
-Colab were: 146.75 (13 Oct), 86.52 (19 Oct), 49.3 (21 Oct), 34.96 (23 Oct) and 17.38 (31 Oct).
-W10 alone, with the LoRA configuration ablations and B3-full, used about 37~CU.

@@ -34,9 +34,7 @@ cầu đọc chữ tiếng Việt trong ảnh, những khó khăn riêng của t
 tài nguyên. Mục~\ref{sec:intro-problem} phát biểu bài toán và tách nó thành các
 bài toán con. Các mục~\ref{sec:intro-gaps} đến~\ref{sec:intro-significance} nêu
 khoảng trống nghiên cứu, mục tiêu, câu hỏi nghiên cứu, giả thuyết, đóng góp và ý
-nghĩa của đề tài. Mục~\ref{sec:intro-scope} xác định phạm vi và giới hạn. Các
-mục~\ref{sec:intro-team} và~\ref{sec:intro-pm} tóm tắt cách nhóm tổ chức và quản
-lý dự án; chi tiết nằm ở Phụ lục~\ref{appendix:pm}.
+nghĩa của đề tài. Mục~\ref{sec:intro-scope} xác định phạm vi và giới hạn. Mục~\ref{sec:intro-outline} trình bày cấu trúc khóa luận và sự tương ứng giữa các chương với các báo cáo trong hướng dẫn khóa luận AIP491.
 
 %********************************** Mục 1.1 ************************************
 \section{Tổng quan}
@@ -637,116 +635,37 @@ Chương~\ref{chap:results}. Thứ ba, GPU L4 trên Colab cho kết quả ổn �
 phiên khi cố định seed và cấu hình.
 
 %********************************** Mục 1.10 ***********************************
-\section{Tổ chức nhóm}
-\label{sec:intro-team}
-
-\subsection{Cơ cấu và vai trò}
-
-Nhóm có bốn sinh viên, mỗi người phụ trách một mảng kỹ thuật theo đề cương.
-
-Phạm Lê Huy Hoàng (SE182670) là trưởng nhóm và phụ trách mảng PEFT / Training.
-Ngoài việc huấn luyện các mô hình QLoRA, làm ablation cấu hình LoRA và xây
-adapter dùng chung, Hoàng điều phối tiến độ, tích hợp kết quả của các mảng và
-duyệt các kết quả liên mảng.
-
-Hồ Đắc Toàn (SE183249) phụ trách mảng VLM / Baseline: tìm hiểu kiến trúc
-Qwen2.5-VL, tái lập baseline zero-shot và đối chiếu với số đã công bố.
-
-Trần Quốc Huân (SE193642) phụ trách mảng Dataset / OCR: lấy dữ liệu từ nguồn
-chính thức, cố định split, kiểm tra rò rỉ giữa train và test, và tạo OCR cache
-bằng PaddleOCR và VietOCR.
-
-Văn Quang Trường (SE182458) phụ trách mảng Evaluation / Deployment: cài đặt các
-thước đo, kiểm định thống kê, đo hallucination, xây prototype và video demo.
-
-Bảng phân công chi tiết, kèm thư mục mã nguồn chính của từng người, nằm ở Phụ
-lục~\ref{appendix:pm}.
-
-\subsection{Kế hoạch giao tiếp}
-
-Nhóm làm việc với giảng viên hướng dẫn theo các mốc của khoa và khi cần xác nhận
-một quyết định lớn, ví dụ việc chốt baseline Qwen2.5-VL-3B ngày 07/10/2026. Sau
-mỗi buổi review với giảng viên phản biện, nhóm điền checklist góp ý, gửi email
-cho giảng viên hướng dẫn và giảng viên review, rồi tải lên thư mục chung.
-
-Trong nhóm, mỗi tuần làm việc có một README và một Team Report trong thư mục
-\path{docs/Wxx/} của repo, ghi việc đã làm, kết quả, quyết định và việc dời lại.
-Mã nguồn, log nhỏ và tài liệu được quản lý trên GitHub; ảnh, adapter, OCR cache
-và video demo được lưu trên Google Drive. Các quyết định ảnh hưởng đến kết quả
-chính được ghi lại trước khi chạy và được giảng viên hướng dẫn xác nhận khi cần.
-
-%********************************** Mục 1.11 ***********************************
-\section{Cách tiếp cận quản lý dự án}
-\label{sec:intro-pm}
-
-Vì đây là một đề tài nghiên cứu, kế hoạch xoay quanh thí nghiệm: mỗi kết luận ở
-Chương~\ref{chap:results} phải truy ngược được về một lần chạy có log, seed và cấu
-hình cố định. Mục này tóm tắt cách nhóm tổ chức công việc; Phụ
-lục~\ref{appendix:pm} trình bày đầy đủ phân rã công việc, lịch, rủi ro và quản lý
-chất lượng.
-
-\subsection{Các giai đoạn}
-
-Dự án được chia thành năm giai đoạn theo khung 15 tuần của đề cương:
-
-\paragraph{Giai đoạn 1: Định hướng và lập kế hoạch (W01--W03).} Nhóm đọc paper
-theo bốn mảng, lập literature matrix, phân tích hai bộ dữ liệu, xác định khoảng
-trống nghiên cứu, câu hỏi nghiên cứu và giả thuyết, rồi trình bày ở Review~1.
-
-\paragraph{Giai đoạn 2: Dữ liệu và baseline (W04--W07).} Nhóm lấy dữ liệu từ nguồn
-chính thức, chốt baseline Qwen2.5-VL-3B-Instruct, đánh giá zero-shot, tái lập số công bố
-trên TextVQA và chốt cấu hình suy luận dựa trên số đo (số token ảnh, kiểu số).
-
-\paragraph{Giai đoạn 3: Thích nghi và cải tiến (W07--W10).} Nhóm huấn luyện QLoRA
-thường, phân tích lỗi, đề xuất QLoRA nhận biết OCR, kiểm chứng trên tập con 8.000
-câu, kiểm tra qua ba seed và bảng $2\times2$, rồi chạy trên toàn bộ dữ liệu.
-
-\paragraph{Giai đoạn 4: Đánh giá và phân tích (W10--W12).} Nhóm lập bảng đánh giá
-đầy đủ, làm ablation cấu hình LoRA, thử adapter dùng chung, phân tích lỗi và đo
-hallucination bằng POPE tiếng Việt.
-
-\paragraph{Giai đoạn 5: Prototype, đóng gói và khóa luận (W13--W15).} Nhóm xây
-prototype web, kiểm chứng prototype khớp với pipeline đánh giá, quay video demo,
-chuẩn bị gói tái lập, slide bảo vệ và khóa luận.
-
-\subsection{Tích hợp các thành phần}
-
-Các thành phần của hệ thống được ghép với nhau qua một số điểm chung cố định. Một
-hàm dựng prompt duy nhất được dùng cho cả huấn luyện, đánh giá và prototype, nên
-không có sai lệch prompt giữa các giai đoạn. OCR được chạy một lần và lưu cache
-có mã băm; huấn luyện và đánh giá chỉ đọc cache. Danh sách các mô hình chính thức
-được sinh tự động từ log, và prototype được kiểm tra theo luật đặt trước để bảo
-đảm cho cùng câu trả lời với pipeline đánh giá.
-
-\subsection{Quản lý chất lượng và rủi ro}
-
-Chất lượng của đề tài trước hết là độ tin cậy của con số. Nhóm ghi luật quyết
-định của mỗi phép thử chính lên Git trước khi chạy, dùng kiểm định ghép cặp cho
-mọi so sánh, tính lại bảng kết quả trực tiếp từ file dự đoán gốc thay vì chép
-tay, và ghi mã băm SHA-256 cho adapter, OCR cache và file dữ liệu.
-
-Về rủi ro, kế hoạch ban đầu liệt kê tám rủi ro. Những rủi ro đã thực sự xảy ra
-gồm: trường không có GPU server, fp16 làm hỏng câu trả lời trên GPU T4, dữ liệu
-ban đầu lấy sai nguồn, mỗi lần huấn luyện đầy đủ tốn khoảng 12 giờ, và ảnh có cờ
-xoay EXIF làm sai OCR cache. Cách xử lý từng rủi ro được ghi ở Phụ
-lục~\ref{appendix:pm}.
-
-\subsection{Theo dõi tiến độ}
-
-Nhóm làm theo chu kỳ tuần: lập kế hoạch, ghi luật trước, chạy thí nghiệm, kiểm
-tra lại số liệu, và đóng tuần bằng README cùng Team Report. Tiến độ được đối chiếu
-với các mốc của khoa: Review~1, Review~2, hội đồng cấp khoa và hội đồng cấp
-trường. Khi một quyết định thay đổi kế hoạch, ví dụ đổi baseline hay chuyển sang
-Colab, quyết định đó được ghi lại cùng lý do trong báo cáo tuần.
-
-%********************************** Mục 1.12 ***********************************
 \section{Cấu trúc khóa luận}
 \label{sec:intro-outline}
 
-Chương~\ref{chap:related} tổng quan VQA, vision-language model, parameter-efficient
-fine-tuning và các nghiên cứu VQA tiếng Việt. Chương~\ref{chap:methods} trình bày
-dữ liệu, baseline, phương pháp QLoRA nhận biết OCR và giao thức đánh giá.
-Chương~\ref{chap:results} báo cáo kết quả chính và các ablation.
-Chương~\ref{chap:discussion} thảo luận phân tích lỗi, hallucination và giới hạn.
-Chương~\ref{chap:conclusion} kết luận. Phụ lục~\ref{appendix:pm} trình bày kế
-hoạch quản lý dự án, và Phụ lục~\ref{appendix:repro} mô tả gói tái lập.
+Khóa luận theo cấu trúc báo cáo trong hướng dẫn khóa luận AIP491, trong đó báo cáo cuối
+gom bản hoàn chỉnh của các báo cáo đã nộp trong học kỳ. Chương~\ref{chap:pm} trình bày kế
+hoạch quản lý dự án: nhóm, các giai đoạn, phân rã công việc, rủi ro, chất lượng, thay đổi và
+việc đóng dự án. Chương~\ref{chap:related} tổng quan VQA, vision-language model,
+parameter-efficient fine-tuning và các nghiên cứu VQA tiếng Việt, đồng thời so sánh các hệ
+thống hiện có. Chương~\ref{chap:methods} trình bày dữ liệu, baseline, phương pháp QLoRA nhận
+biết OCR và giao thức đánh giá. Chương~\ref{chap:system} mô tả thiết kế, hiện thực hệ thống
+và việc kiểm chứng prototype. Chương~\ref{chap:results} báo cáo kết quả chính và các
+ablation. Chương~\ref{chap:discussion} thảo luận phân tích lỗi, hallucination và giới hạn.
+Chương~\ref{chap:conclusion} kết luận. Phụ lục~\ref{appendix:repro} mô tả gói tái lập.
+Bảng~\ref{tab:intro-aip491} cho thấy các chương tương ứng với bảy báo cáo.
+
+\begin{table}[htbp]
+\caption{Tương ứng giữa các báo cáo AIP491 và các chương của khóa luận}
+\label{tab:intro-aip491}
+\centering
+\small
+\begin{tabular}{p{0.14\textwidth}p{0.48\textwidth}p{0.28\textwidth}}
+\toprule
+\raggedright \textbf{Báo cáo} & \raggedright \textbf{Nội dung} & \raggedright \textbf{Chương} \tabularnewline
+\midrule
+\raggedright Báo cáo~1 & \raggedright Giới thiệu dự án & \raggedright Chương~\ref{chap:intro} \tabularnewline
+\raggedright Báo cáo~2 & \raggedright Kế hoạch quản lý dự án & \raggedright Chương~\ref{chap:pm} \tabularnewline
+\raggedright Báo cáo~3 & \raggedright Hệ thống hiện có và các nghiên cứu liên quan & \raggedright Chương~\ref{chap:related} \tabularnewline
+\raggedright Báo cáo~4 & \raggedright Phương pháp & \raggedright Chương~\ref{chap:methods} \tabularnewline
+\raggedright Báo cáo~5 & \raggedright Thiết kế và hiện thực hệ thống & \raggedright Chương~\ref{chap:system} \tabularnewline
+\raggedright Báo cáo~6 & \raggedright Kết quả và thảo luận & \raggedright Chương~\ref{chap:results} và~\ref{chap:discussion} \tabularnewline
+\raggedright Báo cáo~7 & \raggedright Kết luận & \raggedright Chương~\ref{chap:conclusion} \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}

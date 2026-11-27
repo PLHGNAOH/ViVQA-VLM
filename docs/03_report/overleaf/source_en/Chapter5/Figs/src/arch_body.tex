@@ -1,0 +1,48 @@
+\begin{tikzpicture}
+% rows: y0 = 0, y1 = -1.55, y2 = -3.1, y3 = -4.65
+% ---- backend column (core.py)
+\node[comp=3.2cm] (det)    at (3.4, 0)     {\Ldet};
+\node[comp=3.2cm] (prompt) at (3.4,-1.55)  {\Lprompt};
+\node[comp=3.2cm] (model)  at (3.4,-3.1)   {\Lmodel};
+\node[comp=3.2cm] (conf)   at (3.4,-4.65)  {\Lconf};
+% ---- interface column (app.py)
+\node[comp=3.1cm] (prep)   at (7.75, 0)    {\Lprep};
+\node[comp=3.1cm] (cache)  at (7.75,-1.55) {\Lcache};
+\node[comp=3.1cm] (show)   at (7.75,-4.65) {\Lshow};
+% ---- OCR process
+\node[comp=2.35cm] (pdet)  at (12.55,-1.55) {\Lpdet};
+\node[comp=2.35cm] (vrec)  at (12.55,-3.1)  {\Lvrec};
+% ---- column frames
+\begin{scope}[on background layer]
+  \node[frame, fill=teal!4, draw=teal!60, inner sep=5pt, fit=(det)(conf)] (bf) {};
+  \node[frame, fill=teal!4, draw=teal!60, inner sep=5pt, fit=(prep)(show)] (uf) {};
+  \node[frame, fill=teal!10, draw=teal, inner xsep=8pt, inner ysep=14pt, yshift=-1pt, fit=(bf)(uf)] (mainf) {};
+  \node[oframe, inner xsep=7pt, inner ysep=8pt, fit=(pdet)(vrec)] (ocrf) {};
+\end{scope}
+\node[font=\scriptsize\bfseries, text=teal!80!black, anchor=north west, inner sep=3pt] at (mainf.north west) {\Lmainp};
+\node[font=\scriptsize\bfseries, text=teal!80!black, anchor=north, inner sep=2pt] at (bf.south) {\Lbackend};
+\node[font=\scriptsize\bfseries, text=teal!80!black, anchor=north, inner sep=2pt] at (uf.south) {\Lui};
+\node[font=\scriptsize\bfseries, text=amber!60!black, anchor=south, align=center, inner sep=2pt] at (ocrf.north) {\Locrp};
+% ---- user
+\node[comp=3.3cm, fill=ink!6] (user) at (7.75, 1.85) {\Luser};
+% ---- artefacts
+\node[comp=2.25cm, fill=ink!4, draw=ink!40, text width=2.25cm, anchor=east, font=\scriptsize] (art) at ($(mainf.west |- model)!0.5!(mainf.west |- conf)+(-0.35,0)$) {\Lart};
+% ---- step badges
+\foreach \n/\s in {prep/1, cache/2, det/3, prompt/4, model/5, conf/6, show/7}
+  \node[stepbadge] at (\n.north west) {\s};
+% ---- flows
+\draw[flow] (user) -- node[lab, right] {\Limage} (prep);
+\draw[flow] (user.west) -| node[lab, pos=0.3, above] {\Lquestion} (det.north);
+\draw[flow] (prep) -- (cache);
+\draw[flow, <->] (cache.east) -- node[lab, below=1pt, text width=1.6cm, fill=none] {\Ljson} (pdet.west);
+\draw[flow] (pdet) -- (vrec);
+\draw[flow] (cache.west) -- node[lab, above] {\Locrlines} (prompt.east);
+\draw[flow] (det) -- (prompt);
+\draw[flow] (prompt) -- (model);
+\draw[flow] (model) -- (conf);
+\draw[flow] (conf.east) -- (show.west);
+\draw[flow] (show.east) -- ($(show.east -| ocrf.east)+(0.45,0)$) |- node[lab, pos=0.25, right, text width=1.9cm, align=left] {\Lanswer} (user.east);
+% ---- artefacts (dashed)
+\draw[art] (art.east |- model) -- (model.west);
+\draw[art] (art.east |- conf)  -- (conf.west);
+\end{tikzpicture}

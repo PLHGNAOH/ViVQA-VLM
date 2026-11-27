@@ -3,20 +3,23 @@
 Bản khoá luận CHÍNH được viết trên Overleaf (project riêng của Hoàng, tạo từ template của mentor, ngày 10/11/2026).
 Google Doc "ViVQA-VLM Thesis (TV)" chỉ còn là bản lưu trữ của Chương I–II, không sửa tiếp.
 
-## Cấu trúc (theo template của mentor: 6 chương)
-| Template | Nội dung | Trạng thái 11/11/2026 |
+## Cấu trúc (từ 27/11/2026: 8 chương theo thứ tự Report 1–7 của AIP491)
+Giữ nguyên lớp LaTeX và 6 chương nghiên cứu của template mentor, chèn thêm Chương 2 (PMP) và Chương 5 (System Design) để
+thứ tự khớp `docs/02_references/templates/Template_AIP491_CP_StudentsGuide.docx` (Final Report = bản final của Report #1–#7).
+
+| Thư mục | Chương | Report AIP491 |
 |---|---|---|
-| Chapter 1 | Giới thiệu | Đã viết (VI) |
-| Chapter 2 | Các nghiên cứu liên quan | Đã viết (VI) |
-| Chapter 3 | Dữ liệu và phương pháp | Đã viết (VI) |
-| Chapter 4 | Kết quả | Đã viết (VI) |
-| Chapter 5 | Thảo luận | Đã viết (VI) |
-| Chapter 6 | Kết luận | Đã viết (VI) |
-| Appendix A | Kế hoạch quản lý dự án | Đã viết (VI) |
-| Appendix B | Gói tái lập | Đã viết (VI) |
-- Tóm tắt (Abstract) đã viết (VI). Trang Dedication đang tắt trong thesis.tex (template còn chữ mẫu).
-- Hình: Chapter3/Figs (4 hình khổ ngang, sidewaysfigure, cần gói rotating đã bật trong preamble), Chapter4/Figs (2 biểu đồ PDF).
-- Snapshot hiện tại: v3 (11/11/2026): tắt microtype expansion, ảnh Ch3 2600 px, thêm 3 dòng %\includeonly; biên dịch nhanh hơn trên Overleaf gói miễn phí.
+| Chapter1 | Giới thiệu / Introduction (§1.10 có bảng đối chiếu Report ↔ chương) | Report 1 |
+| Chapter2 | Kế hoạch quản lý dự án / Project management plan (từ Phụ lục A cũ + §1.10–1.11 cũ; thêm quản lý thay đổi, đóng dự án) | Report 2 |
+| Chapter3 | Nghiên cứu liên quan và hệ thống hiện có / Related work and existing systems | Report 3 |
+| Chapter4 | Phương pháp / Methodology (Chương 3 cũ, bỏ §3.8) | Report 4 |
+| Chapter5 | Thiết kế và hiện thực hệ thống / System design and implementation (mới; gồm §3.8 và §4.8 cũ) | Report 5 |
+| Chapter6 | Kết quả / Results (Chương 4 cũ, bỏ §4.8) | Report 6 |
+| Chapter7 | Thảo luận / Discussion | Report 6 |
+| Chapter8 | Kết luận / Conclusion (+ mục Nhìn lại quá trình thực hiện) | Report 7 |
+| Appendix1 | Phụ lục A: Gói tái lập / Reproducibility package (Phụ lục B cũ) | — |
+- Hình mới: Chapter5/Figs/sd_architecture.pdf (vẽ bằng TikZ, mã nguồn ở Chapter5/Figs/src/, biên dịch riêng bằng pdflatex) và sd_interface.png (ảnh giao diện ở chế độ backend giả, từ docs/W13/figures/ui_mock_desktop.png).
+- Nhãn LaTeX cũ được giữ (sec:intro-team, sec:intro-pm, sec:met-proto, sec:res-proto...) nên mọi \ref tự cập nhật số.
 
 ## Ngôn ngữ
 - Viết tiếng Việt trước. Preamble/preamble.tex: `\thesisvitrue` = tiếng Việt, `\thesisvifalse` = tiếng Anh.

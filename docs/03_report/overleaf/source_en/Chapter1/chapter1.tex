@@ -36,8 +36,7 @@ Section~\ref{sec:intro-problem} states the problem and splits it into
 sub-problems. Sections~\ref{sec:intro-gaps} to~\ref{sec:intro-significance} present
 the research gaps, objectives, research questions, hypotheses, contributions and
 significance of the work. Section~\ref{sec:intro-scope} defines the scope and
-limitations. Sections~\ref{sec:intro-team} and~\ref{sec:intro-pm} summarise how the team was organised and how the project was managed; the details are in
-Appendix~\ref{appendix:pm}.
+limitations. Section~\ref{sec:intro-outline} outlines the thesis and shows how its chapters correspond to the reports of the AIP491 capstone guide.
 
 %********************************** Section 1.1 ********************************
 \section{Overview}
@@ -662,125 +661,39 @@ reported separately in Chapter~\ref{chap:results}. Third, the L4 GPU on Colab gi
 stable results across sessions when the seed and the configuration are fixed.
 
 %********************************** Section 1.10 *******************************
-\section{Team organisation}
-\label{sec:intro-team}
-
-\subsection{Structure and roles}
-
-The team has four students, each in charge of one technical area as defined in the
-project proposal.
-
-Pham Le Huy Hoang (SE182670) is the team leader and is in charge of PEFT / Training.
-Besides training the QLoRA models, running the LoRA configuration ablations and
-building the shared adapter, Hoang coordinates the schedule, integrates the results
-of the different areas and reviews cross-area results.
-
-Ho Dac Toan (SE183249) is in charge of VLM / Baseline: studying the Qwen2.5-VL
-architecture, reproducing the zero-shot baseline and comparing it with the published
-numbers.
-
-Tran Quoc Huan (SE193642) is in charge of Dataset / OCR: obtaining the data from the
-official sources, fixing the splits, checking for leakage between training and test,
-and building the OCR cache with PaddleOCR and VietOCR.
-
-Van Quang Truong (SE182458) is in charge of Evaluation / Deployment: implementing the
-metrics and statistical tests, measuring hallucination, and building the prototype and
-the demo video.
-
-The detailed assignment table, with each member's main source-code directories, is in
-Appendix~\ref{appendix:pm}.
-
-\subsection{Communication plan}
-
-The team works with the supervisors at the department's milestones and whenever a
-major decision needs confirmation, for example fixing the Qwen2.5-VL-3B baseline on
-7 October 2026. After each review meeting, the team fills in the feedback checklist,
-emails it to the supervisors and the reviewers, and uploads it to the shared folder.
-
-Within the team, each working week has a README and a Team Report in the
-\path{docs/Wxx/} directory of the repository, recording what was done, the results,
-the decisions and what was postponed. Source code, small logs and documents are
-managed on GitHub; images, adapters, the OCR cache and the demo video are stored on
-Google Drive. Decisions that affect the main results are recorded before the run and
-confirmed by the supervisors when needed.
-
-%********************************** Section 1.11 *******************************
-\section{Project management approach}
-\label{sec:intro-pm}
-
-Because this is a research project, the plan revolves around experiments: every
-conclusion in Chapter~\ref{chap:results} must be traceable to a run with a log, a seed
-and a fixed configuration. This section summarises how the team organised the work;
-Appendix~\ref{appendix:pm} presents the full work breakdown, schedule, risks and
-quality management.
-
-\subsection{Phases}
-
-The project is divided into five phases following the 15-week frame of the proposal:
-
-\paragraph{Phase 1: Orientation and planning (W01--W03).} The team reads papers in the
-four areas, builds a literature matrix, analyses the two datasets, identifies the
-research gaps, research questions and hypotheses, and presents them at Review~1.
-
-\paragraph{Phase 2: Data and baseline (W04--W07).} The team obtains the data from the
-official sources, fixes the Qwen2.5-VL-3B-Instruct baseline, measures zero-shot,
-reproduces the published number on TextVQA and fixes the inference configuration
-based on measurements (number of image tokens, data type).
-
-\paragraph{Phase 3: Adaptation and improvement (W07--W10).} The team trains plain
-QLoRA, analyses the errors, proposes OCR-aware QLoRA, verifies it on the
-8,000-question subset, checks it across three seeds and with the $2\times2$ table, and
-then runs it on the full data.
-
-\paragraph{Phase 4: Evaluation and analysis (W10--W12).} The team builds the full
-evaluation table, runs the LoRA configuration ablations, tries a shared adapter,
-analyses the errors and measures hallucination with the Vietnamese POPE benchmark.
-
-\paragraph{Phase 5: Prototype, packaging and thesis (W13--W15).} The team builds the web
-prototype, verifies that it matches the evaluation pipeline, records the demo video,
-and prepares the reproducibility package, the defence slides and the thesis.
-
-\subsection{Integrating the components}
-
-The components of the system are connected through a few fixed shared points. A
-single prompt-building function is used for training, evaluation and the prototype,
-so the prompt never differs between stages. OCR is run once and cached with a hash;
-training and evaluation only read the cache. The list of official models is generated
-automatically from the logs, and the prototype is checked against pre-set rules to
-make sure it gives the same answers as the evaluation pipeline.
-
-\subsection{Quality and risk management}
-
-The quality of the project is first of all the reliability of its numbers. The team
-commits the decision rule of each main test to Git before running it, uses paired
-tests for every comparison, recomputes the result tables directly from the original
-prediction files instead of copying them by hand, and records SHA-256 hashes for the
-adapters, the OCR cache and the data files.
-
-As for risks, the initial plan listed eight risks. Those that actually occurred were:
-no GPU server at the university, fp16 corrupting the answers on the T4 GPU, data
-initially taken from the wrong source, about 12 hours per full training run, and
-images with an EXIF rotation flag corrupting the OCR cache. How each risk was handled
-is described in Appendix~\ref{appendix:pm}.
-
-\subsection{Progress tracking}
-
-The team works in weekly cycles: plan, record the rules in advance, run the
-experiments, re-check the numbers, and close the week with a README and a Team
-Report. Progress is checked against the department's milestones: Review~1, Review~2,
-the department committee and the university committee. When a decision changes the
-plan, for example changing the baseline or moving to Colab, the decision and its
-reason are recorded in the weekly report.
-
-%********************************** Section 1.12 *******************************
 \section{Thesis outline}
 \label{sec:intro-outline}
 
-Chapter~\ref{chap:related} reviews VQA, vision-language models, parameter-efficient
-fine-tuning and Vietnamese VQA research. Chapter~\ref{chap:methods} presents the data,
+The thesis follows the report structure of the AIP491 capstone guide, in which the final
+report brings together the final versions of the reports submitted during the semester.
+Chapter~\ref{chap:pm} presents the project management plan: the team, the phases, the work
+breakdown, risks, quality, changes and the closure of the project. Chapter~\ref{chap:related}
+reviews VQA, vision-language models, parameter-efficient fine-tuning and Vietnamese VQA
+research, and compares the existing systems. Chapter~\ref{chap:methods} presents the data,
 the baseline, the OCR-aware QLoRA method and the evaluation protocol.
-Chapter~\ref{chap:results} reports the main results and the ablations.
-Chapter~\ref{chap:discussion} discusses the error analysis, hallucination and
-limitations. Chapter~\ref{chap:conclusion} concludes. Appendix~\ref{appendix:pm}
-presents the project management plan, and Appendix~\ref{appendix:repro} describes the
-reproducibility package.
+Chapter~\ref{chap:system} describes the design and implementation of the system and the
+verification of the prototype. Chapter~\ref{chap:results} reports the main results and the
+ablations. Chapter~\ref{chap:discussion} discusses the error analysis, hallucination and
+limitations. Chapter~\ref{chap:conclusion} concludes. Appendix~\ref{appendix:repro}
+describes the reproducibility package. Table~\ref{tab:intro-aip491} shows how the chapters
+correspond to the seven reports.
+
+\begin{table}[htbp]
+\caption{Correspondence between the AIP491 reports and the chapters of the thesis}
+\label{tab:intro-aip491}
+\centering
+\small
+\begin{tabular}{p{0.14\textwidth}p{0.48\textwidth}p{0.28\textwidth}}
+\toprule
+\raggedright \textbf{Report} & \raggedright \textbf{Content} & \raggedright \textbf{Chapter} \tabularnewline
+\midrule
+\raggedright Report~1 & \raggedright Project introduction & \raggedright Chapter~\ref{chap:intro} \tabularnewline
+\raggedright Report~2 & \raggedright Project management plan & \raggedright Chapter~\ref{chap:pm} \tabularnewline
+\raggedright Report~3 & \raggedright Existing systems and state of the art & \raggedright Chapter~\ref{chap:related} \tabularnewline
+\raggedright Report~4 & \raggedright Methodology & \raggedright Chapter~\ref{chap:methods} \tabularnewline
+\raggedright Report~5 & \raggedright System design and implementation & \raggedright Chapter~\ref{chap:system} \tabularnewline
+\raggedright Report~6 & \raggedright Results and discussion & \raggedright Chapters~\ref{chap:results} and~\ref{chap:discussion} \tabularnewline
+\raggedright Report~7 & \raggedright Conclusion & \raggedright Chapter~\ref{chap:conclusion} \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}

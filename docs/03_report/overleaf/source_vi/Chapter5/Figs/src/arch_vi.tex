@@ -1,0 +1,27 @@
+\documentclass[border=4pt]{standalone}
+\usepackage[T1,T5]{fontenc}
+\usepackage[vietnamese]{babel}
+\input{arch_common}
+\newcommand{\Ldet}{Nhận diện câu có/không\\ \scriptsize theo luật, \texttt{core.py}}
+\newcommand{\Lprompt}{Dựng prompt\\ \scriptsize \texttt{builder.py}, dùng chung với huấn luyện và đánh giá}
+\newcommand{\Lmodel}{Qwen2.5-VL-3B-Instruct\\ \scriptsize 4-bit NF4 + adapter LoRA SH (PEFT); greedy, hoặc hiệu token đầu so với $\tau^*$}
+\newcommand{\Lconf}{Mức tin cậy\\ \scriptsize Cao / Trung bình / Thấp}
+\newcommand{\Lprep}{Chuẩn bị ảnh\\ \scriptsize nguyên file; xoay theo EXIF,\\ \scriptsize cạnh $\le$\,6.000 điểm ảnh}
+\newcommand{\Lcache}{OCR chạy nền và bộ đệm\\ \scriptsize khóa SHA-1, tối đa 32 ảnh}
+\newcommand{\Lshow}{Hiển thị\\ \scriptsize câu trả lời, mức tin cậy,\\ \scriptsize khung chữ OCR đánh số}
+\newcommand{\Lpdet}{PaddleOCR\\ \scriptsize phát hiện vùng chữ}
+\newcommand{\Lvrec}{VietOCR\\ \scriptsize nhận dạng chữ}
+\newcommand{\Lmainp}{Tiến trình chính (Python, PyTorch)}
+\newcommand{\Lbackend}{Backend \texttt{core.py}}
+\newcommand{\Lui}{Giao diện web \texttt{app.py} (Gradio)}
+\newcommand{\Locrp}{Tiến trình OCR\\ \texttt{ocr\_worker.py}}
+\newcommand{\Luser}{Người dùng (trình duyệt)}
+\newcommand{\Lart}{\textbf{Sản phẩm chỉ đọc}\\[2pt] adapter SH\\ (đã kiểm SHA-256)\\[1pt] \texttt{qwen\_lora.yaml}\\[1pt] ngưỡng đã kiểm\\ chứng (bản tổng hợp W13)}
+\newcommand{\Limage}{ảnh}
+\newcommand{\Lquestion}{câu hỏi}
+\newcommand{\Ljson}{dòng JSON (stdin/stdout)}
+\newcommand{\Locrlines}{dòng OCR}
+\newcommand{\Lanswer}{câu trả lời, mức tin cậy, bằng chứng OCR}
+\begin{document}
+\input{arch_body}
+\end{document}

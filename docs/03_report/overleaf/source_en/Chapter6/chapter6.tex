@@ -3,8 +3,8 @@
 %****************************** Chapter 6 **************************************
 %*******************************************************************************
 
-\chapter{CONCLUSION}
-\label{chap:conclusion}
+\chapter{RESULTS}
+\label{chap:results}
 
 \ifpdf
     \graphicspath{{Chapter6/Figs/Raster/}{Chapter6/Figs/PDF/}{Chapter6/Figs/}}
@@ -12,116 +12,509 @@
     \graphicspath{{Chapter6/Figs/Vector/}{Chapter6/Figs/}}
 \fi
 
+This chapter reports the results in the order of the research questions.
+Section~\ref{sec:res-repro} presents the baseline reproduction and the zero-shot results
+(RQ1). Section~\ref{sec:res-qlora} reports QLoRA (RQ2), and Section~\ref{sec:res-ocr}
+reports the proposed OCR-aware QLoRA (RQ3). Section~\ref{sec:res-ablation} presents the
+ablations, Section~\ref{sec:res-qtype} the results by question type,
+Section~\ref{sec:res-cost} the computational cost, and Section~\ref{sec:res-exif} a
+sensitivity analysis; the verification of the prototype is reported with the system in
+Chapter~\ref{chap:system}. Section~\ref{sec:res-hyp} summarises the verdict for each hypothesis. The
+hallucination results (RQ4) and the error analysis are in Chapter~\ref{chap:discussion}.
+
+Unless stated otherwise, all numbers are measured on the full test sets (ViVQA 3,001
+questions, ViTextVQA 10,028 questions), on one NVIDIA L4 GPU, in bf16, with the base
+model in 4-bit NF4 and seed 42. Numbers are given as percentages.
+
 %********************************** Section 6.1 ********************************
-\section{Summary}
-\label{sec:con-summary}
+\section{Baseline reproduction and zero-shot results}
+\label{sec:res-repro}
 
-This thesis studied how to adapt an open-source vision-language model to Vietnamese visual
-question answering under tight resource constraints: parameter-efficient fine-tuning only,
-and a single Colab GPU. We chose Qwen2.5-VL-3B-Instruct as the baseline, reproduced it
-on TextVQA val (79.60 against the published 79.3), measured the zero-shot baseline on ViVQA
-and ViTextVQA, and then adapted it with QLoRA using 7.37 million trainable parameters, i.e.\
-0.196\% of all parameters.
+\subsection{Reproducing the published number (R0)}
 
-The proposed improvement is OCR-aware QLoRA: the text in the image is read with VietOCR,
-sorted in reading order and added to the prompt during training, not only at inference. On the full
-ViTextVQA test set of 10,028 questions, the method reaches 53.35 EM, 3.09 points above plain
-QLoRA on the same data ($p = 6.7\times10^{-21}$) and above the best previously published
-result (25.48 EM). On ViVQA, QLoRA raises EM from 22.09 to 76.64.
+Table~\ref{tab:res-r0} compares our result with the number in the Qwen2.5-VL
+technical report~\cite{bai2025qwen25vl} on all 5,000 TextVQA val questions. With the
+paper's original configuration (bf16, no resolution cap), we obtain 79.60 VQA-Acc
+against the published 79.3, a difference of $+0.3$ points. Our inference pipeline
+is therefore considered correct. The economical configuration used in all later
+experiments (4-bit NF4, at most 512 image tokens) reaches 75.21, i.e.\ it keeps 94.5\% of
+the accuracy while inference VRAM drops from 10.9~GB to 2.5~GB (a 77\% reduction).
+
+\begin{table}[htbp]
+\caption{Reproducing Qwen2.5-VL-3B-Instruct on TextVQA val (5,000 questions)}
+\label{tab:res-r0}
+\centering
+\small
+\begin{tabular}{p{0.45\textwidth}rr}
+\toprule
+\textbf{Configuration} & \textbf{VQA-Acc} & \textbf{Inference VRAM} \\
+\midrule
+Original report~\cite{bai2025qwen25vl} & 79.3 & --- \\
+R0: team re-run, original configuration (bf16) & 79.60 & 10.9 GB \\
+R0b: economical configuration (4-bit, $\leq$ 512 image tokens) & 75.21 & 2.5 GB \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Zero-shot on Vietnamese data (B1)}
+
+Table~\ref{tab:res-b1} presents the zero-shot results. The base model reaches 22.09 EM on
+ViVQA and 29.12 on ViTextVQA. On ViTextVQA alone, B1 is already above the best previously
+published result (ViTextBLIP-2, 25.48 EM~\cite{nguyen2024vitextvqa}), which shows that a
+modern base model already reads text better than earlier systems.
+
+\begin{table}[htbp]
+\caption{Zero-shot results (B1) on the full test sets}
+\label{tab:res-b1}
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Test set} & \textbf{EM} & \textbf{ANLS} & \textbf{F1 (secondary)} \\
+\midrule
+ViVQA (3,001 questions) & 22.09 & 28.61 & 38.05 \\
+ViTextVQA (10,028 questions) & 29.12 & 47.60 & 53.89 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Low EM is mostly due to the wrong format.} Zero-shot answers are longer than
+the gold answers: 2.9 words against 1.6 on average on ViVQA, and 5.4 against 3.7 on
+ViTextVQA. For 18\% of the ViTextVQA questions the answer contains the gold answer but
+still fails EM because of extra words. Two examples: the question ``\vi{đây là bảo tàng
+gì?}'' (``what museum is this?'') is answered ``\vi{Bảo tàng Lịch sử Quốc gia.}'' while
+the gold answer is ``\vi{lịch sử quốc gia}''; the question ``\vi{màu của chiếc tàu là
+gì}'' (``what colour is the ship?'') is answered ``\vi{Đỏ và trắng}'' (``red and white'')
+while the gold answer is ``\vi{màu đỏ}'' (``red'').
+
+\paragraph{By ViVQA question type.} Zero-shot EM varies widely between types: number 69.1
+(444 questions), colour 44.8 (625), object 5.7 (1,247) and location 0.7 (685). For object
+and location questions the gold answer is a single noun (``\vi{phòng}'', ``room''), while
+the model answers with a whole phrase (``\vi{trong phòng khách}'', ``in the living
+room'').
+
+\paragraph{Language and tone marks.} In the first baseline run (the initial configuration,
+before bf16 was fixed), about 90 answers were in English even though the questions were in
+Vietnamese. On ViTextVQA test2000, EM on answers with Vietnamese diacritics (22.4) is much
+lower than EM on answers made only of Latin letters without diacritics (39.4). This is
+quantitative evidence for problems V1 and V2 of Chapter~\ref{chap:intro}.
+
+\paragraph{Training-free approaches.} We tried three more approaches without
+training. (i) A few-shot prompt with 5 text-only examples, to show the model the answer
+format, reduces EM by 2.1 points on ViVQA and 1.2 points on ViTextVQA. (ii) Adding the OCR
+line to the prompt at inference does not bring a significant improvement
+(Section~\ref{sec:res-promptonly}). (iii) A larger VLM, Qwen2-VL-7B~\cite{wang2024qwen2vl},
+reaches only 16.7 EM on test2000 in the zero-shot setting (with the configuration of the reference paper; 16.2 EM with the B1 configuration), mostly because of long answers.
+None of these approaches fixes the format problem, so training is needed.
 
 %********************************** Section 6.2 ********************************
-\section{Answers to the research questions}
-\label{sec:con-rq}
+\section{QLoRA}
+\label{sec:res-qlora}
 
-\begin{description}
-  \item[RQ1.] \textit{How well does zero-shot perform, and which Vietnamese errors dominate?}
-  Zero-shot reaches 22.09 EM on ViVQA and 29.12 on ViTextVQA. The dominant error is the wrong
-  format: the model answers at greater length than the gold answer (2.9 against 1.6 words on
-  ViVQA) and sometimes in English. Answers with tone marks are clearly harder than answers
-  made only of Latin letters. A few-shot formatting prompt does not fix these errors (H3 not
-  supported).
+Table~\ref{tab:res-qlora} compares zero-shot with QLoRA. With only 0.196\% of the
+parameters trained, QLoRA increases EM by 21.1 points on ViTextVQA (29.12 to 50.26) and by
+51.7 points on ViVQA after one epoch (22.09 to 73.78). On ViTextVQA, 2,543 questions are
+answered correctly only by B2 against 423 only by B1; the McNemar test gives $p$ close to
+0 on both datasets.
 
-  \item[RQ2.] \textit{How much does QLoRA improve without full fine-tuning?}
-  QLoRA increases EM by 21.1 points on ViTextVQA and 54.6 points on ViVQA (the official model
-  C3), with only 0.196\% of the parameters, one L4 GPU, at most 12.75 hours of training and a
-  peak VRAM below 8.4~GB. The gain comes mainly from learning the right answer format and is
-  not due to image leakage: on the clean test set, the gain is still 44.1 points (H1
-  supported).
+\begin{table}[htbp]
+\caption{Zero-shot versus QLoRA on the full test sets}
+\label{tab:res-qlora}
+\centering
+\small
+\begin{tabular}{p{0.38\textwidth}rrrr}
+\toprule
+\textbf{Model} & \textbf{Epochs} & \textbf{EM} & \textbf{ANLS} & \textbf{F1 (secondary)} \\
+\midrule
+\multicolumn{5}{l}{\textit{ViVQA (3,001 questions)}} \\
+B1 · zero-shot & --- & 22.09 & 28.61 & 38.05 \\
+C1 · QLoRA & 1 & 73.78 & 75.66 & 76.20 \\
+\textbf{C3 · QLoRA (official)} & 2 & \textbf{76.64} & \textbf{78.03} & \textbf{78.84} \\
+\midrule
+\multicolumn{5}{l}{\textit{ViTextVQA (10,028 questions)}} \\
+B1 · zero-shot & --- & 29.12 & 47.60 & 53.89 \\
+B2 · QLoRA & 1 & 50.26 & 72.02 & 71.16 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-  \item[RQ3.] \textit{Does OCR text help, and does it work together with QLoRA?}
-  Yes, but only when the model is trained with OCR. Adding OCR to the prompt of a model that
-  has never seen OCR brings no improvement; training with OCR gives an interaction effect of
-  $+4.9$ EM points, stable across three seeds, and the benefit does not shrink with more data.
-  The ANLS gain ($+1.87$) is below the pre-set 3-point threshold, so H2 is partially
-  supported: OCR helps produce exactly the right string more than it helps produce
-  character-level near-misses.
+\paragraph{Choosing the number of epochs for ViVQA.} The two-epoch schedule is compared with
+one epoch on the clean val set (688 questions, images not in training) following a
+pre-registered rule: C1 reaches 73.11, the adapter after epoch 1 of the two-epoch schedule
+reaches 71.51, and the adapter after epoch 2 (C3) reaches 77.03 ($p = 1.4\times10^{-4}$
+against C1). After the choice, the test set is run only once: C3 is 2.86 EM points above C1
+(65 questions correct only for C1 against 151 only for C3, $p = 4.6\times10^{-9}$) and 2.4
+ANLS points above. C3 is the official ViVQA model, 54.6 EM points above zero-shot.
 
-  \item[RQ4.] \textit{After adaptation, does the model invent content more or less often?}
-  On POPE-vi, B3-full does not increase hallucination according to the pre-set rule
-  ($\Delta$F1 from $+2.5$ to $+5.5$), but its object false-alarm rate increases under
-  adversarial sampling. C3 cannot be measured because it has forgotten how to answer yes/no.
-  The manual review shows that hallucination accounts for only about 2.3\% (B3-full) and 3.7\%
-  (C3) of all answers. H4 is partially supported.
-\end{description}
+\paragraph{The gain is not due to image leakage.} Because about half of the ViVQA test images
+are in the training set (Section~\ref{sec:met-quality}), we re-check on the clean
+test set of 1,219 questions (images not seen in training): one epoch of QLoRA raises EM from
+25.0 to 69.1, i.e.\ $+44.1$ points (CI95 [+41; +47]). The gain from C1 to C3 is also the
+same on seen and unseen images ($+2.9$ and $+2.9$ points). C3 reaches 77.66 on seen images
+and 75.67 on unseen images; on a stricter subset (unseen images and question--answer pairs
+not in training, 1,118 questions) C3 reaches 71.74. The inflation due to shared images is
+therefore small, about 2 points.
 
 %********************************** Section 6.3 ********************************
-\section{Contributions}
-\label{sec:con-contrib}
+\section{OCR-aware QLoRA}
+\label{sec:res-ocr}
 
-\begin{enumerate}
-  \item \textbf{OCR-aware QLoRA for Vietnamese VQA}, with its mechanism isolated by a
-  $2\times2$ experiment: the benefit comes from teaching the model to use OCR, not from adding
-  OCR to the prompt.
-  \item \textbf{Efficient and reproducible adaptation.} The results on ViTextVQA are above the
-  previously published results with 0.196\% of the parameters on one GPU; every number has a
-  log, a seed and a configuration, with a reproducibility package containing the source code,
-  adapters, configurations, inference scripts and instructions to re-run.
-  \item \textbf{Measuring problems specific to Vietnamese.} Each of the four problems V1--V4
-  has concrete measurements; POPE-vi is a Vietnamese hallucination benchmark of 4,985
-  questions on 500 images unseen in training.
-  \item \textbf{Two-level error analysis.} An automatic analysis by error type and OCR status,
-  checked against a blind manual review, shows that EM underestimates the model and estimates
-  how much could still be gained with better OCR (about 17 EM points).
-  \item \textbf{A verified prototype.} A web application that answers with the OCR text and a
-  confidence level, verified to give the same answers as the official evaluation pipeline,
-  with a median latency of about 1 second on one L4 GPU; it also runs offline on a laptop
-with a 4~GB GPU and gives the same answers.
-\end{enumerate}
+Table~\ref{tab:res-ocr} gives the main result of the thesis on ViTextVQA. The proposed
+B3-full reaches 53.35 EM, 73.89 ANLS and 73.73 F1. Figure~\ref{fig:res-main} summarises
+the EM of the main models on both datasets.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{res_main.pdf}
+\caption[EM on the full test sets]{EM on the full test sets. Grey: references (zero-shot and published results);
+blue: QLoRA; orange: the proposed OCR-aware QLoRA.}
+\label{fig:res-main}
+\end{figure}
+
+\begin{table}[htbp]
+\caption{Results on the full ViTextVQA test set (10,028 questions)}
+\label{tab:res-ocr}
+\centering
+\small
+\begin{tabular}{p{0.34\textwidth}p{0.13\textwidth}crrr}
+\toprule
+\raggedright \textbf{Model} & \raggedright \textbf{Training data} & \raggedright \textbf{OCR} & \raggedright \textbf{EM} & \raggedright \textbf{ANLS} & \raggedright \textbf{F1} \tabularnewline
+\midrule
+\raggedright ViTextBLIP-2~\cite{nguyen2024vitextvqa} & \raggedright 100\% & \raggedright yes & \raggedright 25.48 & \raggedright --- & \raggedright 53.95 \tabularnewline
+\raggedright B1 · zero-shot & \raggedright --- & \raggedright no & \raggedright 29.12 & \raggedright 47.60 & \raggedright 53.89 \tabularnewline
+\raggedright B2-sub · QLoRA & \raggedright 23\% & \raggedright no & \raggedright 46.56 & \raggedright 68.90 & \raggedright 67.83 \tabularnewline
+\raggedright B3 · OCR-aware QLoRA & \raggedright 23\% & \raggedright yes & \raggedright 49.10 & \raggedright 70.47 & \raggedright 70.03 \tabularnewline
+\raggedright B2 · QLoRA & \raggedright 100\% & \raggedright no & \raggedright 50.26 & \raggedright 72.02 & \raggedright 71.16 \tabularnewline
+\raggedright \textbf{B3-full · OCR-aware QLoRA} & \raggedright 100\% & \raggedright yes & \raggedright \textbf{53.35} & \raggedright \textbf{73.89} & \raggedright \textbf{73.73} \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Controlled comparisons.} Each pair differs only in the OCR line:
+\begin{itemize}
+  \item 8,000-question subset: B3 is 2.54 EM points above B2-sub (417 questions correct
+  only for B2-sub against 672 only for B3, $p = 1.1\times10^{-14}$); $\Delta$ANLS $+1.57$,
+  CI95 [+1.06; +2.08].
+  \item Full data: B3-full is 3.09 EM points above B2 (395 against 705 questions,
+  $p = 6.7\times10^{-21}$); $\Delta$ANLS $+1.87$, CI95 [+1.38; +2.36].
+\end{itemize}
+
+On the subset, B3 is still 1.16 EM points below B2 trained on the full data
+($p = 0.0025$). With 23\% of the data and about 25\% of the training time, the OCR line
+therefore recovers about 69\% of the EM gap caused by cutting the data; with enough data,
+OCR-aware QLoRA surpasses plain QLoRA.
+
+\paragraph{Against the published result.} B3-full has 53.35 EM (CI95 [52.39; 54.33]) and
+73.73 F1 (CI95 [73.02; 74.45]); the lower bounds of the CI95 are above the published
+ViTextBLIP-2 numbers on both metrics. The ViTextVQA paper does not publish its answer
+normalisation, so the absolute comparison is for reference only; we publish our
+own scoring function. The gap can be split into three parts: a better base model (B1 at
+29.12 is already above 25.48), QLoRA ($+21.1$ EM) and OCR ($+3.1$ EM).
+
+\paragraph{Metrics that do not depend on word segmentation.} Because token-F1 depends on how
+units are segmented, we recompute F1 after word segmentation with pyvi. Word-level
+F1 is 1--3 points lower than syllable-level F1 (B1 51.83; B2 69.07; B3-full 71.67), but the
+gain from B2 to B3-full is almost unchanged ($+2.57$ by syllable, $+2.60$ by word) and the
+ranking B1 < B2 < B3-full holds. EM and ANLS compare whole strings and characters, so they
+do not depend on word segmentation.
 
 %********************************** Section 6.4 ********************************
-\section{Limitations}
-\label{sec:con-limits}
+\section{Ablations}
+\label{sec:res-ablation}
 
-The main limitations were analysed in Section~\ref{sec:dis-validity}: the main models were run
-with only one seed; EM is too strict towards answers that are correct in meaning but written
-differently; the quality of Vietnamese scene-text OCR is a bottleneck; the ANLS threshold of H2
-was not reached; F1 on POPE-vi hides the false-alarm rate; the comparison with published results
-depends on the paper's answer normalisation; and the final manual review had only one
-annotator.
+The ablations below run on test2000 (2,000 ViTextVQA questions) and the train8k subset,
+unless stated otherwise.
+
+\subsection{Adding OCR only at inference}
+\label{sec:res-promptonly}
+
+Table~\ref{tab:res-promptonly} shows that adding the OCR line to the prompt of a model that
+was never trained with OCR brings no significant improvement, whether the model is
+zero-shot or already trained with QLoRA.
+
+\begin{table}[htbp]
+\caption{Adding the OCR line only at inference (test2000)}
+\label{tab:res-promptonly}
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Model} & \textbf{EM without OCR} & \textbf{EM with OCR} & \textbf{McNemar $p$} \\
+\midrule
+B1 · zero-shot & 28.80 & 29.35 & 0.55 \\
+B2 · QLoRA without OCR & 49.70 & 50.70 & 0.24 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{OCR in training $\times$ OCR at inference}
+
+To isolate the mechanism, we run a $2\times2$ factorial experiment on the same
+8,000-question subset (Table~\ref{tab:res-2x2}). Adding OCR only at inference reduces EM by
+0.65 points ($p = 0.49$); training with OCR and then inferring without OCR reduces it by
+0.55 points ($p = 0.35$). Only when OCR is present at both stages does EM increase: 49.25
+against 44.90 ($p = 2.2\times10^{-8}$). The interaction effect is $+4.90$ EM points, CI95
+[+3.20; +6.60], and $+3.62$ ANLS points, CI95 [+2.25; +5.03].
+
+\begin{table}[htbp]
+\caption{EM by OCR in training and at inference (test2000, train8k)}
+\label{tab:res-2x2}
+\centering
+\small
+\begin{tabular}{lrr}
+\toprule
+ & \textbf{Inference without OCR} & \textbf{Inference with OCR} \\
+\midrule
+Training without OCR (B2-sub) & 45.55 & 44.90 \\
+Training with OCR (B3) & 45.00 & \textbf{49.25} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.68\textwidth]{res_2x2.pdf}
+\caption[Interaction between OCR in training and OCR at inference]{Interaction between OCR in training and OCR at inference (test2000, train8k). The
+two lines cross: OCR helps only when it is present at both stages.}
+\label{fig:res-2x2}
+\end{figure}
+
+This result (Fig.~\ref{fig:res-2x2}) shows that the benefit comes from \emph{teaching the
+model to use the OCR line}, not from adding OCR to the prompt. It also shows that B3
+depends on OCR: without OCR at inference, B3's EM drops from 49.25 to 45.00
+($p = 3.8\times10^{-9}$), the level of B2-sub. The prototype therefore always runs OCR
+before querying the model.
+
+\subsection{Amount of data $\times$ OCR}
+
+Table~\ref{tab:res-data} compares the benefit of OCR at two amounts of data, on the full
+test set. The benefit of OCR does not shrink as the data grows ($+2.54$ to $+3.09$ EM); the
+data $\times$ OCR interaction is $+0.55$, CI95 [$-0.20$; $+1.29$], i.e.\ the two factors
+are additive.
+
+\begin{table}[htbp]
+\caption{EM by amount of data and OCR (full ViTextVQA test set)}
+\label{tab:res-data}
+\centering
+\small
+\begin{tabular}{lrrp{0.26\textwidth}}
+\toprule
+\textbf{Training data} & \textbf{Without OCR} & \textbf{With OCR} & \textbf{Benefit of OCR} \\
+\midrule
+23\% (8,000 questions) & 46.56 & 49.10 & $+2.54$ ($p = 1.1\times10^{-14}$) \\
+100\% (35,159 questions) & 50.26 & 53.35 & $+3.09$ ($p = 6.7\times10^{-21}$) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Stability across seeds}
+
+Because B3-full was run with only one seed, we check the stability of the B3 versus
+B2-sub comparison over three training seeds (Table~\ref{tab:res-seed}). The gain is
+$+3.57 \pm 0.76$ EM points and is statistically significant for all three seeds.
+$\Delta$ANLS is $+1.55 \pm 0.40$; for seed 44 the lower bound of the CI95 of $\Delta$ANLS
+is close to 0.
+
+\begin{table}[htbp]
+\caption{B3 versus B2-sub by seed (test2000, train8k)}
+\label{tab:res-seed}
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Seed} & \textbf{EM B2-sub} & \textbf{EM B3} & \textbf{$\Delta$EM} & \textbf{McNemar $p$} \\
+\midrule
+42 & 45.55 & 49.25 & $+3.70$ & $1.7\times10^{-6}$ \\
+43 & 44.75 & 49.00 & $+4.25$ & $4.0\times10^{-8}$ \\
+44 & 46.05 & 48.80 & $+2.75$ & $1.4\times10^{-4}$ \\
+\midrule
+Mean $\pm$ standard deviation & $45.45 \pm 0.66$ & $49.02 \pm 0.23$ & $+3.57 \pm 0.76$ & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{LoRA configuration}
+
+Two configuration ablations use the B3 recipe (Table~\ref{tab:res-lora}). A1 also attaches
+LoRA to the MLP layers of the language model, with rank 4 to keep about the same number of
+parameters (1.5\% difference); the result is not better and training is 17.5\% slower. The
+QLoRA paper~\cite{dettmers2023qlora} recommends attaching every linear layer but also states
+that the total number of LoRA parameters is the most important factor; here that total is
+kept equal. A2 raises the rank to 64: EM increases by 1.05 points but not significantly
+($p = 0.071$; the CI95 still includes gains of up to 2.15, so this conclusion is weak),
+while the adapter is four times larger. We keep $r = 16$ on q, k, v, o.
+
+\begin{table}[htbp]
+\caption{LoRA configuration ablation (test2000, B3 recipe)}
+\label{tab:res-lora}
+\centering
+\footnotesize
+\begin{tabular}{p{0.07\textwidth}p{0.17\textwidth}rrrp{0.17\textwidth}rr}
+\toprule
+\raggedright \textbf{} & \raggedright \textbf{LoRA target layers} & \raggedright \textbf{$r/\alpha$} & \raggedright \textbf{Parameters} & \raggedright \textbf{EM} & \raggedright \textbf{$\Delta$EM (CI95), $p$} & \raggedright \textbf{s/step} & \raggedright \textbf{MiB} \tabularnewline
+\midrule
+\raggedright B3 & \raggedright q, k, v, o & \raggedright 16/32 & \raggedright 7,372,800 & \raggedright 49.25 & \raggedright --- & \raggedright 21.48 & \raggedright 28.2 \tabularnewline
+\raggedright A1 & \raggedright q, k, v, o, gate, up, down & \raggedright 4/8 & \raggedright 7,483,392 & \raggedright 48.70 & \raggedright $-0.55$ [$-1.60$; $+0.45$], 0.34 & \raggedright 25.24 & \raggedright 28.6 \tabularnewline
+\raggedright A2 & \raggedright q, k, v, o & \raggedright 64/128 & \raggedright 29,491,200 & \raggedright 50.30 & \raggedright $+1.05$ [$-0.05$; $+2.15$], 0.071 & \raggedright 20.85 & \raggedright 112.5 \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{One adapter for both datasets}
+\label{sec:res-sh}
+
+The SH adapter is trained on 10,799 ViVQA questions and 8,000 ViTextVQA questions, all with
+the OCR prompt (for images without text the prompt equals the prompt without OCR), with
+hyperparameters identical to C1 and B3. The pre-registered rule considers SH ``not worse''
+if the lower bound of the CI95 of $\Delta$EM is above $-1.5$ on each dataset.
+Table~\ref{tab:res-sh} shows that SH meets the rule on both datasets: one 29.5~MB adapter
+serves both kinds of questions without losing accuracy compared with specialised adapters
+of the same budget. There is no evidence of positive transfer between the two datasets.
+
+\begin{table}[htbp]
+\caption{Shared adapter (SH) versus specialised adapters with the same budget}
+\label{tab:res-sh}
+\centering
+\small
+\begin{tabular}{p{0.22\textwidth}p{0.18\textwidth}p{0.20\textwidth}rp{0.12\textwidth}}
+\toprule
+\raggedright \textbf{Test set} & \raggedright \textbf{Reference $\to$ SH (EM)} & \raggedright \textbf{$\Delta$EM (CI95)} & \raggedright \textbf{$p$} & \raggedright \textbf{Verdict} \tabularnewline
+\midrule
+\raggedright ViVQA (3,001) & \raggedright C1 73.78 $\to$ 73.51 & \raggedright $-0.27$ [$-1.13$; $+0.60$] & \raggedright 0.60 & \raggedright not worse \tabularnewline
+\raggedright ViTextVQA test2000 & \raggedright B3 49.25 $\to$ 49.50 & \raggedright $+0.25$ [$-0.95$; $+1.45$] & \raggedright 0.75 & \raggedright not worse \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+On ViVQA, 44\% of the questions have an OCR line, mostly English text on COCO images that
+VietOCR reads as gibberish; the gold answer is in the OCR for none of them. On this group,
+$\Delta$EM is $+0.15$ [$-1.05$; $+1.36$] and the rate of wrongly copying OCR text into the
+answer is only 0.30\% (C1: 0.23\%): the model learns to ignore irrelevant OCR lines. SH is
+still below the official models (C3 is 3.13 points higher and B3-full 4.35 points higher on
+the same sets) because it uses only one ViVQA epoch and 23\% of the ViTextVQA data; this is
+the pre-registered cheap version. The main result tables still use C3 and B3-full; SH is
+used only for the prototype.
 
 %********************************** Section 6.5 ********************************
-\section{Future work}
-\label{sec:con-future}
+\section{Results by ViTextVQA question type}
+\label{sec:res-qtype}
 
-\begin{enumerate}
-  \item \textbf{Better Vietnamese scene-text OCR}: fine-tune VietOCR on scene text and improve
-  the reading order. According to the error analysis, this direction has the highest ceiling
-  for improvement.
-  \item \textbf{Add OCR to the prompt only when the question is about text} (gating by
-  question type), to reduce cases where irrelevant OCR text derails purely visual questions
-  as illustrated in Section~\ref{par:err-ocr-distractor}.
-  \item \textbf{Position-aware OCR}: feed the coordinates and order of the text boxes to the
-  model in the spirit of M4C~\cite{hu2020m4c}, to reduce wrong phrase boundaries.
-  \item \textbf{Human evaluation and a synonym-tolerant metric}, since more than half of the EM
-  errors are correct in meaning.
-  \item \textbf{Balancing yes/no questions during training} to avoid forgetting the format as
-  in C3, and measuring text hallucination on images with text, not only object hallucination.
-  \item \textbf{Confidence calibration} (e.g.\ temperature scaling) so that the prototype can
-  show probabilities instead of levels.
-  \item \textbf{More seeds for the main models} and newer base models under the same evaluation
-  protocol.
-\end{enumerate}
+Table~\ref{tab:res-qtype} breaks down EM on the full ViTextVQA test set by the 9 question
+types of the \texttt{qt-v1} classifier (Section~\ref{sec:met-quality}). The three types
+marked $\dagger$ have a label accuracy below 80\% and are therefore less reliable.
 
-The results of this thesis show that a team with limited resources can still adapt a large VLM
-to Vietnamese and surpass previous work, provided that every change is measured under the same
-conditions and every conclusion is tested.
+\begin{table}[htbp]
+\caption{EM by question type on the full ViTextVQA test set}
+\label{tab:res-qtype}
+\centering
+\small
+\begin{tabular}{p{0.26\textwidth}rrrrr}
+\toprule
+\textbf{Question type} & \textbf{n} & \textbf{B1} & \textbf{B2} & \textbf{B3-full} & \textbf{$\Delta$ B2$\to$B3-full} \\
+\midrule
+Source & 661 & 24.5 & 57.2 & 58.1 & $+0.9$ \\
+Contact & 641 & 47.9 & 55.5 & 64.1 & $+8.6$ \\
+Number, time & 1,041 & 41.2 & 55.7 & 58.8 & $+3.1$ \\
+Person & 420 & 40.7 & 54.8 & 61.2 & $+6.4$ \\
+Location & 969 & 25.3 & 44.0 & 47.0 & $+3.0$ \\
+Name$^\dagger$ & 1,971 & 34.9 & 55.7 & 57.6 & $+1.9$ \\
+Text content$^\dagger$ & 777 & 27.4 & 48.6 & 51.1 & $+2.5$ \\
+Product, service & 1,144 & 16.5 & 42.5 & 44.1 & $+1.6$ \\
+Other$^\dagger$ & 2,404 & 21.5 & 46.1 & 49.6 & $+3.5$ \\
+\midrule
+All & 10,028 & 29.1 & 50.3 & 53.4 & $+3.1$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+OCR helps most for the types that require copying every character exactly: contact numbers
+(phone numbers, websites) gain 8.6 points and person names 6.4 points. OCR helps least for
+the source type ($+0.9$), which is usually a small watermark in a corner of the image. After
+B3-full, the hardest types are questions that require inferring from the text rather than
+copying it: product, service (44.1) and location (47.0).
+
+%********************************** Section 6.6 ********************************
+\section{Computational cost}
+\label{sec:res-cost}
+
+Table~\ref{tab:res-cost} summarises the cost of the training runs. Every run uses one 24~GB
+L4 GPU with a peak VRAM of at most 8.4~GB, so it can run on Colab Pro, in line with the
+efficiency constraint of the project. The official ViTextVQA model (B3-full) needs 12.75
+hours of training and about 1 second of inference per question.
+
+\begin{table}[htbp]
+\caption{Training and inference cost (one L4 GPU)}
+\label{tab:res-cost}
+\centering
+\footnotesize
+\begin{tabular}{p{0.19\textwidth}p{0.11\textwidth}rrrrp{0.11\textwidth}}
+\toprule
+\raggedright \textbf{Run} & \raggedright \textbf{Data} & \raggedright \textbf{Train questions} & \raggedright \textbf{Train hours} & \raggedright \textbf{s/step} & \raggedright \textbf{VRAM} & \raggedright \textbf{Inference (s/question)} \tabularnewline
+\midrule
+\raggedright B1 · zero-shot & \raggedright both & \raggedright --- & \raggedright --- & \raggedright --- & \raggedright --- & \raggedright 0.876 / 0.510 \tabularnewline
+\raggedright C1 · QLoRA & \raggedright ViVQA & \raggedright 10,799 & \raggedright 3.03 & \raggedright 16.17 & \raggedright 6.62 GB & \raggedright 0.571 \tabularnewline
+\raggedright C3 · QLoRA (2 epochs) & \raggedright ViVQA & \raggedright 10,799 & \raggedright 6.07 & \raggedright 16.20 & \raggedright 6.62 GB & \raggedright 0.571 \tabularnewline
+\raggedright B2 · QLoRA & \raggedright ViTextVQA & \raggedright 35,159 & \raggedright 11.99 & \raggedright 19.63 & \raggedright 6.88 GB & \raggedright 1.001 \tabularnewline
+\raggedright B3-full · QLoRA + OCR & \raggedright ViTextVQA & \raggedright 35,159 & \raggedright 12.75 & \raggedright 20.89 & \raggedright 8.38 GB & \raggedright 0.996 \tabularnewline
+\raggedright SH · shared & \raggedright both & \raggedright 18,799 & \raggedright 6.07 & \raggedright 18.58 & \raggedright 8.15 GB & \raggedright 0.574 / 1.002 \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+In every main run, the number of trainable parameters is 7,372,800 (0.196\%) and the
+adapter weighs 29.5~MB; SH replaces two adapters with one. The OCR line increases training
+VRAM by about 1.5~GB and the time per step by 6--8\% because the prompt is longer, while
+inference time is almost unchanged. OCR runs once per image and is cached: about 0.72--0.85
+seconds per ViTextVQA image and 0.11 seconds per ViVQA image (little text) on a T4.
+
+%********************************** Section 6.7 ********************************
+\section{Sensitivity analysis: images with an EXIF rotation flag}
+\label{sec:res-exif}
+
+While testing the prototype, we found that some images had gibberish OCR text in the
+cache even though the image was clearly readable. The cause is images with an EXIF rotation
+flag: the text detection library (OpenCV) rotates the image according to the flag, while
+the library that crops the image for VietOCR (PIL) does not, so the text regions are
+detected on the rotated image but cropped from the unrotated one. Following a
+pre-registered rule, we confirmed that 164/165 images with a rotation flag give
+garbage OCR text, against 0/200 control images. The bug affects 1.256\% of the ViTextVQA
+test questions (126 questions on 41 images), 1.28\% of the training questions, and does not
+affect ViVQA.
+
+After the fix (rotating the image before detection and cropping) and re-running OCR on 167
+images, B3-full's EM on the 126 affected questions rises from 26.98 to 49.21, and on the
+full test set from 53.35 to 53.63; the margin over B2 grows from $+3.09$ to $+3.37$ EM points
+and $\Delta$ANLS from $+1.87$ to $+2.05$. Following the recorded rule, the official number of
+the thesis remains the pre-fix number (53.35); the post-fix number is reported as a
+sensitivity analysis. The conclusion does not change, and the bug, if anything, made the
+proposed method look worse rather than better.
+
+%********************************** Section 6.8 ********************************
+\section{Summary by hypothesis}
+\label{sec:res-hyp}
+
+Table~\ref{tab:res-hyp} checks the results against the decision rule of each hypothesis in
+Table~\ref{tab:hypotheses}. The evidence for H4 is presented in Section~\ref{sec:dis-halluc}.
+
+\begin{table}[htbp]
+\caption{Verdict for each hypothesis}
+\label{tab:res-hyp}
+\centering
+\small
+\begin{tabular}{p{0.07\textwidth}p{0.62\textwidth}p{0.17\textwidth}}
+\toprule
+\raggedright \textbf{ID} & \raggedright \textbf{Evidence} & \raggedright \textbf{Verdict} \tabularnewline
+\midrule
+\raggedright H1 & \raggedright QLoRA increases EM by 51.7 points (ViVQA, one epoch) and 21.1 points (ViTextVQA), $p$ close to 0; the threshold is 5 points. & \raggedright Supported \tabularnewline
+\raggedright H2 & \raggedright OCR training $\times$ inference interaction $+4.9$ EM; with full data B3-full is $+3.09$ EM above B2 ($p = 6.7\times10^{-21}$), stable across three seeds. But $\Delta$ANLS is only $+1.87$, below the 3-point threshold (above the 1-point rejection threshold). & \raggedright Partially supported \tabularnewline
+\raggedright H3 & \raggedright The form tested was a few-shot formatting prompt: EM decreased by 2.1 (ViVQA) and 1.2 (ViTextVQA). & \raggedright Not supported \tabularnewline
+\raggedright H4 & \raggedright POPE-vi: B3-full does not increase hallucination by F1; C3 is inconclusive because it does not answer in yes/no form; B3-full's false-alarm rate increases with adversarial sampling. & \raggedright Partially supported \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+As for the research questions: RQ1 is answered by B1 (22.09 and 29.12 EM; the errors are
+mainly format and language). RQ2 is answered by B2 and C3 (gains of 21.1 and 54.6 EM points
+with only 0.196\% of the parameters). RQ3 is answered by B3-full and the $2\times2$
+experiment: OCR helps, but only when the model is trained with OCR. RQ4 is discussed in
+Chapter~\ref{chap:discussion}.

@@ -1,0 +1,27 @@
+\documentclass[border=4pt]{standalone}
+\usepackage[T5,T1]{fontenc}
+\input{arch_common}
+\newcommand{\vi}[1]{{\fontencoding{T5}\selectfont #1}}
+\newcommand{\Ldet}{Yes/no detector\\ \scriptsize rule-based, \texttt{core.py}}
+\newcommand{\Lprompt}{Prompt builder\\ \scriptsize \texttt{builder.py}, shared with training and evaluation}
+\newcommand{\Lmodel}{Qwen2.5-VL-3B-Instruct\\ \scriptsize 4-bit NF4 + LoRA adapter SH (PEFT); greedy, or first-token margin vs.\ $\tau^*$}
+\newcommand{\Lconf}{Confidence level\\ \scriptsize High / Medium / Low}
+\newcommand{\Lprep}{Image preparation\\ \scriptsize original file, EXIF rotation,\\ \scriptsize $\le$\,6,000\,px}
+\newcommand{\Lcache}{OCR prefetch and cache\\ \scriptsize SHA-1 key, up to 32 images}
+\newcommand{\Lshow}{Presentation\\ \scriptsize answer, level,\\ \scriptsize numbered OCR boxes}
+\newcommand{\Lpdet}{PaddleOCR\\ \scriptsize text detection}
+\newcommand{\Lvrec}{VietOCR\\ \scriptsize text recognition}
+\newcommand{\Lmainp}{Main process (Python, PyTorch)}
+\newcommand{\Lbackend}{Backend \texttt{core.py}}
+\newcommand{\Lui}{Web interface \texttt{app.py} (Gradio)}
+\newcommand{\Locrp}{OCR process\\ \texttt{ocr\_worker.py}}
+\newcommand{\Luser}{User (web browser)}
+\newcommand{\Lart}{\textbf{Read-only artefacts}\\[2pt] SH adapter\\ (SHA-256 checked)\\[1pt] \texttt{qwen\_lora.yaml}\\[1pt] verified thresholds (W13 summary)}
+\newcommand{\Limage}{image}
+\newcommand{\Lquestion}{question}
+\newcommand{\Ljson}{JSON lines (stdin/stdout)}
+\newcommand{\Locrlines}{OCR lines}
+\newcommand{\Lanswer}{answer, level, OCR evidence}
+\begin{document}
+\input{arch_body}
+\end{document}

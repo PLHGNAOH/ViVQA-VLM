@@ -3,8 +3,8 @@
 %****************************** Chapter 3 **************************************
 %*******************************************************************************
 
-\chapter{DATA AND METHODS}
-\label{chap:methods}
+\chapter{RELATED WORK AND EXISTING SYSTEMS}
+\label{chap:related}
 
 \ifpdf
     \graphicspath{{Chapter3/Figs/Raster/}{Chapter3/Figs/PDF/}{Chapter3/Figs/}}
@@ -12,737 +12,302 @@
     \graphicspath{{Chapter3/Figs/Vector/}{Chapter3/Figs/}}
 \fi
 
-\nomenclature[z-ViT]{ViT}{Vision Transformer: a transformer image encoder that splits the image into patches}
-\nomenclature[z-MLP]{MLP}{Multi-Layer Perceptron: a multi-layer feed-forward neural network}
-\nomenclature[z-bf16]{bf16}{bfloat16: a 16-bit floating-point format with the same range as fp32}
-\nomenclature[z-EXIF]{EXIF}{Metadata stored with an image file, including a flag telling how the image should be rotated for display}
-\nomenclature[z-CI95]{CI95}{95\% confidence interval}
-\nomenclature[z-ECE]{ECE}{Expected Calibration Error: the gap between confidence and actual accuracy}
+\nomenclature[z-OCR-VQA]{Scene-text VQA}{VQA in which the answer must be read from the text in the image}
+\nomenclature[z-Q-Former]{Q-Former}{Querying Transformer: the image--language connector of BLIP-2}
 
-This chapter describes how the thesis answers the four research questions of
-Chapter~\ref{chap:intro}. Section~\ref{sec:met-overview} summarises the pipeline and
-the list of runs. Section~\ref{sec:met-data} presents the two datasets, the splits and
-the preprocessing. Section~\ref{sec:met-baseline} describes the base model
-Qwen2.5-VL-3B-Instruct and its reproduction. Section~\ref{sec:met-qlora} presents the
-adaptation with QLoRA, and Section~\ref{sec:met-ocr} presents the proposed
-improvement, OCR-aware QLoRA. Section~\ref{sec:met-eval} gives the evaluation protocol,
-Section~\ref{sec:met-setup} the experimental setup, and Section~\ref{sec:met-proto}
-the design of the web prototype.
+This chapter reviews the five groups of work the thesis builds on: VQA and scene-text
+VQA (Section~\ref{sec:rel-vqa}), vision-language models (Section~\ref{sec:rel-vlm}),
+parameter-efficient fine-tuning methods (Section~\ref{sec:rel-peft}), Vietnamese VQA
+research (Section~\ref{sec:rel-vivqa}) and hallucination measurement
+(Section~\ref{sec:rel-halluc}). Section~\ref{sec:rel-summary} summarises the gaps
+G1--G4 stated in Chapter~\ref{chap:intro} and shows which gaps the thesis addresses.
 
 %********************************** Section 3.1 ********************************
-\section{Pipeline overview}
-\label{sec:met-overview}
+\section{Visual question answering and scene-text VQA}
+\label{sec:rel-vqa}
 
-Every run goes through the same eight-step pipeline, divided into three stages:
+\subsection{The VQA task}
 
-\begin{description}
-  \item[A. Data preparation (run once, cached).] (1) download the original data,
-  (2) preprocess, (3) run OCR on the ViTextVQA images, (4) fix the splits.
-  \item[B. Training and inference (identical for every run).] (5) build the prompt,
-  (6) pass it through Qwen2.5-VL-3B-Instruct, with or without a LoRA adapter.
-  \item[C. Evaluation and deliverables.] (7) score and analyse errors, (8) package as a
-  web prototype.
-\end{description}
+Antol et al.~\cite{antol2015vqa} framed VQA as an open-ended task: given an image and
+a natural-language question, the system answers with a word or a short phrase. Their
+VQA dataset collects ten human answers per question and defines the VQA Accuracy
+metric: an answer is fully correct if at least three people gave the same answer,
+i.e.\
+\begin{equation}
+  \mathrm{Acc}(a) = \min\left(\frac{\#\{\text{humans who answered } a\}}{3},\ 1\right).
+  \label{eq:vqaacc}
+\end{equation}
+Systems of that period combined a CNN encoding the image with an LSTM encoding the question and
+then \emph{classified} the answer over a fixed set of frequent answers. This
+classification setting works well for short, recurring answers (colour, count,
+yes/no), but cannot produce an answer that never appeared in the answer set during
+training.
 
-The compared variants differ only in two ``switches'': whether the OCR line is added
-to the prompt (steps 3 and 5), and whether a LoRA adapter is trained (step 6). All
-other factors (split, seed, image resolution, data type, decoding, scoring function)
-are kept fixed, so that the measured differences are caused only by the switches.
-Figure~\ref{fig:met-pipeline} illustrates the pipeline, and Table~\ref{tab:met-runs}
-lists the runs referred to in the thesis.
+\subsection{Scene-text VQA}
 
-\begin{landscape}
-\begin{figure}[p]
-\centering
-\includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_pipeline.jpg}
-\caption[The eight-step pipeline]{The eight-step pipeline. Step 3 (OCR) runs only for ViTextVQA; the OCR line is
-cached and then added to the prompt in step 5. B1, B2 and B3 go through the same
-pipeline and differ only in steps 3 and 6.}
-\label{fig:met-pipeline}
-\end{figure}
-\end{landscape}
+Many real questions can only be answered by reading the text in the image: a shop
+name, a price, a phone number. Singh et al.~\cite{singh2019textvqa} introduced the
+TextVQA dataset for this type of question and showed that ordinary VQA models can
+hardly answer them; their LoRRA model adds OCR tokens to the model and allows it to
+\emph{copy} an OCR token as the answer. Biten et al.~\cite{biten2019stvqa} built the
+ST-VQA dataset with the same goal and proposed the ANLS metric (Average Normalized
+Levenshtein Similarity), a character-level similarity between the answer and the gold
+answer that does not heavily penalise small OCR reading errors. M4C~\cite{hu2020m4c}
+extends the copying idea with a multimodal transformer that generates the answer step
+by step, choosing at each step between a vocabulary word and an OCR token.
 
-\begin{table}[htbp]
-\caption{Main runs and their roles}
-\label{tab:met-runs}
-\centering
-\small
-\begin{tabular}{p{0.12\textwidth}p{0.34\textwidth}p{0.44\textwidth}}
-\toprule
-\raggedright \textbf{Name} & \raggedright \textbf{Configuration} & \raggedright \textbf{Role} \tabularnewline
-\midrule
-\raggedright R0 & \raggedright Qwen2.5-VL-3B, original paper configuration, bf16 & \raggedright Reproduce the published number on TextVQA val \tabularnewline
-\raggedright B1 & \raggedright Zero-shot, 4-bit, no OCR & \raggedright Baseline on Vietnamese data (RQ1) \tabularnewline
-\raggedright B2 & \raggedright QLoRA, full ViTextVQA train, no OCR & \raggedright Measures the effect of QLoRA (RQ2) \tabularnewline
-\raggedright C1 / C3 & \raggedright QLoRA on ViVQA, 1 / 2 epochs & \raggedright C3 is the official ViVQA model \tabularnewline
-\raggedright B2-sub & \raggedright QLoRA, 8,000-question ViTextVQA subset, no OCR & \raggedright Controlled reference for B3 \tabularnewline
-\raggedright B3 & \raggedright As B2-sub, with the OCR line in training and test & \raggedright Verifies OCR-aware QLoRA (RQ3) \tabularnewline
-\raggedright B3-full & \raggedright As B2, with the OCR line in training and test & \raggedright Proposed method; official ViTextVQA model \tabularnewline
-\raggedright A1 / A2 & \raggedright B3 recipe, different LoRA target layers / rank & \raggedright LoRA configuration ablations \tabularnewline
-\raggedright SH & \raggedright One adapter for both datasets & \raggedright Used by the prototype \tabularnewline
-\bottomrule
-\end{tabular}
-\end{table}
+The common lesson of this line of work is that, in scene-text VQA, the quality of the
+answer is bounded by the quality of the text that is read. If OCR misreads the text or
+sorts the text regions in the wrong order, the model cannot copy the correct answer.
+This is why the thesis measures the quality of Vietnamese OCR and the reading order
+separately (Chapter~\ref{chap:methods}).
 
 %********************************** Section 3.2 ********************************
-\section{Data}
-\label{sec:met-data}
+\section{Vision-language models}
+\label{sec:rel-vlm}
 
-\subsection{The two datasets}
+Current vision-language models (VLMs) share a common template: an image encoder turns
+the image into a sequence of vectors, a connector maps these vectors into the space of
+the language model, and a large language model (LLM) reads the image tokens together
+with the question to generate the answer. VLMs differ in the connector, in how they
+handle image resolution and in their training data. Table~\ref{tab:rel-vlm} compares
+the four VLMs that the project proposal allows as baselines.
 
-Table~\ref{tab:met-datasets} compares the two datasets. They differ in image source,
-question creation and answer form, so they place two different demands on the model.
+\paragraph{BLIP-2.} Li et al.~\cite{li2023blip2} keep both the image encoder and the
+LLM frozen and train only a small module in between, the Q-Former. The Q-Former uses a
+small number of learned queries to extract information from the image into a fixed
+sequence of tokens fed to the LLM. This is cheap to train, but the small, fixed number
+of image tokens makes it hard for the model to keep small details such as text in the
+image.
+
+\paragraph{LLaVA and LLaVA-1.5.} Liu et al.~\cite{liu2023llava} connect the image
+encoder to the LLM with a single projection layer and train on conversational data
+about images (visual instruction tuning). LLaVA-1.5~\cite{liu2024llava15} replaces the
+projection with an MLP, increases the image resolution and adds a prompt asking for
+short answers; this prompt alone is enough for the model to answer in the short style
+that VQA datasets require. LLaVA-1.5 also releases both a fully fine-tuned version and
+a LoRA version (Section~\ref{sec:rel-peft}).
+
+\paragraph{Florence-2.} Xiao et al.~\cite{xiao2024florence2} build a unified
+encoder--decoder vision model that takes text prompts and produces results for
+captioning, object detection, grounding and OCR. The model is small (0.23 and
+0.77 billion parameters), so it is easy to train, but it is not a multilingual
+conversational model and was not trained for open-ended question answering in
+Vietnamese.
+
+\paragraph{Qwen2.5-VL.} Bai et al.~\cite{bai2025qwen25vl} use a ViT encoder that takes
+images at their native resolution (native dynamic resolution): the image is cut into
+14×14-pixel patches, and the connector merges each group of 2×2 patches into one token,
+so the number of image tokens is proportional to the image size. The language model is
+the multilingual Qwen2.5, and the model is trained extensively on documents and text in
+images; the 3-billion-parameter version reaches 79.3 on TextVQA according to the
+authors. The thesis chooses Qwen2.5-VL-3B-Instruct as the baseline; the detailed
+architecture and the reasons for the choice are presented in Chapter~\ref{chap:methods}.
 
 \begin{table}[htbp]
-\caption{The two datasets used in the thesis}
-\label{tab:met-datasets}
+\caption{Comparison of the four VLMs within the scope of the proposal}
+\label{tab:rel-vlm}
 \centering
 \small
-\begin{tabular}{p{0.17\textwidth}p{0.37\textwidth}p{0.37\textwidth}}
+\begin{tabular}{p{0.13\textwidth}p{0.25\textwidth}p{0.24\textwidth}p{0.26\textwidth}}
 \toprule
-\raggedright & \textbf{ViVQA}~\cite{tran2021vivqa} & \raggedright \textbf{ViTextVQA}~\cite{nguyen2024vitextvqa} \tabularnewline
+\textbf{Model} & \textbf{Image--language connector} & \textbf{Strengths for this project} & \textbf{Weaknesses for this project} \\
 \midrule
-\raggedright Size & \raggedright 15,000 questions, 10,328 images & \raggedright 50,342 questions, 16,762 images \tabularnewline
-Image source & Randomly drawn from MS COCO~\cite{lin2014coco}; everyday images with almost no text &
-Collected from the Internet and photos taken in Vietnam; every image contains Vietnamese text \\
-Question creation & Semi-automatic: COCO-QA~\cite{ren2015cocoqa} question--answer pairs machine-translated into Vietnamese, then checked by people &
-Manually annotated by 16 native speakers; cross-check F1 above 85\% \\
-Question types & 4 types inherited from COCO-QA: object, number, colour, location; no yes/no questions &
-Questions about the text in the image: names, places, products, contact numbers\ldots; no type labels \\
-\raggedright Answers & \raggedright Very short: 99.83\% have at most 3 words & \raggedright Phrases copied from the image, 4.18 words on average \tabularnewline
-\raggedright Suitable metrics & \raggedright EM, VQA-Acc & \raggedright EM, ANLS \tabularnewline
+BLIP-2 & Q-Former, fixed number of image tokens; image encoder and LLM frozen & Cheap to train; basis of ViTextBLIP-2 & Few image tokens, easily loses small text details \\
+LLaVA-1.5 & MLP projecting each patch into the LLM & Simple architecture; evidence that LoRA matches full fine-tuning & Mainly English; fixed image resolution \\
+Florence-2 & Unified encoder--decoder with text prompts & Very small; has a dedicated OCR task & Not a multilingual conversational model \\
+Qwen2.5-VL & Native-resolution ViT, 2×2 patches merged into one token & Multilingual; reads text in images well; has a 3B version & Number of image tokens grows with image size, memory-hungry \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\subsection{Splits}
-\label{sec:met-split}
-
-\paragraph{ViVQA.} The original release has only two files, \texttt{train.csv} and
-\texttt{test.csv}. We shuffle the training set with seed 42 and hold out 10\%
-as a validation set, giving 10,799 training and 1,200 validation questions; the test set
-of 3,001 questions is unchanged. Holding out a validation set is our decision,
-not the dataset authors'.
-
-\paragraph{ViTextVQA.} We use the authors' official split (7:1:2): 35,159
-training questions on 11,733 images, 5,155 dev questions on 1,676 images and 10,028
-test questions on 3,353 images. The training and dev sets share no image with the test
-set.
-
-\paragraph{Fixed subsets.} To run experiments quickly while keeping them comparable, we create additional subsets, each drawn once with seed 42 and stored as a list of
-question IDs:
-\begin{itemize}
-  \item \textbf{dev300}: 300 ViTextVQA dev questions, used to choose configurations
-  (resolution, data type, OCR configuration);
-  \item \textbf{test2000}: 2,000 ViTextVQA test questions, used for ablations that need
-  many runs;
-  \item \textbf{train8k}: 8,000 ViTextVQA training questions on 2,670 images, used for
-  B2-sub, B3 and the ablations;
-  \item ViVQA \textbf{clean val}: 688 validation questions whose images do not appear in
-  training, used to choose the number of epochs;
-  \item ViVQA \textbf{clean test}: 1,219 test questions whose images do not appear in
-  training, used to check for leakage.
-\end{itemize}
-
-General rule: every configuration choice is made on dev or val, never on test. The test
-sets are used only for reporting.
-
-\subsection{Preprocessing: from raw files to clean records}
-\label{sec:met-prep}
-
-\paragraph{ViVQA.} The preparation script downloads the two CSV files from the authors'
-repository, drops the index column, decodes the question-type column (0--3 into object,
-number, colour, location), normalises questions and answers to Unicode NFC and strips
-leading and trailing whitespace. Images are downloaded from MS COCO 2014 by image ID;
-records with broken images are removed.
-
-\paragraph{ViTextVQA.} The data is downloaded from the official Hugging Face repository
-(the terms must be accepted; licence CC BY-NC 3.0). The COCO-style annotation file (a
-list of images and a list of annotations) is flattened into one row per question. The
-script automatically checks the number of questions in each split, that question IDs
-are unique and that no answer is empty. This check matters because the repository
-contains a file \path{ViTextVQA_test.json} that is a Kaggle submission template in which
-every answer is a placeholder string; the real answers are in
-\path{ViTextVQA_test_gt.json}. Using the template by mistake would give meaningless
-scores without any error. The SHA-256 hashes of the original files are recorded in the
-preparation report to lock the data version.
-
-\paragraph{Standard record.} Both datasets are converted to the same record format with
-\texttt{question\_id}, \texttt{question}, \texttt{answers} (always a list),
-\texttt{image\_path} and \texttt{question\_type}. Before training, samples with an empty
-answer or a missing image are removed. We do not edit the questions or answers,
-augment the data or add training data from external sources.
-
-At this step the text is only normalised to Unicode NFC and stripped of extra
-whitespace. Lowercasing, punctuation removal and the other normalisation steps are
-applied only at scoring time (Section~\ref{sec:met-norm}), so that the model learns to
-generate the original answers.
-
-\subsection{Data quality}
-\label{sec:met-quality}
-
-Before training, we measured the problems already present in the original data.
-These problems are recorded and reported, not fixed in the data:
-
-\begin{itemize}
-  \item \textbf{Wrong or noisy gold answers.} A manual review of 200 B2 errors shows that
-  12.5\% are due to a wrong gold answer (19\% on ViVQA), mostly in hard-to-understand
-  machine-translated ViVQA questions.
-  \item \textbf{Images shared between ViVQA train and test.} About 46\% of the test
-  questions use images that are also in the training set (49\% including val). This is
-  why we create the clean val and clean test sets of
-  Section~\ref{sec:met-split}.
-  \item \textbf{ViVQA has no yes/no questions.} There is no ``\vi{có}'' (``yes'') answer in
-  the training set, so a model trained only on ViVQA may forget how to answer yes/no
-  questions (checked in Chapter~\ref{chap:discussion}).
-  \item \textbf{ViTextVQA gold answers with spaced punctuation}, e.g.\ ``0983 . 651 888''
-  (25.7\% of the answers). The scoring normalisation handles this symmetrically for both
-  the gold answers and the predictions.
-  \item \textbf{Images with an EXIF rotation flag.} A small number of ViTextVQA images
-  carry a rotation flag; their effect on OCR is analysed in Section~\ref{sec:res-exif}.
-  \item \textbf{ViTextVQA has no question-type labels.} We build a keyword-based
-  rule classifier with 9 types (called \texttt{qt-v1}), written only from dev300 and
-  frozen before running on test; on 150 blindly labelled questions it reaches 80.7\%
-  accuracy.
-\end{itemize}
 
 %********************************** Section 3.3 ********************************
-\section{The base model Qwen2.5-VL-3B-Instruct}
-\label{sec:met-baseline}
+\section{Parameter-efficient fine-tuning}
+\label{sec:rel-peft}
 
-\subsection{Why this model}
+\subsection{Why PEFT is needed}
 
-The project proposal allows one of three baselines: BLIP-2, Florence-2 or Qwen2.5-VL. We choose Qwen2.5-VL-3B-Instruct~\cite{bai2025qwen25vl} for four reasons: it is
-multilingual, including Vietnamese; it reads text in images well (79.3 on TextVQA val
-according to the original report); with 3 billion parameters it is small enough to be
-quantised to 4 bits and trained on one Colab GPU; and it generates free-form answers,
-which suits the phrase-style answers of ViTextVQA. The other VLMs are used only as
-zero-shot references.
+Fully fine-tuning a large model for each task means updating and storing a copy of
+every parameter. For the 175-billion-parameter GPT-3, each copy takes about 350~GB in
+16 bits, and training also has to keep gradients and optimiser
+states~\cite{hu2022lora}. Parameter-efficient fine-tuning (PEFT) keeps the original
+weights frozen and trains only a small number of added parameters. Early
+approaches include adapters~\cite{houlsby2019adapter}, which insert small layers between
+the layers of the network, and prefix-tuning~\cite{li2021prefix}, which learns a
+sequence of vectors placed before the input. Adapters add inference latency because
+they add sequential layers; prefix-tuning takes up part of the sequence length and is
+hard to optimise.
 
-\subsection{Architecture}
+\subsection{LoRA}
 
-Qwen2.5-VL-3B-Instruct has three blocks:
+Hu et al.~\cite{hu2022lora} assume that the change in the weights during adaptation
+has a low rank. For a weight matrix $W_0 \in \mathbb{R}^{d \times k}$, LoRA keeps $W_0$
+fixed and learns two small matrices $B \in \mathbb{R}^{d \times r}$ and
+$A \in \mathbb{R}^{r \times k}$ with $r \ll \min(d, k)$:
+\begin{equation}
+  h = W_0 x + \frac{\alpha}{r} B A x .
+  \label{eq:lora}
+\end{equation}
+$B$ is initialised to zero, so at the start the model keeps its original behaviour.
+After training, $BA$ can be added directly to $W_0$, so inference is not slower. On
+GPT-3, LoRA matches or exceeds full fine-tuning with about 10,000 times fewer trainable
+parameters and about 3 times less GPU memory.
 
-\begin{enumerate}
-  \item A \textbf{vision encoder}, a ViT~\cite{dosovitskiy2021vit} with 32 layers and
-  width 1,280. The image is cut into 14$\times$14-pixel patches. Most layers use window
-  attention, where each patch attends only within a 112$\times$112-pixel window to
-  reduce cost; four layers (the 7th, 15th, 23rd and 31st) use full attention over the
-  whole image.
-  \item An \textbf{MLP merger} that merges 2$\times$2 adjacent patches into one token and
-  projects it into the 2,048-dimensional space of the language model. Each image token
-  therefore corresponds to a 28$\times$28-pixel region.
-  \item The \textbf{Qwen2.5 language model}, with 36 decoder layers of width 2,048, using
-  grouped-query attention with 16 query heads and 2 key--value heads of 128 dimensions
-  each. The model reads the image tokens together with the text tokens and generates the
-  answer one token at a time.
-\end{enumerate}
+\subsection{QLoRA}
 
-Figure~\ref{fig:met-arch} shows the path of the data through these three blocks and
-where the LoRA adapter is attached (Section~\ref{sec:met-qlora}).
+LoRA reduces the number of parameters to learn but still has to keep the original
+weights in 16 bits in memory. Dettmers et al.~\cite{dettmers2023qlora} quantise the
+original weights to 4 bits and train LoRA on top, with three techniques: the 4-bit
+NormalFloat (NF4) data type, designed for weights with a near-normal distribution;
+double quantisation, which also compresses the quantisation constants; and paged
+optimisers, which avoid running out of memory during consumption peaks. As a result,
+a 65-billion-parameter LLM can be fine-tuned on one 48~GB GPU, while the results match
+16-bit fine-tuning in the authors' experiments. The paper also recommends attaching LoRA
+to every linear layer to compensate for the quantisation error. The thesis uses QLoRA
+because it is the only way to fine-tune a VLM with several billion parameters on one
+Colab GPU; the choice between attaching LoRA only to the attention matrices or to every
+linear layer is tested with an ablation in Chapter~\ref{chap:results}.
 
-\begin{landscape}
-\begin{figure}[p]
-\centering
-\includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_architecture.jpg}
-\caption[Qwen2.5-VL-3B-Instruct + LoRA as used in this thesis]{Qwen2.5-VL-3B-Instruct + LoRA as used in this thesis. Vision
-branch (frozen): the image is cut into $14\times14$ patches, passes through 32 ViT blocks
-and the patch merger, and becomes 256--512 image tokens. Text branch (frozen): the
-tokenizer turns the Vietnamese question (plus the OCR line in B3) into text tokens. The
-LLM decoder (36 blocks, 4-bit NF4, frozen) reads the combined sequence and generates the
-answer greedily. LoRA ($r=16$ on q, k, v, o; 7.37\,M parameters, 0.196\%) is the only
-trained part. Values from the model configuration; diagram redrawn after Fig.~1 of the
-technical report by Bai et al.~\cite{bai2025qwen25vl}.}
-\label{fig:met-arch}
-\end{figure}
-\end{landscape}
+\subsection{PEFT for vision-language models}
 
-\subsection{Image preprocessing}
-\label{sec:met-image}
-
-The image is opened and converted to RGB, then resized by the Qwen2.5-VL image processor
-while keeping its aspect ratio (native resolution): each side is rounded to a multiple
-of 28 and the total number of pixels is forced into the range $[200{,}704;\ 401{,}408]$,
-i.e.\ 256 to 512 image tokens. Large images are downscaled and small images are
-upscaled. The pixel values are then normalised with the mean and standard deviation of
-the image encoder. Two examples:
-
-\begin{itemize}
-  \item A 640$\times$360-pixel ViVQA image is within the allowed range; its sides are
-  only rounded to 644$\times$364, i.e.\ a 23$\times$13 grid = 299 image tokens.
-  \item A 1,024$\times$996-pixel ViTextVQA image exceeds the cap and is downscaled to
-  616$\times$616, i.e.\ a 22$\times$22 grid = 484 image tokens.
-\end{itemize}
-
-On the test sets, ViVQA images have a median of 345 tokens (maximum 506; only 1.5\% of
-the images reach the cap), while ViTextVQA images have a median of 480 tokens and 57.7\%
-reach the 512 cap. Figure~\ref{fig:met-image} illustrates the steps and the two examples
-above.
-
-\begin{landscape}
-\begin{figure}[p]
-\centering
-\includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_image_tokens.jpg}
-\caption[Image preprocessing: from the image file to image tokens]{Image preprocessing: from the image file to the grid of image tokens, with a
-ViVQA example (sides only rounded) and a ViTextVQA example (downscaled because it exceeds
-the 512-token cap). The grid drawn on the ViTextVQA image is only illustrative.}
-\label{fig:met-image}
-\end{figure}
-\end{landscape}
-
-\paragraph{Why a 512-token cap.} We set the rule before measuring: choose 1,280
-tokens if the training time increases by no more than 1.5 times.
-Table~\ref{tab:met-res} shows that 1,280 tokens increase the training time of one
-ViTextVQA epoch by 1.91 times, so we chose 512 tokens. The lost resolution, which
-matters for the small tone marks of Vietnamese text, is compensated by the OCR line read
-from the original image (Section~\ref{sec:met-ocr}).
+Sung et al.~\cite{sung2022vladapter} compare PEFT methods in a controlled way on
+image--language tasks, including VQA, and show that a shared adapter with only 4.18\%
+trainable parameters comes close to full fine-tuning. LLaVA-1.5 gives similar evidence
+at a larger scale: with the 13-billion-parameter model, the LoRA version reaches 80.0 on
+VQAv2 (the same as full fine-tuning), 60.2 against 61.3 on TextVQA, and 86.7 against
+85.9 F1 on POPE~\cite{liu2024llava15}. Table~\ref{tab:rel-peft} summarises the
+adaptation methods.
 
 \begin{table}[htbp]
-\caption{Comparison of 512 and 1,280 image tokens on ViTextVQA}
-\label{tab:met-res}
+\caption{Ways to adapt a large model}
+\label{tab:rel-peft}
 \centering
 \small
-\begin{tabular}{p{0.36\textwidth}rrp{0.24\textwidth}}
+\begin{tabular}{p{0.20\textwidth}p{0.22\textwidth}p{0.20\textwidth}p{0.26\textwidth}}
 \toprule
-\textbf{Measure} & \textbf{512} & \textbf{1,280} & \textbf{Difference} \\
+\textbf{Method} & \textbf{Trainable parameters} & \textbf{Inference latency} & \textbf{Training memory} \\
 \midrule
-Zero-shot EM (dev300) & 33.3 & 36.0 & +2.7; $p = 0.13$ \\
-Zero-shot ANLS (dev300) & 46.5 & 50.4 & +3.9 [+1.2; +6.6] \\
-Training time, 1 epoch (L4, hours) & 11.1 & 21.2 & $\times$1.91 \\
-Training VRAM (GB) & 6.71 & 10.84 & +62\% \\
-Inference (seconds/question) & 2.61 & 3.81 & $\times$1.46 \\
+Full fine-tuning & All & Unchanged & Very large: weights, gradients, optimiser states \\
+Adapter & A few percent & Higher (extra layers) & Keeps 16-bit weights \\
+Prefix-tuning & Very few & Slightly higher (longer sequence) & Keeps 16-bit weights \\
+LoRA & Below 1\% & Unchanged after merging & Keeps 16-bit weights \\
+QLoRA & Below 1\% & Unchanged after merging & 4-bit weights; the smallest \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Data type and quantisation}
-\label{sec:met-dtype}
-
-The initial baseline ran in fp16 on a T4 GPU and produced 23 degenerate answers (strings
-of ``!'' exactly 32 tokens long). We diagnosed an overflow: fp16 can only represent
-values up to 65,504, the logits became infinite and the argmax fell back to token 0,
-which is ``!''. A one-variable experiment on 73 questions (the 23 broken ones and 50
-controls) confirmed it: fp16 broke 23/73 questions, while fp32 and bf16 broke none, with
-fp32 being 1.71 times slower than bf16. Because the L4 GPU supports bf16 and the T4 does
-not, every official run uses bf16 on the L4.
-
-The base model weights are quantised to 4-bit NF4 with double
-quantisation~\cite{dettmers2023qlora}. This reduces inference VRAM from 10.9~GB to
-2.5~GB and keeps 94.5\% of the accuracy on TextVQA val (Section~\ref{sec:res-repro}).
-
-\subsection{Reproducing the baseline}
-
-The Qwen2.5-VL paper does not report results on ViVQA or ViTextVQA. We therefore
-reproduce it in two steps. Step one (R0) runs the model with the paper's original
-configuration on all 5,000 TextVQA val questions, where a published number exists, to
-check that our inference pipeline is correct. Step two (B1) runs the same model
-zero-shot with our economical configuration (4 bits, at most 512 image tokens) on
-ViVQA and ViTextVQA, to produce the reference number for every improvement. The results
-of both steps are in Section~\ref{sec:res-repro}.
+However, all of this evidence comes from English. Among the works we reviewed,
+none verifies LoRA or QLoRA on a VLM for Vietnamese VQA or for Vietnamese scene-text
+VQA. This is gap G3, on which the thesis focuses.
 
 %********************************** Section 3.4 ********************************
-\section{Adaptation with QLoRA}
-\label{sec:met-qlora}
+\section{Vietnamese VQA}
+\label{sec:rel-vivqa}
 
-\subsection{Adapter configuration}
+\subsection{Datasets}
 
-Following LoRA~\cite{hu2022lora}, each selected linear layer
-receives two additional low-rank matrices $BA$ as in~\eqref{eq:lora}; only $A$ and $B$ are trained. We
-attach the adapter to the four attention projections \texttt{q\_proj},
-\texttt{k\_proj}, \texttt{v\_proj} and \texttt{o\_proj} of the 36 decoder layers, with
-rank $r = 16$, $\alpha = 32$ and dropout 0.05. The base model is quantised to 4-bit NF4
-and fully frozen. Table~\ref{tab:met-params} checks the number of trainable parameters
-by hand.
+\paragraph{ViVQA.} Tran et al.~\cite{tran2021vivqa} released the first Vietnamese VQA
+dataset, with 10,328 images and 15,000 question--answer pairs. The answers are short,
+mostly one to three words, so the task is usually framed as classification.
+
+\paragraph{OpenViVQA.} Nguyen et al.~\cite{nguyen2023openvivqa} built a dataset with
+open-ended, longer answers that must be generated rather than chosen from a fixed set;
+about half of the samples involve text in the image~\cite{nguyen2024vitextvqa}.
+
+\paragraph{ViTextVQA.} Nguyen et al.~\cite{nguyen2024vitextvqa} released the first
+large-scale Vietnamese scene-text VQA dataset, with 16,762 images and 50,342 questions,
+split into train, dev and test in a 7:1:2 ratio. The answers are usually text copied
+from the image, such as shop names, slogans or prices. Humans reach 88.00 EM and 96.42
+F1 on this dataset. The authors also show that sorting the OCR text from left to right
+and from top to bottom helps the models answer better. The thesis uses ViVQA and
+ViTextVQA; detailed statistics are presented in Chapter~\ref{chap:methods}.
+
+\subsection{Methods}
+
+Table~\ref{tab:rel-vivqa} summarises representative methods over time.
 
 \begin{table}[htbp]
-\caption{Number of LoRA parameters per projection ($r = 16$)}
-\label{tab:met-params}
+\caption{Representative Vietnamese VQA studies}
+\label{tab:rel-vivqa}
 \centering
 \small
-\begin{tabular}{lcr}
+\begin{tabular}{p{0.21\textwidth}p{0.33\textwidth}p{0.16\textwidth}p{0.20\textwidth}}
 \toprule
-\textbf{Projection} & \textbf{Shape (in $\to$ out)} & \textbf{Parameters $= r(d_{in}+d_{out})$} \\
+\textbf{Study} & \textbf{Approach} & \textbf{Published result} & \textbf{Limitation} \\
 \midrule
-\texttt{q\_proj} & 2,048 $\to$ 2,048 & 65,536 \\
-\texttt{k\_proj} & 2,048 $\to$ 256 & 36,864 \\
-\texttt{v\_proj} & 2,048 $\to$ 256 & 36,864 \\
-\texttt{o\_proj} & 2,048 $\to$ 2,048 & 65,536 \\
-\midrule
-Per decoder layer & & 204,800 \\
-$\times$ 36 layers & & \textbf{7,372,800} \\
+ViVQA~\cite{tran2021vivqa}, 2021 & LSTM, Bi-LSTM with several word embeddings; Hierarchical Co-Attention; answer chosen from a fixed set & Acc 34.96 on ViVQA & Hand-crafted features; cannot read text \\
+Bi-directional Cross-Attention~\cite{nguyentran2022bica}, 2022 & Pre-trained encoders, bidirectional cross-attention between image and question & Beats the ViVQA baseline & Still a classification task \\
+PAT~\cite{nguyen2023pat}, 2023 & Parallel Attention Transformer, hierarchical question features & Acc 60.55 on ViVQA & Classification; does not read text \\
+BARTPhoBEiT~\cite{tran2023bartphobeit}, 2023 & BARTpho for Vietnamese combined with a BEiT-style image encoder & Acc 68.58 on ViVQA & Classification; does not read text \\
+AViVQA-TranConI~\cite{nguyen2024tranconi}, 2024 & BLIP-2 (global features) and EfficientNet (local features), BARTpho, fused with BEiT-3; classification over 353 answers & Acc 71.04 on ViVQA & Cannot generate new answers; no OCR \\
+ViTextBLIP-2~\cite{nguyen2024vitextvqa}, 2026 & SwinTextSpotter reads the text, a Q-Former connects image and OCR text, a frozen ViT5 generates the answer & EM 25.48; F1 53.95 on ViTextVQA & Depends on external OCR; far from humans (88.00 EM) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The total of 7,372,800 parameters is 0.196\% of the model's 3.76 billion parameters and
-matches the number reported by the PEFT library. The match also shows that the adapter
-lives only in the language model: the vision encoder and the MLP merger are not touched.
-We additionally check the list of layers with LoRA recorded in the training log.
-The adapter is saved as a 29.5~MB file.
+These studies follow a clear path: from hand-crafted features with attention (2021), to
+pre-trained encoders and multimodal fusion modules (2022--2024), to a generative model
+based on BLIP-2 for data with text (2025). Two problems recur. First, most works on
+ViVQA treat VQA as classification over a fixed answer set, so they cannot produce
+answers unseen during training, which is mandatory for questions that require reading.
+Second, reading Vietnamese text with diacritics in images remains a weak point:
+ViTextBLIP-2 relies on an external OCR system kept fixed during training, so the OCR's
+reading errors pass straight into the answer.
 
-\subsection{Training labels and label masking}
-\label{sec:met-labels}
-
-Each training sample is a sequence in Qwen's chat template: a fixed system prompt, the
-image, the text part of the prompt (Section~\ref{sec:met-prompt}), and then the answer.
-The system prompt is ``\vi{Bạn là trợ lý hỏi đáp hình ảnh tiếng Việt. Hãy trả lời thật
-NGẮN GỌN và CHÍNH XÁC bằng tiếng Việt, chỉ đưa ra đáp án, không giải thích dài dòng.}''
-(``You are a Vietnamese visual question answering assistant. Answer VERY BRIEFLY and
-ACCURATELY in Vietnamese, give only the answer, without long explanations.''). The label
-is the first answer in the gold list, with whitespace collapsed and the letters and
-diacritics kept as they are, followed by the end-of-turn token \texttt{<|im\_end|>} so
-that the model learns when to stop.
-
-All tokens of the system prompt, the image and the question are labelled $-100$, so they
-are ignored in the loss. Let $\mathcal{A}$ be the set of positions of the answer tokens;
-the loss is
-\begin{equation}
-\mathcal{L} = -\frac{1}{|\mathcal{A}|}\sum_{t \in \mathcal{A}} \log p_\theta\left(y_t \mid y_{<t},\, I,\, x\right),
-\label{eq:loss}
-\end{equation}
-where $I$ is the image, $x$ the text part of the prompt and $\theta$ contains only the
-LoRA parameters. Without masking, most of the learning signal would go into regenerating
-the more than 500 image and question tokens, while the answer has only a few tokens.
-Because the number of image tokens depends on the image size, the prompt length is
-measured separately for each sample by running the processor on exactly that prompt and
-that image; sequences are right-padded so that the prompt is always at the start of the
-sequence.
-
-A single prompt-building function is used for both training and evaluation. As a result,
-the training prompt is identical to the evaluation prompt, which avoids a distribution
-shift between the two stages.
-
-\subsection{Hyperparameters}
-
-Table~\ref{tab:met-hparams} lists the hyperparameters shared by all training runs. Only
-the official ViVQA model (C3) uses a two-epoch schedule and takes the adapter after the
-second epoch; the number of epochs is chosen on the clean val set
-(Section~\ref{sec:res-qlora}).
-
-\begin{table}[htbp]
-\caption{Training hyperparameters}
-\label{tab:met-hparams}
-\centering
-\small
-\begin{tabular}{p{0.30\textwidth}p{0.58\textwidth}}
-\toprule
-\textbf{Parameter} & \textbf{Value} \\
-\midrule
-LoRA & $r = 16$, $\alpha = 32$, dropout 0.05, on q, k, v, o of the LLM \\
-Quantisation & 4-bit NF4, double quantisation, bf16 compute \\
-Learning rate & $2\times10^{-4}$, warmup 3\% of the steps, weight decay 0 \\
-Batch & 2 samples $\times$ gradient accumulation 8 = effective batch 16 \\
-Gradient checkpointing & On \\
-Epochs & 1 (C3: 2, chosen on clean val) \\
-Images & 256--512 tokens (min\_pixels 200,704, max\_pixels 401,408) \\
-Inference & Greedy, at most 32 generated tokens \\
-Seed & 42 (stability checked with 42, 43, 44) \\
-\bottomrule
-\end{tabular}
-\end{table}
+A caution about comparisons: the Accuracy of the classification methods on ViVQA is
+computed over a fixed answer set, which is not the same scoring as the EM of the
+free-generation model used in this thesis. The ViVQA numbers in
+Table~\ref{tab:rel-vivqa} are therefore for reference only. On ViTextVQA, the thesis
+compares directly with ViTextBLIP-2 because both use the same test set and the same EM
+and F1 metrics (Chapter~\ref{chap:results}).
 
 %********************************** Section 3.5 ********************************
-\section{Proposed method: OCR-aware QLoRA}
-\label{sec:met-ocr}
+\section{Hallucination and how to measure it}
+\label{sec:rel-halluc}
 
-\subsection{Motivation}
+Hallucination in VLMs is the phenomenon in which the model generates fluent content
+that is not in the image, for example mentioning an object that does not appear.
+Rohrbach et al.~\cite{rohrbach2018chair} measure it on image captioning with the CHAIR
+metric, which counts the share of mentioned objects that are not in the image labels.
+This measure depends on extracting object names from the sentence and on the sentence
+length.
 
-A manual review of 200 B2 errors shows that the real errors on ViTextVQA are mainly
-reading errors: misread text accounts for 28\%, the wrong text region for 23\% and wrong
-tone marks for 8\% of the errors. These are exactly problems V1 (tone marks) and V3 (text
-order) of Chapter~\ref{chap:intro}. At 512 image tokens, ViTextVQA images are downscaled,
-so the small diacritic strokes are easily lost. An OCR system reading the image at its
-original resolution can provide this information again, as text.
-
-However, adding OCR to the prompt of a model that has never seen OCR is not enough. On
-dev300, adding the OCR line at inference changes 167/300 of B1's answers but fixes only
-16 and breaks 16: the model uses the OCR indiscriminately. We therefore propose to
-add the OCR line to the prompt \emph{already during} QLoRA training, so that the adapter
-learns when to trust and copy from the OCR and when to ignore it. We call this
-method OCR-aware QLoRA.
-
-\subsection{The OCR pipeline}
-\label{sec:met-ocrpipe}
-
-OCR runs once on the original images; the results are cached and every training and
-evaluation run only looks them up. This guarantees that all variants with OCR use exactly
-the same OCR text. The OCR pipeline has six steps:
-
-\begin{enumerate}
-  \item \textbf{Fix the image orientation} according to the EXIF flag before reading
-  (added after the bug was found, Section~\ref{sec:res-exif}).
-  \item \textbf{Detect text regions} with the PaddleOCR~\cite{du2020ppocr} detection
-  model.
-  \item \textbf{Read the text} of each region with VietOCR~\cite{vietocr} (a
-  VGG--transformer architecture), a model trained for Vietnamese text with diacritics.
-  \item \textbf{Sort in reading order}: boxes whose vertical centres differ by less than
-  half the median height are grouped into the same line; lines are sorted from top to
-  bottom, and boxes within a line from left to right. The ViTextVQA authors showed that
-  top-left to bottom-right order is helpful~\cite{nguyen2024vitextvqa}.
-  \item \textbf{Cache}: for each image, store the text, confidence and box coordinates
-  of every line; the cache is locked by a SHA-256 hash. Storing the coordinates makes it
-  possible to analyse ``wrong text region'' errors without re-running OCR.
-  \item \textbf{Build the OCR line}: the lines are joined with ``\textbar'', cut at 600
-  characters and prefixed with ``\vi{Văn bản đọc được trong ảnh:}'' (``Text read in the
-  image:'').
-\end{enumerate}
-
-The cache covers 15,352 ViTextVQA images (all of train, test and dev300). Images from
-which no text is read get no OCR line, and their prompt is identical to the prompt
-without OCR. Figure~\ref{fig:met-ocr} illustrates the six steps on a real image.
-
-\begin{landscape}
-\begin{figure}[p]
-\centering
-\includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{met_ocr.jpg}
-\caption[The OCR pipeline on ViTextVQA image 16267.jpg]{The OCR pipeline on ViTextVQA image 16267.jpg: 13 text boxes are detected, read
-and joined into the OCR line. The OCR text is still noisy (``\vi{SÓ}'', ``\vi{MIẾN}''
-instead of ``\vi{SỐ}'', ``\vi{MIỀN}''), while the gold answer is ``\vi{đại lý xổ số miền
-bắc}'' (``northern lottery agency'').}
-\label{fig:met-ocr}
-\end{figure}
-\end{landscape}
-
-\subsection{Choosing the OCR configuration}
-
-The OCR configuration was chosen on dev300 according to pre-set rules, without looking at
-the test set. The main criterion is the share of questions whose gold answer appears
-verbatim, with the correct diacritics, in the OCR text. PaddleOCR with the Latin
-recognition model drops Vietnamese diacritics (e.g.\ ``\vi{Kiểu Thẩm}'' becomes ``Kiu
-Thm''): the answer is in the OCR for 27.0\% of the questions when compared with
-diacritics, but for 57.7\% when the diacritics are removed before comparing. Keeping the
-PaddleOCR detector and replacing the recogniser with VietOCR raises the
-diacritic-preserving rate to 37.7\% (McNemar test $p = 0.0008$). We chose PaddleOCR
-detection with VietOCR recognition, a neutral prefix template, a 600-character cut and no
-confidence filtering.
-
-\subsection{Prompt}
-\label{sec:met-prompt}
-
-The text part of the prompt has two forms that differ by exactly one line:
-
-\begin{itemize}
-  \item Without OCR (B1, B2, C1, C3): ``\vi{Câu hỏi:} \{question\}'' (``Question:
-  \{question\}'')
-  \item With OCR (B3, B3-full, SH): ``\vi{Văn bản đọc được trong ảnh:} \{line 1\}
-  \textbar\ \{line 2\} \textbar\ \ldots'', a line break, then ``\vi{Câu hỏi:}
-  \{question\}''
-\end{itemize}
-
-The OCR line is placed before the question so that the model reads it as context. For a
-typical ViTextVQA sample, the input sequence has about 62 tokens of system prompt and chat
-template, 480 image tokens, 76 OCR tokens and 11 question tokens (medians over the whole
-set). The longest sequence in the whole data is 1,058 tokens, only 0.83\% of the model's
-128,000-token context window; the practical limits are VRAM and training time, not the
-context length.
-
-\subsection{Training B3 and B3-full}
-
-B3 uses exactly the B2 recipe (the same hyperparameters and the same 0.196\% of
-parameters), adding only the OCR line to the prompt both in training and in evaluation.
-We verify it in two steps. Step one trains on train8k and compares with B2-sub,
-the same subset without OCR; this is a controlled test that is cheap and can be repeated
-with several seeds. Step two (B3-full) trains on all 35,159 training questions and
-compares with B2 to answer the question: with enough data, does OCR still help?
+POPE~\cite{li2023pope} switches to yes/no questions: for each image it asks ``Is there
+\emph{an X} in the image?'' for both objects that are present and objects that are not.
+The absent objects are chosen in three ways: at random, among the objects most frequent
+in the whole dataset, and among the objects that often co-occur with the objects in the
+image (adversarial). Results are reported as Accuracy, Precision, Recall, F1 and the
+``yes'' ratio. Because the answer is only yes or no, POPE needs no sentence analysis and
+is easy to apply to other languages. However, no POPE-style benchmark exists in
+Vietnamese (gap G4). The thesis builds POPE-vi following exactly this protocol to test
+hypothesis H4 (Chapter~\ref{chap:discussion}).
 
 %********************************** Section 3.6 ********************************
-\section{Evaluation protocol}
-\label{sec:met-eval}
+\section{Summary and research gaps}
+\label{sec:rel-summary}
 
-\subsection{Answer normalisation}
-\label{sec:met-norm}
+Table~\ref{tab:rel-gaps} links each gap stated in Chapter~\ref{chap:intro} to the
+evidence from the works above and to how the thesis addresses it.
 
-Before matching, the model's answer and the gold answer go through the same
-normalisation function \texttt{normalize\_vi}, which has six cumulative levels:
+\begin{table}[htbp]
+\caption{Gaps, evidence and how the thesis addresses them}
+\label{tab:rel-gaps}
+\centering
+\small
+\begin{tabular}{p{0.20\textwidth}p{0.36\textwidth}p{0.34\textwidth}}
+\toprule
+\textbf{Gap} & \textbf{Evidence} & \textbf{How the thesis addresses it} \\
+\midrule
+G1. English-centric pre-training & VLMs are trained mainly on English; LLaVA-1.5 shows only emergent multilingual ability, not dedicated training & Choose a multilingual baseline; measure wrong-language and wrong-format errors in the zero-shot setting \\
+G2. Weak Vietnamese VQA, especially for reading text & ViTextBLIP-2 reaches 25.48 EM against 88.00 for humans; the ViVQA methods are classifiers that do not read text & Free-form answer generation; Vietnamese OCR text with diacritics, in reading order, in the prompt \\
+G3. No PEFT for Vietnamese VLMs & LoRA, QLoRA, VL-Adapter and LLaVA-1.5 are only verified on English & QLoRA on Qwen2.5-VL-3B; OCR-aware QLoRA as the main contribution \\
+G4. No Vietnamese hallucination benchmark & POPE and CHAIR exist only in English & Build POPE-vi; check whether QLoRA increases hallucination \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\begin{description}
-  \item[S1.] Unicode NFC: letters and diacritics are combined into one consistent code.
-  \item[S2.] Lowercasing.
-  \item[S3.] Removing punctuation while keeping Vietnamese tone marks.
-  \item[S4.] Collapsing extra whitespace.
-  \item[S5.] Removing a leading ``\vi{màu}'' (``colour'') prefix (``\vi{màu đỏ}'' becomes
-  ``\vi{đỏ}'', ``red'').
-  \item[S6.] If the whole string is a number (0--20 or a round ten up to 100), converting
-  the word to digits (``\vi{ba}'' becomes ``3'').
-\end{description}
-
-The function does not remove tone marks (``\vi{con mèo}'' differs from ``con meo'') and
-does not merge synonyms, so EM stays strict; near-misses are measured by ANLS. On
-ViTextVQA, levels S3 and S4 change 25.8\% of the gold answers (because of the spaced
-punctuation in the gold answers); on ViVQA, levels S5 and S6 change 20.9\% and 14.8\% of
-the answers. The trained model hardly depends on normalisation (C3 reaches 76.6 at every
-level), so no level creates an improvement by itself.
-
-\subsection{Metrics}
-
-Let $p$ be the answer and $G$ the set of gold answers, both normalised.
-
-\paragraph{Exact Match (main metric).} $\mathrm{EM}(p, G) = 1$ if $p$ exactly matches an
-element of $G$, and 0 otherwise.
-
-\paragraph{VQA Accuracy.}
-$\mathrm{Acc}(p, G) = \min\left(\#\{g \in G : g = p\}/3,\ 1\right)$ following Antol et
-al.~\cite{antol2015vqa}. In both datasets each question has only one gold answer, so
-VQA-Acc equals EM in every run; the thesis reports EM and notes this.
-
-\paragraph{ANLS.} Following Biten et al.~\cite{biten2019stvqa},
-\begin{equation}
-\mathrm{ANLS}(p, G) = \max_{g \in G} s(p, g), \qquad
-s(p, g) =
-\begin{cases}
-1 - \dfrac{\mathrm{Lev}(p, g)}{\max(|p|, |g|)} & \text{if this value is } \geq 0.5,\\[6pt]
-0 & \text{otherwise,}
-\end{cases}
-\label{eq:anls}
-\end{equation}
-where $\mathrm{Lev}$ is the character-level Levenshtein distance. ANLS tolerates small
-reading errors: ``\vi{miền bác}'' against ``\vi{miền bắc}'' has an EM of 0 but an ANLS of
-0.95.
-
-\paragraph{Token-F1 (secondary metric).} F1 over the bags of syllables of the answer and
-the gold answer, used only to compare with the published ViTextVQA numbers. Because
-Vietnamese spaces separate syllables rather than words, we also report F1 after
-word segmentation with pyvi to check that the conclusion does not change.
-
-BLEU and CIDEr are not used as main metrics, as required by the proposal.
-
-\subsection{Statistical tests}
-\label{sec:met-stats}
-
-Every comparison between two models is made on the same set of questions, so we
-use paired tests instead of comparing aggregate numbers:
-
-\begin{itemize}
-  \item \textbf{EM}: exact McNemar test~\cite{mcnemar1947} (two-sided binomial) on the
-  questions that only one of the two models gets right.
-  \item \textbf{ANLS, $\Delta$EM and interaction effects}: 95\% confidence intervals by
-  paired bootstrap~\cite{efron1993}, 10,000 resamples, seed 42.
-  \item \textbf{Proportions in the manual review}: Wilson confidence
-  intervals~\cite{wilson1927}.
-  \item \textbf{POPE-vi}: bootstrap by image, because the questions about the same image
-  are not independent.
-\end{itemize}
-
-With 2,000 questions, the threshold $p < 0.05$ corresponds to a difference of about 1.7
-EM points, and 80\% power is reached for a true difference of about 2.3 points. The
-ablations on test2000 are read with this limit in mind.
-
-\subsection{Pre-registered decision rules}
-
-Before each experiment, we commit the decision rule to the repository (a
-timestamped commit) and only then runs it. The rule states the dataset, the reference, the
-metric, the threshold and how to conclude. For example, H1 is supported if QLoRA increases
-EM by at least 5 points with $p < 0.05$. The shared adapter is considered ``not worse'' if
-the lower bound of the CI95 of $\Delta$EM is above $-1.5$ on each dataset. A model ``does
-not increase hallucination'' if the lower bound of the CI95 of $\Delta$F1 on POPE-vi is
-above $-2$. When a result does not meet the rule, we report it as such and do not
-change the rule after seeing the numbers.
-
-\subsection{Measuring hallucination: POPE-vi}
-\label{sec:met-pope}
-
-We build POPE-vi, a Vietnamese version of POPE~\cite{li2023pope}. The images are
-500 ViVQA test images that never appear in training or validation; the object labels come
-from the COCO 2014 annotations and are translated into Vietnamese with an 80-class
-dictionary. Each image has three questions about objects that are present (answer
-``\vi{có}'', ``yes'') and three questions about absent objects (answer ``\vi{không}'',
-``no'') for each way of choosing absent objects: random, popular and adversarial. The
-template is ``\vi{Trong ảnh có} \{object\} \vi{không? Trả lời ``có'' hoặc ``không''.}''
-(``Is there \{object\} in the image? Answer `yes' or `no'.''). After removing duplicates,
-4,985 questions remain. The dictionary, the rules and the question file are locked in the
-repository before any model is run.
-
-Each model is compared with the zero-shot base model using the same prompt form. Besides
-F1, as reported for LLaVA-1.5~\cite{liu2024llava15}, we also report the yes-ratio,
-the false-alarm rate (``no'' questions answered ``yes'') and the share of answers that
-cannot be parsed as yes or no.
-
-\subsection{Error analysis}
-\label{sec:met-error}
-
-The error analysis has two parts. The automatic part assigns each EM error to one error
-type, in priority order: differs only in tone marks, missing words, extra words (the gold
-answer is contained in the answer), off by at most 2 characters, and other. For ViTextVQA,
-each question is also assigned an OCR status: the answer appears verbatim in the OCR,
-matches only without diacritics, the OCR has text but does not contain the answer, or the
-OCR reads no text. The definitions are recorded before the run. The manual part randomly
-samples (seed 42) 100 errors of B3-full and 50 errors of C3, locks the list before
-labelling, and labels blindly: the annotator sees only the image, the question, the gold
-answer and the prediction, not the automatic error type or the OCR text.
-
-%********************************** Section 3.7 ********************************
-\section{Experimental setup}
-\label{sec:met-setup}
-
-\paragraph{Hardware.} Every training and evaluation run uses one NVIDIA L4 GPU with 24~GB
-on Google Colab Pro. OCR runs on a Tesla T4 GPU in a separate session. No run uses more
-than one GPU.
-
-\paragraph{Software.} Library versions are pinned in \path{requirements-colab.txt}:
-PyTorch 2.11.0, Transformers 5.17.0, PEFT 0.21.2, bitsandbytes 0.50.2, Accelerate 1.15.0,
-qwen-vl-utils 0.0.14, PaddleOCR 3.x, VietOCR and Gradio 6.31.0.
-
-\paragraph{Logs for reproducibility.} Each run writes a signature file
-\path{run_signature.json} (configuration and data hashes) together with its logs
-(\path{train_log.json} for training; metadata in \path{metrics.json} for evaluation),
-including the split and data file hashes, seed, source-code commit, GPU type, library
-versions, the full configuration, training and inference time and peak VRAM. Per-question
-results are stored in \path{predictions.json} so that every metric and test can be
-recomputed from scratch. Result directories have ASCII names following the convention
-\begin{quote}\raggedright
-\path|experiments/W<week>_<method>_<model>_<data>_<dtype>_<gpu>_seed<seed>/|
-\end{quote}
-(additional tokens such as the LoRA rank or the number of epochs may be inserted). Here
-\texttt{week} is the week of the experiment, \texttt{method} the method, \texttt{model}
-the model, \texttt{data} the dataset, \texttt{dtype} the data type, \texttt{gpu} the GPU
-and \texttt{seed} the random seed. A real example:
-\begin{quote}\raggedright
-\path{experiments/W07_B2_qlora_r16_qwen25vl_vitextvqa_ep1_bf16_L4_seed42/}
-\end{quote}
-
-%********************************** Section 3.8 ********************************
-\section{Prototype design}
-\label{sec:met-proto}
-
-The prototype is a Gradio~\cite{abid2019gradio} web application. It runs on a Colab L4,
-and the same code also runs offline on a laptop with a 4~GB GPU (Section~\ref{sec:res-proto}).
-The user uploads an image and asks a Vietnamese question; the system answers with the OCR
-text and a confidence level. The design follows three principles:
-
-\begin{enumerate}
-  \item \textbf{The same inference path as the evaluation.} The prototype calls exactly
-  the prompt-building function, the adapter and the decoding (greedy, at most 32 tokens)
-  of the evaluation pipeline. This is checked with the matching rule in
-  Section~\ref{sec:res-proto}.
-  \item \textbf{Answers with evidence.} Because the model uses OCR, the interface shows
-  the OCR text so that users can check the answer themselves. OCR runs in a separate
-  process and reads the original image (at most 6,000 pixels per side) rotated according
-  to the EXIF flag.
-  \item \textbf{One adapter for every question.} The prototype uses the SH adapter,
-  trained on both ViVQA and ViTextVQA, so it does not need to guess in advance which kind
-  of question the user will ask.
-\end{enumerate}
-
-\paragraph{Confidence.} For open questions, the confidence is the $\exp$ of the mean log
-probability of the answer tokens. Because this confidence is not well calibrated
-(ECE~\cite{guo2017calibration} of 0.198), the interface shows only High, Medium or Low
-instead of a percentage.
-
-\paragraph{Yes/no questions.} A rule-based detector flags yes/no questions (ending in
-``\vi{không}'', ``\vi{chưa}'', ``\vi{phải không}''\ldots{} and containing no question
-word). For these questions, the decision is based on the margin
-$m = s_{\text{yes}} - s_{\text{no}}$ between the largest log probability of a first token
-on the ``yes'' side and on the ``no'' side: the answer is ``yes'' when $m > \tau^*$. The
-threshold $\tau^* = 4.85$ is chosen on a separate calibration set (ViVQA test images not
-seen in training and not part of POPE-vi) by maximising the balanced accuracy, in order to
-correct SH's ``yes'' bias (Section~\ref{sec:dis-halluc}) without retraining. Other
-questions go through the greedy path as in the evaluation.
-
-\paragraph{Running on a laptop.} On a laptop GPU with 4~GB of VRAM, only the 4-bit model and
-the adapter are placed on the GPU; OCR runs on the CPU in its own process. To hide the OCR
-time, OCR starts as soon as the image is uploaded, and its result is cached so that further
-questions about the same image do not repeat it. The prompt, the adapter and the decoding
-settings are unchanged.
-
-\paragraph{Privacy.} The prototype does not store users' images or questions; it records
-only processing times.
+In short, previous work shows that VLMs can read text in images, that PEFT is enough to
+adapt VLMs, and that the order of the OCR text matters for Vietnamese VQA. What is
+missing is a study that combines these three ideas for Vietnamese under a small resource
+budget, with a reproduced baseline, ablations and hallucination measurement.
+Chapter~\ref{chap:methods} presents how the thesis does this.

@@ -1,0 +1,148 @@
+%!TEX root = ../thesis.tex
+%*******************************************************************************
+%****************************** Chapter 8 **************************************
+%*******************************************************************************
+
+\chapter{CONCLUSION}
+\label{chap:conclusion}
+
+\ifpdf
+    \graphicspath{{Chapter8/Figs/Raster/}{Chapter8/Figs/PDF/}{Chapter8/Figs/}}
+\else
+    \graphicspath{{Chapter8/Figs/Vector/}{Chapter8/Figs/}}
+\fi
+
+%********************************** Section 8.1 ********************************
+\section{Summary}
+\label{sec:con-summary}
+
+This thesis studied how to adapt an open-source vision-language model to Vietnamese visual
+question answering under tight resource constraints: parameter-efficient fine-tuning only,
+and a single Colab GPU. We chose Qwen2.5-VL-3B-Instruct as the baseline, reproduced it
+on TextVQA val (79.60 against the published 79.3), measured the zero-shot baseline on ViVQA
+and ViTextVQA, and then adapted it with QLoRA using 7.37 million trainable parameters, i.e.\
+0.196\% of all parameters.
+
+The proposed improvement is OCR-aware QLoRA: the text in the image is read with VietOCR,
+sorted in reading order and added to the prompt during training, not only at inference. On the full
+ViTextVQA test set of 10,028 questions, the method reaches 53.35 EM, 3.09 points above plain
+QLoRA on the same data ($p = 6.7\times10^{-21}$) and above the best previously published
+result (25.48 EM). On ViVQA, QLoRA raises EM from 22.09 to 76.64.
+
+%********************************** Section 8.2 ********************************
+\section{Answers to the research questions}
+\label{sec:con-rq}
+
+\begin{description}
+  \item[RQ1.] \textit{How well does zero-shot perform, and which Vietnamese errors dominate?}
+  Zero-shot reaches 22.09 EM on ViVQA and 29.12 on ViTextVQA. The dominant error is the wrong
+  format: the model answers at greater length than the gold answer (2.9 against 1.6 words on
+  ViVQA) and sometimes in English. Answers with tone marks are clearly harder than answers
+  made only of Latin letters. A few-shot formatting prompt does not fix these errors (H3 not
+  supported).
+
+  \item[RQ2.] \textit{How much does QLoRA improve without full fine-tuning?}
+  QLoRA increases EM by 21.1 points on ViTextVQA and 54.6 points on ViVQA (the official model
+  C3), with only 0.196\% of the parameters, one L4 GPU, at most 12.75 hours of training and a
+  peak VRAM below 8.4~GB. The gain comes mainly from learning the right answer format and is
+  not due to image leakage: on the clean test set, the gain is still 44.1 points (H1
+  supported).
+
+  \item[RQ3.] \textit{Does OCR text help, and does it work together with QLoRA?}
+  Yes, but only when the model is trained with OCR. Adding OCR to the prompt of a model that
+  has never seen OCR brings no improvement; training with OCR gives an interaction effect of
+  $+4.9$ EM points, stable across three seeds, and the benefit does not shrink with more data.
+  The ANLS gain ($+1.87$) is below the pre-set 3-point threshold, so H2 is partially
+  supported: OCR helps produce exactly the right string more than it helps produce
+  character-level near-misses.
+
+  \item[RQ4.] \textit{After adaptation, does the model invent content more or less often?}
+  On POPE-vi, B3-full does not increase hallucination according to the pre-set rule
+  ($\Delta$F1 from $+2.5$ to $+5.5$), but its object false-alarm rate increases under
+  adversarial sampling. C3 cannot be measured because it has forgotten how to answer yes/no.
+  The manual review shows that hallucination accounts for only about 2.3\% (B3-full) and 3.7\%
+  (C3) of all answers. H4 is partially supported.
+\end{description}
+
+%********************************** Section 8.3 ********************************
+\section{Contributions}
+\label{sec:con-contrib}
+
+\begin{enumerate}
+  \item \textbf{OCR-aware QLoRA for Vietnamese VQA}, with its mechanism isolated by a
+  $2\times2$ experiment: the benefit comes from teaching the model to use OCR, not from adding
+  OCR to the prompt.
+  \item \textbf{Efficient and reproducible adaptation.} The results on ViTextVQA are above the
+  previously published results with 0.196\% of the parameters on one GPU; every number has a
+  log, a seed and a configuration, with a reproducibility package containing the source code,
+  adapters, configurations, inference scripts and instructions to re-run.
+  \item \textbf{Measuring problems specific to Vietnamese.} Each of the four problems V1--V4
+  has concrete measurements; POPE-vi is a Vietnamese hallucination benchmark of 4,985
+  questions on 500 images unseen in training.
+  \item \textbf{Two-level error analysis.} An automatic analysis by error type and OCR status,
+  checked against a blind manual review, shows that EM underestimates the model and estimates
+  how much could still be gained with better OCR (about 17 EM points).
+  \item \textbf{A verified prototype.} A web application that answers with the OCR text and a
+  confidence level, verified to give the same answers as the official evaluation pipeline,
+  with a median latency of about 1 second on one L4 GPU; it also runs offline on a laptop
+with a 4~GB GPU and gives the same answers.
+\end{enumerate}
+
+%********************************** Section 8.4 ********************************
+\section{Reflections on the project}
+\label{sec:con-reflect}
+
+Looking back on the project, three working habits contributed most to the results. Writing
+the decision rule of each main test before running it kept the conclusions honest: when the
+first version of the prototype failed rule R-OCR, the failure stayed on record and a new rule
+was written with its reasons, instead of a threshold being adjusted after the fact. Checking
+the inputs before spending GPU time caught problems early: the data-type check in W06 showed
+that fp16 broke 23 of 73 answers before the first full QLoRA training run, and a CPU self-test
+caught a LoRA configuration that would also have been attached to 96 layers of the vision
+encoder. Running the main comparison first on an 8,000-question subset meant that the 12-hour
+full training run was started only once the subset result was clear.
+
+Some things could have been done better. The origin of the data should have been checked in
+the first week: the team only found in W05 that the local copy of ViVQA was in fact ViVQA-X
+and that ViTextVQA came from an unofficial copy. The whole input path, and not only the model,
+should have been checked earlier: the EXIF rotation mismatch between PaddleOCR and VietOCR was
+found only in W14, after the official models had been trained. Finally, the main models were
+trained with one seed because of the GPU budget; with more compute, the three-seed check of
+W09 should be repeated for B3-full.
+
+\section{Limitations}
+\label{sec:con-limits}
+
+The main limitations were analysed in Section~\ref{sec:dis-validity}: the main models were run
+with only one seed; EM is too strict towards answers that are correct in meaning but written
+differently; the quality of Vietnamese scene-text OCR is a bottleneck; the ANLS threshold of H2
+was not reached; F1 on POPE-vi hides the false-alarm rate; the comparison with published results
+depends on the paper's answer normalisation; and the final manual review had only one
+annotator.
+
+%********************************** Section 8.5 ********************************
+\section{Future work}
+\label{sec:con-future}
+
+\begin{enumerate}
+  \item \textbf{Better Vietnamese scene-text OCR}: fine-tune VietOCR on scene text and improve
+  the reading order. According to the error analysis, this direction has the highest ceiling
+  for improvement.
+  \item \textbf{Add OCR to the prompt only when the question is about text} (gating by
+  question type), to reduce cases where irrelevant OCR text derails purely visual questions
+  as illustrated in Section~\ref{par:err-ocr-distractor}.
+  \item \textbf{Position-aware OCR}: feed the coordinates and order of the text boxes to the
+  model in the spirit of M4C~\cite{hu2020m4c}, to reduce wrong phrase boundaries.
+  \item \textbf{Human evaluation and a synonym-tolerant metric}, since more than half of the EM
+  errors are correct in meaning.
+  \item \textbf{Balancing yes/no questions during training} to avoid forgetting the format as
+  in C3, and measuring text hallucination on images with text, not only object hallucination.
+  \item \textbf{Confidence calibration} (e.g.\ temperature scaling) so that the prototype can
+  show probabilities instead of levels.
+  \item \textbf{More seeds for the main models} and newer base models under the same evaluation
+  protocol.
+\end{enumerate}
+
+The results of this thesis show that a team with limited resources can still adapt a large VLM
+to Vietnamese and surpass previous work, provided that every change is measured under the same
+conditions and every conclusion is tested.

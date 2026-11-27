@@ -1,0 +1,18 @@
+\usepackage{mathptmx}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds,calc}
+\definecolor{ink}{HTML}{13294B}
+\definecolor{teal}{HTML}{1C7293}
+\definecolor{amber}{HTML}{E8A33D}
+\tikzset{
+  >={Stealth[length=2mm]},
+  comp/.style={draw=ink!70, rounded corners=2pt, fill=white, align=center, text width=#1,
+               inner sep=3pt, minimum height=9.5mm, font=\footnotesize},
+  comp/.default=3.3cm,
+  frame/.style={draw=teal, rounded corners=4pt, fill=teal!6, inner sep=7pt},
+  oframe/.style={draw=amber!90!black, rounded corners=4pt, fill=amber!10, inner sep=7pt},
+  stepbadge/.style={circle, fill=ink, text=white, inner sep=0.8pt, minimum size=4.2mm, font=\scriptsize\bfseries},
+  flow/.style={->, draw=ink, thick},
+  lab/.style={font=\scriptsize, align=center, fill=white, inner sep=1.2pt},
+  art/.style={->, draw=ink!55, dashed},
+}

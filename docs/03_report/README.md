@@ -1,5 +1,7 @@
 # 03_report — Báo cáo / Thesis
 
+> **Từ 27/11/2026:** khoá luận có 8 chương theo thứ tự Report 1–7 của AIP491 (xem `overleaf/README.md`). Các file R*.md dưới đây chỉ là bản nháp cũ (không có R2; R5 chỉ là khung) — nội dung chính thức nằm trong `overleaf/source_en` và `overleaf/source_vi`.
+
 > **Từ 10/11/2026:** khoá luận chính viết trên **Overleaf** theo template 6 chương của mentor (xem `overleaf/README.md`). Các file R1–R7 trong thư mục này là bản nháp nguồn để soạn từng chương.
 
 Báo cáo (thesis) được **viết trên Overleaf** (LaTeX). Folder này là **bản đồng bộ local**:
