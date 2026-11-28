@@ -8,6 +8,10 @@ chỉ khác nhau ở cờ compare (rỗng / b1+b1_ocr / rỗng) — đúng phép
 
   python -m src.prototype.compare_scan --selftest
   python -m src.prototype.compare_scan
+  python -m src.prototype.compare_scan --rule v2 --from_results docs/W15/demo_compare/scan_results.json
+
+--rule mặc định v1 (luật chốt trước khi chạy). v2 chỉ đổi cách tính thời gian, xem README.
+--from_results chỉ đọc json đã có, không nạp model và không OCR.
 """
 from __future__ import annotations
 
@@ -38,6 +42,7 @@ SCAN_JSON = OUT_DIR / "scan_results.json"
 SCAN_MD = OUT_DIR / "scan_table.md"
 IMG_DIR = REPO / "demo_images" / "compare"
 EX_JSON = Path(r"D:\vivqa_models\demo_compare\examples_compare.json")
+EX_JSON_V2 = Path(r"D:\vivqa_models\demo_compare\examples_compare_v2.json")
 
 ADAPTER = r"D:\vivqa_models\SH\epoch_1"
 ADAPTER_SHA = "c9791e961aaa58fdcd7d9baafede3bd7bd8c902acc9cc43917306f1e0fecc354"
@@ -308,8 +313,16 @@ def measure_item(backend, item: Dict[str, Any], tmp_dir: str, refs: Dict[str, Di
     return base
 
 
-def is_showcase(rec: Dict[str, Any]) -> bool:
-    """Ứng viên chào hàng — đúng docs/W15/demo_compare/README.md, không thêm điều kiện."""
+def sec_model_sum(rec: Dict[str, Any]) -> Optional[float]:
+    """Thời gian người xem chờ ở v2: SH + B1 + B1-OCR. Không cộng sec_ocr."""
+    parts = (rec.get("sec_sh"), rec.get("sec_b1"), rec.get("sec_b1_ocr"))
+    if not all(isinstance(x, (int, float)) for x in parts):
+        return None
+    return float(parts[0]) + float(parts[1]) + float(parts[2])
+
+
+def is_showcase(rec: Dict[str, Any], rule: str = "v1") -> bool:
+    """Ứng viên chào hàng. v1 là luật chốt trước khi chạy. v2 chỉ đổi mốc thời gian."""
     if rec.get("missing") or rec.get("error_sh") or not rec.get("sh_stable"):
         return False
     if rec.get("em_sh") != 1.0 or rec.get("em_b1") != 0.0:
@@ -318,7 +331,7 @@ def is_showcase(rec: Dict[str, Any]) -> bool:
         return False
     if rec.get("level") == "Thấp" or not rec.get("level"):
         return False
-    sec = rec.get("sec_tong")
+    sec = rec.get("sec_tong") if rule == "v1" else sec_model_sum(rec)
     if not isinstance(sec, (int, float)) or sec > 8.0:
         return False
     if rec.get("source") == "vivqa" and rec.get("trung_train"):
@@ -342,12 +355,15 @@ def _why_empty(cands: List[Dict[str, Any]]) -> str:
     return "không có item đạt luật"
 
 
-def select_slots(rows: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def select_slots(rows: Sequence[Dict[str, Any]], rule: str = "v1") -> List[Dict[str, Any]]:
     """Bảy ô, item đầu tiên đạt luật, bỏ item đã chọn ở ô trước."""
     by_id = {r["id"]: r for r in rows}
     real_ids = [r["id"] for r in rows if r.get("source") == "real"]
     used: set = set()
     out = []
+
+    def show(rec: Dict[str, Any]) -> bool:
+        return is_showcase(rec, rule)
 
     def take(slot: str, ids: Sequence[str], pred) -> None:
         cands = [by_id[i] for i in ids if i in by_id]
@@ -358,13 +374,13 @@ def select_slots(rows: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
         else:
             out.append({"slot": slot, "id": None, "reason": _why_empty(cands)})
 
-    take("anh_that_chu", real_ids, lambda r: is_showcase(r) and r.get("n_ocr_lines", 0) >= 1)
-    take("so_lieu", SO_LIEU, is_showcase)
-    take("dau_thanh", DAU_THANH, is_showcase)
-    take("goc_tra_loi_tieng_anh", GOC_EN, is_showcase)
-    take("goc_bia", GOC_BIA, is_showcase)
-    take("day_du_2x2", VITEXT_ORDER, lambda r: is_showcase(r) and r.get("source") == "vitextvqa")
-    take("co_khong", real_ids, lambda r: is_showcase(r) and r.get("yesno"))
+    take("anh_that_chu", real_ids, lambda r: show(r) and int(r.get("n_ocr_lines") or 0) >= 1)
+    take("so_lieu", SO_LIEU, show)
+    take("dau_thanh", DAU_THANH, show)
+    take("goc_tra_loi_tieng_anh", GOC_EN, show)
+    take("goc_bia", GOC_BIA, show)
+    take("day_du_2x2", VITEXT_ORDER, lambda r: show(r) and r.get("source") == "vitextvqa")
+    take("co_khong", real_ids, lambda r: show(r) and r.get("yesno"))
     return out
 
 
@@ -485,12 +501,7 @@ def _example_image(rec: Dict[str, Any]) -> str:
     return str(hits[0]) if hits else ""
 
 
-def write_outputs(rows: Sequence[Dict[str, Any]], slots: Sequence[Dict[str, Any]],
-                  summary: Dict[str, Any]) -> None:
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    payload = {"summary": summary, "items": [_public_row(r) for r in rows]}
-    SCAN_JSON.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    SCAN_MD.write_text(render_table(rows), encoding="utf-8")
+def write_examples(rows: Sequence[Dict[str, Any]], slots: Sequence[Dict[str, Any]], dest: Path) -> None:
     by_id = {r["id"]: r for r in rows}
     examples = []
     for slot in slots:
@@ -498,8 +509,17 @@ def write_outputs(rows: Sequence[Dict[str, Any]], slots: Sequence[Dict[str, Any]
         image = _example_image(rec) if rec else ""
         if rec and image and rec.get("question"):
             examples.append({"image": image, "question": rec["question"]})
-    EX_JSON.parent.mkdir(parents=True, exist_ok=True)
-    EX_JSON.write_text(json.dumps(examples, ensure_ascii=False, indent=2), encoding="utf-8")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(examples, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def write_outputs(rows: Sequence[Dict[str, Any]], slots: Sequence[Dict[str, Any]],
+                  summary: Dict[str, Any]) -> None:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    payload = {"summary": summary, "items": [_public_row(r) for r in rows]}
+    SCAN_JSON.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    SCAN_MD.write_text(render_table(rows), encoding="utf-8")
+    write_examples(rows, slots, EX_JSON)
 
 
 def _fake_ok(item_id: str, source: str, **kw) -> Dict[str, Any]:
@@ -535,6 +555,23 @@ def _selftest() -> None:
     assert not is_showcase({**good, "sec_tong": 8.01})
     assert is_showcase({**good, "sec_tong": 8.0})
     assert not is_showcase({**good, "error_sh": "boom"})
+
+    # v2: OCR lần đầu không tính. sec_ocr lớn nhưng SH+B1+B1-OCR ≤ 8 thì đạt; v1 thì trượt.
+    heavy = _fake_ok(
+        "vitextvqa_test_3037", "vitextvqa",
+        sec_tong=30.0, sec_ocr=27.0, sec_sh=1.0, sec_b1=0.5, sec_b1_ocr=0.5,
+    )
+    assert not is_showcase(heavy, "v1")
+    assert is_showcase(heavy, "v2")
+    assert not is_showcase({**heavy, "sec_sh": 7.0, "sec_b1": 0.6, "sec_b1_ocr": 0.5}, "v2")
+    assert is_showcase({**heavy, "sec_sh": 6.0, "sec_b1": 1.0, "sec_b1_ocr": 1.0}, "v2")
+    assert not is_showcase({**heavy, "sec_b1": None}, "v2")
+    slow_real = _fake_ok(
+        "real_z", "real", n_ocr_lines=4, question="biển ghi gì",
+        sec_tong=20.0, sec_ocr=17.0, sec_sh=1.0, sec_b1=1.0, sec_b1_ocr=1.0,
+    )
+    assert select_slots([slow_real], "v1")[0]["id"] is None
+    assert select_slots([slow_real], "v2")[0]["id"] == "real_z"
 
     rows = [
         _fake_ok("real_a", "real", n_ocr_lines=3, yesno=False, question="biển ghi gì"),
@@ -714,13 +751,31 @@ def run_gpu() -> int:
     return 0 if summary["gate_pass"] else 2
 
 
+def run_from_results(path: str, rule: str) -> int:
+    """Chọn ô từ json đã lưu. Không nạp model, không OCR, không ghi đè scan_results."""
+    src = Path(path)
+    data = json.loads(src.read_text(encoding="utf-8"))
+    rows = data["items"]
+    slots = select_slots(rows, rule)
+    dest = EX_JSON_V2 if rule == "v2" else EX_JSON
+    write_examples(rows, slots, dest)
+    print(json.dumps({"rule": rule, "examples": str(dest), "slots": slots}, ensure_ascii=False), flush=True)
+    for s in slots:
+        print(f"  ô {s['slot']}: {s['id'] or 'TRỐNG — ' + s['reason']}", flush=True)
+    return 0
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--rule", choices=("v1", "v2"), default="v1")
+    ap.add_argument("--from_results", default=None, metavar="scan_results.json")
     a = ap.parse_args(list(argv) if argv is not None else None)
     if a.selftest:
         _selftest()
         return 0
+    if a.from_results:
+        return run_from_results(a.from_results, a.rule)
     return run_gpu()
 
 
