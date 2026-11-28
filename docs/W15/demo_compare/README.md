@@ -80,3 +80,7 @@ Chọn lại từ `scan_results.json`, không chạy GPU. Bảy ô đều có it
 ## Giao diện 28/11 chiều
 
 Giao diện demo chỉ hiện hai thẻ: mô hình gốc (Zero-shot) và mô hình cuối cùng của nhóm. Cột gốc + OCR vẫn có trong `scan_results.json` nhưng không hiện trên giao diện.
+
+## Giao diện v2.5 (28/11 tối)
+
+Bộ chọn hai mục: Zero-shot và Final Model. Mỗi lần bấm Trả lời chỉ hiện kết quả của mô hình đang chọn.

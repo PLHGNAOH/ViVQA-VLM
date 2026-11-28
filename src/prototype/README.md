@@ -38,7 +38,7 @@ Môi trường đo 2026-11-13: RTX 3050 Ti Laptop 4 GB · CPU i5-12500H · venv 
 
 ### Lệnh chạy
 
-Cách nhanh: `.\demo` (offline, song song, tự mở trình duyệt **nền sáng** `http://127.0.0.1:7860/?__theme=light`) · `.\demo safe` (tuần tự, ít tranh RAM) · `.\demo share` (link gradio.live) · `.\demo nhom` (một thẻ, không so sánh) · hoặc **Tasks** → `ViVQA demo (offline)` / `(safe)` / `(share)`.
+Cách nhanh: `.\demo` (offline, song song, tự mở trình duyệt **nền sáng** `http://127.0.0.1:7860/?__theme=light`, bộ chọn Zero-shot / Final Model) · `.\demo safe` (tuần tự, ít tranh RAM) · `.\demo share` (link gradio.live) · `.\demo nhom` (chỉ Final Model, không bộ chọn) · hoặc **Tasks** → `ViVQA demo (offline)` / `(safe)` / `(share)`.
 
 Khi trình chiếu / máy chiếu: mở fullscreen **F11**, phóng to trang **Ctrl + '+'** (Ctrl + '-' thu nhỏ). Muốn nền tối: chạy PS1 với `-Dark` (không gắn `?__theme=light`).
 
@@ -126,27 +126,10 @@ Trước (OMP=1): tổng ~9–25 s/câu; OCR chiếm ~80–94% thời gian mỗi
 - Cùng Wi-Fi: `http://<IP-LAN>:7860` (script bind `0.0.0.0`).
 - Bảo vệ: `-Offline` + `http://127.0.0.1:7860`.
 
-## Chế độ so sánh (compare-v2 giao diện, 28/11/2026 chiều)
+## Bộ chọn mô hình (v2.5)
 
-Giao diện luôn hiện **hai thẻ cố định** trên cùng một hàng. Không còn radio. Không hiện cột gốc + OCR.
+Ngay dưới ô câu hỏi có đúng hai lựa chọn: **Zero-shot** (mô hình gốc, chưa cải tiến) và **Final Model** (mô hình cuối cùng của nhóm). Luồng trình bày: tải ảnh, gõ câu hỏi, chọn Zero-shot, bấm Trả lời, đọc kết quả; rồi chuyển sang Final Model và bấm Trả lời lại trên cùng ảnh, cùng câu hỏi. Mỗi lần chỉ hiện kết quả của mô hình đang chọn. Đổi lựa chọn không tự chạy lại và không xoá kết quả đang hiện.
 
-| Trái | Phải |
-|---|---|
-| Mô hình gốc (Zero-shot) | Mô hình cuối cùng của nhóm (QLoRA nhận biết OCR) |
+Zero-shot dùng cùng trọng số, tắt adapter (`disable_adapter`), không chạy OCR và không đi đường có/không τ. Final Model đi đúng đường SH (OCR, τ, mức tin cậy). `.\demo nhom` (cờ `--no_model_selector`) chỉ chạy Final Model, không có bộ chọn.
 
-Mô hình gốc **không** được nạp lần thứ hai. Demo dùng đúng model đang chạy (Qwen2.5-VL-3B 4-bit + adapter SH) và tắt adapter bằng `with model.disable_adapter():` (PEFT). VRAM không tăng — phù hợp laptop 4 GB. Prompt của mô hình gốc giống run B1 (zero-shot): giữ nguyên câu hỏi, không đi đường có/không τ (đường đó chỉ dành cho mô hình nhóm). Mức tin cậy chỉ hiện ở mô hình nhóm.
-
-Mặc định `--compare_default goc` (hai thẻ). `.\demo nhom` (tương đương `-NoCompare` / `--compare_default nhom`) chạy **một thẻ** như cũ: đúng đường trả lời SH, HTML câu trả lời không đổi.
-
-EM hiện dưới hai thẻ (exact match, khoá luận):
-
-| Cột trên giao diện | ViTextVQA 2.000 câu | ViVQA 3.001 câu |
-|---|---:|---:|
-| Gốc (Zero-shot) | 28,80 — `W07_B1_zeroshot_qwen25vl_vitextvqa_test2000_bf16_L4_seed42` | 22,09 — `W07_B1_zeroshot_qwen25vl_vivqa_test_bf16_L4_seed42` |
-| Nhóm (QLoRA nhận biết OCR) | 49,50 — `W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vitextvqa_test2000_bf16_L4_seed42` | 73,51 — `W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vivqa_test_bf16_L4_seed42` |
-
-Gốc + OCR (29,35 trên 2.000 câu ViTextVQA, `W08_B1ocr_vietocr_v1_qwen25vl_vitextvqa_test2000_bf16_L4_seed42`) vẫn nằm trong số liệu khóa luận và trong `scan_results.json`, không hiện trên giao diện.
-
-Chi phí thêm ≈ **một lần sinh** của mô hình gốc, sau khi câu của nhóm đã xong. Lỗi ở mô hình gốc không xoá câu trả lời của nhóm.
-
-Quay lui một thẻ: `.\demo nhom`. Quay lui code: `git checkout demo-pre-compare-20261128 -- src/prototype`.
+Quay lui code: `git checkout demo-pre-compare-20261128 -- src/prototype`.

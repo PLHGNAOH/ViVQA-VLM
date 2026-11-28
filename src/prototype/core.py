@@ -308,6 +308,14 @@ class Backend:
         out["sec_compare"] = time.perf_counter() - t_cmp0
         return out
 
+    def ask_base(self, image_path: str, question: str, key: str = "b1") -> Dict[str, Any]:
+        """Mô hình gốc: answer_base, không OCR, không SH. Lỗi để nổi lên cho Handler."""
+        max_new = int(self.cfg["prompting"].get("max_new_tokens", 32))
+        return answer_base(
+            self.model, self.processor, image_path, question, [],
+            self.cfg["prompting"], key, max_new,
+        )
+
 
 def _selftest_compare() -> None:
     """Offline: disable_adapter vào/ra, prompt B1 / B1-OCR, prompt SH không đổi, compare rỗng không thêm khoá."""
