@@ -40,3 +40,17 @@ Khớp câu tham chiếu Colab (B1 / B1-OCR / SH) **không** nằm trong luật 
 7. **co_khong** — ảnh thật, câu có/không. Cùng thứ tự dòng trong `cau_hoi.csv`.
 
 Ô không có item đạt → để trống, ghi rõ trong bảng kết quả.
+
+## Bảng thứ tự demo sau khi chạy (28/11/2026)
+
+Luật phía trên không sửa. Ô trống vì không có item nào đạt đủ điều kiện (phần lớn vì tổng giây > 8; trung bình đo được 12,86 s).
+
+| Thứ tự | Ô | Item | Câu hỏi |
+|---|---|---|---|
+| 1 | anh_that_chu | trống — không có item đạt luật | |
+| 2 | so_lieu | trống — không có item đạt luật | |
+| 3 | dau_thanh | trống — không có item đạt luật | |
+| 4 | goc_tra_loi_tieng_anh | `vivqa_test_1315` | cái gì kiểm tra tảng đá trong bao vây của nó |
+| 5 | goc_bia | trống — không có item đạt luật | |
+| 6 | day_du_2x2 | trống — không có item đạt luật | |
+| 7 | co_khong | trống — không có item đạt luật | |
