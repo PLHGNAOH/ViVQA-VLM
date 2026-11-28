@@ -125,3 +125,29 @@ Trước (OMP=1): tổng ~9–25 s/câu; OCR chiếm ~80–94% thời gian mỗi
 - `-Share` → link công khai `*.gradio.live` (Gradio).
 - Cùng Wi-Fi: `http://<IP-LAN>:7860` (script bind `0.0.0.0`).
 - Bảo vệ: `-Offline` + `http://127.0.0.1:7860`.
+
+## Chế độ so sánh (compare-v1, 28/11/2026)
+
+Mô hình gốc **không** được nạp lần thứ hai. Demo dùng đúng model đang chạy (Qwen2.5-VL-3B 4-bit + adapter SH) và tắt adapter bằng `with model.disable_adapter():` (PEFT). VRAM không tăng — phù hợp laptop 4 GB. Prompt của mô hình gốc giống run B1 (zero-shot) hoặc B1-OCR (chữ OCR trong prompt): giữ nguyên câu hỏi, không đi đường có/không τ (đường đó chỉ dành cho mô hình nhóm). Mức tin cậy chỉ hiện ở mô hình nhóm.
+
+Radio **Chế độ trả lời** (ngay dưới ô câu hỏi; nút Xoá không đổi lựa chọn này):
+
+| Lựa chọn | Việc chạy |
+|---|---|
+| Chỉ mô hình của nhóm | Đúng đường trả lời cũ (SH). HTML câu trả lời không đổi. |
+| So sánh: mô hình gốc ↔ mô hình nhóm | SH, rồi một lần sinh với adapter tắt (B1). |
+| So sánh đầy đủ: gốc · gốc + OCR · mô hình nhóm | SH, rồi B1, rồi B1-OCR. |
+
+Mặc định giao diện là mục so sánh gốc ↔ nhóm (`--compare_default goc`; có thể `nhom` hoặc `day_du`).
+
+EM trên tập test (exact match, khoá luận):
+
+| Cột | ViTextVQA 2.000 câu | ViVQA 3.001 câu |
+|---|---:|---:|
+| Gốc | 28,80 — `W07_B1_zeroshot_qwen25vl_vitextvqa_test2000_bf16_L4_seed42` | 22,09 — `W07_B1_zeroshot_qwen25vl_vivqa_test_bf16_L4_seed42` |
+| Gốc + OCR | 29,35 — `W08_B1ocr_vietocr_v1_qwen25vl_vitextvqa_test2000_bf16_L4_seed42` | — |
+| Nhóm (QLoRA nhận biết OCR) | 49,50 — `W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vitextvqa_test2000_bf16_L4_seed42` | 73,51 — `W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vivqa_test_bf16_L4_seed42` |
+
+Chi phí thêm ≈ **một lần sinh cho mỗi mô hình gốc** (chế độ gốc: +1; đầy đủ: +2), sau khi câu của nhóm đã xong. Lỗi ở mô hình gốc không xoá câu trả lời của nhóm.
+
+Quay lui: trên giao diện chọn **Chỉ mô hình của nhóm**, hoặc `git checkout demo-pre-compare-20261128 -- src/prototype`.

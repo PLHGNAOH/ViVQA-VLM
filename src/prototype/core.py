@@ -12,9 +12,11 @@ Thành phần (đều kiểm offline được):
   - is_yes_no_question (detector yesno-detector-v1, thiết kế CHỈ trên ViVQA train + ViTextVQA dev, chốt trước test)
     + normalize_yes_no: câu có/không -> thêm chỉ dẫn POPE-vi -> quyết định bằng margin token đầu so với τ* (R-YB v3).
   - Backend: gói tất cả cho giao diện (bước 7): nạp model + adapter SH, OCR, trả lời + độ tin cậy + văn bản OCR.
+  - answer_base (compare-v1): mô hình gốc = cùng PeftModel, tắt adapter; không nạp model thứ hai.
 """
 from __future__ import annotations
 
+import copy
 import math
 import re
 import time
@@ -180,6 +182,47 @@ def answer_one(model, processor, image_path: str, question: str, ocr_texts: Opti
 
 
 # --------------------------------------------------------------------------- #
+# So sánh mô hình gốc (compare-v1): cùng trọng số, tắt adapter — không nạp model thứ hai
+# --------------------------------------------------------------------------- #
+COMPARE_VERSION = "compare-v1"
+COMPARE_MODES = {
+    "b1":     {"label": "Mô hình gốc (chưa huấn luyện)",     "prompt_mode": "zero_shot"},
+    "b1_ocr": {"label": "Mô hình gốc + chữ OCR trong prompt", "prompt_mode": "ocr"},
+}
+
+
+def answer_base(model, processor, image_path: str, question: str, ocr_texts, prompting: Dict[str, Any],
+                key: str, max_new_tokens: int = 32) -> Dict[str, Any]:
+    """Mô hình gốc qua PeftModel.disable_adapter (không thêm VRAM).
+
+    Prompt như run B1 / B1-OCR. Giữ nguyên câu hỏi: không normalize_yes_no, không đi đường có/không τ.
+    Không tính mức tin cậy (ngưỡng chỉ hiệu chỉnh cho SH).
+    """
+    if not hasattr(model, "disable_adapter"):
+        raise RuntimeError("compare cần PeftModel")
+    from src.prompting.builder import prompt_for_sample
+    prompting_base = copy.deepcopy(prompting)
+    prompting_base["mode"] = COMPARE_MODES[key]["prompt_mode"]
+    prompt = prompt_for_sample(
+        {"question": question, "ocr_texts": list(ocr_texts or []), "question_id": "proto"},
+        prompting_base,
+    )
+    with model.disable_adapter():
+        _cuda_sync()
+        inputs = build_inputs(processor, image_path, prompt, device=model.device)
+        _cuda_sync()
+        t_gen0 = time.perf_counter()
+        ids, _lps = generate_from_inputs(model, inputs, max_new_tokens)
+        _cuda_sync()
+        sec_model = time.perf_counter() - t_gen0
+        ans = processor.batch_decode(
+            [ids], skip_special_tokens=True, clean_up_tokenization_spaces=False,
+        )[0].strip()
+    return {"key": key, "label": COMPARE_MODES[key]["label"], "answer": ans,
+            "prompt": prompt, "sec_model": sec_model}
+
+
+# --------------------------------------------------------------------------- #
 # Backend cho giao diện (bước 7) — nạp một lần, trả lời nhiều lần
 # --------------------------------------------------------------------------- #
 class Backend:
@@ -202,8 +245,13 @@ class Backend:
 
     def ask(self, image_path: str, question: str,
             ocr_lines: Optional[List[Dict[str, Any]]] = None,
-            ocr_timing: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """ocr_lines/ocr_timing: dùng lại OCR prefetch/cache — cùng answer_one, không đổi kết quả."""
+            ocr_timing: Optional[Dict[str, Any]] = None,
+            compare: Sequence[str] = ()) -> Dict[str, Any]:
+        """ocr_lines/ocr_timing: dùng lại OCR prefetch/cache — cùng answer_one, không đổi kết quả.
+
+        compare rỗng → dict không có khoá "compare" (infer / bench / diagnose không đổi).
+        Khác rỗng → thêm câu trả lời mô hình gốc; lỗi một key không làm hỏng kết quả SH.
+        """
         from src.data.ocr import lines_to_texts
         t0 = time.perf_counter()
         ocr_timing = dict(ocr_timing or {})
@@ -235,10 +283,174 @@ class Backend:
         t_post0 = time.perf_counter()
         level = conf_level(r["confidence"], cuts)
         t_level = time.perf_counter() - t_post0
-        return {**r, "level": level, "ocr_lines": lines, "ocr_texts": texts,
-                "sec_ocr": t_ocr, "sec_ocr_det": t_ocr_det, "sec_ocr_rec": t_ocr_rec,
-                "sec_preprocess": float(r.get("sec_preprocess") or 0.0),
-                "sec_model": float(r.get("sec_model") or 0.0),
-                "sec_postprocess": float(r.get("sec_postprocess") or 0.0) + t_level,
-                "ocr_source": ocr_source, "n_gen_tokens": int(r.get("n_tokens") or 0),
-                "n_ocr_lines": len(lines), "sec_total": time.perf_counter() - t0}
+        out = {**r, "level": level, "ocr_lines": lines, "ocr_texts": texts,
+               "sec_ocr": t_ocr, "sec_ocr_det": t_ocr_det, "sec_ocr_rec": t_ocr_rec,
+               "sec_preprocess": float(r.get("sec_preprocess") or 0.0),
+               "sec_model": float(r.get("sec_model") or 0.0),
+               "sec_postprocess": float(r.get("sec_postprocess") or 0.0) + t_level,
+               "ocr_source": ocr_source, "n_gen_tokens": int(r.get("n_tokens") or 0),
+               "n_ocr_lines": len(lines), "sec_total": time.perf_counter() - t0}
+        if not compare:
+            return out
+        t_cmp0 = time.perf_counter()
+        cmp_items: List[Dict[str, Any]] = []
+        max_new = int(self.cfg["prompting"].get("max_new_tokens", 32))
+        for key in compare:
+            label = COMPARE_MODES[key]["label"] if key in COMPARE_MODES else str(key)
+            try:
+                cmp_items.append(answer_base(
+                    self.model, self.processor, image_path, question, texts,
+                    self.cfg["prompting"], key, max_new,
+                ))
+            except Exception as e:
+                cmp_items.append({"key": key, "label": label, "error": str(e)[:300]})
+        out["compare"] = cmp_items
+        out["sec_compare"] = time.perf_counter() - t_cmp0
+        return out
+
+
+def _selftest_compare() -> None:
+    """Offline: disable_adapter vào/ra, prompt B1 / B1-OCR, prompt SH không đổi, compare rỗng không thêm khoá."""
+    import inspect
+
+    from src.prompting.builder import prompt_for_sample
+    import src.prototype.core as core
+
+    assert core.CORE_VERSION == "prototype-core-v1"
+    assert core.COMPARE_VERSION == "compare-v1"
+    src_ao = inspect.getsource(core.answer_one)
+    assert "disable_adapter" not in src_ao
+    assert "prompt_for_sample(sample, prompting)" in src_ao
+    assert "normalize_yes_no" in src_ao
+
+    class _Ctx:
+        def __init__(self, model):
+            self.model = model
+
+        def __enter__(self):
+            self.model.n_enter += 1
+            self.model.adapter_on = False
+
+        def __exit__(self, exc_type, exc, tb):
+            self.model.n_exit += 1
+            self.model.adapter_on = True
+            return False
+
+    class _Model:
+        def __init__(self, fail: bool = False):
+            self.adapter_on = True
+            self.n_enter = 0
+            self.n_exit = 0
+            self.fail = fail
+            self.device = "cpu"
+            self.saw_off_during_gen = False
+
+        def disable_adapter(self):
+            return _Ctx(self)
+
+    class _Proc:
+        def batch_decode(self, seqs, skip_special_tokens=True, clean_up_tokenization_spaces=False):
+            assert skip_special_tokens is True and clean_up_tokenization_spaces is False
+            assert seqs == [[7, 8]]
+            return ["  câu gốc  "]
+
+    class _Bare:
+        device = "cpu"
+
+    try:
+        core.answer_base(_Bare(), None, "x.jpg", "câu", [], {"mode": "ocr"}, "b1")
+        raise AssertionError("model không có disable_adapter phải RuntimeError")
+    except RuntimeError as e:
+        assert str(e) == "compare cần PeftModel", e
+
+    def fake_build(processor, image_path, prompt_text, device=None):
+        return {"input_ids": "patched"}
+
+    def fake_gen(model, inputs, max_new_tokens=32):
+        model.saw_off_during_gen = model.adapter_on is False
+        assert max_new_tokens == 32
+        if getattr(model, "fail", False):
+            raise RuntimeError("gen fail giữa chừng")
+        return [7, 8], [-0.1, -0.2]
+
+    old_b, old_g = core.build_inputs, core.generate_from_inputs
+    core.build_inputs = fake_build
+    core.generate_from_inputs = fake_gen
+    try:
+        q = "biển hiệu ghi gì"
+        ocr3 = ["dòng OCR một", "dòng OCR hai", "dòng OCR ba"]
+        prompting = {"mode": "ocr", "ocr": {"template": "v1"}, "max_new_tokens": 32}
+        proc = _Proc()
+        m = _Model()
+        out_b1 = core.answer_base(m, proc, "x.jpg", q, ocr3, prompting, "b1", 32)
+        assert m.adapter_on is True and m.n_enter == 1 and m.n_exit == 1 and m.saw_off_during_gen
+        assert out_b1["answer"] == "câu gốc" and out_b1["key"] == "b1"
+        assert out_b1["label"] == core.COMPARE_MODES["b1"]["label"]
+        assert "confidence" not in out_b1 and prompting["mode"] == "ocr"
+        assert out_b1["prompt"] == f"Câu hỏi: {q}"
+        assert "Văn bản đọc được" not in out_b1["prompt"]
+        for line in ocr3:
+            assert line not in out_b1["prompt"]
+
+        m_fail = _Model(fail=True)
+        try:
+            core.answer_base(m_fail, proc, "x.jpg", q, ocr3, prompting, "b1")
+            raise AssertionError("generate lỗi phải nổi")
+        except RuntimeError as e:
+            assert "gen fail" in str(e)
+        assert m_fail.adapter_on is True and m_fail.n_enter == 1 and m_fail.n_exit == 1
+
+        out_ocr = core.answer_base(_Model(), proc, "x.jpg", q, list(ocr3), prompting, "b1_ocr")
+        assert out_ocr["prompt"].startswith("Văn bản đọc được trong ảnh: ")
+        for line in ocr3:
+            assert line in out_ocr["prompt"], out_ocr["prompt"]
+
+        qyn = "Trong ảnh có con mèo không"
+        out_yn = core.answer_base(_Model(), proc, "x.jpg", qyn, ocr3, prompting, "b1")
+        assert out_yn["prompt"] == f"Câu hỏi: {qyn}"
+        assert "Trả lời" not in out_yn["prompt"]
+
+        sample = {"question": q, "ocr_texts": list(ocr3), "question_id": "proto"}
+        sh_prompt = prompt_for_sample(sample, prompting)
+        sh_before = (
+            "Văn bản đọc được trong ảnh: dòng OCR một | dòng OCR hai | dòng OCR ba\n"
+            f"Câu hỏi: {q}"
+        )
+        assert sh_prompt == sh_before, sh_prompt
+
+        def fake_answer_one(*_a, **_k):
+            return {"mode": "open", "answer": "SH-OK", "confidence": 0.91, "n_tokens": 1,
+                    "prompt": sh_prompt, "sec": 0.2, "sec_preprocess": 0.01, "sec_model": 0.11,
+                    "sec_postprocess": 0.01}
+
+        old_ao = core.answer_one
+        core.answer_one = fake_answer_one
+        try:
+            b = core.Backend.__new__(core.Backend)
+            b.cfg = {"prompting": prompting}
+            b.ocr_fn = lambda _path: []
+            b.ocr_max_chars = 600
+            b.ocr_min_conf = 0.0
+            b.tau = core.TAU_STAR_SH
+            b.cuts_open = (0.0, 1.0)
+            b.cuts_yn = (0.5, 1.0)
+            b.yn_tokens = {}
+            b.penalty = 1.0
+            b.special_ids = []
+            b.model = _Model()
+            b.processor = proc
+            r0 = b.ask("x.jpg", q, compare=())
+            assert r0["answer"] == "SH-OK" and "compare" not in r0 and "sec_compare" not in r0
+            r1 = b.ask("x.jpg", q, compare=("b1",))
+            assert r1["answer"] == "SH-OK" and r1["compare"][0]["key"] == "b1"
+            assert "error" not in r1["compare"][0] and r1["sec_compare"] >= 0
+            b.model = _Model(fail=True)
+            r2 = b.ask("x.jpg", q, compare=("b1", "b1_ocr"))
+            assert r2["answer"] == "SH-OK" and r2["level"] and len(r2["compare"]) == 2
+            assert all("error" in it and len(it["error"]) <= 300 for it in r2["compare"])
+        finally:
+            core.answer_one = old_ao
+    finally:
+        core.build_inputs = old_b
+        core.generate_from_inputs = old_g
+    print("compare-v1 core selftest OK")
