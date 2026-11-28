@@ -1,0 +1,79 @@
+{
+  "metrics": {
+    "exact_match": 0.7151162790697675,
+    "vqa_accuracy": 0.7151162790697675,
+    "anls": 0.7316742487163997,
+    "token_f1": 0.7390988372093024,
+    "exact_match__color": 0.8,
+    "vqa_accuracy__color": 0.8,
+    "anls__color": 0.81,
+    "token_f1__color": 0.81,
+    "exact_match__object": 0.6974789915966386,
+    "vqa_accuracy__object": 0.6974789915966386,
+    "anls__object": 0.7142175051838917,
+    "token_f1__object": 0.7529411764705883,
+    "exact_match__number": 0.7238805970149254,
+    "vqa_accuracy__number": 0.7238805970149254,
+    "anls__number": 0.7276119402985075,
+    "token_f1__number": 0.7238805970149254,
+    "exact_match__location": 0.6468085106382979,
+    "vqa_accuracy__location": 0.6468085106382979,
+    "anls__location": 0.6761702127659575,
+    "token_f1__location": 0.6804255319148936
+  },
+  "meta": {
+    "run_name": "W09_C2_eval_qlora_r16_vivqa_valclean_bf16_L4_seed42",
+    "finished_utc": "2026-10-16T21:49:30+00:00",
+    "num_samples": 688,
+    "question_type_counts": {
+      "color": 200,
+      "object": 119,
+      "number": 134,
+      "location": 235
+    },
+    "prompting_mode": "zero_shot",
+    "decoding": "greedy (do_sample=False)",
+    "max_new_tokens": 32,
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "backbone": "qwen2_5_vl",
+    "variant": null,
+    "quantization": {
+      "4bit": true,
+      "type": "nf4",
+      "double_quant": true,
+      "compute_dtype": "bfloat16"
+    },
+    "torch_dtype": "bfloat16",
+    "min_pixels": 200704,
+    "max_pixels": 401408,
+    "seed": 42,
+    "git_commit": "1777b08",
+    "config_file": "configs/qwen_lora.yaml",
+    "hardware": {
+      "gpus_seen": [
+        "NVIDIA L4"
+      ],
+      "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+    },
+    "inference_time_sec": 412.6,
+    "sec_per_sample": 0.6,
+    "peak_vram_gb_this_session": 2.57,
+    "dataset": "vivqa",
+    "data_file": "data/vivqa/val_imgdisjoint.json",
+    "data_file_sha256": "bd6091d948b4471ed92277b53d3ad348a8f18cc549e2c46bd611046cb5a1a656",
+    "limit": null,
+    "chunk_size": 500,
+    "adapter": {
+      "path": "/content/drive/MyDrive/ViVQA-VLM/adapters/W09_B2_qlora_r16_qwen25vl_vivqa_ep2_bf16_L4_seed42/epoch_1",
+      "weights_sha256": "e8a2809f63568c350fae4d3d6a20435e674f7ad19fbf0f9989af9cf751f62e2f",
+      "config_sha256": "4cacecf893b23be805e48d0b78b227b11124a978d7f4f071bd2b214454cfa489",
+      "weights_mb": 29.53
+    },
+    "few_shot": null,
+    "ocr": null,
+    "versions": {
+      "transformers": "5.17.0",
+      "torch": "2.11.0+cu130"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+ "what": "W14 bước 2 — OCR cache ViTextVQA đã sửa EXIF (file cache nằm trên Drive)",
+ "created_utc": "2026-11-01T11:32:22",
+ "valid": true,
+ "cache_file": "data/vitextvqa_official/ocr/paddledet_vietocr_exiffix.json",
+ "sha256": "41abe2ad85c5c9585a22ec62b246b0fb60d5e132ccdb5db6fb37aa7128aa7ad5",
+ "derived_from": "paddledet_vietocr.json",
+ "derived_from_sha256": "e7ce4f76d98c1eb5dbbd7c07bb6ed62cfb3e4043b955143a2b5a6cc182560c1b",
+ "n_images": 15352,
+ "n_replaced": 167,
+ "n_errors": 0,
+ "errors": [],
+ "V1_no_errors": true,
+ "V2_others_unchanged": true,
+ "others_fingerprint": "732b11751399bbd31c5582e54510c0ba229405eee6e49fdefb351afe5112c429",
+ "n_others": 15185,
+ "V3_parity_step_b": true,
+ "parity": {
+  "n": 165,
+  "n_match": 165,
+  "mismatch_examples": [],
+  "pct": 100.0
+ },
+ "V4_engine": true,
+ "engine_info": {
+  "engine": "PaddleOCR TextDetection + VietOCR",
+  "paddleocr": "3.7.0",
+  "paddlepaddle": "3.3.1",
+  "lang": "vi",
+  "device": "gpu",
+  "det_model": "PP-OCRv6_medium_det",
+  "rec_model": "vietocr/vgg_transformer",
+  "vietocr_config": "vgg_transformer, beamsearch=False",
+  "exif": "transpose-v1 (W14 R-EXIF)"
+ },
+ "test_questions_on_fixed_images": 126,
+ "pct_answer_in_ocr_test_fixed_images": {
+  "old": 0.0,
+  "new": 41.27
+ },
+ "sec_per_image": 5.411
+}

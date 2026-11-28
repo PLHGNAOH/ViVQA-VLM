@@ -1,0 +1,184 @@
+{
+  "what": "B1 (zero-shot) và B2 (QLoRA 1 epoch) trên toàn bộ ViTextVQA test 10.028 câu; cùng cấu hình B1/B2 trên tập con",
+  "pre_registered_rules": {
+    "vs_vitextblip2": "CAO HƠN nếu cận dưới CI95 bootstrap (10.000, seed 42) > số công bố Table 6 (EM 25,48 / F1 53,95)",
+    "B2_vs_B1": "cải thiện nếu EM tăng và McNemar exact p < 0,05",
+    "determinism": ">= 99% dự đoán trùng run tập con trên 2.000 câu chung",
+    "representativeness": "ghi nhận EM tập con có nằm trong CI95 EM full không"
+  },
+  "full_test_file": "data/vitextvqa_official/test.json",
+  "adapter_sha256": "2e7b17d18b32b0f248b130dab4717b9b408b1da68e4fea5c3f5d6baaf9dcf863",
+  "runs": {
+    "B1": "W07_B1_zeroshot_qwen25vl_vitextvqa_testfull_bf16_L4_seed42",
+    "B2": "W07_B2_eval_qlora_r16_ep1_vitextvqa_testfull_bf16_L4_seed42"
+  },
+  "table1": [
+    {
+      "run": "B1 zero-shot",
+      "n": 10028,
+      "EM": 29.118468288791384,
+      "F1 (phụ)": 53.891930706934964,
+      "ANLS": 47.599094143625635,
+      "VQA-Acc": 29.118468288791384,
+      "s/câu": 0.876,
+      "giờ suy luận": 2.44
+    },
+    {
+      "run": "B2 QLoRA 1 epoch",
+      "n": 10028,
+      "EM": 50.25927403270841,
+      "F1 (phụ)": 71.16324131007207,
+      "ANLS": 72.02041338874653,
+      "VQA-Acc": 50.25927403270841,
+      "s/câu": 1.001,
+      "giờ suy luận": 2.79
+    },
+    {
+      "run": "ViTextBLIP-2 (paper, Table 6)",
+      "n": "full test",
+      "EM": 25.48,
+      "F1 (phụ)": 53.95
+    }
+  ],
+  "vs_vitextblip2": {
+    "B1": {
+      "reference": {
+        "what": "Table 6, ViTextBLIP-2 (SOTA của paper), full test",
+        "em": 25.48,
+        "f1": 53.95,
+        "note": "Table 10/12 cùng paper ghi 24,83 EM / 52,51 F1 cho mô hình đầy đủ; paper không giải thích"
+      },
+      "source": "Nguyen et al., ViTextVQA, Expert Systems with Applications 2025, arXiv:2404.10652v5",
+      "EM": {
+        "ours_pct": 29.12,
+        "ours_ci95_pct": [
+          28.23,
+          29.99
+        ],
+        "published_pct": 25.48,
+        "diff_points": 3.64,
+        "n": 10028,
+        "verdict": "CAO HƠN số công bố"
+      },
+      "F1": {
+        "ours_pct": 53.89,
+        "ours_ci95_pct": [
+          53.11,
+          54.66
+        ],
+        "published_pct": 53.95,
+        "diff_points": -0.06,
+        "n": 10028,
+        "verdict": "KHÔNG PHÂN BIỆT ĐƯỢC"
+      },
+      "rule": "CAO HƠN nếu cận dưới CI95 bootstrap > số công bố (xét riêng EM và F1)"
+    },
+    "B2": {
+      "reference": {
+        "what": "Table 6, ViTextBLIP-2 (SOTA của paper), full test",
+        "em": 25.48,
+        "f1": 53.95,
+        "note": "Table 10/12 cùng paper ghi 24,83 EM / 52,51 F1 cho mô hình đầy đủ; paper không giải thích"
+      },
+      "source": "Nguyen et al., ViTextVQA, Expert Systems with Applications 2025, arXiv:2404.10652v5",
+      "EM": {
+        "ours_pct": 50.26,
+        "ours_ci95_pct": [
+          49.27,
+          51.23
+        ],
+        "published_pct": 25.48,
+        "diff_points": 24.78,
+        "n": 10028,
+        "verdict": "CAO HƠN số công bố"
+      },
+      "F1": {
+        "ours_pct": 71.16,
+        "ours_ci95_pct": [
+          70.42,
+          71.89
+        ],
+        "published_pct": 53.95,
+        "diff_points": 17.21,
+        "n": 10028,
+        "verdict": "CAO HƠN số công bố"
+      },
+      "rule": "CAO HƠN nếu cận dưới CI95 bootstrap > số công bố (xét riêng EM và F1)"
+    }
+  },
+  "reference": {
+    "what": "Table 6, ViTextBLIP-2 (SOTA của paper), full test",
+    "em": 25.48,
+    "f1": 53.95,
+    "note": "Table 10/12 cùng paper ghi 24,83 EM / 52,51 F1 cho mô hình đầy đủ; paper không giải thích"
+  },
+  "source": "Nguyen et al., ViTextVQA, Expert Systems with Applications 2025, arXiv:2404.10652v5",
+  "paired_B1_vs_B2": {
+    "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B1_zeroshot_qwen25vl_vitextvqa_testfull_bf16_L4_seed42",
+    "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B2_eval_qlora_r16_ep1_vitextvqa_testfull_bf16_L4_seed42",
+    "label_a": "B1",
+    "label_b": "B2",
+    "n": 10028,
+    "n_both_correct": 2497,
+    "n_only_a": 423,
+    "n_only_b": 2543,
+    "n_both_wrong": 4565,
+    "b": 423,
+    "c": 2543,
+    "p_value": 0.0,
+    "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+    "em_a": 0.2911846828879138,
+    "em_b": 0.5025927403270841,
+    "em_diff": 0.2114080574391703,
+    "anls_threshold": 0.5,
+    "anls_a": 0.4759909414362538,
+    "anls_b": 0.7202041338874611,
+    "anls_diff": 0.24421319245120723,
+    "anls_ci95": [
+      0.23531466708497495,
+      0.25315439366550546
+    ],
+    "bootstrap": {
+      "n_resamples": 10000,
+      "seed": 42,
+      "method": "paired percentile"
+    }
+  },
+  "determinism_vs_subset_runs": {
+    "B1": {
+      "n": 2000,
+      "identical_pct": 100.0,
+      "EM_subset_run": 28.799999999999997,
+      "EM_full_run_on_subset": 28.799999999999997,
+      "pass": true
+    },
+    "B2": {
+      "n": 2000,
+      "identical_pct": 100.0,
+      "EM_subset_run": 49.7,
+      "EM_full_run_on_subset": 49.7,
+      "pass": true
+    }
+  },
+  "subset_representativeness": {
+    "B1": {
+      "EM_subset2000": 28.799999999999997,
+      "EM_full": 29.12,
+      "EM_full_ci95": [
+        28.23,
+        29.99
+      ],
+      "subset_inside_full_ci95": true
+    },
+    "B2": {
+      "EM_subset2000": 49.7,
+      "EM_full": 50.26,
+      "EM_full_ci95": [
+        49.27,
+        51.23
+      ],
+      "subset_inside_full_ci95": true
+    }
+  },
+  "gpu": "NVIDIA L4"
+}

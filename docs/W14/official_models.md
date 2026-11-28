@@ -1,0 +1,13 @@
+# Model chính thức (sinh tự động từ `configs/official_models.json`)
+
+| id | Vai trò | Run eval | EM | ANLS | F1 | Adapter (Drive) | sha256 (12) | Notebook |
+|---|---|---|---|---|---|---|---|---|
+| r0 | tái lập baseline | textvqa_val: `W07_R0_textvqa_val_qwen25vl3b_paper_bf16_L4` | 79,60 | — | — | `— (zero-shot)` | — | 06_r0_textvqa_repro_qwen25vl.ipynb |
+| b1 | baseline | vivqa_test: `W07_B1_zeroshot_qwen25vl_vivqa_test_bf16_L4_seed42` | 22,09 | 28,61 | 38,05 | `— (zero-shot)` | — | 02_run_baseline_qwen25vl.ipynb, 08_fulltest_vitextvqa_b1_b2.ipynb |
+| b1 | baseline | vitextvqa_testfull: `W07_B1_zeroshot_qwen25vl_vitextvqa_testfull_bf16_L4_seed42` | 29,12 | 47,60 | 53,89 | `— (zero-shot)` | — | 02_run_baseline_qwen25vl.ipynb, 08_fulltest_vitextvqa_b1_b2.ipynb |
+| b2_vitextvqa | bước thích nghi | vitextvqa_testfull: `W07_B2_eval_qlora_r16_ep1_vitextvqa_testfull_bf16_L4_seed42` | 50,26 | 72,02 | 71,16 | `adapters/W07_B2_qlora_r16_qwen25vl_vitextvqa_ep1_bf16_L4_seed42/epoch_1` | 2e7b17d18b32 | 04_qlora_qwen25vl.ipynb, 08_fulltest_vitextvqa_b1_b2.ipynb |
+| c3_vivqa | chính thức ViVQA | vivqa_test: `W09_C3_eval_qlora_r16_vivqa_test_bf16_L4_seed42` | 76,64 | 78,03 | 78,84 | `adapters/W09_B2_qlora_r16_qwen25vl_vivqa_ep2_bf16_L4_seed42/epoch_2` | 3ceff2f7f961 | 16_qlora_vivqa_2epoch_select_qwen25vl.ipynb |
+| b3full | chính thức ViTextVQA (đóng góp chính) | vitextvqa_testfull: `W10_B3full_eval_qlora_ocr_vietocr_v1_r16_full_ep1_vitextvqa_testfull_bf16_L4_seed42` | 53,35 | 73,89 | 73,73 | `adapters/W10_B3full_qlora_ocr_vietocr_v1_r16_qwen25vl_vitextvqa_full_ep1_bf16_L4_seed42/epoch_1` | c1eb9c2b4baf | 18_qlora_ocr_b3full_vs_b2_qwen25vl.ipynb |
+| b3full | chính thức ViTextVQA (đóng góp chính) | vitextvqa_testfull_exiffix (độ nhạy W14): `W14_B3full_eval_exiffix_qlora_ocr_vietocr_v1_r16_full_ep1_vitextvqa_testfull_bf16_L4_seed42` | 53,63 | 74,07 | 73,96 | `adapters/W10_B3full_qlora_ocr_vietocr_v1_r16_qwen25vl_vitextvqa_full_ep1_bf16_L4_seed42/epoch_1` | c1eb9c2b4baf | 18_qlora_ocr_b3full_vs_b2_qwen25vl.ipynb |
+| sh | prototype (adapter dùng chung) | vivqa_test: `W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vivqa_test_bf16_L4_seed42` | 73,51 | 75,45 | 76,09 | `adapters/W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42/epoch_1` | c9791e961aaa | 20_qlora_shared_adapter_qwen25vl.ipynb, 28_prototype_v2_live_demo_sh_qwen25vl.ipynb |
+| sh | prototype (adapter dùng chung) | vitextvqa_test2000: `W11_SH_eval_qlora_ocr_vietocr_v1_r16_shared_ep1_vitextvqa_test2000_bf16_L4_seed42` | 49,50 | 71,12 | 70,09 | `adapters/W11_SH_qlora_ocr_vietocr_v1_r16_qwen25vl_shared_vivqa_sub8k_ep1_bf16_L4_seed42/epoch_1` | c9791e961aaa | 20_qlora_shared_adapter_qwen25vl.ipynb, 28_prototype_v2_live_demo_sh_qwen25vl.ipynb |

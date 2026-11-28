@@ -1,0 +1,116 @@
+{
+  "what": "B2 = QLoRA sơ bộ 1 epoch trên ViVQA train; so với B1 (zero-shot) cùng model 4-bit, prompt, decoding, test, GPU",
+  "pre_registered_rule": "cải thiện nếu EM tăng và McNemar exact p < 0.05 trên ViVQA test; ANLS kèm CI95 bootstrap ghép cặp",
+  "train": {
+    "run": "W07_B2_qlora_r16_qwen25vl_vivqa_ep1_bf16_L4_seed42",
+    "adapter": "/content/drive/MyDrive/ViVQA-VLM/adapters/W07_B2_qlora_r16_qwen25vl_vivqa_ep1_bf16_L4_seed42/epoch_1",
+    "epochs": 1,
+    "global_step": 675,
+    "sec_per_step": 16.174,
+    "train_hours": 3.03,
+    "peak_vram_gb": 6.62,
+    "final_loss": 0.4763,
+    "resumed_from": null,
+    "trainable_params": 7372800,
+    "trainable_pct": 0.196,
+    "data": "ViVQA train 10.799 (chưa làm sạch nhiễu)"
+  },
+  "eval_runs": {
+    "vivqa": "W07_B2_eval_qlora_r16_ep1_vivqa_test_bf16_L4_seed42"
+  },
+  "table1": [
+    {
+      "tập": "vivqa",
+      "run": "B1 zero-shot",
+      "EM": 0.22092635788070644,
+      "VQA-Acc": 0.22092635788070644,
+      "ANLS": 0.28605205920218557,
+      "token-F1 (phụ)": 0.3805318993254651,
+      "câu hỏng": 0,
+      "s/câu": 0.51
+    },
+    {
+      "tập": "vivqa",
+      "run": "B2 QLoRA 1 epoch",
+      "EM": 0.7377540819726758,
+      "VQA-Acc": 0.7377540819726758,
+      "ANLS": 0.7565609600514632,
+      "token-F1 (phụ)": 0.7620348772631346,
+      "câu hỏng": 0,
+      "s/câu": 0.571
+    }
+  ],
+  "table2_by_type": [
+    {
+      "loại": "color",
+      "n": 625,
+      "B1 EM": 0.448,
+      "B2 EM": 0.8304,
+      "B1 ANLS": 0.5542554778554771,
+      "B2 ANLS": 0.832
+    },
+    {
+      "loại": "location",
+      "n": 685,
+      "B1 EM": 0.0072992700729927005,
+      "B2 EM": 0.6364963503649635,
+      "B1 ANLS": 0.06984337593611965,
+      "B2 ANLS": 0.6711676198902473
+    },
+    {
+      "loại": "object",
+      "n": 1247,
+      "B1 EM": 0.05693664795509222,
+      "B2 EM": 0.7353648757016841,
+      "B1 ANLS": 0.12565344305520726,
+      "B2 ANLS": 0.7603766010341791
+    },
+    {
+      "loại": "number",
+      "n": 444,
+      "B1 EM": 0.6914414414414415,
+      "B2 EM": 0.7702702702702703,
+      "B1 ANLS": 0.6925675675675675,
+      "B2 ANLS": 0.7713963963963963
+    }
+  ],
+  "table3_answer_length": {
+    "gold (đáp án đầu)": 1.5718093968677107,
+    "B1": 2.8817060979673443,
+    "B2": 1.5531489503498834
+  },
+  "paired": {
+    "vivqa": {
+      "run_a": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B1_zeroshot_qwen25vl_vivqa_test_bf16_L4_seed42",
+      "run_b": "/content/drive/MyDrive/ViVQA-VLM/experiments/W07_B2_eval_qlora_r16_ep1_vivqa_test_bf16_L4_seed42",
+      "label_a": "B1",
+      "label_b": "B2",
+      "n": 3001,
+      "n_both_correct": 628,
+      "n_only_a": 35,
+      "n_only_b": 1586,
+      "n_both_wrong": 752,
+      "b": 35,
+      "c": 1586,
+      "p_value": 0.0,
+      "mcnemar_test": "exact binomial, two-sided, n=b+c, p=0.5",
+      "em_a": 0.22092635788070644,
+      "em_b": 0.7377540819726758,
+      "em_diff": 0.5168277240919693,
+      "anls_threshold": 0.5,
+      "anls_a": 0.2860520592021856,
+      "anls_b": 0.7565609600514632,
+      "anls_diff": 0.4705089008492776,
+      "anls_ci95": [
+        0.4527868382975504,
+        0.4886889616798275
+      ],
+      "bootstrap": {
+        "n_resamples": 10000,
+        "seed": 42,
+        "method": "paired percentile"
+      }
+    }
+  },
+  "gpu": "NVIDIA L4"
+}

@@ -1,0 +1,59 @@
+{
+  "metrics": {
+    "exact_match": 0.167,
+    "vqa_accuracy": 0.167,
+    "anls": 0.2994400996551797,
+    "token_f1": 0.4350430077778375,
+    "exact_match__unknown": 0.167,
+    "vqa_accuracy__unknown": 0.167,
+    "anls__unknown": 0.2994400996551797,
+    "token_f1__unknown": 0.4350430077778375
+  },
+  "meta": {
+    "run_name": "W07_R1_vitextvqa_test2000_qwen2vl7b_paper_bf16_L4_seed42",
+    "finished_utc": "2026-10-10T05:43:39+00:00",
+    "num_samples": 2000,
+    "question_type_counts": {
+      "unknown": 2000
+    },
+    "prompting_mode": "zero_shot",
+    "decoding": "greedy (do_sample=False)",
+    "max_new_tokens": 32,
+    "model_id": "Qwen/Qwen2-VL-7B-Instruct",
+    "backbone": "qwen2_vl",
+    "variant": "qwen2vl7b_paper",
+    "quantization": {
+      "4bit": null,
+      "type": null,
+      "double_quant": null,
+      "compute_dtype": null
+    },
+    "torch_dtype": "bfloat16",
+    "min_pixels": null,
+    "max_pixels": null,
+    "seed": 42,
+    "git_commit": "e8d8fa2",
+    "config_file": "configs/qwen_lora.yaml",
+    "hardware": {
+      "gpus_seen": [
+        "NVIDIA L4"
+      ],
+      "platform": "Linux-6.6.122+-x86_64-with-glibc2.39"
+    },
+    "inference_time_sec": 5699.2,
+    "sec_per_sample": 2.85,
+    "peak_vram_gb_this_session": 20.27,
+    "variant_why": "gần paper nhất có thể: bf16, không lượng tử, độ phân giải mặc định (paper không công bố cấu hình)",
+    "oom_fallback_images": [],
+    "dataset": "vitextvqa_official",
+    "data_file": "data/vitextvqa_official/test_subset2000_seed42.json",
+    "data_file_sha256": "69a8b35c64fb505147fbd7904b19dce3853d7b63a24bb888359bdff61b30f68e",
+    "limit": null,
+    "chunk_size": 500,
+    "adapter": null,
+    "versions": {
+      "transformers": "5.17.0",
+      "torch": "2.11.0+cu130"
+    }
+  }
+}

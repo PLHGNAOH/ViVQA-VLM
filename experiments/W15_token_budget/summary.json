@@ -1,0 +1,849 @@
+{
+  "version": "token-budget-v1",
+  "finished_utc": "2026-11-04T06:56:17+00:00",
+  "model": {
+    "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "revision": "66285546d2b821cf421d4f5eb2576359d3770cd3",
+    "context_window": 128000,
+    "num_hidden_layers": 36,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 2,
+    "head_dim": 128,
+    "kv_cache_bytes_per_token": 36864
+  },
+  "qwen_vl_utils_defaults": {
+    "factor": 28,
+    "min_pixels": 3136,
+    "max_pixels": 12845056
+  },
+  "config": {
+    "min_pixels": 200704,
+    "max_pixels": 401408,
+    "alt_max_pixels": 1003520,
+    "max_new_tokens": 32,
+    "ocr_backend": "paddledet_vietocr",
+    "ocr_template": "v1",
+    "ocr_max_chars": 600,
+    "seed": 42
+  },
+  "validation": {
+    "n_checked": 1200,
+    "n_mismatch": 0,
+    "ok": true,
+    "per_split": [
+      {
+        "split": "vivqa_test",
+        "mode": "zero_shot",
+        "n_checked": 150,
+        "n_mismatch": 0,
+        "examples": [],
+        "method": "fast"
+      },
+      {
+        "split": "vivqa_test",
+        "mode": "ocr",
+        "n_checked": 150,
+        "n_mismatch": 0,
+        "examples": [],
+        "method": "fast"
+      },
+      {
+        "split": "vivqa_train",
+        "mode": "zero_shot",
+        "n_checked": 150,
+        "n_mismatch": 0,
+        "examples": [],
+        "method": "fast"
+      },
+      {
+        "split": "vivqa_train",
+        "mode": "ocr",
+        "n_checked": 150,
+        "n_mismatch": 0,
+        "examples": [],
+        "method": "fast"
+      },
+      {
+        "split": "vitextvqa_test",
+        "mode": "zero_shot",
+        "n_checked": 150,
+        "n_mismatch": 0,
+        "examples": [],
+        "method": "fast"
+      },
+      {
+        "split": "vitextvqa_test",
+        "mode": "ocr",
+        "n_checked": 150,
+        "n_mismatch": 0,
+        "examples": [],
+        "method": "fast"
+      },
+      {
+        "split": "vitextvqa_train",
+        "mode": "zero_shot",
+        "n_checked": 150,
+        "n_mismatch": 0,
+        "examples": [],
+        "method": "fast"
+      },
+      {
+        "split": "vitextvqa_train",
+        "mode": "ocr",
+        "n_checked": 150,
+        "n_mismatch": 0,
+        "examples": [],
+        "method": "fast"
+      }
+    ],
+    "note": "n_mismatch tính trên đường nhanh; tập lệch đã đo lại bằng processor (xem method)"
+  },
+  "results": {
+    "vivqa_test|zero_shot": {
+      "n_questions": 3001,
+      "n_images": 2789,
+      "image_tokens": {
+        "n": 3001,
+        "min": 256.0,
+        "mean": 357.8,
+        "max": 506.0,
+        "p50": 345.0,
+        "p95": 460.0,
+        "p99": 484.0
+      },
+      "pct_images_capped_512": 1.5,
+      "pct_images_raised_to_256": 14.5,
+      "native_image_tokens": {
+        "n": 3001,
+        "min": 40.0,
+        "mean": 351.5,
+        "max": 529.0,
+        "p50": 345.0,
+        "p95": 460.0,
+        "p99": 529.0
+      },
+      "image_tokens_if_1280_cap": {
+        "n": 3001,
+        "min": 256.0,
+        "mean": 358.5,
+        "max": 529.0,
+        "p50": 345.0,
+        "p95": 460.0,
+        "p99": 529.0
+      },
+      "question_tokens": {
+        "n": 3001,
+        "min": 3.0,
+        "mean": 12.1,
+        "max": 32.0,
+        "p50": 11.0,
+        "p95": 21.0,
+        "p99": 25.0
+      },
+      "text_tokens": {
+        "n": 3001,
+        "min": 66.0,
+        "mean": 74.2,
+        "max": 95.0,
+        "p50": 73.0,
+        "p95": 83.0,
+        "p99": 88.0
+      },
+      "input_tokens": {
+        "n": 3001,
+        "min": 329.0,
+        "mean": 432.0,
+        "max": 587.0,
+        "p50": 425.0,
+        "p95": 532.0,
+        "p99": 564.0
+      },
+      "max_sequence_infer": {
+        "n": 3001,
+        "min": 361.0,
+        "mean": 464.0,
+        "max": 619.0,
+        "p50": 457.0,
+        "p95": 564.0,
+        "p99": 596.0
+      },
+      "context_window": 128000,
+      "longest_sequence": 619,
+      "pct_of_context_longest": 0.484,
+      "kv_cache_mb_longest": 21.76,
+      "image_share_of_input_p50": 83.0
+    },
+    "vivqa_test|ocr": {
+      "n_questions": 3001,
+      "n_images": 2789,
+      "image_tokens": {
+        "n": 3001,
+        "min": 256.0,
+        "mean": 357.8,
+        "max": 506.0,
+        "p50": 345.0,
+        "p95": 460.0,
+        "p99": 484.0
+      },
+      "pct_images_capped_512": 1.5,
+      "pct_images_raised_to_256": 14.5,
+      "native_image_tokens": {
+        "n": 3001,
+        "min": 40.0,
+        "mean": 351.5,
+        "max": 529.0,
+        "p50": 345.0,
+        "p95": 460.0,
+        "p99": 529.0
+      },
+      "image_tokens_if_1280_cap": {
+        "n": 3001,
+        "min": 256.0,
+        "mean": 358.5,
+        "max": 529.0,
+        "p50": 345.0,
+        "p95": 460.0,
+        "p99": 529.0
+      },
+      "question_tokens": {
+        "n": 3001,
+        "min": 3.0,
+        "mean": 12.1,
+        "max": 32.0,
+        "p50": 11.0,
+        "p95": 21.0,
+        "p99": 25.0
+      },
+      "text_tokens": {
+        "n": 3001,
+        "min": 66.0,
+        "mean": 83.2,
+        "max": 497.0,
+        "p50": 80.0,
+        "p95": 107.0,
+        "p99": 147.0
+      },
+      "input_tokens": {
+        "n": 3001,
+        "min": 329.0,
+        "mean": 441.0,
+        "max": 888.0,
+        "p50": 438.0,
+        "p95": 552.0,
+        "p99": 585.0
+      },
+      "max_sequence_infer": {
+        "n": 3001,
+        "min": 361.0,
+        "mean": 473.0,
+        "max": 920.0,
+        "p50": 470.0,
+        "p95": 584.0,
+        "p99": 617.0
+      },
+      "ocr_line_tokens": {
+        "n": 3001,
+        "min": 0.0,
+        "mean": 9.1,
+        "max": 428.0,
+        "p50": 0.0,
+        "p95": 32.0,
+        "p99": 74.0
+      },
+      "pct_questions_with_ocr_line": 44.25,
+      "ocr_line_tokens_when_present": {
+        "n": 1328,
+        "min": 9.0,
+        "mean": 20.5,
+        "max": 428.0,
+        "p50": 13.0,
+        "p95": 54.0,
+        "p99": 111.0
+      },
+      "context_window": 128000,
+      "longest_sequence": 920,
+      "pct_of_context_longest": 0.719,
+      "kv_cache_mb_longest": 32.34,
+      "image_share_of_input_p50": 81.6
+    },
+    "vivqa_train|zero_shot": {
+      "n_questions": 10799,
+      "n_images": 8255,
+      "image_tokens": {
+        "n": 10799,
+        "min": 256.0,
+        "mean": 357.5,
+        "max": 506.0,
+        "p50": 345.0,
+        "p95": 460.0,
+        "p99": 484.0
+      },
+      "pct_images_capped_512": 1.56,
+      "pct_images_raised_to_256": 14.61,
+      "native_image_tokens": {
+        "n": 10799,
+        "min": 35.0,
+        "mean": 350.8,
+        "max": 529.0,
+        "p50": 345.0,
+        "p95": 460.0,
+        "p99": 529.0
+      },
+      "image_tokens_if_1280_cap": {
+        "n": 10799,
+        "min": 256.0,
+        "mean": 358.2,
+        "max": 529.0,
+        "p50": 345.0,
+        "p95": 460.0,
+        "p99": 529.0
+      },
+      "question_tokens": {
+        "n": 10799,
+        "min": 2.0,
+        "mean": 12.0,
+        "max": 37.0,
+        "p50": 11.0,
+        "p95": 21.0,
+        "p99": 25.0
+      },
+      "text_tokens": {
+        "n": 10799,
+        "min": 65.0,
+        "mean": 74.1,
+        "max": 100.0,
+        "p50": 73.0,
+        "p95": 83.0,
+        "p99": 88.0
+      },
+      "input_tokens": {
+        "n": 10799,
+        "min": 327.0,
+        "mean": 431.5,
+        "max": 598.0,
+        "p50": 425.0,
+        "p95": 530.0,
+        "p99": 564.0
+      },
+      "max_sequence_infer": {
+        "n": 10799,
+        "min": 359.0,
+        "mean": 463.5,
+        "max": 630.0,
+        "p50": 457.0,
+        "p95": 562.0,
+        "p99": 596.0
+      },
+      "answer_tokens": {
+        "n": 10799,
+        "min": 2.0,
+        "mean": 4.1,
+        "max": 8.0,
+        "p50": 4.0,
+        "p95": 7.0,
+        "p99": 7.0
+      },
+      "sequence_train": {
+        "n": 10799,
+        "min": 330.0,
+        "mean": 435.6,
+        "max": 600.0,
+        "p50": 428.0,
+        "p95": 535.0,
+        "p99": 567.0
+      },
+      "context_window": 128000,
+      "longest_sequence": 630,
+      "pct_of_context_longest": 0.492,
+      "kv_cache_mb_longest": 22.15,
+      "image_share_of_input_p50": 82.9
+    },
+    "vivqa_train|ocr": {
+      "n_questions": 10799,
+      "n_images": 8255,
+      "image_tokens": {
+        "n": 10799,
+        "min": 256.0,
+        "mean": 357.5,
+        "max": 506.0,
+        "p50": 345.0,
+        "p95": 460.0,
+        "p99": 484.0
+      },
+      "pct_images_capped_512": 1.56,
+      "pct_images_raised_to_256": 14.61,
+      "native_image_tokens": {
+        "n": 10799,
+        "min": 35.0,
+        "mean": 350.8,
+        "max": 529.0,
+        "p50": 345.0,
+        "p95": 460.0,
+        "p99": 529.0
+      },
+      "image_tokens_if_1280_cap": {
+        "n": 10799,
+        "min": 256.0,
+        "mean": 358.2,
+        "max": 529.0,
+        "p50": 345.0,
+        "p95": 460.0,
+        "p99": 529.0
+      },
+      "question_tokens": {
+        "n": 10799,
+        "min": 2.0,
+        "mean": 12.0,
+        "max": 37.0,
+        "p50": 11.0,
+        "p95": 21.0,
+        "p99": 25.0
+      },
+      "text_tokens": {
+        "n": 10799,
+        "min": 65.0,
+        "mean": 83.1,
+        "max": 483.0,
+        "p50": 80.0,
+        "p95": 108.0,
+        "p99": 142.0
+      },
+      "input_tokens": {
+        "n": 10799,
+        "min": 327.0,
+        "mean": 440.6,
+        "max": 887.0,
+        "p50": 438.0,
+        "p95": 552.0,
+        "p99": 586.0
+      },
+      "max_sequence_infer": {
+        "n": 10799,
+        "min": 359.0,
+        "mean": 472.6,
+        "max": 919.0,
+        "p50": 470.0,
+        "p95": 584.0,
+        "p99": 618.0
+      },
+      "ocr_line_tokens": {
+        "n": 10799,
+        "min": 0.0,
+        "mean": 9.1,
+        "max": 401.0,
+        "p50": 0.0,
+        "p95": 33.0,
+        "p99": 67.0
+      },
+      "pct_questions_with_ocr_line": 44.77,
+      "ocr_line_tokens_when_present": {
+        "n": 4835,
+        "min": 9.0,
+        "mean": 20.2,
+        "max": 401.0,
+        "p50": 14.0,
+        "p95": 49.0,
+        "p99": 100.0
+      },
+      "answer_tokens": {
+        "n": 10799,
+        "min": 2.0,
+        "mean": 4.1,
+        "max": 8.0,
+        "p50": 4.0,
+        "p95": 7.0,
+        "p99": 7.0
+      },
+      "sequence_train": {
+        "n": 10799,
+        "min": 330.0,
+        "mean": 444.7,
+        "max": 893.0,
+        "p50": 442.0,
+        "p95": 557.0,
+        "p99": 590.0
+      },
+      "context_window": 128000,
+      "longest_sequence": 919,
+      "pct_of_context_longest": 0.718,
+      "kv_cache_mb_longest": 32.31,
+      "image_share_of_input_p50": 81.5
+    },
+    "vitextvqa_test|zero_shot": {
+      "n_questions": 10028,
+      "n_images": 3353,
+      "image_tokens": {
+        "n": 10028,
+        "min": 256.0,
+        "mean": 425.4,
+        "max": 512.0,
+        "p50": 480.0,
+        "p95": 504.0,
+        "p99": 510.0
+      },
+      "pct_images_capped_512": 57.69,
+      "pct_images_raised_to_256": 14.02,
+      "native_image_tokens": {
+        "n": 10028,
+        "min": 10.0,
+        "mean": 1961.9,
+        "max": 16335.0,
+        "p50": 609.0,
+        "p95": 15552.0,
+        "p99": 16160.0
+      },
+      "image_tokens_if_1280_cap": {
+        "n": 10028,
+        "min": 256.0,
+        "mean": 718.9,
+        "max": 1280.0,
+        "p50": 609.0,
+        "p95": 1254.0,
+        "p99": 1271.0
+      },
+      "question_tokens": {
+        "n": 10028,
+        "min": 4.0,
+        "mean": 11.3,
+        "max": 40.0,
+        "p50": 11.0,
+        "p95": 18.0,
+        "p99": 23.0
+      },
+      "text_tokens": {
+        "n": 10028,
+        "min": 67.0,
+        "mean": 73.5,
+        "max": 102.0,
+        "p50": 73.0,
+        "p95": 80.0,
+        "p99": 85.0
+      },
+      "input_tokens": {
+        "n": 10028,
+        "min": 324.0,
+        "mean": 498.9,
+        "max": 598.0,
+        "p50": 554.0,
+        "p95": 578.0,
+        "p99": 585.0
+      },
+      "max_sequence_infer": {
+        "n": 10028,
+        "min": 356.0,
+        "mean": 530.9,
+        "max": 630.0,
+        "p50": 586.0,
+        "p95": 610.0,
+        "p99": 617.0
+      },
+      "context_window": 128000,
+      "longest_sequence": 630,
+      "pct_of_context_longest": 0.492,
+      "kv_cache_mb_longest": 22.15,
+      "image_share_of_input_p50": 86.5
+    },
+    "vitextvqa_test|ocr": {
+      "n_questions": 10028,
+      "n_images": 3353,
+      "image_tokens": {
+        "n": 10028,
+        "min": 256.0,
+        "mean": 425.4,
+        "max": 512.0,
+        "p50": 480.0,
+        "p95": 504.0,
+        "p99": 510.0
+      },
+      "pct_images_capped_512": 57.69,
+      "pct_images_raised_to_256": 14.02,
+      "native_image_tokens": {
+        "n": 10028,
+        "min": 10.0,
+        "mean": 1961.9,
+        "max": 16335.0,
+        "p50": 609.0,
+        "p95": 15552.0,
+        "p99": 16160.0
+      },
+      "image_tokens_if_1280_cap": {
+        "n": 10028,
+        "min": 256.0,
+        "mean": 718.9,
+        "max": 1280.0,
+        "p50": 609.0,
+        "p95": 1254.0,
+        "p99": 1271.0
+      },
+      "question_tokens": {
+        "n": 10028,
+        "min": 4.0,
+        "mean": 11.3,
+        "max": 40.0,
+        "p50": 11.0,
+        "p95": 18.0,
+        "p99": 23.0
+      },
+      "text_tokens": {
+        "n": 10028,
+        "min": 67.0,
+        "mean": 170.8,
+        "max": 551.0,
+        "p50": 149.0,
+        "p95": 335.0,
+        "p99": 411.0
+      },
+      "input_tokens": {
+        "n": 10028,
+        "min": 331.0,
+        "mean": 596.2,
+        "max": 1026.0,
+        "p50": 610.0,
+        "p95": 810.0,
+        "p99": 897.0
+      },
+      "max_sequence_infer": {
+        "n": 10028,
+        "min": 363.0,
+        "mean": 628.2,
+        "max": 1058.0,
+        "p50": 642.0,
+        "p95": 842.0,
+        "p99": 929.0
+      },
+      "ocr_line_tokens": {
+        "n": 10028,
+        "min": 0.0,
+        "mean": 97.3,
+        "max": 473.0,
+        "p50": 75.0,
+        "p95": 262.0,
+        "p99": 335.0
+      },
+      "pct_questions_with_ocr_line": 99.68,
+      "ocr_line_tokens_when_present": {
+        "n": 9996,
+        "min": 10.0,
+        "mean": 97.6,
+        "max": 473.0,
+        "p50": 76.0,
+        "p95": 262.0,
+        "p99": 335.0
+      },
+      "context_window": 128000,
+      "longest_sequence": 1058,
+      "pct_of_context_longest": 0.827,
+      "kv_cache_mb_longest": 37.2,
+      "image_share_of_input_p50": 73.1
+    },
+    "vitextvqa_train|zero_shot": {
+      "n_questions": 35159,
+      "n_images": 11733,
+      "image_tokens": {
+        "n": 35159,
+        "min": 256.0,
+        "mean": 427.5,
+        "max": 512.0,
+        "p50": 480.0,
+        "p95": 504.0,
+        "p99": 510.0
+      },
+      "pct_images_capped_512": 59.8,
+      "pct_images_raised_to_256": 13.8,
+      "native_image_tokens": {
+        "n": 35159,
+        "min": 8.0,
+        "mean": 2080.5,
+        "max": 16335.0,
+        "p50": 625.0,
+        "p95": 15552.0,
+        "p99": 16170.0
+      },
+      "image_tokens_if_1280_cap": {
+        "n": 35159,
+        "min": 256.0,
+        "mean": 733.7,
+        "max": 1280.0,
+        "p50": 625.0,
+        "p95": 1254.0,
+        "p99": 1271.0
+      },
+      "question_tokens": {
+        "n": 35159,
+        "min": 4.0,
+        "mean": 11.4,
+        "max": 51.0,
+        "p50": 11.0,
+        "p95": 18.0,
+        "p99": 23.0
+      },
+      "text_tokens": {
+        "n": 35159,
+        "min": 67.0,
+        "mean": 73.5,
+        "max": 113.0,
+        "p50": 73.0,
+        "p95": 80.0,
+        "p99": 85.0
+      },
+      "input_tokens": {
+        "n": 35159,
+        "min": 324.0,
+        "mean": 501.0,
+        "max": 613.0,
+        "p50": 554.0,
+        "p95": 578.0,
+        "p99": 585.0
+      },
+      "max_sequence_infer": {
+        "n": 35159,
+        "min": 356.0,
+        "mean": 533.0,
+        "max": 645.0,
+        "p50": 586.0,
+        "p95": 610.0,
+        "p99": 617.0
+      },
+      "answer_tokens": {
+        "n": 35159,
+        "min": 2.0,
+        "mean": 7.9,
+        "max": 64.0,
+        "p50": 6.0,
+        "p95": 19.0,
+        "p99": 28.0
+      },
+      "sequence_train": {
+        "n": 35159,
+        "min": 327.0,
+        "mean": 509.0,
+        "max": 645.0,
+        "p50": 561.0,
+        "p95": 588.0,
+        "p99": 598.0
+      },
+      "context_window": 128000,
+      "longest_sequence": 645,
+      "pct_of_context_longest": 0.504,
+      "kv_cache_mb_longest": 22.68,
+      "image_share_of_input_p50": 86.5
+    },
+    "vitextvqa_train|ocr": {
+      "n_questions": 35159,
+      "n_images": 11733,
+      "image_tokens": {
+        "n": 35159,
+        "min": 256.0,
+        "mean": 427.5,
+        "max": 512.0,
+        "p50": 480.0,
+        "p95": 504.0,
+        "p99": 510.0
+      },
+      "pct_images_capped_512": 59.8,
+      "pct_images_raised_to_256": 13.8,
+      "native_image_tokens": {
+        "n": 35159,
+        "min": 8.0,
+        "mean": 2080.5,
+        "max": 16335.0,
+        "p50": 625.0,
+        "p95": 15552.0,
+        "p99": 16170.0
+      },
+      "image_tokens_if_1280_cap": {
+        "n": 35159,
+        "min": 256.0,
+        "mean": 733.7,
+        "max": 1280.0,
+        "p50": 625.0,
+        "p95": 1254.0,
+        "p99": 1271.0
+      },
+      "question_tokens": {
+        "n": 35159,
+        "min": 4.0,
+        "mean": 11.4,
+        "max": 51.0,
+        "p50": 11.0,
+        "p95": 18.0,
+        "p99": 23.0
+      },
+      "text_tokens": {
+        "n": 35159,
+        "min": 67.0,
+        "mean": 171.2,
+        "max": 537.0,
+        "p50": 150.0,
+        "p95": 337.0,
+        "p99": 404.0
+      },
+      "input_tokens": {
+        "n": 35159,
+        "min": 332.0,
+        "mean": 598.7,
+        "max": 1012.0,
+        "p50": 613.0,
+        "p95": 815.0,
+        "p99": 886.0
+      },
+      "max_sequence_infer": {
+        "n": 35159,
+        "min": 364.0,
+        "mean": 630.7,
+        "max": 1044.0,
+        "p50": 645.0,
+        "p95": 847.0,
+        "p99": 918.0
+      },
+      "ocr_line_tokens": {
+        "n": 35159,
+        "min": 0.0,
+        "mean": 97.7,
+        "max": 462.0,
+        "p50": 76.0,
+        "p95": 260.0,
+        "p99": 330.0
+      },
+      "pct_questions_with_ocr_line": 99.77,
+      "ocr_line_tokens_when_present": {
+        "n": 35077,
+        "min": 10.0,
+        "mean": 97.9,
+        "max": 462.0,
+        "p50": 76.0,
+        "p95": 260.0,
+        "p99": 330.0
+      },
+      "answer_tokens": {
+        "n": 35159,
+        "min": 2.0,
+        "mean": 7.9,
+        "max": 64.0,
+        "p50": 6.0,
+        "p95": 19.0,
+        "p99": 28.0
+      },
+      "sequence_train": {
+        "n": 35159,
+        "min": 335.0,
+        "mean": 606.7,
+        "max": 1023.0,
+        "p50": 620.0,
+        "p95": 826.0,
+        "p99": 897.0
+      },
+      "context_window": 128000,
+      "longest_sequence": 1044,
+      "pct_of_context_longest": 0.816,
+      "kv_cache_mb_longest": 36.7,
+      "image_share_of_input_p50": 73.1
+    }
+  },
+  "elapsed_sec": 990.7,
+  "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+  "versions": {
+    "transformers": "5.17.0",
+    "qwen_vl_utils": "unknown"
+  }
+}
