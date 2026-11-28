@@ -38,7 +38,7 @@ Môi trường đo 2026-11-13: RTX 3050 Ti Laptop 4 GB · CPU i5-12500H · venv 
 
 ### Lệnh chạy
 
-Cách nhanh: `.\demo` (offline, song song, tự mở trình duyệt **nền sáng** `http://127.0.0.1:7860/?__theme=light`, bộ chọn Zero-shot / Final Model) · `.\demo safe` (tuần tự, ít tranh RAM) · `.\demo share` (link gradio.live) · `.\demo nhom` (chỉ Final Model, không bộ chọn) · hoặc **Tasks** → `ViVQA demo (offline)` / `(safe)` / `(share)`.
+Cách nhanh: `.\demo` (offline, song song, tự mở trình duyệt **nền sáng** `http://127.0.0.1:7860/?__theme=light`) · `.\demo safe` (tuần tự, ít tranh RAM) · `.\demo share` (link gradio.live) · hoặc **Tasks** → `ViVQA demo (offline)` / `(safe)` / `(share)`.
 
 Khi trình chiếu / máy chiếu: mở fullscreen **F11**, phóng to trang **Ctrl + '+'** (Ctrl + '-' thu nhỏ). Muốn nền tối: chạy PS1 với `-Dark` (không gắn `?__theme=light`).
 
@@ -125,11 +125,3 @@ Trước (OMP=1): tổng ~9–25 s/câu; OCR chiếm ~80–94% thời gian mỗi
 - `-Share` → link công khai `*.gradio.live` (Gradio).
 - Cùng Wi-Fi: `http://<IP-LAN>:7860` (script bind `0.0.0.0`).
 - Bảo vệ: `-Offline` + `http://127.0.0.1:7860`.
-
-## Bộ chọn mô hình (v2.5)
-
-Ngay dưới ô câu hỏi có đúng hai lựa chọn: **Zero-shot** (mô hình gốc, chưa cải tiến) và **Final Model** (mô hình cuối cùng của nhóm). Luồng trình bày: tải ảnh, gõ câu hỏi, chọn Zero-shot, bấm Trả lời, đọc kết quả; rồi chuyển sang Final Model và bấm Trả lời lại trên cùng ảnh, cùng câu hỏi. Mỗi lần chỉ hiện kết quả của mô hình đang chọn. Đổi lựa chọn không tự chạy lại và không xoá kết quả đang hiện.
-
-Zero-shot dùng cùng trọng số, tắt adapter (`disable_adapter`), không chạy OCR và không đi đường có/không τ. Final Model đi đúng đường SH (OCR, τ, mức tin cậy). `.\demo nhom` (cờ `--no_model_selector`) chỉ chạy Final Model, không có bộ chọn.
-
-Quay lui code: `git checkout demo-pre-compare-20261128 -- src/prototype`.

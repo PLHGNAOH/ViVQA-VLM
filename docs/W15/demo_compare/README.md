@@ -84,3 +84,7 @@ Giao diện demo chỉ hiện hai thẻ: mô hình gốc (Zero-shot) và mô hì
 ## Giao diện v2.5 (28/11 tối)
 
 Bộ chọn hai mục: Zero-shot và Final Model. Mỗi lần bấm Trả lời chỉ hiện kết quả của mô hình đang chọn.
+
+## Tạm gác (28/11 tối)
+
+Buổi 30/11 dùng prototype v2.2 (chỉ Final Model). Code so sánh (compare-v1 → v2.5, compare_scan.py) nằm ở nhánh feature/compare-selector (4d7924e), cập nhật sau 30/11.

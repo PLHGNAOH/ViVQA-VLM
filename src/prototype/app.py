@@ -11,8 +11,6 @@ Nguyên tắc (từ kết quả đã kiểm ở W13, docs/W13/README.md):
     Ngưỡng mức đọc từ prototype_check_summary.json (chọn trên nửa A tập test), không gõ tay.
   - OCR chạy ở tiến trình riêng (src.prototype.ocr_worker) với ĐÚNG engine đã dựng cache; khác engine -> không chạy.
   - Không lưu ảnh / câu hỏi / câu trả lời. Log (tuỳ chọn) chỉ ghi số đo: thời gian, mức, số dòng OCR, kích thước ảnh.
-  - Bộ chọn (v2.5): Zero-shot hoặc Final Model. Mỗi lần bấm Trả lời chỉ hiện kết quả của mô hình đang chọn.
-    Đường Final Model (SH) không đổi. --no_model_selector ẩn bộ chọn và chỉ chạy Final Model.
 
 Chạy:
   Backend giả, CPU (xem/duyệt giao diện, 0 GPU):   python -m src.prototype.app --mock
@@ -32,9 +30,9 @@ import time
 import uuid
 from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-APP_VERSION = "prototype-app-v2.5-selector"   # bộ chọn Zero-shot / Final Model, mỗi lần một kết quả
+APP_VERSION = "prototype-app-v2.2"   # v2.2: OCR prefetch/cache + latency chi tiết (output-identical)
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SUMMARY_REL = "experiments/W13_prototype_check_L4_seed42/prototype_check_summary.json"
 OCR_SELECTION_REL = "experiments/W08_ocr_select_dev300_L4_seed42/ocr_selection.json"
@@ -404,34 +402,12 @@ class MockBackend:
 
     def __init__(self, settings: Dict[str, Any], ocr_cfg: Dict[str, Any]):
         self.settings, self.ocr_cfg = settings, ocr_cfg
-        self.n_ask = 0
-        self.n_ask_base = 0
 
-    def ask_base(self, image_path: str, question: str, key: str = "b1") -> Dict[str, Any]:
-        """Câu mẫu Zero-shot. Không gọi ask."""
-        from src.prompting.builder import prompt_for_sample
-        from src.prototype.core import COMPARE_MODES
-        self.n_ask_base += 1
-        prompting = {"mode": COMPARE_MODES[key]["prompt_mode"], "ocr": {"template": self.ocr_cfg["template"]}}
-        prompt = prompt_for_sample(
-            {"question": question, "ocr_texts": [], "question_id": "proto"}, prompting)
-        return {
-            "key": key,
-            "label": COMPARE_MODES[key]["label"],
-            "answer": "(dữ liệu mẫu) Zero-shot",
-            "prompt": prompt,
-            "sec_model": 0.02,
-        }
-
-    def ask(self, image_path: str, question: str,
-            ocr_lines: Optional[List[Dict[str, Any]]] = None,
-            ocr_timing: Optional[Dict[str, Any]] = None,
-            compare: Sequence[str] = ()) -> Dict[str, Any]:
+    def ask(self, image_path: str, question: str) -> Dict[str, Any]:
         from PIL import Image
         from src.data.ocr import lines_to_texts
         from src.prompting.builder import prompt_for_sample
-        from src.prototype.core import COMPARE_MODES, conf_level, is_yes_no_question, normalize_yes_no
-        self.n_ask += 1
+        from src.prototype.core import conf_level, is_yes_no_question, normalize_yes_no
         t0 = time.time()
         with Image.open(image_path) as im:
             w, h = im.size
@@ -454,30 +430,9 @@ class MockBackend:
             ans = "cửa hàng mẫu" if any(x in q for x in ("tên", "biển", "chữ")) else "màu đỏ"
             mode, cuts = "open", self.settings["cuts_open"]
         sec_ocr = 0.01
-        out = {"mode": mode, "answer": ans, "confidence": conf, "level": conf_level(conf, cuts), "prompt": prompt,
-               "ocr_lines": lines, "ocr_texts": texts, "sec_ocr": sec_ocr, "sec": time.time() - t0,
-               "sec_total": time.time() - t0 + sec_ocr}
-        if not compare:
-            return out
-        items = []
-        for key in compare:
-            if key not in COMPARE_MODES:
-                items.append({"key": key, "label": str(key),
-                              "error": "không có chế độ này (dữ liệu mẫu)"})
-                continue
-            pb = {"mode": COMPARE_MODES[key]["prompt_mode"], "ocr": {"template": self.ocr_cfg["template"]}}
-            prompt_b = prompt_for_sample(
-                {"question": question, "ocr_texts": texts, "question_id": "proto"}, pb)
-            items.append({
-                "key": key,
-                "label": COMPARE_MODES[key]["label"],
-                "answer": f"(dữ liệu mẫu) {COMPARE_MODES[key]['label']}",
-                "prompt": prompt_b,
-                "sec_model": 0.02,
-            })
-        out["compare"] = items
-        out["sec_compare"] = 0.02 * len(items)
-        return out
+        return {"mode": mode, "answer": ans, "confidence": conf, "level": conf_level(conf, cuts), "prompt": prompt,
+                "ocr_lines": lines, "ocr_texts": texts, "sec_ocr": sec_ocr, "sec": time.time() - t0,
+                "sec_total": time.time() - t0 + sec_ocr}
 
 
 def _rss_gb_tree() -> float:
@@ -694,12 +649,10 @@ class Handler:
     """Xử lý một lượt hỏi: kiểm đầu vào -> chuẩn bị ảnh -> backend -> hiển thị. Ghi log số đo (tuỳ chọn)."""
 
     def __init__(self, backend, settings: Dict[str, Any], ocr_cfg: Dict[str, Any], log_jsonl: Optional[str] = None,
-                 tmp_dir: Optional[str] = None, ocr_cache: Optional[OCRResultCache] = None,
-                 show_selector: bool = True):
+                 tmp_dir: Optional[str] = None, ocr_cache: Optional[OCRResultCache] = None):
         self.backend, self.settings, self.ocr_cfg, self.log_jsonl = backend, settings, ocr_cfg, log_jsonl
         self.tmp_dir = tmp_dir or tempfile.mkdtemp(prefix="vivqa_proto_")
         self.ocr_cache = ocr_cache
-        self.show_selector = show_selector
         self._current_key: Optional[str] = None
 
     def _log(self, rec: Dict[str, Any]) -> None:
@@ -741,9 +694,8 @@ class Handler:
         """Xoá: không dùng nhầm OCR ảnh cũ cho lượt sau (bỏ key hiện tại khỏi theo dõi)."""
         self._current_key = None
 
-    def __call__(self, image_path: Optional[str], question: Optional[str], model_choice: str = "final"):
+    def __call__(self, image_path: Optional[str], question: Optional[str]):
         from PIL import Image
-        model_choice = model_choice or "final"
         q = (question or "").strip()
         err = None
         if not image_path:
@@ -755,34 +707,12 @@ class Handler:
         if err:
             return f"<div class='vv-card'>⚠️ {html.escape(err)}</div>", "", None, "", ""
         used = None
-        rec: Dict[str, Any] = {"ts": datetime.now(timezone.utc).isoformat(timespec="seconds"), "app": APP_VERSION,
-                               "model_choice": model_choice}
+        rec: Dict[str, Any] = {"ts": datetime.now(timezone.utc).isoformat(timespec="seconds"), "app": APP_VERSION}
         try:
             used, info, key = self._prepare_keyed(image_path)
             self._current_key = key
             rec.update({"img_orig": info["orig_size"], "img_used": info["used_size"], "rotated": info["rotated"],
                         "resized": info["resized"]})
-            if model_choice == "zero_shot":
-                base = self.backend.ask_base(used, q)
-                raw = str(base.get("answer") or "")
-                body = html.escape(raw) if raw.strip() else "<i>(model không trả lời)</i>"
-                answer_html = (
-                    "<div class='vv-card'><div class='vv-mode'>Câu trả lời · Zero-shot</div>"
-                    f"<div class='vv-ans'>{body}</div></div>"
-                )
-                sec = base.get("sec_model")
-                sec_txt = f"{sec:.2f} s".replace(".", ",") if isinstance(sec, (int, float)) else "—"
-                details_md = "\n".join([
-                    f"- **Thời gian mô hình:** {sec_txt}",
-                    "",
-                    "**Prompt gửi cho model:**",
-                    "```text",
-                    base.get("prompt") or "",
-                    "```",
-                ])
-                rec.update({"ok": True})
-                self._log(rec)
-                return answer_html, "", None, "", details_md
             ocr_lines = None
             ocr_timing = None
             t_wait0 = time.perf_counter()
@@ -801,7 +731,7 @@ class Handler:
                 else:
                     ocr_timing = {"sec_det": entry.get("sec_det", 0.0), "sec_rec": entry.get("sec_rec", 0.0),
                                   "sec_ocr": entry.get("sec", wait_s), "ocr_source": "fresh"}
-                r = self.backend.ask(used, q, ocr_lines=ocr_lines, ocr_timing=ocr_timing, compare=())
+                r = self.backend.ask(used, q, ocr_lines=ocr_lines, ocr_timing=ocr_timing)
                 r["sec_ocr_wall"] = wait_s if src != "cache" else 0.0
                 if src == "cache":
                     r["ocr_source"] = "cache"
@@ -810,14 +740,8 @@ class Handler:
                 else:
                     r["ocr_source"] = src
             else:
-                r = self.backend.ask(used, q, compare=())
+                r = self.backend.ask(used, q)
             out = render_result(r, info, self.settings, self.ocr_cfg)
-            if self.show_selector:
-                out["answer_html"] = out["answer_html"].replace(
-                    "<div class='vv-mode'>Câu trả lời</div>",
-                    "<div class='vv-mode'>Câu trả lời · Final Model</div>",
-                    1,
-                )
             boxes = draw_ocr_boxes(used, r.get("ocr_lines") or [], out["evidence"]) if r.get("ocr_lines") \
                 else display_copy(Image.open(used).convert("RGB"))
             rec.update({"ok": True, "mode": r["mode"], "level": r["level"], "n_ocr_lines": len(r.get("ocr_lines") or []),
@@ -841,12 +765,13 @@ class Handler:
                         pass
 
 
-def build_demo(handler: Handler, examples: Optional[List[List[str]]] = None,
-               model_default: str = "zero_shot", show_selector: bool = True):
+def build_demo(handler: Handler, examples: Optional[List[List[str]]] = None):
     os.environ.setdefault("GRADIO_ANALYTICS_ENABLED", "False")      # không gửi số liệu sử dụng ra ngoài
     import gradio as gr
     is_mock = getattr(handler.backend, "is_mock", False)
-    header = "<h2 style='margin:0'>ViVQA-VLM · Hỏi đáp hình ảnh tiếng Việt</h2>"
+    header = ("<h2 style='margin:0'>ViVQA-VLM · Hỏi đáp hình ảnh tiếng Việt</h2>"
+              "<div class='vv-mode'>Qwen2.5-VL-3B (4-bit) + adapter QLoRA dùng chung (SH) · đọc chữ trong ảnh bằng "
+              "PaddleOCR + VietOCR · trả lời ngắn bằng tiếng Việt</div>")
     if is_mock:
         header += ("<div class='vv-mock'>⚠️ <b>Chế độ thử giao diện (backend giả)</b>: câu trả lời và chữ OCR là "
                    "dữ liệu mẫu cố định, <b>không</b> phải kết quả của model.</div>")
@@ -858,13 +783,6 @@ def build_demo(handler: Handler, examples: Optional[List[List[str]]] = None,
                                   height=380)
                 q_in = gr.Textbox(label="Câu hỏi (tiếng Việt)", lines=2, max_lines=4,
                                   placeholder="Ví dụ: cửa hàng có biển màu vàng là nơi nào?  ·  Trong ảnh có con mèo không?")
-                model_in = None
-                if show_selector:
-                    model_in = gr.Radio(
-                        label="Mô hình",
-                        choices=[("Zero-shot", "zero_shot"), ("Final Model", "final")],
-                        value=model_default,
-                    )
                 with gr.Row():
                     btn = gr.Button("Trả lời", variant="primary")
                     clr = gr.Button("Xoá")
@@ -883,12 +801,8 @@ def build_demo(handler: Handler, examples: Optional[List[List[str]]] = None,
                     gr.Markdown(CONF_EXPLAIN)
         gr.HTML(f"<div class='vv-disc'>{DISCLAIMER}</div>")
         outs = [ans_out, warn_out, ocr_img, ocr_out, det_out]
-        if show_selector:
-            btn.click(handler, [img_in, q_in, model_in], outs)
-            q_in.submit(handler, [img_in, q_in, model_in], outs)
-        else:
-            btn.click(handler, [img_in, q_in], outs)
-            q_in.submit(handler, [img_in, q_in], outs)
+        btn.click(handler, [img_in, q_in], outs)
+        q_in.submit(handler, [img_in, q_in], outs)
         img_in.change(handler.prefetch_ocr, [img_in], None)
         def _clear():
             handler.on_clear()
@@ -1016,108 +930,6 @@ def _selftest() -> None:
     assert len(recs) == 4 and [r["ok"] for r in recs] == [True, True, True, False]
     flat = json.dumps(recs, ensure_ascii=False)
     assert "con mèo" not in flat and "cửa hàng" not in flat, "log không được chứa câu hỏi / câu trả lời"
-    assert all(r["model_choice"] == "final" and "compare_mode" not in r and "sec_compare" not in r for r in recs)
-    # (4b) bộ chọn v2.5: mỗi lần một kết quả; --no_model_selector giữ HTML Final Model
-    from src.prototype.core import _selftest_compare
-    _selftest_compare()
-    q_cmp = "tên cửa hàng là gì"
-    banned = ("EM trên tập test", "Chưa huấn luyện", "Đã tinh chỉnh", "xử lý kém")
-    mb = MockBackend(st, ocr_cfg)
-    h_sel = Handler(mb, st, ocr_cfg, show_selector=True, tmp_dir=tempfile.mkdtemp(prefix="vvapp_sel_"))
-    a_z, w_z, im_z, o_z, d_z = h_sel(p_ok, q_cmp, "zero_shot")
-    assert "Câu trả lời · Zero-shot" in a_z and "(dữ liệu mẫu) Zero-shot" in a_z
-    assert "Độ tin cậy" not in a_z
-    assert w_z == "" and im_z is None and o_z == ""
-    assert mb.n_ask == 0 and mb.n_ask_base == 1
-    assert f"Câu hỏi: {q_cmp}" in d_z and "Thời gian mô hình" in d_z
-    r_final = mb.ask(p_ok, q_cmp, compare=())
-    direct = render_result(r_final, info0, st, ocr_cfg)["answer_html"]
-    expected = direct.replace(
-        "<div class='vv-mode'>Câu trả lời</div>",
-        "<div class='vv-mode'>Câu trả lời · Final Model</div>",
-        1,
-    )
-    n_ask_before, n_base_before = mb.n_ask, mb.n_ask_base
-    a_f, w_f, im_f, o_f, d_f = h_sel(p_ok, q_cmp, "final")
-    assert mb.n_ask == n_ask_before + 1 and mb.n_ask_base == n_base_before
-    assert a_f == expected and "Độ tin cậy:" in a_f and im_f is not None
-    for blob in (a_z, w_z, o_z, d_z, a_f, w_f, o_f, d_f):
-        for s in banned:
-            assert s not in blob, (s, blob[:200])
-    mb_off = MockBackend(st, ocr_cfg)
-    h_off = Handler(mb_off, st, ocr_cfg, show_selector=False, tmp_dir=tempfile.mkdtemp(prefix="vvapp_off_"))
-    r_off = mb_off.ask(p_ok, q_cmp, compare=())
-    direct_off = render_result(r_off, info0, st, ocr_cfg)["answer_html"]
-    a_off, *_ = h_off(p_ok, q_cmp, "final")
-    assert a_off == direct_off
-    assert a_off.startswith("<div class='vv-card'><div class='vv-mode'>Câu trả lời</div>")
-    r_yn = MockBackend(st, ocr_cfg).ask(p_ok, "Trong ảnh có con mèo không?", compare=("b1",))
-    assert 'Trả lời "có" hoặc "không".' in r_yn["prompt"]
-    assert 'Trả lời "có" hoặc "không".' not in r_yn["compare"][0]["prompt"]
-    import src.prototype.core as core
-    ocr_calls = {"n": 0}
-
-    class _Ctx:
-        def __init__(self, model):
-            self.model = model
-
-        def __enter__(self):
-            self.model.adapter_on = False
-            return self
-
-        def __exit__(self, exc_type, exc, tb):
-            self.model.adapter_on = True
-            return False
-
-    class _Model:
-        def __init__(self):
-            self.adapter_on = True
-            self.device = "cpu"
-
-        def disable_adapter(self):
-            return _Ctx(self)
-
-    class _Proc:
-        def batch_decode(self, seqs, skip_special_tokens=True, clean_up_tokenization_spaces=False):
-            return ["  câu gốc  "]
-
-    def fake_build(processor, image_path, prompt_text, device=None):
-        return {"input_ids": "patched"}
-
-    def fake_gen(model, inputs, max_new_tokens=32):
-        assert model.adapter_on is False and max_new_tokens == 32
-        return [7, 8], [-0.1, -0.2]
-
-    def ocr_fn(_path):
-        ocr_calls["n"] += 1
-        return []
-
-    old_b, old_g = core.build_inputs, core.generate_from_inputs
-    core.build_inputs = fake_build
-    core.generate_from_inputs = fake_gen
-    try:
-        b = core.Backend.__new__(core.Backend)
-        q_base = "biển hiệu ghi gì"
-        b.cfg = {"prompting": {"mode": "ocr", "ocr": {"template": "v1"}, "max_new_tokens": 32}}
-        b.model = _Model()
-        b.processor = _Proc()
-        b.ocr_fn = ocr_fn
-        out_base = b.ask_base("x.jpg", q_base)
-        assert b.model.adapter_on is True and ocr_calls["n"] == 0
-        assert out_base["prompt"] == f"Câu hỏi: {q_base}"
-        assert out_base["answer"] == "câu gốc" and out_base["key"] == "b1"
-        assert {"key", "label", "answer", "prompt", "sec_model"} <= set(out_base)
-    finally:
-        core.build_inputs = old_b
-        core.generate_from_inputs = old_g
-    import subprocess
-    import sys
-    rejected = subprocess.run(
-        [sys.executable, "-m", "src.prototype.app", "--compare_default", "goc", "--selftest"],
-        cwd=REPO_ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120,
-    )
-    assert rejected.returncode != 0, rejected.stderr
-    assert "unrecognized arguments" in rejected.stderr and "--compare_default" in rejected.stderr, rejected.stderr
     # (6) dựng được giao diện Gradio (không mở cổng)
     try:
         import gradio  # noqa: F401
@@ -1126,26 +938,10 @@ def _selftest() -> None:
         has_gr = False
         print("⚠ chưa cài gradio -> bỏ qua kiểm dựng giao diện (notebook 24 cài gradio và kiểm lại)")
     if has_gr:
-        import gradio as gr
-        demo = build_demo(h_sel, examples=[[p_ok, q_cmp]], model_default="zero_shot", show_selector=True)
+        demo = build_demo(h, examples=[[p_ok, "tên cửa hàng là gì"]])
         assert demo is not None
-        radios = [b for b in demo.blocks.values() if isinstance(b, gr.Radio)]
-        assert len(radios) == 1, radios
-        radio = radios[0]
-        assert radio.label == "Mô hình"
-        assert list(radio.choices) == [("Zero-shot", "zero_shot"), ("Final Model", "final")]
-        assert radio.value == "zero_shot"
-        html_blob = "\n".join(str(getattr(b, "value", "") or "") for b in demo.blocks.values() if isinstance(b, gr.HTML))
-        assert "Qwen2.5-VL-3B" not in html_blob and "So sánh" not in html_blob
-        demo_final = build_demo(h_sel, model_default="final", show_selector=True)
-        radio_f = [b for b in demo_final.blocks.values() if isinstance(b, gr.Radio)]
-        assert len(radio_f) == 1 and radio_f[0].value == "final"
-        demo_off = build_demo(h_off, show_selector=False)
-        assert not any(isinstance(b, gr.Radio) for b in demo_off.blocks.values())
     print("✅ selftest app OK (ngưỡng từ summary, ảnh nguyên file / xoay / thu nhỏ, bằng chứng OCR, "
-          "không hiện số độ tin cậy, cảnh báo, backend giả, log không chứa nội dung, "
-          "v2.5: zero_shot không gọi ask, final đổi tiêu đề, không bộ chọn giống render_result, "
-          "argparse từ chối --compare_default"
+          "không hiện số độ tin cậy, cảnh báo, backend giả, log không chứa nội dung"
           + (", dựng Gradio)" if has_gr else ")"))
 
 
@@ -1166,10 +962,6 @@ def main() -> None:
     ap.add_argument("--examples_json", default=None)
     ap.add_argument("--log_jsonl", default=None, help="ghi số đo từng lượt (không ghi ảnh / câu hỏi / câu trả lời)")
     ap.add_argument("--share", action="store_true", help="tạo link công khai *.gradio.live (dùng trên Colab)")
-    ap.add_argument("--model_default", choices=("zero_shot", "final"), default="zero_shot",
-                    help="giá trị ban đầu của bộ chọn Mô hình")
-    ap.add_argument("--no_model_selector", action="store_true",
-                    help="ẩn bộ chọn, chỉ chạy Final Model")
     ap.add_argument("--port", type=int, default=7860)
     a = ap.parse_args()
     if a.selftest:
@@ -1196,9 +988,8 @@ def main() -> None:
             target=_print_startup_when_ready, args=(info, a.port),
             name="startup-log", daemon=True,
         ).start()
-    show_selector = not a.no_model_selector
-    demo = build_demo(Handler(backend, st, ocr_cfg, a.log_jsonl, ocr_cache=ocr_cache, show_selector=show_selector),
-                      load_examples(a.examples_json), model_default=a.model_default, show_selector=show_selector)
+    demo = build_demo(Handler(backend, st, ocr_cfg, a.log_jsonl, ocr_cache=ocr_cache),
+                      load_examples(a.examples_json))
     try:
         demo.queue(default_concurrency_limit=1).launch(share=a.share, server_name="0.0.0.0", server_port=a.port,
                                                        css=CSS, show_error=True)
