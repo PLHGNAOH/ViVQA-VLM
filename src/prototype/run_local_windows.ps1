@@ -8,6 +8,7 @@
 #   .\demo              → offline, song song OCR+model, tự mở trình duyệt
 #   .\demo safe         → offline + -SequentialStart (chậm ~20 s, ít tranh RAM)
 #   .\demo share        → tạo link *.gradio.live
+#   .\demo nhom         → offline, một thẻ (không so sánh) = -NoCompare
 #
 # Lệnh chạy (từ bất kỳ thư mục nào):
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1
@@ -19,6 +20,7 @@
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Dark
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -SequentialStart
 #   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -Examples
+#   powershell -ExecutionPolicy Bypass -File src\prototype\run_local_windows.ps1 -Offline -NoCompare
 #
 # Khởi động: OCR worker song song với nạp Qwen (mặc định). -SequentialStart = .\demo safe.
 # Bảng Ví dụ tắt mặc định; bật lại: -Offline -Examples.
@@ -34,6 +36,7 @@ param(
     [switch]$Dark,
     [switch]$SequentialStart,
     [switch]$Examples,
+    [switch]$NoCompare,
     [int]$Port = 7860,
     [int]$OcrThreads = 12
 )
@@ -98,6 +101,9 @@ if ($Examples -and (-not $Mock) -and (Test-Path $ExamplesJson)) {
     Write-Host "EXAMPLES=on ($ExamplesJson)"
 } else {
     Write-Host "EXAMPLES=off (bật lại: -Examples)"
+}
+if ($NoCompare) {
+    $pyArgs += @("--compare_default", "nhom")
 }
 
 Write-Host "python $($pyArgs -join ' ')"

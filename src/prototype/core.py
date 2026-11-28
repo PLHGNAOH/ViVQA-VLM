@@ -186,7 +186,7 @@ def answer_one(model, processor, image_path: str, question: str, ocr_texts: Opti
 # --------------------------------------------------------------------------- #
 COMPARE_VERSION = "compare-v1"
 COMPARE_MODES = {
-    "b1":     {"label": "Mô hình gốc (chưa huấn luyện)",     "prompt_mode": "zero_shot"},
+    "b1":     {"label": "Mô hình gốc (Zero-shot)",            "prompt_mode": "zero_shot"},
     "b1_ocr": {"label": "Mô hình gốc + chữ OCR trong prompt", "prompt_mode": "ocr"},
 }
 

@@ -76,3 +76,7 @@ Chọn lại từ `scan_results.json`, không chạy GPU. Bảy ô đều có it
 | 5 | goc_bia | `vitextvqa_test_10580` | trong hình au á là gì ? | 4,41 |
 | 6 | day_du_2x2 | `vitextvqa_test_9245` | thời gian cấm của các loại xe cơ giới thô sơ ở đường này là gì ? | 5,45 |
 | 7 | co_khong | `real_may_anh_canon` | Máy ảnh trong hình có chữ Canon không? | 2,81 |
+
+## Giao diện 28/11 chiều
+
+Giao diện demo chỉ hiện hai thẻ: mô hình gốc (Zero-shot) và mô hình cuối cùng của nhóm. Cột gốc + OCR vẫn có trong `scan_results.json` nhưng không hiện trên giao diện.

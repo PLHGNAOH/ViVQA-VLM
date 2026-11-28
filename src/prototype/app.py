@@ -11,8 +11,8 @@ Nguyên tắc (từ kết quả đã kiểm ở W13, docs/W13/README.md):
     Ngưỡng mức đọc từ prototype_check_summary.json (chọn trên nửa A tập test), không gõ tay.
   - OCR chạy ở tiến trình riêng (src.prototype.ocr_worker) với ĐÚNG engine đã dựng cache; khác engine -> không chạy.
   - Không lưu ảnh / câu hỏi / câu trả lời. Log (tuỳ chọn) chỉ ghi số đo: thời gian, mức, số dòng OCR, kích thước ảnh.
-  - So sánh (tuỳ chọn, compare-v1): mô hình gốc = cùng model đang nạp, tắt adapter (không thêm VRAM).
-    Câu trả lời của mô hình nhóm (SH) không đổi.
+  - So sánh (compare-v2): hai thẻ cố định — mô hình gốc Zero-shot (tắt adapter) và mô hình cuối cùng của nhóm.
+    Câu trả lời của mô hình nhóm (SH) không đổi. Không còn radio, không hiện cột gốc + OCR.
 
 Chạy:
   Backend giả, CPU (xem/duyệt giao diện, 0 GPU):   python -m src.prototype.app --mock
@@ -34,7 +34,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-APP_VERSION = "prototype-app-v2.3-compare"   # v2.3 thêm chế độ so sánh, câu trả lời SH không đổi
+APP_VERSION = "prototype-app-v2.4-compare2"   # 2 thẻ cố định gốc Zero-shot ↔ mô hình cuối cùng; bỏ radio và cột gốc+OCR
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SUMMARY_REL = "experiments/W13_prototype_check_L4_seed42/prototype_check_summary.json"
 OCR_SELECTION_REL = "experiments/W08_ocr_select_dev300_L4_seed42/ocr_selection.json"
@@ -58,7 +58,7 @@ COMPARE_EM_CAPTION_FULL = (
     "EM trên tập test (khóa luận): ViTextVQA 2.000 câu — gốc 28,80 · gốc + OCR 29,35 · nhóm 49,50 │ "
     "ViVQA 3.001 câu — gốc 22,09 · nhóm 73,51"
 )
-_COMPARE_KEYS = {"nhom": (), "goc": ("b1",), "day_du": ("b1", "b1_ocr")}
+_COMPARE_KEYS = {"nhom": (), "goc": ("b1",)}
 
 DISCLAIMER = (
     "<b>Prototype nghiên cứu</b> (khoá luận ViVQA-VLM, ĐH FPT). Model có thể trả lời sai hoặc mô tả thứ không có "
@@ -114,8 +114,8 @@ CSS = """
 .dark .vv-ocr tr.ev td{background:#0f5132;color:#ffffff}
 .dark .vv-ocr tr.cut td{color:var(--body-text-color-subdued,#8b949e)}
 .dark .vv-mock{background:#3d2e00;color:#ffe8a3;border-color:#6c5600}
-.vv-cmp{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch}
-.vv-cmp .vv-card{flex:1 1 220px;min-width:220px;box-sizing:border-box}
+.vv-cmp{display:flex;flex-wrap:nowrap;gap:10px;align-items:stretch}
+.vv-cmp .vv-card{flex:1 1 0;min-width:260px;box-sizing:border-box}
 .vv-card.vv-cmp-sh{border:2px solid #198754}
 .vv-card.vv-cmp-base{background:#f3f4f6}
 .vv-cmp-note,.vv-cmp-cap{color:var(--body-text-color-subdued,#57606a);font-size:.8em;margin-top:6px}
@@ -363,10 +363,12 @@ def _compare_details_md(r: Dict[str, Any]) -> str:
         "",
         "**So sánh**",
         "",
-        "mô hình gốc = cùng trọng số, tắt adapter (PEFT disable_adapter), prompt như run B1 / B1-OCR.",
+        "mô hình gốc = cùng trọng số, tắt adapter (PEFT disable_adapter), prompt như run B1 (zero-shot).",
         "",
     ]
     for it in r.get("compare") or []:
+        if it.get("key") != "b1":
+            continue
         label = it.get("label") or it.get("key") or ""
         if it.get("error"):
             lines.append(f"- **{label}:** lỗi — {it['error']}")
@@ -391,7 +393,7 @@ def _base_compare_card(item: Dict[str, Any]) -> str:
         "<div class='vv-card vv-cmp-base'>"
         f"<div class='vv-mode'>{label}</div>"
         f"<div class='vv-ans'>{body}</div>"
-        "<div class='vv-cmp-note'>Chưa huấn luyện cho tiếng Việt · không có mức tin cậy</div>"
+        "<div class='vv-cmp-note'>Chưa huấn luyện cho tiếng Việt · xử lý kém câu hỏi về chữ tiếng Việt trong ảnh · không có mức tin cậy</div>"
         f"<div class='vv-cmp-note'>Mô hình {_sec_comma(item.get('sec_model'))}</div>"
         "</div>"
     )
@@ -405,9 +407,10 @@ def _sh_compare_card(r: Dict[str, Any], settings: Dict[str, Any]) -> str:
     t = r.get("sec_model", r.get("sec"))
     return (
         "<div class='vv-card vv-cmp-sh'>"
-        "<div class='vv-mode'>Mô hình của nhóm (QLoRA nhận biết OCR)</div>"
+        "<div class='vv-mode'>Mô hình cuối cùng của nhóm (QLoRA nhận biết OCR)</div>"
         f"<div class='vv-ans'>{ans}</div>"
         f"{_badge(r['level'])}{num}<span class='vv-mode'>{mode_txt}</span>"
+        "<div class='vv-cmp-note'>Đã tinh chỉnh QLoRA cùng chữ OCR · phù hợp câu hỏi về chữ tiếng Việt trong ảnh</div>"
         f"<div class='vv-cmp-note'>Mô hình {_sec_comma(t)}</div>"
         "</div>"
     )
@@ -420,18 +423,12 @@ def render_compare(r: Dict[str, Any], img_info: Dict[str, Any], settings: Dict[s
         if sh_answer_html is not None:
             return sh_answer_html
         return render_result(r, img_info, settings, ocr_cfg)["answer_html"]
-    order = ("b1", "b1_ocr")
-    by_key = {}
-    extras = []
+    b1_item = None
     for it in r["compare"]:
-        k = it.get("key")
-        if k in order and k not in by_key:
-            by_key[k] = it
-        elif k not in order:
-            extras.append(it)
-    ordered = [by_key[k] for k in order if k in by_key] + extras
-    cards = "".join(_base_compare_card(it) for it in ordered) + _sh_compare_card(r, settings)
-    caption = compare_em_caption([it.get("key") for it in ordered])
+        if it.get("key") == "b1" and b1_item is None:
+            b1_item = it
+    cards = (_base_compare_card(b1_item) if b1_item is not None else "") + _sh_compare_card(r, settings)
+    caption = compare_em_caption(["b1"])
     return (
         "<div class='vv-cmp'>" + cards + "</div>"
         f"<div class='vv-cmp-cap'>{html.escape(caption)}</div>"
@@ -929,8 +926,10 @@ def build_demo(handler: Handler, examples: Optional[List[List[str]]] = None, com
     is_mock = getattr(handler.backend, "is_mock", False)
     header = ("<h2 style='margin:0'>ViVQA-VLM · Hỏi đáp hình ảnh tiếng Việt</h2>"
               "<div class='vv-mode'>Qwen2.5-VL-3B (4-bit) + adapter QLoRA dùng chung (SH) · đọc chữ trong ảnh bằng "
-              "PaddleOCR + VietOCR · trả lời ngắn bằng tiếng Việt</div>"
-              "<div class='vv-mode'>Có thể so sánh với mô hình gốc (cùng mô hình, tắt adapter)</div>")
+              "PaddleOCR + VietOCR · trả lời ngắn bằng tiếng Việt</div>")
+    if compare_default != "nhom":
+        header += ("<div class='vv-mode'>So sánh mô hình gốc (Zero-shot) với mô hình cuối cùng của nhóm — "
+                   "cùng mô hình nền, mô hình gốc tắt adapter</div>")
     if is_mock:
         header += ("<div class='vv-mock'>⚠️ <b>Chế độ thử giao diện (backend giả)</b>: câu trả lời và chữ OCR là "
                    "dữ liệu mẫu cố định, <b>không</b> phải kết quả của model.</div>")
@@ -942,15 +941,6 @@ def build_demo(handler: Handler, examples: Optional[List[List[str]]] = None, com
                                   height=380)
                 q_in = gr.Textbox(label="Câu hỏi (tiếng Việt)", lines=2, max_lines=4,
                                   placeholder="Ví dụ: cửa hàng có biển màu vàng là nơi nào?  ·  Trong ảnh có con mèo không?")
-                cmp_in = gr.Radio(
-                    label="Chế độ trả lời",
-                    choices=[
-                        ("Chỉ mô hình của nhóm", "nhom"),
-                        ("So sánh: mô hình gốc ↔ mô hình nhóm", "goc"),
-                        ("So sánh đầy đủ: gốc · gốc + OCR · mô hình nhóm", "day_du"),
-                    ],
-                    value=compare_default,
-                )
                 with gr.Row():
                     btn = gr.Button("Trả lời", variant="primary")
                     clr = gr.Button("Xoá")
@@ -969,8 +959,12 @@ def build_demo(handler: Handler, examples: Optional[List[List[str]]] = None, com
                     gr.Markdown(CONF_EXPLAIN)
         gr.HTML(f"<div class='vv-disc'>{DISCLAIMER}</div>")
         outs = [ans_out, warn_out, ocr_img, ocr_out, det_out]
-        btn.click(handler, [img_in, q_in, cmp_in], outs)
-        q_in.submit(handler, [img_in, q_in, cmp_in], outs)
+
+        def _ask(image_path, question):
+            return handler(image_path, question, compare_default)
+
+        btn.click(_ask, [img_in, q_in], outs)
+        q_in.submit(_ask, [img_in, q_in], outs)
         img_in.change(handler.prefetch_ocr, [img_in], None)
         def _clear():
             handler.on_clear()
@@ -1099,10 +1093,15 @@ def _selftest() -> None:
     flat = json.dumps(recs, ensure_ascii=False)
     assert "con mèo" not in flat and "cửa hàng" not in flat, "log không được chứa câu hỏi / câu trả lời"
     assert all(r["compare_mode"] == "nhom" and r["sec_compare"] is None for r in recs)
-    # (4b) compare-v1: nhom giữ answer_html; goc / day_du hiện đúng thẻ; log không chứa nội dung
+    # (4b) compare-v2: nhom giữ answer_html; goc = đúng 2 thẻ; không còn day_du / radio
     from src.prototype.core import _selftest_compare
     _selftest_compare()
     assert compare_em_caption(("b1", "b1_ocr")) == COMPARE_EM_CAPTION_FULL
+    _cap_b1 = compare_em_caption(["b1"])
+    assert _cap_b1 == (
+        "EM trên tập test (khóa luận): ViTextVQA 2.000 câu — gốc 28,80 · nhóm 49,50 │ "
+        "ViVQA 3.001 câu — gốc 22,09 · nhóm 73,51"
+    )
     _em_runs = [
         ("experiments/W07_B1_zeroshot_qwen25vl_vitextvqa_test2000_bf16_L4_seed42/metrics.json", "28,80"),
         ("experiments/W08_B1ocr_vietocr_v1_qwen25vl_vitextvqa_test2000_bf16_L4_seed42/metrics.json", "29,35"),
@@ -1126,30 +1125,38 @@ def _selftest() -> None:
     r_goc = h.backend.ask(p_ok, q_cmp, compare=("b1",))
     assert r_goc["answer"] == r_nhom["answer"] and r_goc["compare"][0]["answer"].startswith("(dữ liệu mẫu)")
     a_goc, w_goc, _, o_goc, d_goc = h(p_ok, q_cmp, "goc")
-    assert "Mô hình gốc" in a_goc and "Mô hình của nhóm" in a_goc
-    assert "gốc + chữ OCR" not in a_goc and "29,35" not in a_goc
+    assert a_goc.count("class='vv-card") == 2, a_goc.count("class='vv-card")
+    i_base = a_goc.find("vv-cmp-base")
+    i_sh = a_goc.find("vv-cmp-sh")
+    assert 0 <= i_base < i_sh, (i_base, i_sh)
+    assert "Mô hình gốc (Zero-shot)" in a_goc and "Mô hình cuối cùng của nhóm" in a_goc
+    assert "gốc + chữ OCR" not in a_goc and "gốc + OCR" not in a_goc
+    assert "29,35" not in a_goc and _cap_b1 in a_goc
     assert "Độ tin cậy:" in a_goc and "Chưa huấn luyện cho tiếng Việt" in a_goc
+    assert "xử lý kém câu hỏi về chữ tiếng Việt trong ảnh" in a_goc
+    assert "Đã tinh chỉnh QLoRA cùng chữ OCR" in a_goc
     assert "khớp với chữ" in w_goc and "CỬA HÀNG MẪU" in o_goc
     assert "disable_adapter" in d_goc and "**So sánh**" in d_goc
-    a_full, _, _, _, d_full = h(p_ok, q_cmp, "day_du")
-    i_b1 = a_full.find("Mô hình gốc (chưa huấn luyện)")
-    i_ocr = a_full.find("gốc + chữ OCR")
-    i_sh = a_full.find("Mô hình của nhóm (QLoRA nhận biết OCR)")
-    assert 0 <= i_b1 < i_ocr < i_sh, (i_b1, i_ocr, i_sh)
-    assert "28,80" in a_full and "29,35" in a_full and "49,50" in a_full
-    assert "22,09" in a_full and "73,51" in a_full
-    assert COMPARE_EM_CAPTION_FULL in a_full
-    assert "disable_adapter" in d_full
+    assert "Mô hình gốc (Zero-shot)" in d_goc
+    assert "gốc + chữ OCR" not in d_goc and "B1-OCR" not in d_goc and "b1_ocr" not in d_goc
     r_yn = h.backend.ask(p_ok, "Trong ảnh có con mèo không?", compare=("b1",))
     assert 'Trả lời "có" hoặc "không".' in r_yn["prompt"]
     assert 'Trả lời "có" hoặc "không".' not in r_yn["compare"][0]["prompt"]
     log2 = os.path.join(tmp, "q_cmp.jsonl")
     h2 = Handler(MockBackend(st, ocr_cfg), st, ocr_cfg, log_jsonl=log2, tmp_dir=tempfile.mkdtemp(prefix="vvapp_c_"))
-    h2(p_ok, q_cmp, "day_du")
+    h2(p_ok, q_cmp, "goc")
     rec2 = json.loads(open(log2, encoding="utf-8").read().splitlines()[-1])
-    assert rec2["compare_mode"] == "day_du" and isinstance(rec2["sec_compare"], float)
+    assert rec2["compare_mode"] == "goc" and isinstance(rec2["sec_compare"], float)
     blob = json.dumps(rec2, ensure_ascii=False)
     assert "cửa hàng" not in blob and "dữ liệu mẫu" not in blob and q_cmp not in blob
+    import subprocess
+    import sys
+    rejected = subprocess.run(
+        [sys.executable, "-m", "src.prototype.app", "--compare_default", "day_du", "--selftest"],
+        cwd=REPO_ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120,
+    )
+    assert rejected.returncode != 0, rejected.stderr
+    assert "invalid choice" in rejected.stderr and "day_du" in rejected.stderr, rejected.stderr
     # (6) dựng được giao diện Gradio (không mở cổng)
     try:
         import gradio  # noqa: F401
@@ -1158,11 +1165,16 @@ def _selftest() -> None:
         has_gr = False
         print("⚠ chưa cài gradio -> bỏ qua kiểm dựng giao diện (notebook 24 cài gradio và kiểm lại)")
     if has_gr:
+        import gradio as gr
         demo = build_demo(h, examples=[[p_ok, "tên cửa hàng là gì"]])
         assert demo is not None
+        radios = [b for b in demo.blocks.values() if isinstance(b, gr.Radio)]
+        assert radios == [], radios
+        demo_nhom = build_demo(h, compare_default="nhom")
+        assert not any(isinstance(b, gr.Radio) for b in demo_nhom.blocks.values())
     print("✅ selftest app OK (ngưỡng từ summary, ảnh nguyên file / xoay / thu nhỏ, bằng chứng OCR, "
           "không hiện số độ tin cậy, cảnh báo, backend giả, log không chứa nội dung, "
-          "compare-v1: nhom giống render_result, goc/day_du đúng thẻ"
+          "compare-v2: nhom giống render_result, goc đúng 2 thẻ, không radio, argparse từ chối day_du"
           + (", dựng Gradio)" if has_gr else ")"))
 
 
@@ -1183,8 +1195,8 @@ def main() -> None:
     ap.add_argument("--examples_json", default=None)
     ap.add_argument("--log_jsonl", default=None, help="ghi số đo từng lượt (không ghi ảnh / câu hỏi / câu trả lời)")
     ap.add_argument("--share", action="store_true", help="tạo link công khai *.gradio.live (dùng trên Colab)")
-    ap.add_argument("--compare_default", choices=("nhom", "goc", "day_du"), default="goc",
-                    help="giá trị ban đầu của radio Chế độ trả lời")
+    ap.add_argument("--compare_default", choices=("nhom", "goc"), default="goc",
+                    help="goc: hai thẻ gốc Zero-shot và mô hình cuối cùng; nhom: một thẻ như cũ")
     ap.add_argument("--port", type=int, default=7860)
     a = ap.parse_args()
     if a.selftest:
